@@ -1,4 +1,7 @@
-SpazCore is a set of libraries that make it easier to create HTML+JavaScript applications for desktop and mobile platforms. It's *not* a framework. It primarily exists at this point to facilitate new versions of the Spaz Twitter client on platforms other than AIR.
+SpazCore is a set of libraries that make it easier to create HTML+JavaScript
+applications for desktop and mobile platforms. It's *not* a framework. It
+primarily exists at this point to facilitate new versions of the Spaz Twitter
+client on platforms other than AIR.
 
 Initially, I'd like to target the following platforms:
 
@@ -7,7 +10,8 @@ Initially, I'd like to target the following platforms:
 * PhoneGap (?)
 * Another mobile platform (NDA atm)
 
-SpazCore is not complete. It's barely started. If you're interested in JavaScript application development, SpazCore needs your help.
+SpazCore is not complete. It's barely started. If you're interested in
+JavaScript application development, SpazCore needs your help.
 
 Here's what is planned at the moment:
 
