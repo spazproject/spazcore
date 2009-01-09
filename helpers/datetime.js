@@ -3,28 +3,10 @@ makes relative time out of "Sun Jul 08 19:01:12 +0000 2007" type string
 Borrowed from Mike Demers (slightly altered)
 https://twitter.pbwiki.com/RelativeTimeScripts
 */
-function get_relative_time(time_value) {
-	
-	// air.trace(time_value);
-	// 
-	// return time_value;
-	// 
-	// time.start('getUnixTime');
-	// var unixtime = Date.parse(time_value);
-	// time.stop('getUnixTime');
-	// 
-	// time.start('setParsedDate');
+var sc.helpers.getRelativeTime = function(time_value) {
 	var parsed_date = new Date(time_value);
-	// parsed_date.setTime(unixtime);
-	// time.stop('setParsedDate');
-	// 
-	// time.start('getNow');
 	var now = new Date;
-	// time.stop('getNow');
-	// 
-	// time.start('calcDelta');
 	var delta = parseInt( (now.getTime() - parsed_date.getTime()) / 1000);
-	// time.stop('calcDelta');
 	
 	if (delta < 10) {
 		return 'Just now';
@@ -50,15 +32,14 @@ function get_relative_time(time_value) {
 }
 
 
-function httpTimeToInt(entryDate) {
+var sc.helpers.httpTimeToInt = function(entryDate) {
 	var parsedDate = new Date;
 	parsedDate.setTime(Date.parse(entryDate));
 	return parsedDate.getTime();
-	// var now = new Date;
 }
 
 
-function getTimeAsInt() {
+var sc.helpers.getTimeAsInt = function() {
 	var now = new Date;
 	return now.getTime();
 }

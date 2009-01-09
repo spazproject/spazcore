@@ -16,7 +16,7 @@ const SPAZCORE_PLATFORM_TITANIUM	= 'Titanium';
 * 
 * @return {String} an identifier for the platform
 */
-function get_platform() {
+var sc.helpers.getPlatform = function() {
 	if (window.runtime) {
 		return SPAZCORE_PLATFORM_AIR;
 	}
@@ -36,8 +36,8 @@ function get_platform() {
 * @param {String} str the platform you're checking for
 * 
 */
-function is_platform(str) {
-	platform = get_platform();
+var sc.helpers.isPlatform = function(str) {
+	platform = sc.helpers.getPlatform();
 	if ( platform.toLowerCase() == str.toLowerCase() ) {
 		return true;
 	} else {
@@ -46,20 +46,64 @@ function is_platform(str) {
 }
 
 
+var sc.helpers.isAIR() {
+	return sc.helpers.isPlatform(SPAZCORE_PLATFORM_AIR);
+}
+
+var sc.helpers.iswebOS() {
+	return sc.helpers.isPlatform(SPAZCORE_PLATFORM_WEBOS);
+}
+
+var sc.helpers.isTitanium() {
+	return sc.helpers.isPlatform(SPAZCORE_PLATFORM_TITANIUM);
+}
+
+
 /*
 	dump an object's first level to console
 */
-function dump(obj) {
+var sc.helpers.dump = function(obj) {
 	
-	for(var x in obj) {
-		air.trace("'"+x+"':"+obj[x]);
+	/*
+		for AIR
+	*/
+	if (sc.helpers.isAIR()) {
+		logger = air.trace;
 	}
+	
+	/*
+		for Nova
+	*/
+	if (sc.helpers.iswebOS()) {
+		logger = console.log()
+	}
+	
+	/*
+	* for Titanium
+	* 
+	* @todo this needs to be tested
+	*
+	*/
+	if (sc.helpers.isTitanium()) {
+		logger = console.log()
+	}
+	
+	
+	if (sc.helpers.isString(obj)) {
+		this.logger(obj);
+	} else {
+		for(var x in obj) {
+			this.logger("'"+x+"':"+obj[x]);
+		}
+	}
+
+	
 }
 
 /*
 	Open a URL in the default system web browser
 */
-function openInBrowser(url) {
+var sc.helpers.openInBrowser = function(url) {
 	var request = new air.URLRequest(url);
 	try {            
 	    air.navigateToURL(request);
@@ -71,7 +115,7 @@ function openInBrowser(url) {
 /*
 	Gets the contents of a file
 */
-function getFileContents(path) {
+var sc.helpers.getFileContents = function(path) {
 	var f = new air.File(path);
 	if (f.exists) {
 		var fs = new air.FileStream();
@@ -88,7 +132,7 @@ function getFileContents(path) {
 	Saves the contents to a specified path. Serializes a passed object if 
 	serialize == true
 */
-function setFileContents(path, content, serialize) {
+var sc.helpers.setFileContents = function(path, content, serialize) {
 	
 	if (serialize) {
 		content = JSON.stringify(content);
@@ -111,26 +155,26 @@ function setFileContents(path, content, serialize) {
 /*
 	Returns the current application version string
 */
-function getVersion() {
-		var appXML = air.NativeApplication.nativeApplication.applicationDescriptor
-		var domParser = new DOMParser();
-		appXML = domParser.parseFromString(appXML, "text/xml");
-		var version = appXML.getElementsByTagName("version")[0].firstChild.nodeValue;
-		return version;
+var sc.helpers.getAppVersion = function() {
+	var appXML = air.NativeApplication.nativeApplication.applicationDescriptor
+	var domParser = new DOMParser();
+	appXML = domParser.parseFromString(appXML, "text/xml");
+	var version = appXML.getElementsByTagName("version")[0].firstChild.nodeValue;
+	return version;
 };
 
 
 /*
 	Returns the user agent string for the app
 */
-function getUserAgent() {
+var sc.helpers.getUserAgent = function() {
 	return window.htmlLoader.userAgent
 };
 
 /*
 	Sets the user agent string for the app
 */
-function setUserAgent(uastring) {
+var sc.helpers.setUserAgent = function(uastring) {
 	window.htmlLoader.userAgent = uastring
 	// air.URLRequestDefaults.userAgent = uastring
 	return window.htmlLoader.userAgent
@@ -139,7 +183,7 @@ function setUserAgent(uastring) {
 /*
 	Gets clipboard text
 */
-function getClipboardText() {
+var sc.helpers.getClipboardText = function() {
 	if(air.Clipboard.generalClipboard.hasFormat("text/plain")){
 	    var text = air.Clipboard.generalClipboard.getData("text/plain");
 		return text;
@@ -151,7 +195,7 @@ function getClipboardText() {
 /*
 	Sets clipboard text
 */
-function setClipboardText(text) {
+var sc.helpers.setClipboardText = function(text) {
 	Spaz.dump('Copying "' + text + '" to clipboard');
 	air.Clipboard.generalClipboard.clear();
 	air.Clipboard.generalClipboard.setData(air.ClipboardFormats.TEXT_FORMAT,text,false);
@@ -161,7 +205,7 @@ function setClipboardText(text) {
 /*
 	Loads a value for a key from EncryptedLocalStore
 */
-function getEncryptedValue(key) {
+var sc.helpers.getEncryptedValue = function(key) {
 	var storedValue = air.EncryptedLocalStore.getItem(key);
 	var val = storedValue.readUTFBytes(storedValue.length);
 	return val;
@@ -170,7 +214,7 @@ function getEncryptedValue(key) {
 /*
 	Sets a value in the EncryptedLocalStore of AIR
 */
-function setEncyrptedValue(key, val) {
+var sc.helpers.setEncyrptedValue = function(key, val) {
 	var bytes = new air.ByteArray();
     bytes.writeUTFBytes(val);
     air.EncryptedLocalStore.setItem(key, bytes);
@@ -180,12 +224,12 @@ function setEncyrptedValue(key, val) {
 /*
 	Get the app storage directory
 */
-function getAppStoreDir() {
+var sc.helpers.getAppStoreDir = function() {
 	return air.File.applicationStorageDirectory;
 }
 
 
-function getPreferencesFile(name, create) {
+var sc.helpers.getPreferencesFile = function(name, create) {
 	if (!name) {name='preferences';}
 	
 	var prefsFile = getAppStoreDir();
@@ -201,7 +245,7 @@ function getPreferencesFile(name, create) {
 	to clear out an existing file.
 	returns the air.File object or false
 */
-function init_file(path, overwrite) {
+var sc.helpers.init_file = function(path, overwrite) {
 	var file = new air.File(path);
 	if ( !file.exists || (file.exists && overwrite) ) {
 		var fs = new air.FileStream();

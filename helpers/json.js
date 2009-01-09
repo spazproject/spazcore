@@ -1,28 +1,31 @@
-/* A wrapper for JSON that correct Twitter issues and perform logging if JSON data could not be parsed
+/* A wrapper for JSON.parse() that correct Twitter issues and perform logging if JSON data could not be parsed
  * which will help to find out what is wrong
+ * @param {String} text 
  */
-function parseJSON(text)
-{
+var sc.helpers.deJSON = function(json)
+ {
 
-   // Fix twitter data bug
-   var re = new RegExp("Couldn\\'t\\ find\\ Status\\ with\\ ID\\=[0-9]+\\,", "g");
-   text = text.replace(re, "");
+	// Fix twitter data bug
+	var re = new RegExp("Couldn\\'t\\ find\\ Status\\ with\\ ID\\=[0-9]+\\,", "g");
+	json = json.replace(re, "");
 
-   //
-   var done = false
-   try
-   {
-      var obj = JSON.parse(text);
-      done = true;
-   }
-   finally
-   {
-      if (!done)
-      {
-         Spaz.dump("Could not parse JSON text " + text);
-      }
-   }
+	var done = false
+	try {
+		var obj = JSON.parse(json);
+		done = true;
+	} finally {
+		if (!done) {
+			sc.helpers.dump("Could not parse JSON text " + text);
+		}
+	}
 
-   //
-   return obj;
+	return obj;
+}
+
+/**
+ * really just a simple wrapper for JSON.stringify	
+ * @param  any js construct
+ */
+var sc.helpers.enJSON = function(jsobj) {
+	return JSON.stringify(jsobj);
 }
