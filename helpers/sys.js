@@ -3,6 +3,31 @@
 	to interact with the OS
 */
 
+
+/**
+* returns a string identifier for the platform
+* @return string an identifier for the platform
+*/
+function getPlatform() {
+	if (window.runtime) {
+		return "AIR";
+	}
+	if (Luna) {
+		return "Luna";
+	}
+}
+
+
+function isPlatform(str) {
+	platform = getPlatform();
+	if ( platform.toLowerCase() == str.toLowerCase() ) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
 /*
 	dump an object's first level to console
 */
