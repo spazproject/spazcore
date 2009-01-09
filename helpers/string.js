@@ -2,7 +2,7 @@
 	This is a port of the CodeIgniter helper "autolink" to javascript
 	It finds and links both web addresses and email addresses
 */
-var sc.helpers.autolink = function(str, type, popup) {
+sc.helpers.autolink = function(str, type, popup) {
 	if (!type) {
 		type = 'both';
 	}
@@ -69,7 +69,7 @@ var sc.helpers.autolink = function(str, type, popup) {
 /*
 	turns twitter style username refs ('@username') into links
 */
-var sc.helpers.autolinkTwitter = function(str) {
+sc.helpers.autolinkTwitter = function(str) {
 	re_uname = /(^|\s|\(\[)@([a-zA-Z0-9_]+)([^a-zA-Z0-9_]|$)/gi
 	
 	var ms = [];

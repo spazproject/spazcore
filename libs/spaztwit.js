@@ -3,6 +3,14 @@
  * 
  * This requires jQuery. Tested with 1.2.6
  * 
+ * 
+ * jQuery events raised by this library
+ * 
+ * 'new_public_timeline_data' (data)
+ * 'new_friends_timeline_data' (data)
+ * 
+ * 
+ * 
  * @param username string
  * @param password string
  * @class SpazTwit
@@ -87,7 +95,7 @@ SpazTwit.prototype.getAPIURL = function(key) {
     urls.downtime_schedule	= "help/downtime_schedule.json";
 
     if (urls[key]) {
-        return this.baseurl + urls[key];
+        return this._postProcessURL(this.baseurl + urls[key]);
     } else {
         return false
     }
@@ -109,52 +117,51 @@ SpazTwit.prototype.getPublicTimeline = function() {
 	var pssword  = null;
 	var data     = null
 	
-	var xhr = jQuery.ajax({
-        'mode':'queue',
-        'complete':function(xhr, msg){
-            alert('complete:'+msg);
-        },
-        'error':function(xhr, msg, exc) {
-            if (xhr && xhr.responseText) {
-                alert("Error:"+xhr.responseText+" from "+url);
-            } else {
-                alert("Error:Unknown from "+url);
-            }
-        },
-        'success':function(data) {
-			alert("Success! \n\n" + data);
-				
-			/*
-				overwrite "tweets" with that was pulled from Twitter. Comment out
-				to use the hardcoded version
-			*/
-			tweets = JSON.parse(data);
-
-			alert(tweets);
-			
-			// var content = Luna.View.render({
-			// 								collection: tweets,
-			// 								template: 'timeline/tweet',
-			// 								separator: 'timeline/separator'
-			// 						});
-			// $('timeline').update(content);
-        },
-        'beforeSend':function(xhr){
-			alert("beforesend");
-        },
-        'processData':false,
-        'type':"GET",
-        'url':url,
-        'data':data// ,
-        // 		'username':username,
-        // 		'password':password
+	this._getTimeline({
+		'url':url,
+		'data':data,
+		'username':username,
+		'password':password,
+		'success_event_type': 'new_public_timeline_data'
 	});
 };
 
 
 
-SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page) {};
-SpazTwit.prototype.getReplies = function(since_id, page) {};
+SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page) {
+	
+	if (!page) { page = 1;}
+	if (!count) { count = 200;}
+	if (!since_id) { since_id = 0;}
+	
+	var url = this.getAPIURL('friends_timeline');
+	this._getTimeline({
+		'url':url,
+		'data':{
+			'since_id': since_id, 
+			'count': 	count,
+			'page': 	page 
+		},
+		'username':this.username,
+		'password':this.password,
+		'success_event_type': 'new_friends_timeline_data'		
+	});
+};
+
+
+SpazTwit.prototype.getReplies = function(since_id, page) {
+	var url = this.getAPIURL('public_timeline');
+	this._getTimeline({
+		'url':url,
+		'data':{
+			'since_id': since_id,
+			'page': 	page 
+		},
+		'username':this.username,
+		'password':this.password,
+		'success_event_type': 'new_friends_timeline_data'		
+	});
+};
 SpazTwit.prototype.getSent = function(since_id, count, page) {}; // auth user's sent statuses
 SpazTwit.prototype.getUserTimeline = function(user_id, since_id, count, page) {}; // auth user's sent statuses
 SpazTwit.prototype.getDirectMessages = function(since_id, page) {};
@@ -162,8 +169,47 @@ SpazTwit.prototype.getSentDirectMessages = function(since_id, page) {};
 SpazTwit.prototype.getFavorites = function(user_id, page) {};
 SpazTwit.prototype.search = function() {};
 
-SpazTwit.prototype._getTimeline = function(url, data, username, password) {
+SpazTwit.prototype._getTimeline = function(opts) {
 	
+	dump(opts);
+	
+	if (opts.username && opts.password) {
+		// opts.url = opts.url.replace(/(^https?:\/\/)(.+)$/gi, "$1"+opts.username+":"+opts.password+"@$2");
+		// dump(opts.url);
+		// opts.url = this._postProcessURL(opts.url);
+		// dump(opts.url);
+	}
+	
+	var xhr = jQuery.ajax({
+        'complete':function(xhr, msg){
+			jQuery.trigger
+            dump('complete:'+msg);
+        },
+        'error':function(xhr, msg, exc) {
+            if (xhr && xhr.responseText) {
+                dump("Error:"+xhr.responseText+" from "+opts['url']);
+            } else {
+                dump("Error:Unknown from "+opts['url']);
+            }
+        },
+        'success':function(data) {
+			dump("Success! \n\n" + data);
+				
+			data = JSON.parse(data);
+			
+			jQuery().trigger(opts.success_event_type, [data]);
+        },
+        'beforeSend':function(xhr){
+			dump("beforesend");
+			if (opts.username && opts.password) {
+				xhr.setRequestHeader("Authorization", "Basic " + Base64.encode(opts.username + ":" + opts.password));
+			}
+        },
+        'processData':false,
+        'type':"GET",
+        'url': 		opts.url,
+        // 'data': 	opts.data,
+	});
 };
 
 
@@ -199,3 +245,39 @@ SpazTwit.prototype.test = function() {};
 
 
 
+SpazTwit.prototype._postProcessURL = function(url) {
+	if (Luna) {
+		var re = /https?:\/\/.[^\/:]*(?::[0-9]+)?/;
+		var match = url.match(re);
+		if (match && match[0] != Luna.hostingPrefix) {
+			url = "/proxy?url=" + encodeURIComponent(url);
+		}
+		return url;		
+	} else {
+		return url;
+	}
+}
+
+
+
+/**
+ * remap dump calls as appropriate 
+ */
+if (sc && sc.helpers && sc.helpers.dump) {
+	var dump = sc.helpers.dump;
+} else if(console && console.log) {
+	var dump = console.log;
+} else { // do nothing!
+	var dump = function(input) {
+		return;
+	}
+}
+
+
+/**
+ * shortcut for SpazTwit if the SpazCore libraries are being used
+ * 
+ */
+if (SpazTwit) {
+	scTwit = SpazTwit;
+}

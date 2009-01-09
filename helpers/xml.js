@@ -1,4 +1,4 @@
-var sc.helpers.createXMLFromString = function (string) {
+sc.helpers.createXMLFromString = function (string) {
 	var xmlParser, xmlDocument;
 	try {
 		xmlParser = new DOMParser();

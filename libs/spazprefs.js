@@ -218,5 +218,11 @@ var SpazPrefs = function(defaults) {
 
 
 
+/**
+ * shortcut for SpazPrefs
+ */
+if (sc) {
+	scPrefs = SpazPrefs;
+}
 
 

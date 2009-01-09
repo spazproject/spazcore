@@ -2,7 +2,7 @@
  * which will help to find out what is wrong
  * @param {String} text 
  */
-var sc.helpers.deJSON = function(json)
+sc.helpers.deJSON = function(json)
  {
 
 	// Fix twitter data bug
@@ -26,6 +26,6 @@ var sc.helpers.deJSON = function(json)
  * really just a simple wrapper for JSON.stringify	
  * @param  any js construct
  */
-var sc.helpers.enJSON = function(jsobj) {
+sc.helpers.enJSON = function(jsobj) {
 	return JSON.stringify(jsobj);
 }
