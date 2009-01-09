@@ -4,22 +4,40 @@
 */
 
 
+const SPAZCORE_PLATFORM_AIR			= 'AIR';
+const SPAZCORE_PLATFORM_WEBOS		= 'webOS';
+const SPAZCORE_PLATFORM_TITANIUM	= 'Titanium';
+
+
 /**
 * returns a string identifier for the platform
-* @return string an identifier for the platform
+* 
+* Right now these checks are really, really basic
+* 
+* @return {String} an identifier for the platform
 */
-function getPlatform() {
+function get_platform() {
 	if (window.runtime) {
-		return "AIR";
+		return SPAZCORE_PLATFORM_AIR;
 	}
 	if (Luna) {
-		return "Luna";
+		return SPAZCORE_PLATFORM_WEBOS;
+	}
+	if (ti) {
+		return SPAZCORE_PLATFORM_TITANIUM
 	}
 }
 
-
-function isPlatform(str) {
-	platform = getPlatform();
+/**
+* checks to see if current platform is the one passed in
+* 
+* use one of the defined constants, like SPAZCORE_PLATFORM_AIR
+* 
+* @param {String} str the platform you're checking for
+* 
+*/
+function is_platform(str) {
+	platform = get_platform();
 	if ( platform.toLowerCase() == str.toLowerCase() ) {
 		return true;
 	} else {
@@ -32,6 +50,7 @@ function isPlatform(str) {
 	dump an object's first level to console
 */
 function dump(obj) {
+	
 	for(var x in obj) {
 		air.trace("'"+x+"':"+obj[x]);
 	}
@@ -195,6 +214,13 @@ function init_file(path, overwrite) {
 	}
 	
 }
+
+
+
+
+
+
+
 
 
 // var fs = new air.FileStream();
