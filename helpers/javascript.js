@@ -6,7 +6,7 @@
 	Return a boolean value telling whether
 	the first argument is a string.
 */
-function isString() {
+var sc.helpers.isString = function() {
     if (typeof arguments[0] == 'string') return true;
     if (typeof arguments[0] == 'object') {
         var criterion = arguments[0].constructor.toString().match(/string/i);
@@ -19,7 +19,7 @@ function isString() {
 /*
 	http://www.breakingpar.com/bkp/home.nsf/0/87256B280015193F87256C720080D723
 */
-function isArray(obj) {
+var sc.helpers.isArray = function(obj) {
    if (obj.constructor.toString().indexOf("Array") == -1)
 	  return false;
    else
@@ -29,6 +29,6 @@ function isArray(obj) {
 /*
 	Returns a copy of the object using the jQuery.extend() method
 */
-function clone(oldObj) {
+var sc.helpers.clone = function(oldObj) {
 	return jQuery.extend({}/* clone */, oldObj);
 }
