@@ -95,8 +95,9 @@ sc.helpers.dump = function(obj) {
 	
 	
 	if (sc.helpers.isString(obj)) {
-		
 		dumper(obj);
+	} else if(sc.helpers.isNumber(obj)) {
+		dumper(obj.toString());
 	} else {
 		for(var x in obj) {
 			dumper("'"+x+"':"+obj[x]);

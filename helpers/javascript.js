@@ -16,6 +16,12 @@ sc.helpers.isString = function() {
 }
 
 
+sc.helpers.isNumber = function(chk) {
+	return typeof chk == 'number';
+};
+
+
+
 /*
 	http://www.breakingpar.com/bkp/home.nsf/0/87256B280015193F87256C720080D723
 */

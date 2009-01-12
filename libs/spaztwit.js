@@ -60,10 +60,13 @@ SpazTwit.prototype.setCredentials= function(username, password) {
 
 /*
  * given a key, it returns the URL (baseurl+API method path)
- * @param key string
+ * @param {string} key the key for the URL
+ * @param {array|object} urldata data to included in the URL as GET data
 */
-SpazTwit.prototype.getAPIURL = function(key) {
+SpazTwit.prototype.getAPIURL = function(key, urldata) {
 	var urls = {};
+
+
 
     // Timeline URLs
     urls.public_timeline    = "statuses/public_timeline.json";
@@ -95,7 +98,14 @@ SpazTwit.prototype.getAPIURL = function(key) {
     urls.downtime_schedule	= "help/downtime_schedule.json";
 
     if (urls[key]) {
-        return this._postProcessURL(this.baseurl + urls[key]);
+	
+		if (urldata && typeof urldata != "string") {
+			urldata = '?'+jQuery.param(urldata);
+		} else {
+			urldata = '';
+		}
+		
+        return this._postProcessURL(this.baseurl + urls[key] + urldata);
     } else {
         return false
     }
@@ -114,14 +124,14 @@ SpazTwit.prototype.verifyCredentials = function() {};
 SpazTwit.prototype.getPublicTimeline = function() {
 	var url = this.getAPIURL('public_timeline');
 	var username = null;
-	var pssword  = null;
+	var password  = null;
 	var data     = null
 	
 	this._getTimeline({
 		'url':url,
-		'data':data,
-		'username':username,
-		'password':password,
+		// 'data':data,
+		// 'username':username,
+		// 'password':password,
 		'success_event_type': 'new_public_timeline_data'
 	});
 };
@@ -130,18 +140,22 @@ SpazTwit.prototype.getPublicTimeline = function() {
 
 SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page) {
 	
-	if (!page) { page = 1;}
+	if (!page) { page = null;}
 	if (!count) { count = 200;}
-	if (!since_id) { since_id = 0;}
+	if (!since_id) { since_id = 1;}
 	
-	var url = this.getAPIURL('friends_timeline');
+	var data = {};
+	data['since_id'] = since_id;
+	data['count']	 = count;
+	if (page) {
+		data['page'] = page;
+	}
+	
+	
+	var url = this.getAPIURL('friends_timeline', data);
 	this._getTimeline({
 		'url':url,
-		'data':{
-			'since_id': since_id, 
-			'count': 	count,
-			'page': 	page 
-		},
+		// 'data':data,
 		'username':this.username,
 		'password':this.password,
 		'success_event_type': 'new_friends_timeline_data'		
@@ -150,13 +164,18 @@ SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page) {
 
 
 SpazTwit.prototype.getReplies = function(since_id, page) {
-	var url = this.getAPIURL('public_timeline');
+	
+	
+	var data = {};
+	data['since_id'] = since_id;
+	if (page) {
+		data['page'] = page;
+	}
+	
+	var url = this.getAPIURL('replies_timeline', data);
 	this._getTimeline({
 		'url':url,
-		'data':{
-			'since_id': since_id,
-			'page': 	page 
-		},
+		// 'data':data,
 		'username':this.username,
 		'password':this.password,
 		'success_event_type': 'new_friends_timeline_data'		
@@ -171,14 +190,7 @@ SpazTwit.prototype.search = function() {};
 
 SpazTwit.prototype._getTimeline = function(opts) {
 	
-	dump(opts);
-	
-	if (opts.username && opts.password) {
-		// opts.url = opts.url.replace(/(^https?:\/\/)(.+)$/gi, "$1"+opts.username+":"+opts.password+"@$2");
-		// dump(opts.url);
-		// opts.url = this._postProcessURL(opts.url);
-		// dump(opts.url);
-	}
+	dump(opts.data);
 	
 	var xhr = jQuery.ajax({
         'complete':function(xhr, msg){
@@ -193,7 +205,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
             }
         },
         'success':function(data) {
-			dump("Success! \n\n" + data);
+			// dump("Success! \n\n" + data);
 				
 			data = JSON.parse(data);
 			
@@ -205,10 +217,9 @@ SpazTwit.prototype._getTimeline = function(opts) {
 				xhr.setRequestHeader("Authorization", "Basic " + Base64.encode(opts.username + ":" + opts.password));
 			}
         },
-        'processData':false,
         'type':"GET",
         'url': 		opts.url,
-        // 'data': 	opts.data,
+        'data': 	opts.data,
 	});
 };
 
