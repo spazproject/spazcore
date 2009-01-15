@@ -60,10 +60,8 @@ function SpazTwit(username, password) {
 		apply defaults for ajax calls
 	*/
 	jQuery.ajaxSetup( {
-        timeout:1000*20, // 20 second timeout
+        timeout:1000*60,
         async:true,
-        // type:'POST'
-        // cache:false
     });
 }
 
@@ -153,7 +151,8 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 
 /*
  * checks the currently set username and password against the API. Can take
- * a username and password; will use this.username and this.password otherwise
+ * a username and password; will use this.username and this.password otherwise.
+ * Calls this._processAuthenticatedUser() if successful
  * 
  * @param {string} username optional
  * @param {string} password optional
@@ -172,7 +171,7 @@ SpazTwit.prototype.verifyCredentials = function(username, password) {
 		'url':url,
 		'username':username,
 		'password':password,
-		'process_callback':
+		'process_callback': this._processAuthenticatedUser,
 		'success_event_type':'verify_credentials_succeeded',
 		'failure_event_type':'verify_credentials_failed'
 	}
@@ -184,12 +183,22 @@ SpazTwit.prototype.verifyCredentials = function(username, password) {
 	
 };
 
-SpazTwit.prototype.processAuthenticatedUser = function(data, finished_event) {
+/**
+ * This takes data retrieved from the verifyCredentials method and stores it
+ * in this.me. it then fires off the event specified in finished_event
+ * 
+ * @param {object} data the data returned by a successful call to the verifyCredentials API method
+ * @param {string} finished_event the type of event to fire 
+ */
+SpazTwit.prototype._processAuthenticatedUser = function(data, finished_event) {
 	this.me = data;
 	jQuery().trigger(finished_event, [this.me]);
 }
 
 
+/**
+ * Initiates retrieval of the public timeline. 
+ */
 SpazTwit.prototype.getPublicTimeline = function() {
 	var url = this.getAPIURL('public_timeline');
 	var username = null;
@@ -204,6 +213,8 @@ SpazTwit.prototype.getPublicTimeline = function() {
 
 
 /**
+ * Initiates retrieval of the friends timeline (all the people you are following)
+ * 
  * @param {integer} since_id default is 1
  * @param {integer} count default is 200 
  * @param {integer} page default is null (ignored if null)
@@ -212,7 +223,13 @@ SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page) {
 	
 	if (!page) { page = null;}
 	if (!count) { count = 200;}
-	if (!since_id) { since_id = 1;}
+	if (!since_id) {
+		if (this.data.friends.lastid && this.data.friends.lastid > 1) {
+			since_id = this.data.friends.lastid;
+		} else {
+			since_id = 1;
+		}
+	}
 	
 	var data = {};
 	data['since_id'] = since_id;
@@ -254,7 +271,7 @@ SpazTwit.prototype.processFriendsTimeline = function(ret_items, finished_event) 
 	this.data.friends.newitems = ret_items;
 	
 	// concat new items onto data.items array
-	this.data.friends.items = this.data.friends.items + this.data.friends.newitems
+	this.data.friends.items = this.data.friends.items.concat(this.data.friends.newitems);
 
 	
 	// @todo check length of data.items, and remove oldest extras if necessary
@@ -269,7 +286,7 @@ SpazTwit.prototype.processFriendsTimeline = function(ret_items, finished_event) 
 	*/
 	this.data.combined.newitems = [];
 	this.data.combined.newitems = ret_items;
-	this.data.combined.items = this.data.combined.newitems + this.data.friends.newitems
+	this.data.combined.items = this.data.combined.newitems.concat(this.data.friends.newitems);
 	jQuery().trigger('new_combined_timeline_data', [this.data.combined.newitems]);
 	
 }
@@ -325,9 +342,19 @@ SpazTwit.prototype.getSentDirectMessages = function(since_id, page) {};
 SpazTwit.prototype.getFavorites = function(user_id, page) {};
 SpazTwit.prototype.search = function() {};
 
+
+/**
+ * this is a general wrapper for timeline methods
+ * @param {obj} opts a set of options for this method 
+ */
 SpazTwit.prototype._getTimeline = function(opts) {
 	
 	dump(opts.data);
+	
+	/*
+		for closure references
+	*/
+	var stwit = this;
 	
 	var xhr = jQuery.ajax({
         'complete':function(xhr, msg){
@@ -357,7 +384,12 @@ SpazTwit.prototype._getTimeline = function(opts) {
 			data = JSON.parse(data);
 			
 			if (opts.process_callback) {
-				opts.process_callback(data, opts.success_event_type)
+				/*
+					using .call here and passing stwit as the first param
+					ensures that "this" inside the callback refers to our
+					SpazTwit object, and not the jQuery.Ajax object
+				*/
+				opts.process_callback.call(stwit, data, opts.success_event_type)
 			} else {
 				jQuery().trigger(opts.success_event_type, [data]);
 			}
@@ -378,8 +410,18 @@ SpazTwit.prototype._getTimeline = function(opts) {
 };
 
 
-
+/**
+ * this is a general wrapper for non-timeline methods on the Twitter API. We
+ * use this to call methods that will return a single response 
+ * 
+ * @param {obj} opts a set of options for this method 
+ */
 SpazTwit.prototype._callMethod = function(opts) {
+	/*
+		for closure references
+	*/
+	var stwit = this;
+	
 	var xhr = jQuery.ajax({
 	    'complete':function(xhr, msg){
 	        dump('complete:'+msg);
@@ -407,7 +449,12 @@ SpazTwit.prototype._callMethod = function(opts) {
 	    'success':function(data) {			
 			data = JSON.parse(data);
 			if (opts.process_callback) {
-				opts.process_callback(data, opts.success_event_type)
+				/*
+					using .call here and passing stwit as the first param
+					ensures that "this" inside the callback refers to our
+					SpazTwit object, and not the jQuery.Ajax object
+				*/
+				opts.process_callback.call(stwit, data, opts.success_event_type)
 			} else {
 				jQuery().trigger(opts.success_event_type, [data]);
 			}
@@ -475,6 +522,8 @@ SpazTwit.prototype._postProcessURL = function(url) {
  * sorting function for an array of tweets. Asc by ID.
  * 
  * Example: itemsarray.sort(this._sortItemsAscending) 
+ * @param {object} a a twitter messgae object
+ * @param {object} b a twitter messgae object
  */
 SpazTwit.prototype._sortItemsAscending = function(a,b) {
 	return (a.id - b.id);
@@ -484,6 +533,8 @@ SpazTwit.prototype._sortItemsAscending = function(a,b) {
  * sorting function for an array of tweets. Desc by ID.
  * 
  * Example: itemsarray.sort(this._sortItemsDescending) 
+ * @param {object} a a twitter messgae object
+ * @param {object} b a twitter messgae object
  */
 SpazTwit.prototype._sortItemsDescending = function(a,b) {
 	return (b.id - a.id);
@@ -497,6 +548,8 @@ SpazTwit.prototype._sortItemsDescending = function(a,b) {
  * requires SpazCore helpers/datetime.js for httpTimeToInt()
  * 
  * Example: itemsarray.sort(this._sortItemsByDateAsc) 
+ * @param {object} a a twitter messgae object
+ * @param {object} b a twitter messgae object
  */
 SpazTwit.prototype._sortItemsByDateAsc = function(a,b) {
 	var time_a = sc.helpers.httpTimeToInt(a.created_at);
@@ -509,7 +562,9 @@ SpazTwit.prototype._sortItemsByDateAsc = function(a,b) {
  * 
  * requires SpazCore helpers/datetime.js for httpTimeToInt()
  * 
- * Example: itemsarray.sort(this._sortItemsByDateDesc) 
+ * Example: itemsarray.sort(this._sortItemsByDateDesc)
+ * @param {object} a a twitter messgae object
+ * @param {object} b a twitter messgae object 
  */
 SpazTwit.prototype._sortItemsByDateDesc = function(a,b) {
 	var time_a = sc.helpers.httpTimeToInt(a.created_at);
