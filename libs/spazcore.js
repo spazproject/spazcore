@@ -23,7 +23,7 @@ sch = sc.helpers;
  * set-up prefs object 
  */
 if (__prefs) {
-	sc.prefs {
+	sc.prefs = {
 		'data':__prefs,
 		
 		'get' :function(key) {
