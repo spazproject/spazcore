@@ -38,3 +38,17 @@ sc.helpers.isArray = function(obj) {
 sc.helpers.clone = function(oldObj) {
 	return jQuery.extend({}/* clone */, oldObj);
 }
+
+/**
+ * We use this to do a form of inheritance, where the child inherits
+ * the methods and properties of the supertype
+ * 
+ * @link https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Inheritance
+ * 
+ * @param {object} child the child type
+ * @param {object} supertype the parent we inherit from 
+ */
+sc.helpers.extend = function(child, supertype)
+{
+   child.prototype.__proto__ = supertype.prototype;
+}
