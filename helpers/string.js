@@ -66,11 +66,19 @@ sc.helpers.autolink = function(str, type, popup) {
 
 }
 
-/*
-	turns twitter style username refs ('@username') into links
-*/
-sc.helpers.autolinkTwitter = function(str) {
-	re_uname = /(^|\s|\(\[)@([a-zA-Z0-9_]+)([^a-zA-Z0-9_]|$)/gi
+/**
+ * turns twitter style username refs ('@username') into links
+ * by default, the template used is <a href="http://twitter.com/#username#">@#username#<a/>
+ * pass the second param to give it a custom template
+ * 
+ * return {string}
+ */
+sc.helpers.autolinkTwitter = function(str, tpl) {
+	if (!tpl) {
+		tpl = '<a href="http://twitter.com/#username#">@#username#<a/>';
+	}
+	
+	var re_uname = /(^|\s|\(\[)@([a-zA-Z0-9_]+)([^a-zA-Z0-9_]|$)/gi
 	
 	var ms = [];
 	while (ms = re_uname.exec(str))
@@ -85,8 +93,9 @@ sc.helpers.autolinkTwitter = function(str) {
 				ms[x] = '';
 			}
 		}
-		str = str.replace(ms[0], ms[1]+'<a href="http://twitter.com/'+ms[2]+'">@'+ms[2]+'<a/>'+ms[3]);
-		//air.trace(str);
+		
+		var repl_tpl = tpl.replace(/#username#/gi, ms[2]);
+		str = str.replace(ms[0], ms[1]+repl_tpl+ms[3]);
 
 	}
 	return str;

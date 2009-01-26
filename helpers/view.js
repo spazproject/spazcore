@@ -33,6 +33,36 @@ sc.helpers.removeExtraElements = function(item_selector, max_items, remove_from_
 
 
 /**
+ * This removes any extra items from a ser of elements. Intended to be used for
+ * limiting the sice of timelines
+ * 
+ * @param {string} item_selector a jquery-compatible selector to get items
+ * @param {integer} max_items the max # of item we should have
+ * @param {boolean} remove_from_top whether or not to remove extra items from the top. default is FALSE
+ */
+sc.helpers.removeDuplicateElements = function(item_selector, max_items, remove_from_top) {
+	
+	if (!remove_from_top) {
+		remove_from_top = false;
+	}
+	
+	jqitems = jQuery(item_selector);
+	var diff = jqitems.length - max_items;
+	if (diff > 0) {
+		
+		if (!remove_from_top) {
+			dump("numEntries is " + jqitems.length + " > " + max_items + "; removing last " + diff + " entries");
+	        jqitems.slice(diff * -1).remove();
+		} else {
+			dump("numEntries is " + jqitems.length + " > " + max_items + "; removing first " + diff + " entries");
+	        jqitems.slice(diff).remove();
+		}
+	}
+}
+
+
+
+/**
  * This updates relative times in elements. Each element has to have an attribute
  * that contains the created_at value provided by Twitter
  * 

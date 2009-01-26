@@ -63,24 +63,33 @@ sc.helpers.isTitanium = function() {
 	dump an object's first level to console
 */
 sc.helpers.dump = function(obj) {
+
 	
 	var dumper = function(obj) {
-		return;
+		return false
 	};
 	
 	/*
 		for AIR
 	*/
 	if (sc.helpers.isAIR()) {
-		dumper = air.trace;
+		dumper = function() {
+			for(var x in obj) {
+				air.trace("'"+x+"':"+obj[x]);
+			}
+		}
 	}
 	
 	/*
 		for Nova
 	*/
 	if (sc.helpers.iswebOS()) {
+		if (sc.helpers.isString(obj) || sc.helpers.isNumber(obj) || !obj) {
+			dumper = Luna.Log.info;
+		} else {
+			dumper = Luna.Log.logProperties;
+		}
 		
-		dumper = Luna.Log.info;
 	}
 	
 	/*
@@ -98,10 +107,17 @@ sc.helpers.dump = function(obj) {
 		dumper(obj);
 	} else if(sc.helpers.isNumber(obj)) {
 		dumper(obj.toString());
-	} else {
-		for(var x in obj) {
-			dumper("'"+x+"':"+obj[x]);
+	} else if (obj === undefined) {
+		dumper('UNDEFINED');
+	} else if (obj === null) {
+		dumper('NULL');
+	} else { // this is an object. we hope.
+		if (console.dir) { // we really prefer to use console.dir if it is available
+			console.dir(obj);
+		} else {
+			dumper(obj)
 		}
+		
 	}
 
 	
