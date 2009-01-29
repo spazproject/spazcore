@@ -1112,13 +1112,20 @@ SpazTwit.prototype.test = function() {};
  * @private 
  */
 SpazTwit.prototype._postProcessURL = function(url) {
-	if (Luna) { // we're in webOS
-		var re = /https?:\/\/.[^\/:]*(?::[0-9]+)?/;
-		var match = url.match(re);
-		if (match && match[0] != Luna.hostingPrefix) {
-			url = "/proxy?url=" + encodeURIComponent(url);
+
+	if (Luna) { // we're in webOS		
+		this.audioPlayer = new Audio();
+		if (!this.audioPlayer.palm) { // we are not on an emu or device, so proxy calls
+			var re = /https?:\/\/.[^\/:]*(?::[0-9]+)?/;
+			var match = url.match(re);
+			if (match && match[0] != Luna.hostingPrefix) {
+				url = "/proxy?url=" + encodeURIComponent(url);
+			}
+			return url;		
+		} else {
+			return url;
 		}
-		return url;		
+		
 	} else {
 		return url;
 	}
