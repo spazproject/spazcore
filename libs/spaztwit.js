@@ -30,7 +30,9 @@ const SPAZCORE_SECTION_USER = 'user-timeline';
  * 'get_user_succeeded' (data)
  * 'get_user_failed' (data)
  * 'new_search_timeline_data' (data)
- * 'ferror_search_timeline_data' (data)
+ * 'error_search_timeline_data' (data)
+ * 'new_trends_data' (data)
+ * 'error_trends_data' (data)
  * 
  * 
  * 
@@ -83,31 +85,36 @@ SpazTwit.prototype.initializeData = function() {
 		'lastid':   1,
 		'items':   [],
 		'newitems':[],
-		'max':200
+		'max':200,
+		'min_age':5*60
 	};
 	this.data[SPAZCORE_SECTION_REPLIES] = {
 		'lastid':   1,
 		'items':   [],
 		'newitems':[],
-		'max':50
+		'max':50,
+		'min_age':5*60
 	};
 	this.data[SPAZCORE_SECTION_DMS] = {
 		'lastid':   1,
 		'items':   [],
 		'newitems':[],
-		'max':50
+		'max':50,
+		'min_age':5*60
 	};
 	this.data[SPAZCORE_SECTION_COMBINED] = {
 		'items':   [],
 		'newitems':[],
-		'max':400
+		'max':400,
+		'min_age':5*60
 	};
 	this.data[SPAZCORE_SECTION_SEARCH] = {
 		'lastid':  0, // search api prefers 0, will freak out on "1"
 		'items':   [],
 		'newitems':[],
 		'lastresultdata':{},
-		'max':200
+		'max':200,
+		'min_age':30
 	};
 };
 
@@ -120,7 +127,6 @@ SpazTwit.prototype.initializeCombinedTracker = function() {
 	this.combined_finished[SPAZCORE_SECTION_FRIENDS] = false;
 	this.combined_finished[SPAZCORE_SECTION_REPLIES] = false;
 	this.combined_finished[SPAZCORE_SECTION_DMS] = false;
-	
 };
 
 /**
@@ -207,6 +213,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 
 	// search
 	urls.search				= "http://search.twitter.com/search.json";
+	urls.trends				= "http://search.twitter.com/trends.json";
 
     // misc
     urls.test 			  	= "help/test.json";
@@ -220,7 +227,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 			urldata = '';
 		}
 		
-		if (key == 'search') {
+		if (key == 'search' || key == 'trends') {
 			return this._postProcessURL(urls[key] + urldata);
 		} else {
 			return this._postProcessURL(this.baseurl + urls[key] + urldata);
@@ -479,10 +486,12 @@ SpazTwit.prototype._processUserTimeline = function(ret_items, finished_event, pr
  * 
  * 
  */
-SpazTwit.prototype.getCombinedTimeline = function() {
+SpazTwit.prototype.getCombinedTimeline = function(force) {
 	var opts = {
-		'combined':true,
-		
+		'combined':true
+	}
+	if (force) {
+		opts.force = true;
 	}
 	
 	this.getFriendsTimeline(null, null, null, opts);
@@ -652,6 +661,43 @@ SpazTwit.prototype._processSearchItem = function(item, section_name) {
 	
 	return item;
 }
+
+
+SpazTwit.prototype.getTrends = function() {
+	var url = this.getAPIURL('trends');
+	this._getTimeline({
+		'url':url,
+		'process_callback'	: this._processTrends,
+		'success_event_type': 'new_trends_data',
+		'failure_event_type': 'error_trends_data'
+	});
+};
+
+
+/**
+ * @private
+ */
+SpazTwit.prototype._processTrends = function(trends_result, finished_event, processing_opts) {
+
+	if (!processing_opts) { processing_opts = {}; }
+	
+	/*
+		grab the array of items
+	*/
+	var ret_items = trends_result.trends;
+
+	if (ret_items.length > 0) {
+
+		for (var k=0; k<ret_items.length; k++) {
+			ret_items[k].searchterm = ret_items[k].name;
+			if ( /\s+/.test(ret_items[k].searchterm)) { // if there is whitespace, wrap in quotes
+				ret_items[k].searchterm = '"'+ret_items[k].searchterm+'"';
+			}
+		}
+		jQuery().trigger(finished_event, [ret_items]);
+	}
+}
+
 
 /**
  * this is a general wrapper for timeline methods
