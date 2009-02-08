@@ -71,9 +71,9 @@ sc.helpers.autolink = function(str, type, popup) {
  * by default, the template used is <a href="http://twitter.com/#username#">@#username#<a/>
  * pass the second param to give it a custom template
  * 
- * return {string}
+ * @return {string}
  */
-sc.helpers.autolinkTwitter = function(str, tpl) {
+sc.helpers.autolinkTwitterScreenname = function(str, tpl) {
 	if (!tpl) {
 		tpl = '<a href="http://twitter.com/#username#">@#username#<a/>';
 	}
@@ -95,6 +95,44 @@ sc.helpers.autolinkTwitter = function(str, tpl) {
 		}
 		
 		var repl_tpl = tpl.replace(/#username#/gi, ms[2]);
+		str = str.replace(ms[0], ms[1]+repl_tpl+ms[3]);
+
+	}
+	return str;
+}
+
+
+
+/**
+ * turns twitter style hashtags ('#hashtag') into links
+ * by default, the template used is <a href="http://search.twitter.com/search?q=#hashtag_enc#">##hashtag#<a/>
+ * pass the second param to give it a custom template
+ * 
+ * @return {string}
+ */
+sc.helpers.autolinkTwitterHashtag = function(str, tpl) {
+	if (!tpl) {
+		tpl = '<a href="http://search.twitter.com/search?q=#hashtag_enc#">##hashtag#<a/>';
+	}
+	
+	var re_hashtag = /(^|\s|\(\[)#([a-zA-Z0-9_]{2,})([^a-zA-Z0-9_]|$)/gi
+	
+	var ms = [];
+	while (ms = re_hashtag.exec(str))
+	{
+		
+		/*
+			sometimes we can end up with a null instead of a blank string,
+			so we need to force the issue in javascript.
+		*/
+		for (var x=0; x<ms.length; x++) {
+			if (!ms[x]) {
+				ms[x] = '';
+			}
+		}
+		
+		var repl_tpl = tpl.replace(/#hashtag#/gi, ms[2]);
+		repl_tpl = repl_tpl.replace(/#hashtag_enc#/gi, encodeURIComponent(ms[2]));
 		str = str.replace(ms[0], ms[1]+repl_tpl+ms[3]);
 
 	}

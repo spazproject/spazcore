@@ -116,6 +116,7 @@ SpazTwit.prototype.initializeData = function() {
 		'max':200,
 		'min_age':30
 	};
+	// this.data.byid = {};
 };
 
 
