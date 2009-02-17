@@ -20,7 +20,7 @@ sc.helpers.getPlatform = function() {
 	if (window.runtime) {
 		return SPAZCORE_PLATFORM_AIR;
 	}
-	if (Luna) {
+	if (Mojo) {
 		return SPAZCORE_PLATFORM_WEBOS;
 	}
 	if (ti) {
@@ -85,9 +85,9 @@ sc.helpers.dump = function(obj) {
 	*/
 	if (sc.helpers.iswebOS()) {
 		if (sc.helpers.isString(obj) || sc.helpers.isNumber(obj) || !obj) {
-			dumper = Luna.Log.info;
+			dumper = Mojo.Log.info;
 		} else {
-			dumper = Luna.Log.logProperties;
+			dumper = Mojo.Log.logProperties;
 		}
 		
 	}
