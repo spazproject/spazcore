@@ -115,7 +115,7 @@ sc.helpers.autolinkTwitterHashtag = function(str, tpl) {
 		tpl = '<a href="http://search.twitter.com/search?q=#hashtag_enc#">##hashtag#<a/>';
 	}
 	
-	var re_hashtag = /(^|\s|\(\[)#([a-zA-Z0-9_]{2,})([^a-zA-Z0-9_]|$)/gi
+	var re_hashtag = /(^|\s)#([a-zA-Z0-9_]{2,})([^a-zA-Z0-9_]|$)/gi
 	
 	var ms = [];
 	while (ms = re_hashtag.exec(str))
@@ -138,3 +138,13 @@ sc.helpers.autolinkTwitterHashtag = function(str, tpl) {
 	}
 	return str;
 }
+
+
+/**
+ *
+ */
+sc.helpers.stripTags = function(str) {
+	var re = /<[^>]*>/gim;
+	str = str.replace(re, '');
+	return str;
+};
