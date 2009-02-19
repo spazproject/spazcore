@@ -99,7 +99,7 @@ sc.helpers.dump = function(obj) {
 	*
 	*/
 	if (sc.helpers.isTitanium()) {
-		dumper = window.console.log;
+		dumper = window.dump;
 	}
 	
 	
@@ -112,8 +112,8 @@ sc.helpers.dump = function(obj) {
 	} else if (obj === null) {
 		dumper('NULL');
 	} else { // this is an object. we hope.
-		if (console.dir) { // we really prefer to use console.dir if it is available
-			console.dir(obj);
+		if (dump) { // we really prefer to use dump if it is available
+			dumper(obj);
 		} else {
 			dumper(obj)
 		}
