@@ -43,6 +43,9 @@ var SpazPrefs = function(defaults, sanity_methods) {
 		this.setDefaults(defaults);
 		this._applyDefaults();
 	}
+	
+	
+	this.load();
 
 	
 };
@@ -109,6 +112,8 @@ SpazPrefs.prototype.set = function(key, val, encrypted) {
 	} 
 
 	this._prefs[key] = val;
+	
+	this.save();
 }
 
 
@@ -157,7 +162,30 @@ SpazPrefs.prototype.setEncrypted = function(key, val) {
  * @todo
  */
 SpazPrefs.prototype.load = function(name) {
-	alert('not yet implemented');
+	
+	if (sc.helpers.iswebOS()) {
+		if (!this.mojoDepot) {
+			this.mojoDepot = new Mojo.Depot({
+				name:'SpazDepot',
+				replace:true
+			});
+		}
+		
+
+		var loaded_prefs = this.mojoDepot.simpleGet('SpazPrefs');
+		
+		dump("LOADED PREFS:"+loaded_prefs);
+		
+		if (loaded_prefs) {
+			for (var key in loaded_prefs) {
+	            this.set(key, loaded_prefs[key]);
+	       	}
+		} else {
+			alert("saving defaults!");
+			this.resetPrefs();
+		}
+	}
+	
 }
 
 
@@ -167,7 +195,21 @@ SpazPrefs.prototype.load = function(name) {
  * @todo
  */
 SpazPrefs.prototype.save = function(name) {
-	alert('not yet implemented');
+
+	if (sc.helpers.iswebOS()) {
+		if (!this.mojoDepot) {
+			this.mojoDepot = new Mojo.Depot({
+				name:'SpazDepot',
+				replace:false
+			});
+		}
+		
+		this.mojoDepot.simpleAdd('SpazPrefs', this._prefs);
+	}
+	
+	
+		
+	
 };
 
 
