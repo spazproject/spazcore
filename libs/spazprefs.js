@@ -18,6 +18,10 @@
  * 		onSet:function() {};
  * 	}
  * }
+ * 
+ * events raised:
+ * 'spazprefs_loaded'
+ * 
  */
 var SpazPrefs = function(defaults, sanity_methods) {	
 
@@ -44,11 +48,9 @@ var SpazPrefs = function(defaults, sanity_methods) {
 		this._applyDefaults();
 	}
 	
-	
-	this.load();
-
-	
+	this.loaded = false;
 };
+
 
 /**
  * sets the passed object of key:val pairs as the default preferences
@@ -65,9 +67,8 @@ SpazPrefs.prototype.setDefaults = function(defaults) {
  */
 SpazPrefs.prototype._applyDefaults = function() {
 	for (key in this._defaults) {
-		dump('Copying "' + key + '" from loaded prefs to current prefs');
+		dump('Copying default "' + key + '":"' + this._defaults[key] + '" (' + typeof(this._defaults[key]) + ')');
 		this._prefs[key] = this._defaults[key];
-		dump('"' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
 
 		if (this._sanity_methods[key] && this._sanity_methods[key].onSet) {
 			dump("Calling "+key+".onSet()");
@@ -104,9 +105,12 @@ SpazPrefs.prototype.get = function(key, encrypted) {
 
 
 /**
- * set a preference
+ * set a preference and save automatically
  */
 SpazPrefs.prototype.set = function(key, val, encrypted) {
+	
+	dump('Setting and saving "'+key+'" to "'+val+'" ('+typeof(val)+')');
+	
 	if (encrypted) {
 		return this.setEncrypted(key, val);
 	} 
@@ -167,25 +171,33 @@ SpazPrefs.prototype.load = function(name) {
 		if (!this.mojoDepot) {
 			this.mojoDepot = new Mojo.Depot({
 				name:'SpazDepot',
-				replace:true
+				replace:false
 			});
 		}
 		
 
-		var loaded_prefs = this.mojoDepot.simpleGet('SpazPrefs');
+		this.mojoDepot.simpleGet('SpazPrefs', onGet, onFail);
 		
-		dump("LOADED PREFS:"+loaded_prefs);
+		var thisPrefs = this;
+		function onGet(loaded_prefs) {
+			if (loaded_prefs) {
+				dump('Prefs loaded');
+				for (var key in loaded_prefs) {
+					dump('Copying loaded pref "' + key + '":"' + thisPrefs._prefs[key] + '" (' + typeof(thisPrefs._prefs[key]) + ')');
+		            thisPrefs._prefs[key] = loaded_prefs[key];
+		       	}
+			} else {
+				dump('Prefs loading failed in onGet')
+				thisPrefs.resetPrefs();
+			}
+			jQuery().trigger('spazprefs_loaded');
+		}
 		
-		if (loaded_prefs) {
-			for (var key in loaded_prefs) {
-	            this.set(key, loaded_prefs[key]);
-	       	}
-		} else {
-			alert("saving defaults!");
-			this.resetPrefs();
+		function onFail() {
+			dump('Prefs loading failed in onFail');
+			thisPrefs.resetPrefs();
 		}
 	}
-	
 }
 
 
