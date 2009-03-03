@@ -197,7 +197,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.dm_sent            = "direct_messages/sent.json";
     urls.friendslist        = "statuses/friends.json";
     urls.followerslist      = "statuses/followers.json";
-    urls.show_user			= "users/show.json";
+    urls.show_user			= "users/{{ID}}.json";
     urls.featuredlist       = "statuses/featured.json";
 
     // Action URLs
@@ -219,6 +219,17 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     // misc
     urls.test 			  	= "help/test.json";
     urls.downtime_schedule	= "help/downtime_schedule.json";
+
+	
+	if (urls[key].indexOf('{{ID}}') > -1) {
+		if (typeof(urldata) === 'string') {
+			urls[key] = urls[key].replace('{{ID}}', urldata)
+		} else if (urldata && typeof(urldata) === 'object') {
+			urls[key] = urls[key].replace('{{ID}}', urldata.id)
+		}
+		
+	}
+	
 
     if (urls[key]) {
 	
@@ -597,10 +608,10 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, finished_eve
 		this.data[SPAZCORE_SECTION_SEARCH].items = this.removeDuplicates(this.data[SPAZCORE_SECTION_SEARCH].items);
 		this.data[SPAZCORE_SECTION_SEARCH].items = this.removeExtraElements(this.data[SPAZCORE_SECTION_SEARCH].items, this.data[SPAZCORE_SECTION_SEARCH].max);
 
-		dump('New '+SPAZCORE_SECTION_SEARCH+' items: ('+this.data[SPAZCORE_SECTION_SEARCH].newitems.length+')');
-		dump(this.data[SPAZCORE_SECTION_SEARCH].newitems);
-		dump('All '+SPAZCORE_SECTION_SEARCH+' items ('+this.data[SPAZCORE_SECTION_SEARCH].items.length+'):');
-		dump(this.data[SPAZCORE_SECTION_SEARCH].items);
+		// dump('New '+SPAZCORE_SECTION_SEARCH+' items: ('+this.data[SPAZCORE_SECTION_SEARCH].newitems.length+')');
+		// dump(this.data[SPAZCORE_SECTION_SEARCH].newitems);
+		// dump('All '+SPAZCORE_SECTION_SEARCH+' items ('+this.data[SPAZCORE_SECTION_SEARCH].items.length+'):');
+		// dump(this.data[SPAZCORE_SECTION_SEARCH].items);
 
 
 		jQuery().trigger(finished_event, [this.data[SPAZCORE_SECTION_SEARCH].newitems]);
@@ -625,7 +636,7 @@ SpazTwit.prototype._processSearchItem = function(item, section_name) {
 	if (this.username) {
 		item.SC_user_received_by = this.username;
 	}
-	dump(item);
+	// dump(item);
 	
 	item.CS_is_search = true;
 
@@ -804,8 +815,8 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 		
 		if (section_name === SPAZCORE_SECTION_USER) { // special case -- we don't keep this data, just parse and fire it off
 
-			dump('New '+section_name+' items: ('+ret_items.length+')');
-			dump(ret_items);
+			// dump('New '+section_name+' items: ('+ret_items.length+')');
+			// dump(ret_items);
 			
 			jQuery().trigger(finished_event, [ret_items]);
 			
@@ -825,10 +836,10 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 			this.data[section_name].items = this.removeExtraElements(this.data[section_name].items, this.data[section_name].max);
 
 
-			dump('New '+section_name+' items: ('+this.data[section_name].newitems.length+')');
-			dump(this.data[section_name].newitems);
-			dump('All '+section_name+' items ('+this.data[section_name].items.length+'):');
-			dump(this.data[section_name].items);
+			// dump('New '+section_name+' items: ('+this.data[section_name].newitems.length+')');
+			// dump(this.data[section_name].newitems);
+			// dump('All '+section_name+' items ('+this.data[section_name].items.length+'):');
+			// dump(this.data[section_name].items);
 
 			// @todo check length of data.items, and remove oldest extras if necessary
 			/*
@@ -858,10 +869,10 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 			this.data[SPAZCORE_SECTION_COMBINED].items = this.removeDuplicates(this.data[SPAZCORE_SECTION_COMBINED].items);
 			this.data[SPAZCORE_SECTION_COMBINED].items = this.removeExtraElements(this.data[SPAZCORE_SECTION_COMBINED].items, this.data[SPAZCORE_SECTION_COMBINED].max);
 
-			dump('Combined new items ('+this.data[SPAZCORE_SECTION_COMBINED].newitems.length+'):');
-			dump(this.data[SPAZCORE_SECTION_COMBINED].newitems);
-			dump('Combined all items ('+this.data[SPAZCORE_SECTION_COMBINED].items.length+'):');
-			dump(this.data[SPAZCORE_SECTION_COMBINED].items);
+			// dump('Combined new items ('+this.data[SPAZCORE_SECTION_COMBINED].newitems.length+'):');
+			// dump(this.data[SPAZCORE_SECTION_COMBINED].newitems);
+			// dump('Combined all items ('+this.data[SPAZCORE_SECTION_COMBINED].items.length+'):');
+			// dump(this.data[SPAZCORE_SECTION_COMBINED].items);
 			
 		}
 
@@ -898,7 +909,7 @@ SpazTwit.prototype._processItem = function(item, section_name) {
 	if (this.username) {
 		item.SC_user_received_by = this.username;
 	}
-	dump(item);
+	// dump(item);
 	
 	/*
 		is reply? Then add .SC_is_reply
@@ -1026,7 +1037,7 @@ SpazTwit.prototype.getUser = function(user_id) {
 	var data = {};
 	data['id'] = user_id;
 	
-	var url = this.getAPIURL('verify_credentials', data);
+	var url = this.getAPIURL('show_user', data);
 	
 	var opts = {
 		'url':url,
