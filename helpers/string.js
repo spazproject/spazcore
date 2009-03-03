@@ -30,7 +30,7 @@ sc.helpers.autolink = function(str, type, popup) {
 				}
 			}
 
-			var newstr = ms[1]+'<a href="http'+ms[4]+'://'+ms[5]+ms[6]+'"'+pop+'>http'+ms[4]+'://'+ms[5]+ms[6]+'</a>'+period;
+			var newstr = ms[1]+'<a href="http'+ms[4]+'://'+ms[5]+ms[6]+'"'+pop+'>'+ms[5]+ms[6]+'</a>'+period;
 			str = str.replace(ms[0], newstr);
 			//air.trace(str)
 
