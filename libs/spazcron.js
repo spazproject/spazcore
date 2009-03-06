@@ -10,14 +10,14 @@ SpazCron = function(interval) {
 		this.interval = interval*1000;
 	}
 	
-	this._jobs = {}
+	this._jobs = {};
 		
 };
 
-SpazCron.prototype.addJob = function(name, function, mintime) {};
+SpazCron.prototype.addJob = function(name, func, mintime) {};
 
 
 
-SpazCronJob = function(name, function, mintime) {
+SpazCronJob = function(name, func, mintime) {
 	
 };
