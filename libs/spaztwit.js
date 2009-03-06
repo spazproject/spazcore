@@ -1171,7 +1171,7 @@ SpazTwit.prototype.test = function() {};
  */
 SpazTwit.prototype._postProcessURL = function(url) {
 	
-	if (Mojo) { // we're in webOS		
+	if (typeof Mojo != "undefined") { // we're in webOS		
 		if (use_palmhost_proxy) { // we are not on an emu or device, so proxy calls
 		// if (window.palmService === undefined) { // we are not on an emu or device, so proxy calls
 			var re = /https?:\/\/.[^\/:]*(?::[0-9]+)?/;
