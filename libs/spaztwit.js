@@ -33,7 +33,10 @@ const SPAZCORE_SECTION_USER = 'user-timeline';
  * 'error_search_timeline_data' (data)
  * 'new_trends_data' (data)
  * 'error_trends_data' (data)
- * 
+ * 'create_favorite_succeeded'
+ * 'create_favorite_failed'
+ * 'destroy_favorite_succeeded'
+ * 'destroy_favorite_failed'
  * 
  * 
  * @param username string
@@ -1015,7 +1018,7 @@ SpazTwit.prototype._callMethod = function(opts) {
 				*/
 				opts.process_callback.call(stwit, data, opts.success_event_type)
 			} else {
-				jQuery().trigger(opts.failure_event_type, [data]);
+				jQuery().trigger(opts.success_event_type, [data]);
 			}
 	    },
 	    'beforeSend':function(xhr){
@@ -1151,8 +1154,49 @@ SpazTwit.prototype._processOneItem = function(data, finished_event) {
 	jQuery().trigger(finished_event, [data]);
 };
 
-SpazTwit.prototype.favorite = function(id) {};
-SpazTwit.prototype.unfavorite = function(id) {};
+SpazTwit.prototype.favorite = function(id) {
+	var data = {};
+	data['id'] = id;
+	
+	var url = this.getAPIURL('favorites_create', data);
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'create_favorite_succeeded',
+		'failure_event_type':'create_favorite_failed',
+		'data':data,
+	}
+
+	/*
+		Perform a request and get true or false back
+	*/
+	var xhr = this._callMethod(opts);
+};
+
+SpazTwit.prototype.unfavorite = function(id) {
+	var data = {};
+	data['id'] = id;
+	
+	var url = this.getAPIURL('favorites_destroy', data);
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'destroy_favorite_succeeded',
+		'failure_event_type':'destroy_favorite_failed',
+		'data':data
+	}
+
+	/*
+		Perform a request and get true or false back
+	*/
+	var xhr = this._callMethod(opts);
+};
+
+
 
 
 SpazTwit.prototype.updateLocation = function(location_str) {};
