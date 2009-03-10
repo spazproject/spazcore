@@ -37,6 +37,14 @@ const SPAZCORE_SECTION_USER = 'user-timeline';
  * 'create_favorite_failed'
  * 'destroy_favorite_succeeded'
  * 'destroy_favorite_failed'
+ * 'create_friendship_succeeded'
+ * 'create_friendship_failed'
+ * 'destroy_friendship_succeeded'
+ * 'destroy_friendship_failed'
+ * 'create_block_succeeded'
+ * 'create_block_failed'
+ * 'destroy_block_succeeded'
+ * 'destroy_block_failed'
  * 
  * 
  * @param username string
@@ -206,8 +214,10 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     // Action URLs
     urls.update           	= "statuses/update.json";
     urls.destroy_status   	= "statuses/destroy/{{ID}}.json";
-    urls.follow           	= "friendships/create/{{ID}}.json";
-    urls.stop_follow      	= "friendships/destroy/{{ID}}.json";
+    urls.friendship_create  = "friendships/create/{{ID}}.json";
+    urls.friendship_destroy	= "friendships/destroy/{{ID}}.json";
+    urls.block_create		= "blocks/create/{{ID}}.json";
+    urls.block_destroy		= "blocks/destroy/{{ID}}.json";
     urls.start_notifications= "notifications/follow/{{ID}}.json";
     urls.stop_notifications = "notifications/leave/{{ID}}.json";
     urls.favorites_create 	= "favourings/create/{{ID}}.json";
@@ -1063,10 +1073,89 @@ SpazTwit.prototype.getUser = function(user_id) {
 SpazTwit.prototype.getFriends = function() {};
 SpazTwit.prototype.getFollowers = function() {};
 
-SpazTwit.prototype.addFriend = function(user_id) {};
-SpazTwit.prototype.removeFriend = function(user_id) {};
+SpazTwit.prototype.addFriend = function(user_id) {
+	var data = {};
+	data['id'] = user_id;
+	
+	var url = this.getAPIURL('friendship_create', data);
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'create_friendship_succeeded',
+		'failure_event_type':'create_friendship_failed',
+		'data':data,
+	}
 
-SpazTwit.prototype.block = function(user_id) {};
+	/*
+		Perform a request and get true or false back
+	*/
+	var xhr = this._callMethod(opts);
+};
+SpazTwit.prototype.removeFriend = function(user_id) {
+	var data = {};
+	data['id'] = user_id;
+	
+	var url = this.getAPIURL('friendship_destroy', data);
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'destroy_friendship_succeeded',
+		'failure_event_type':'destroy_friendship_failed',
+		'data':data,
+	}
+
+	/*
+		Perform a request and get true or false back
+	*/
+	var xhr = this._callMethod(opts);
+
+};
+
+SpazTwit.prototype.block = function(user_id) {
+	var data = {};
+	data['id'] = user_id;
+	
+	var url = this.getAPIURL('block_create', data);
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'create_block_succeeded',
+		'failure_event_type':'create_block_failed',
+		'data':data,
+	}
+
+	/*
+		Perform a request and get true or false back
+	*/
+	var xhr = this._callMethod(opts);
+};
+SpazTwit.prototype.unblock = function(user_id) {
+	var data = {};
+	data['id'] = user_id;
+	
+	var url = this.getAPIURL('block_destroy', data);
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'destroy_block_succeeded',
+		'failure_event_type':'destroy_block_failed',
+		'data':data,
+	}
+
+	/*
+		Perform a request and get true or false back
+	*/
+	var xhr = this._callMethod(opts);
+
+};
 
 SpazTwit.prototype.follow = function(user_id) {}; // to add notification
 SpazTwit.prototype.unfollow = function(user_id) {}; // to remove notification
