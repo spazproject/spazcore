@@ -86,6 +86,14 @@ function SpazTwit(username, password) {
 }
 
 
+SpazTwit.prototype.getUsername = function() {
+	return this.username;
+}
+SpazTwit.prototype.getPassword = function() {
+	return this.password;
+}
+
+
 
 SpazTwit.prototype.initializeData = function() {
 	/*
@@ -633,7 +641,7 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, finished_eve
 
 	} else { // no new items, but we should fire off success anyway
 		if (!processing_opts.combined) {
-			jQuery().trigger(finished_event, []);
+			jQuery().trigger(finished_event, [[]]);
 		} else {
 			this.combined_finished[section_name] = true;
 		}

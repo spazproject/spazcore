@@ -6,10 +6,10 @@
 	Return a boolean value telling whether
 	the first argument is a string.
 */
-sc.helpers.isString = function() {
-    if (typeof arguments[0] == 'string') return true;
-    if (typeof arguments[0] == 'object') {
-        var criterion = arguments[0].constructor.toString().match(/string/i);
+sc.helpers.isString = function(thing) {
+	if (typeof thing == 'string') return true;
+    if (typeof thing == 'object') {
+        var criterion = thing.constructor.toString().match(/string/i);
         return (criterion != null);
     }
     return false;
