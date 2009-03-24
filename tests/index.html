@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+	<title>My Foo Tests</title>    
+
+	<!-- Load required vendor libs -->
+	<script src="../vendors/jquery-1.3.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../vendors/json2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../vendors/webtoolkit.base64.js" type="text/javascript" charset="utf-8"></script>
+	
+	<!-- Load SpazCore libraries -->
+	<script src="../libs/spazcore.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../libs/spazcron.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../libs/spazprefs.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../libs/spaztemplate.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../libs/spaztwit.js" type="text/javascript" charset="utf-8"></script>
+	
+	<!-- Load SpazCore helpers -->
+	<script src="../helpers/datetime.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../helpers/javascript.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../helpers/json.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../helpers/string.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../helpers/sys.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../helpers/view.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../helpers/xml.js" type="text/javascript" charset="utf-8"></script>
+	
+
+	<script src="testrunner.js" type="text/javascript" charset="utf-8"></script>
+	<link rel="stylesheet" href="testsuite.css" type="text/css" media="screen" title="no title" charset="utf-8">
+
+
+	<script type="text/javascript" charset="utf-8">
+		$(document).ready(function() {
+
+			module('Helpers:String')
+
+			test("striptags", function() {
+				var input = "<strong>Funky</strong>";
+				var output= "Funky";
+				equals(sc.helpers.stripTags(input), output, "Strip <strong> tags");
+
+				var input = "<script src=\"..\/helpers\/xml.js\" type=\"text\/javascript\" charset=\"utf-8\"><\/script>";
+				var output= "";
+				equals(sc.helpers.stripTags(input), output, "Strip "+input+" tags");
+			});
+			
+			test("autolinkTwitterScreenname", function() {
+				
+				var input = "foo,@user_name!";
+				var output= 'foo,<a href="http://twitter.com/user_name">@user_name</a>!';
+				var tpl   = '<a href="http://twitter.com/#username#">@#username#</a>';
+				equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
+
+				var input = "(@user_name)";
+				var output= '(<a href="http://twitter.com/user_name">@user_name</a>)';
+				var tpl   = '<a href="http://twitter.com/#username#">@#username#</a>';
+				equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
+
+				var input = "@a";
+				var output= '<a href="http://twitter.com/a">@a</a>';
+				var tpl   = '<a href="http://twitter.com/#username#">@#username#</a>';
+				equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
+
+				var input = "@_a";
+				var output= '<a href="http://twitter.com/a">@_a</a>';
+				var tpl   = '<a href="http://twitter.com/#username#">@#username#</a>';
+				equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
+
+				var input = "@_";
+				var output= '<a href="http://twitter.com/_">@_</a>';
+				var tpl   = '<a href="http://twitter.com/#username#">@#username#</a>';
+				equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
+
+				
+			});
+
+
+		});
+	</script>
+
+</head>
+<body>
+
+ <h1>QUnit SpazCore</h1>
+ <h2 id="banner"></h2>
+ <h2 id="userAgent"></h2>
+
+ <ol id="tests"></ol>
+
+ <div id="main"></div>
+
+
+
+</body>
+</html>

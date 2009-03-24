@@ -4,6 +4,7 @@
 const SPAZCORE_SECTION_FRIENDS = 'friends';
 const SPAZCORE_SECTION_REPLIES = 'replies';
 const SPAZCORE_SECTION_DMS = 'dms';
+const SPAZCORE_SECTION_FAVORITES = 'favorites';
 const SPAZCORE_SECTION_COMBINED = 'combined';
 const SPAZCORE_SECTION_PUBLIC = 'public';
 const SPAZCORE_SECTION_SEARCH = 'search';
@@ -121,6 +122,13 @@ SpazTwit.prototype.initializeData = function() {
 		'max':50,
 		'min_age':5*60
 	};
+	this.data[SPAZCORE_SECTION_FAVORITES] = {
+		'lastid':   1,
+		'items':   [],
+		'newitems':[],
+		'max':100,
+		'min_age':5*60
+	};
 	this.data[SPAZCORE_SECTION_COMBINED] = {
 		'items':   [],
 		'newitems':[],
@@ -212,6 +220,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.replies_timeline   = "statuses/replies.json";
     urls.show				= "statuses/show.json";
     urls.favorites          = "favorites.json";
+    urls.user_favorites     = "favorites/{{ID}}.json"; // use this to retrieve favs of a user other than yourself
     urls.dm_timeline        = "direct_messages.json";
     urls.dm_sent            = "direct_messages/sent.json";
     urls.friendslist        = "statuses/friends.json";
@@ -473,6 +482,40 @@ SpazTwit.prototype._processDMTimeline = function(ret_items, finished_event, proc
 	this._processTimeline(SPAZCORE_SECTION_DMS, ret_items, finished_event, processing_opts);
 }
 
+/**
+ *  
+ */
+SpazTwit.prototype.getFavorites = function(page, processing_opts) {	
+	if (!page) { page = null;}
+	if (!processing_opts) {
+		processing_opts = {};
+	}
+	
+	var data = {};
+	if (page) {
+		data['page'] = page;
+	}
+	
+	var url = this.getAPIURL('favorites', data);
+	dump('getting ')
+	this._getTimeline({
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'process_callback'	: this._processFavoritesTimeline,
+		'success_event_type': 'new_favorites_timeline_data',
+		'processing_opts':processing_opts
+	});
+
+};
+/**
+ * @private
+ */
+SpazTwit.prototype._processFavoritesTimeline = function(ret_items, finished_event, processing_opts) {
+	this._processTimeline(SPAZCORE_SECTION_FAVORITES, ret_items, finished_event, processing_opts);
+}
+
+
 
 SpazTwit.prototype.getSent = function(since_id, count, page) {}; // auth user's sent statuses
 SpazTwit.prototype.getSentDirectMessages = function(since_id, page) {};
@@ -532,8 +575,6 @@ SpazTwit.prototype.getCombinedTimeline = function(force) {
 	this.getDirectMessages(null, null, opts);
 };
 
-
-SpazTwit.prototype.getFavorites = function(user_id, page) {};
 
 
 SpazTwit.prototype.search = function(query, since_id, results_per_page, page, lang, geocode) {

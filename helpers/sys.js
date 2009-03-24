@@ -81,7 +81,7 @@ sc.helpers.dump = function(obj) {
 	}
 	
 	/*
-		for Nova
+		for Mojo
 	*/
 	if (sc.helpers.iswebOS()) {
 		if (sc.helpers.isString(obj) || sc.helpers.isNumber(obj) || !obj) {
