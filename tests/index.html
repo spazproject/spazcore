@@ -45,30 +45,27 @@
 			});
 			
 			test("autolinkTwitterScreenname", function() {
+
+				var tpl   = '<a href="http://twitter.com/#username#">@#username#</a>';
 				
 				var input = "foo,@user_name!";
 				var output= 'foo,<a href="http://twitter.com/user_name">@user_name</a>!';
-				var tpl   = '<a href="http://twitter.com/#username#">@#username#</a>';
 				equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
 
 				var input = "(@user_name)";
 				var output= '(<a href="http://twitter.com/user_name">@user_name</a>)';
-				var tpl   = '<a href="http://twitter.com/#username#">@#username#</a>';
 				equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
 
 				var input = "@a";
 				var output= '<a href="http://twitter.com/a">@a</a>';
-				var tpl   = '<a href="http://twitter.com/#username#">@#username#</a>';
 				equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
 
 				var input = "@_a";
-				var output= '<a href="http://twitter.com/a">@_a</a>';
-				var tpl   = '<a href="http://twitter.com/#username#">@#username#</a>';
+				var output= '<a href="http://twitter.com/_a">@_a</a>';
 				equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
 
 				var input = "@_";
 				var output= '<a href="http://twitter.com/_">@_</a>';
-				var tpl   = '<a href="http://twitter.com/#username#">@#username#</a>';
 				equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
 
 				
