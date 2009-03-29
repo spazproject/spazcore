@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" >
 <head>
-	<title>My Foo Tests</title>    
+	<title>QUnit SpazCore</title>    
 
 	<!-- Load required vendor libs -->
 	<script src="../vendors/jquery-1.3.js" type="text/javascript" charset="utf-8"></script>
@@ -44,6 +44,7 @@
 				equals(sc.helpers.stripTags(input), output, "Strip "+input+" tags");
 			});
 			
+
 			test("autolinkTwitterScreenname", function() {
 
 				var tpl   = '<a href="http://twitter.com/#username#">@#username#</a>';
@@ -70,7 +71,100 @@
 
 				
 			});
+			
+			test("autolinkTwitterHashtag", function() {
+				
+				var tpl = '<a href="http://search.twitter.com/search?q=#hashtag_enc#">##hashtag#</a>';
+				
+				var input  = 'Happy Earth Hour! #fb';
+				var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=fb">#fb</a>';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
+				
+				
+				var input  = 'Happy Earth Hour! #downtown';
+				var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
+				
+				var input  = 'Happy Earth Hour! #downtown?';
+				var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>?';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
+				
+				var input  = 'Happy Earth Hour! #downtown.';
+				var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>.';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
+				
+				var input  = 'Happy Earth Hour! #downtown]';
+				var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>]';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
 
+				var input  = 'Happy Earth Hour! #downtown}';
+				var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>}';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
+				
+				var input  = 'Happy Earth Hour! #downtown)';
+				var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>)';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
+				
+				var input  = 'Happy Earth Hour! #downtown,';
+				var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>,';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
+				
+				var input  = 'Happy Earth Hour! #downtown;';
+				var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>;';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
+				
+				var input  = 'Happy Earth Hour! #downtown\'';
+				var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>\'';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
+				
+				var input  = 'Happy Earth Hour! #downtown\'s';
+				var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>\'s';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
+				
+				var input = 'foo #downtown_';
+				var output ='foo <a href="http://search.twitter.com/search?q=downtown_">#downtown_</a>';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
+				
+				var input = 'foo #down+town';
+				var output ='foo <a href="http://search.twitter.com/search?q=down%2Btown">#down+town</a>';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
+				
+				var input = 'foo #down_town';
+				var output ='foo <a href="http://search.twitter.com/search?q=down_town">#down_town</a>';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
+				
+				var input = 'foo #down-town';
+				var output ='foo <a href="http://search.twitter.com/search?q=down-town">#down-town</a>';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
+				
+				
+				var input = 'foo #www.downtown.com';
+				var output ='foo <a href="http://search.twitter.com/search?q=www.downtown.com">#www.downtown.com</a>';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
+				
+				var input = 'foo #www.downtown.com.';
+				var output ='foo <a href="http://search.twitter.com/search?q=www.downtown.com">#www.downtown.com</a>.';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
+			});
+			
+			
+			test("autolink", function() {
+				input   = 'I think @n8han is fast becoming my favorite programming blog stylist. Read http://technically.us/code/ and enjoy.';
+				output  = 'I think @n8han is fast becoming my favorite programming blog stylist. Read <a href="http://technically.us/code/">technically.us/code/</a> and enjoy.';
+				equals(sc.helpers.autolink(input), output);
+
+				input   = '(I did one for my site; see the logo:http://bit.ly/1LkKk1)';
+				output  = '(I did one for my site; see the logo:<a href="http://bit.ly/1LkKk1">bit.ly/1LkKk1</a>)';
+				equals(sc.helpers.autolink(input), output);
+
+				input   = '(http://bit.ly/1LkKk1?[foo]=bar,32&500;xyz)';
+				output  = '(<a href="http://bit.ly/1LkKk1?[foo]=bar,32&500;xyz">bit.ly/1LkKk1?[foo]=bar,32&500;xyz</a>)';
+				equals(sc.helpers.autolink(input), output);
+				
+				input   = '@mynameiszanders you should get ande.rs, so you can have z@ande.rs';
+				output  = '@mynameiszanders you should get ande.rs, so you can have <a href="mailto:z@ande.rs">z@ande.rs<\/a>';
+				equals(sc.helpers.autolink(input), output);
+			});
 
 		});
 	</script>

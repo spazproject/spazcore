@@ -8,7 +8,7 @@
 */
 sc.helpers.isString = function(thing) {
 	if (typeof thing == 'string') return true;
-    if (typeof thing == 'object') {
+    if (typeof thing == 'object' && thing !== null) {
         var criterion = thing.constructor.toString().match(/string/i);
         return (criterion != null);
     }
