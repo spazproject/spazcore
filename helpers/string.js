@@ -1,13 +1,18 @@
-/*
-	This is a port of the CodeIgniter helper "autolink" to javascript
-	It finds and links both web addresses and email addresses
-*/
+/**
+ * This is a port of the CodeIgniter helper "autolink" to javascript
+ * It finds and links both web addresses and email addresses
+ * 
+ * @param {string} str
+ * @param {string} type  'email', 'url', or 'both' (default is 'both')
+ * @param {boolean} popup  if this is true, the <a> tag has a target="_blank" attribute added
+ * @return {string}
+ */
 sc.helpers.autolink = function(str, type, popup) {
 	if (!type) {
 		type = 'both';
 	}
 
-	var re_noemail = /(^|\s|\()((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
+	var re_noemail = /(^|\s|\(|:)((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
 	var re_nourl   = /(^|\s|\()([a-zA-Z0-9_\.\-\+]+)@([a-zA-Z0-9\-]+)\.([a-zA-Z0-9\-\.]*)([^\s\)<]+)/gi;
 
 	if (type != 'email')
@@ -32,8 +37,6 @@ sc.helpers.autolink = function(str, type, popup) {
 
 			var newstr = ms[1]+'<a href="http'+ms[4]+'://'+ms[5]+ms[6]+'"'+pop+'>'+ms[5]+ms[6]+'</a>'+period;
 			str = str.replace(ms[0], newstr);
-			//air.trace(str)
-
 		}
 	}
 
@@ -56,7 +59,7 @@ sc.helpers.autolink = function(str, type, popup) {
 					ms[x] = '';
 				}
 			}
-			str = str.replace(ms[0], ms[1]+'<a href="mailto:'+ms[2]+'@'+ms[3]+'.'+ms[4]+ms[5]+'">'+ms[2]+'@'+ms[3]+'.'+ms[4]+ms[5]+'<a/>'+period);
+			str = str.replace(ms[0], ms[1]+'<a href="mailto:'+ms[2]+'@'+ms[3]+'.'+ms[4]+ms[5]+'">'+ms[2]+'@'+ms[3]+'.'+ms[4]+ms[5]+'</a>'+period);
 			//air.trace(str);
 		}
 	}
@@ -71,6 +74,8 @@ sc.helpers.autolink = function(str, type, popup) {
  * by default, the template used is <a href="http://twitter.com/#username#">@#username#<a/>
  * pass the second param to give it a custom template
  * 
+ * @param {string} str
+ * @param {string} tpl  default is '<a href="http://twitter.com/#username#">@#username#</a>'
  * @return {string}
  */
 sc.helpers.autolinkTwitterScreenname = function(str, tpl) {
@@ -108,14 +113,16 @@ sc.helpers.autolinkTwitterScreenname = function(str, tpl) {
  * by default, the template used is <a href="http://search.twitter.com/search?q=#hashtag_enc#">##hashtag#<a/>
  * pass the second param to give it a custom template
  * 
+ * @param {string} str
+ * @param {string} tpl  default is '<a href="http://search.twitter.com/search?q=#hashtag_enc#">##hashtag#<a/>'
  * @return {string}
  */
 sc.helpers.autolinkTwitterHashtag = function(str, tpl) {
 	if (!tpl) {
-		tpl = '<a href="http://search.twitter.com/search?q=#hashtag_enc#">##hashtag#<a/>';
+		tpl = '<a href="http://search.twitter.com/search?q=#hashtag_enc#">##hashtag#</a>';
 	}
 	
-	var re_hashtag = /(^|\s)#([a-zA-Z0-9_]{2,})([^a-zA-Z0-9_]|$)/gi
+	var re_hashtag = /(^|\s)#([a-zA-Z0-9\-_\.+:=]{1,}\w)([^a-zA-Z0-9\-_+]|$)/gi
 	
 	var ms = [];
 	while (ms = re_hashtag.exec(str))
@@ -141,7 +148,9 @@ sc.helpers.autolinkTwitterHashtag = function(str, tpl) {
 
 
 /**
- *
+ * Simple html tag remover
+ * @param {string} str
+ * @return {string}
  */
 sc.helpers.stripTags = function(str) {
 	var re = /<[^>]*>/gim;

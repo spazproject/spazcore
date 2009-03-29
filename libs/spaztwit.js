@@ -19,17 +19,26 @@ const SPAZCORE_SECTION_USER = 'user-timeline';
  * 
  * jQuery events raised by this library
  * 
+ * 'spaztwit_ajax_error'
  * 'new_public_timeline_data' (data)
  * 'new_friends_timeline_data' (data)
+ * 'error_friends_timeline_data' (data)
  * 'new_replies_timeline_data' (data)
+ * 'error_replies_timeline_data' (data)
  * 'new_dms_timeline_data' (data)
+ * 'error_dms_timeline_data' (data)
  * 'new_combined_timeline_data' (data)
+ * 'error_combined_timeline_data' (data)
+ * 'new_favorites_timeline_data' (data)
+ * 'error_favorites_timeline_data' (data)
  * 'verify_credentials_succeeded' (data)
  * 'verify_credentials_failed' (data)
  * 'update_succeeded' (data)
  * 'update_failed' (data)
  * 'get_user_succeeded' (data)
  * 'get_user_failed' (data)
+ * 'get_one_status_succeeded' (data)
+ * 'get_one_status_failed' (data)
  * 'new_search_timeline_data' (data)
  * 'error_search_timeline_data' (data)
  * 'new_trends_data' (data)
@@ -155,6 +164,8 @@ SpazTwit.prototype.initializeCombinedTracker = function() {
 	this.combined_finished[SPAZCORE_SECTION_FRIENDS] = false;
 	this.combined_finished[SPAZCORE_SECTION_REPLIES] = false;
 	this.combined_finished[SPAZCORE_SECTION_DMS] = false;
+	
+	this.combined_errors = [];
 };
 
 /**
@@ -169,6 +180,21 @@ SpazTwit.prototype.combinedTimelineFinished = function() {
 	}
 	return true;
 };
+
+
+
+/**
+ * Checks to see if the combined timeline is finished 
+ * @return {boolean}
+ */
+SpazTwit.prototype.combinedTimelineHasErrors = function() {
+	if (this.combined_errors.length > 0) {
+		return true
+	} else {
+		return false;
+	}
+};
+
 
 
 /*
@@ -370,6 +396,10 @@ SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page, processi
 		processing_opts = {};
 	}
 	
+	if (processing_opts.combined) {
+		processing_opts.section = SPAZCORE_SECTION_FRIENDS;
+	}
+	
 	var data = {};
 	data['since_id'] = since_id;
 	data['count']	 = count;
@@ -385,6 +415,7 @@ SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page, processi
 		'password':this.password,
 		'process_callback'	: this._processFriendsTimeline,
 		'success_event_type': 'new_friends_timeline_data',
+		'failure_event_type': 'error_friends_timeline_data',
 		'processing_opts':processing_opts
 	});
 };
@@ -414,6 +445,11 @@ SpazTwit.prototype.getReplies = function(since_id, page, processing_opts) {
 		processing_opts = {};
 	}
 	
+	if (processing_opts.combined) {
+		processing_opts.section = SPAZCORE_SECTION_REPLIES;
+	}
+	
+	
 	var data = {};
 	data['since_id'] = since_id;
 	if (page) {
@@ -427,6 +463,7 @@ SpazTwit.prototype.getReplies = function(since_id, page, processing_opts) {
 		'password':this.password,
 		'process_callback'	: this._processRepliesTimeline,
 		'success_event_type': 'new_replies_timeline_data',
+		'failure_event_type': 'error_replies_timeline_data',
 		'processing_opts':processing_opts
 	});
 
@@ -457,6 +494,10 @@ SpazTwit.prototype.getDirectMessages = function(since_id, page, processing_opts)
 		processing_opts = {};
 	}
 	
+	if (processing_opts.combined) {
+		processing_opts.section = SPAZCORE_SECTION_DMS;
+	}
+	
 	var data = {};
 	data['since_id'] = since_id;
 	if (page) {
@@ -470,6 +511,7 @@ SpazTwit.prototype.getDirectMessages = function(since_id, page, processing_opts)
 		'password':this.password,
 		'process_callback'	: this._processDMTimeline,
 		'success_event_type': 'new_dms_timeline_data',
+		'failure_event_type': 'error_dms_timeline_data',
 		'processing_opts':processing_opts		
 	});
 	
@@ -681,11 +723,11 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, finished_eve
 
 
 	} else { // no new items, but we should fire off success anyway
-		if (!processing_opts.combined) {
+		// if (!processing_opts.combined) {
 			jQuery().trigger(finished_event, [[]]);
-		} else {
-			this.combined_finished[section_name] = true;
-		}
+		// } else {
+		// 	this.combined_finished[section_name] = true;
+		// }
 	}
 	
 }
@@ -794,8 +836,14 @@ SpazTwit.prototype._getTimeline = function(opts) {
         'error':function(xhr, msg, exc) {
             if (xhr && xhr.responseText) {
                 dump("Error:"+xhr.responseText+" from "+opts['url']);
+				var error_data = {
+					
+				}
             } else {
                 dump("Error:Unknown from "+opts['url']);
+				if (opts.failure_event_type) {
+					jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':null, 'msg':'Unknown Error'}]);
+				}
             }
 
 			try {
@@ -805,7 +853,15 @@ SpazTwit.prototype._getTimeline = function(opts) {
 			}
 			
 			if (opts.failure_event_type) {
-				jQuery().trigger(opts.failure_event_type, [data]);
+				jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
+			}
+			jQuery().trigger('spaztwit_ajax_error', [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
+			if (opts.processing_opts && opts.processing_opts.combined) {
+				stwit.combined_errors.push( {'url':opts.url, 'xhr':xhr, 'msg':msg, 'section':opts.processing_opts.section} )
+				stwit.combined_finished[opts.processing_opts.section] = true;
+				if (opts.process_callback) {
+					opts.process_callback.call(stwit, [], opts.failure_event_type, opts.processing_opts)
+				}
 			}
 			
         },
@@ -951,7 +1007,11 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 		Fire off the new combined data event
 	*/
 	if (this.combinedTimelineFinished()) {
-
+		
+		if (this.combinedTimelineHasErrors()) {
+			jQuery().trigger('error_combined_timeline_data', [this.combined_errors]);
+		}
+		
 		jQuery().trigger('new_combined_timeline_data', [this.data[SPAZCORE_SECTION_COMBINED].newitems]);
 		this.data[SPAZCORE_SECTION_COMBINED].newitems = []; // reset combined.newitems
 		this.initializeCombinedTracker();
@@ -1056,16 +1116,16 @@ SpazTwit.prototype._callMethod = function(opts) {
 					data = xhr.responseText;
 				}
 				if (opts.failure_event_type) {
-					jQuery().trigger(opts.failure_event_type, [data]);
+					jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
 				}
-
 	
 	        } else {
 	            dump("Error:Unknown from "+opts['url']);
 				if (opts.failure_event_type) {
-					jQuery().trigger(opts.failure_event_type, ["Unknown error!"]);
+					jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':null, 'msg':'Unknown Error'}]);
 				}
 	        }
+			jQuery().trigger('spaztwit_ajax_error', [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
 	    },
 	    'success':function(data) {			
 			data = JSON.parse(data);
