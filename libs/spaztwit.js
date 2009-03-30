@@ -832,23 +832,26 @@ SpazTwit.prototype._getTimeline = function(opts) {
 	
 	var xhr = jQuery.ajax({
         'complete':function(xhr, msg){
-            dump('complete:'+msg);
+            dump(opts.url + ' complete:'+msg);
         },
         'error':function(xhr, msg, exc) {
-            if (xhr) {
-				dump("Error:"+xhr.status+" from "+opts['url']);
-				if (xhr.responseText) {
-					try {
-						var data = JSON.parse(xhr.responseText);
-					} catch(e) {
-						data = xhr.responseText;
+			dump(opts.url + ' error:'+msg)
+	        if (xhr) {
+				if (!xhr.readyState < 3) {
+					dump("Error:"+xhr.status+" from "+opts['url']);
+					if (xhr.responseText) {
+						try {
+							var data = JSON.parse(xhr.responseText);
+						} catch(e) {
+							data = xhr.responseText;
+						}
 					}
 				}
 				if (opts.failure_event_type) {
 					jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
 				}
-
-            } else {
+	
+	        } else {
                 dump("Error:Unknown from "+opts['url']);
 				if (opts.failure_event_type) {
 					jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':null, 'msg':'Unknown Error'}]);
@@ -867,6 +870,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
         },
         'success':function(data) {
 			// dump("Success! \n\n" + data);
+			dump(opts.url + ' success!');
 				
 			data = JSON.parse(data);
 			
@@ -971,6 +975,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 				jQuery().trigger(finished_event, [this.data[section_name].newitems]);
 			} else {
 				this.combined_finished[section_name] = true;
+				dump("this.combined_finished["+section_name+"]:"+this.combined_finished[section_name]);
 			}
 			
 
@@ -1029,16 +1034,17 @@ SpazTwit.prototype._processItem = function(item, section_name) {
 	
 	item.SC_timeline_from = section_name;
 	if (this.username) {
+		dump("this.username:"+this.username);
 		item.SC_user_received_by = this.username;
 	}
-	// dump(item);
 	
 	/*
 		is reply? Then add .SC_is_reply
 	*/
 	if (item.in_reply_to_screen_name && item.SC_user_received_by) {
-		if (item.in_reply_to_screen_name == item.SC_user_received_by) {
+		if (item.in_reply_to_screen_name.toLowerCase() == item.SC_user_received_by.toLowerCase() ) {
 			item.SC_is_reply = true;
+			dump("REPLY!!!! item.SC_is_reply:"+item.SC_is_reply);
 		}
 	}
 	
@@ -1105,16 +1111,19 @@ SpazTwit.prototype._callMethod = function(opts) {
 	
 	var xhr = jQuery.ajax({
 	    'complete':function(xhr, msg){
-	        dump('complete:'+msg);
+	        dump(opts.url + ' complete:'+msg);
 	    },
 	    'error':function(xhr, msg, exc) {
+			dump(opts.url + ' error:'+msg);
 	        if (xhr) {
-				dump("Error:"+xhr.status+" from "+opts['url']);
-				if (xhr.responseText) {
-					try {
-						var data = JSON.parse(xhr.responseText);
-					} catch(e) {
-						data = xhr.responseText;
+				if (!xhr.readyState < 3) {
+					dump("Error:"+xhr.status+" from "+opts['url']);
+					if (xhr.responseText) {
+						try {
+							var data = JSON.parse(xhr.responseText);
+						} catch(e) {
+							data = xhr.responseText;
+						}
 					}
 				}
 				if (opts.failure_event_type) {
@@ -1129,7 +1138,8 @@ SpazTwit.prototype._callMethod = function(opts) {
 	        }
 			jQuery().trigger('spaztwit_ajax_error', [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
 	    },
-	    'success':function(data) {			
+	    'success':function(data) {
+			dump(opts.url + ' success');
 			data = JSON.parse(data);
 			if (opts.process_callback) {
 				/*
