@@ -546,6 +546,7 @@ SpazTwit.prototype.getFavorites = function(page, processing_opts) {
 		'password':this.password,
 		'process_callback'	: this._processFavoritesTimeline,
 		'success_event_type': 'new_favorites_timeline_data',
+		'failure_event_type': 'error_favorites_timeline_data',
 		'processing_opts':processing_opts
 	});
 
@@ -834,28 +835,27 @@ SpazTwit.prototype._getTimeline = function(opts) {
             dump('complete:'+msg);
         },
         'error':function(xhr, msg, exc) {
-            if (xhr && xhr.responseText) {
-                dump("Error:"+xhr.responseText+" from "+opts['url']);
-				var error_data = {
-					
+            if (xhr) {
+				dump("Error:"+xhr.status+" from "+opts['url']);
+				if (xhr.responseText) {
+					try {
+						var data = JSON.parse(xhr.responseText);
+					} catch(e) {
+						data = xhr.responseText;
+					}
 				}
+				if (opts.failure_event_type) {
+					jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
+				}
+
             } else {
                 dump("Error:Unknown from "+opts['url']);
 				if (opts.failure_event_type) {
 					jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':null, 'msg':'Unknown Error'}]);
 				}
             }
-
-			try {
-				var data = JSON.parse(xhr.responseText);
-			} catch(e) {
-				data = xhr.responseText;
-			}
-			
-			if (opts.failure_event_type) {
-				jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
-			}
 			jQuery().trigger('spaztwit_ajax_error', [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
+			
 			if (opts.processing_opts && opts.processing_opts.combined) {
 				stwit.combined_errors.push( {'url':opts.url, 'xhr':xhr, 'msg':msg, 'section':opts.processing_opts.section} )
 				stwit.combined_finished[opts.processing_opts.section] = true;
@@ -1108,12 +1108,14 @@ SpazTwit.prototype._callMethod = function(opts) {
 	        dump('complete:'+msg);
 	    },
 	    'error':function(xhr, msg, exc) {
-	        if (xhr && xhr.responseText) {
-	            dump("Error:"+xhr.responseText+" from "+opts['url']);
-				try {
-					var data = JSON.parse(xhr.responseText);
-				} catch(e) {
-					data = xhr.responseText;
+	        if (xhr) {
+				dump("Error:"+xhr.status+" from "+opts['url']);
+				if (xhr.responseText) {
+					try {
+						var data = JSON.parse(xhr.responseText);
+					} catch(e) {
+						data = xhr.responseText;
+					}
 				}
 				if (opts.failure_event_type) {
 					jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
