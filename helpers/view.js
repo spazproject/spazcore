@@ -18,6 +18,8 @@ sc.helpers.removeExtraElements = function(item_selector, max_items, remove_from_
 	}
 	
 	jqitems = jQuery(item_selector);
+	dump('Items found with '+item_selector);
+	dump(jqitems);
 	var diff = jqitems.length - max_items;
 	if (diff > 0) {
 		
@@ -33,31 +35,16 @@ sc.helpers.removeExtraElements = function(item_selector, max_items, remove_from_
 
 
 /**
- * This removes any extra items from a ser of elements. Intended to be used for
+ * This removes any duplicate items from a series of elements. Intended to be used for
  * limiting the sice of timelines
  * 
  * @param {string} item_selector a jquery-compatible selector to get items
- * @param {integer} max_items the max # of item we should have
  * @param {boolean} remove_from_top whether or not to remove extra items from the top. default is FALSE
+ * @TODO
  */
-sc.helpers.removeDuplicateElements = function(item_selector, max_items, remove_from_top) {
-	
-	if (!remove_from_top) {
-		remove_from_top = false;
-	}
-	
-	jqitems = jQuery(item_selector);
-	var diff = jqitems.length - max_items;
-	if (diff > 0) {
-		
-		if (!remove_from_top) {
-			dump("numEntries is " + jqitems.length + " > " + max_items + "; removing last " + diff + " entries");
-	        jqitems.slice(diff * -1).remove();
-		} else {
-			dump("numEntries is " + jqitems.length + " > " + max_items + "; removing first " + diff + " entries");
-	        jqitems.slice(diff).remove();
-		}
-	}
+sc.helpers.removeDuplicateElements = function(item_selector, remove_from_top) {
+	dump('removeDuplicateElements TODO');
+
 }
 
 

@@ -6,6 +6,7 @@ sc.helpers.createXMLFromString = function (string) {
 		return xmlDocument;
 	} catch (e) {
 		air.trace("Can't create XML document.");
+		dump(e.name + ":" + e.message);
 		return null;
 	}
 }

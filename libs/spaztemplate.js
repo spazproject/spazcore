@@ -2,7 +2,7 @@
  * SpazTemplate 
  * designed for fast templating functions
  */
-SpazTemplate = function(interval) {
+SpazTemplate = function() {
 	
 	this._tpls = {};
 	
