@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>SpazCore Example Shell</title>
+	
+	<!-- Load required vendor libs -->
+	<script src="vendors/jquery-1.3.js" type="text/javascript" charset="utf-8"></script>
+	<script src="vendors/json2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="vendors/webtoolkit.base64.js" type="text/javascript" charset="utf-8"></script>
+	
+	<!-- Load SpazCore libraries -->
+	<script src="libs/spazcore.js" type="text/javascript" charset="utf-8"></script>
+	<script src="libs/spazcron.js" type="text/javascript" charset="utf-8"></script>
+	<script src="libs/spazprefs.js" type="text/javascript" charset="utf-8"></script>
+	<script src="libs/spaztemplate.js" type="text/javascript" charset="utf-8"></script>
+	<script src="libs/spaztwit.js" type="text/javascript" charset="utf-8"></script>
+	
+	<!-- Load SpazCore helpers -->
+	<script src="helpers/datetime.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/javascript.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/json.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/string.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/sys.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/view.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/xml.js" type="text/javascript" charset="utf-8"></script>
+	
+	
+
+	
+	<script type="text/javascript" charset="utf-8">
+		/**
+		 * we use the sc.app construct to store stuff under a namespace, rather
+		 * than clutter up global space 
+		 */
+		sc.app.Tpl = new SpazTemplate();
+		
+		/**
+		 * These templates look hackey (and are) but they are much, much faster than 
+		 * any kind of interpreted templates that support logic constructs
+		 */ 
+		sc.app.Tpl.addTemplateMethod('searchitem', function(d) {
+			var html = '';
+			
+			html += '	<div class="search-item">';
+			html += '		<div class="user-name">'+d.from_user+'</div>';
+			html += '		<div class="text">'+d.text+'</div>';
+			html += '		<div class="created_at" data-created_at="'+d.created_at+'">'+d.created_at+'</div>';
+			html += '	</div>';
+			
+			return html;			
+		});
+		
+		
+		/**
+		 * Creating a SpazTwit object here. We're just doing a search, so don't need
+		 * any authentication stuff 
+		 */
+		sc.app.Twit = new SpazTwit();
+				
+		
+	</script>
+	
+	
+	<script type="text/javascript" charset="utf-8">
+		/**
+		 * Note that we use jQ in a non-conflicting manner inside SpazCore libs, always using "jQuery()".
+		 * You can use the $() notation inside your app, but be careful of conflicts when integrating
+		 * other frameworks
+		 */
+		$().ready( function() {
+			
+			/**
+			 * first we need to set up an event listener for the successful search event
+			 * note that for now, all events are raised at the document level
+			 */
+			$().bind('new_search_timeline_data', function(event, data) {
+				console.dir(data);
+				data.reverse(); // we need to do this to make the newest first
+				
+				$.each(data, function(i) {
+					this.text = sc.helpers.autolink(this.text);
+					this.text = sc.helpers.autolinkTwitterHashtag(this.text);
+					this.text = sc.helpers.autolinkTwitterScreenname(this.text);
+				})
+				
+				var search_html = sc.app.Tpl.parseArray('searchitem', data);
+				$('#search-results').html(search_html);
+				sc.helpers.updateRelativeTimes("#search-results>.search-item>.created_at", "data-created_at");
+				
+				// link up some stuff
+			});
+			
+			/**
+			 * bind an action to click on the button that initiates a search
+			 */
+			$('#search-button').click( function(e) {
+				handleSearch();
+			});
+			
+			/**
+			 * bind an action to form submission, and return false to block
+			 * default submission action
+			 */
+			$('#search-form').submit( function(e) {
+				handleSearch();
+				return false;
+			});
+			
+			
+			
+			
+			function handleSearch() {
+				var search_term = $('#search-term').val();
+				if (search_term.length > 1) {
+					sc.app.Twit.search(search_term);
+				}
+			}
+			
+		});
+	</script>
+	
+	<style type="text/css" media="screen">
+		body {
+			font-family:Palatino, Georgia, Serif;
+			font-size:12pt;
+			line-height:1.3em;
+		}
+		#container {
+			margin-left:auto;
+			margin-right:auto;
+			width:500px;
+			
+		}
+		
+		#search-form {
+			padding:5px;
+			background:#DDDDCC;
+			border:1px solid #999;
+		}
+			#search-term {
+				width:350px;
+			}
+		
+		.search-item {}
+			.user-name {
+				font-weight:bold;
+			}
+			.text {
+				
+			}
+			.created_at{
+				font-size:9pt;
+				color:#999;
+			}
+			
+	</style>
+	
+</head>
+
+<body>
+	
+	<div id="container">
+		<form id="search-form">
+			<input type="text" name="search-term" id="search-term" value="" />
+			<input type="button" name="search-button" id="search-button" value="Search!" />
+		</form>
+	<div id="search-results"></div>	
+	</div>
+	
+
+</body>
+</html>

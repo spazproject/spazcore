@@ -66,7 +66,7 @@ function SpazTwit(username, password) {
 	this.username = username;
 	this.password = password;
 	
-	this.setSource('SpazCore')
+	this.setSource('SpazCore');
 	
 	
 	this.initializeData();
@@ -103,6 +103,23 @@ SpazTwit.prototype.getPassword = function() {
 	return this.password;
 }
 
+/**
+ * retrieves the last status id retrieved for a given section
+ * @param {string} section  use one of the defined constants (ex. SPAZCORE_SECTION_FRIENDS)
+ * @return {integer} the last id retrieved for this section
+ */
+SpazTwit.prototype.getLastId   = function(section) {
+	return this.data[section].lastid;
+};
+
+/**
+ * sets the last status id retrieved for a given section
+ * @param {string} section  use one of the defined constants (ex. SPAZCORE_SECTION_FRIENDS)
+ * @param {integer} id  the new last id retrieved for this section
+ */
+SpazTwit.prototype.setLastId   = function(section, id) {
+	this.data[section].lastid = parseInt(id);
+};
 
 
 SpazTwit.prototype.initializeData = function() {
@@ -431,8 +448,9 @@ SpazTwit.prototype._processFriendsTimeline = function(ret_items, finished_event,
 /**
  *  
  */
-SpazTwit.prototype.getReplies = function(since_id, page, processing_opts) {	
+SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts) {	
 	if (!page) { page = null;}
+	if (!count) { count = null;}
 	if (!since_id) {
 		if (this.data[SPAZCORE_SECTION_REPLIES].lastid && this.data[SPAZCORE_SECTION_REPLIES].lastid > 1) {
 			since_id = this.data[SPAZCORE_SECTION_REPLIES].lastid;
@@ -455,6 +473,9 @@ SpazTwit.prototype.getReplies = function(since_id, page, processing_opts) {
 	if (page) {
 		data['page'] = page;
 	}
+	if (count) {
+		data['count'] = count;
+	}
 	
 	var url = this.getAPIURL('replies_timeline', data);
 	this._getTimeline({
@@ -474,14 +495,16 @@ SpazTwit.prototype.getReplies = function(since_id, page, processing_opts) {
  * @private
  */
 SpazTwit.prototype._processRepliesTimeline = function(ret_items, finished_event, processing_opts) {
+	dump('Processing '+ret_items.length+' items returned from replies method');
 	this._processTimeline(SPAZCORE_SECTION_REPLIES, ret_items, finished_event, processing_opts);
 }
 
 /**
  *  
  */
-SpazTwit.prototype.getDirectMessages = function(since_id, page, processing_opts) {
+SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processing_opts) {
 	if (!page) { page = null;}
+	if (!count) { count = null;}
 	if (!since_id) {
 		if (this.data[SPAZCORE_SECTION_DMS].lastid && this.data[SPAZCORE_SECTION_DMS].lastid > 1) {
 			since_id = this.data[SPAZCORE_SECTION_DMS].lastid;
@@ -503,6 +526,9 @@ SpazTwit.prototype.getDirectMessages = function(since_id, page, processing_opts)
 	if (page) {
 		data['page'] = page;
 	}
+	if (count) {
+		data['count'] = count;
+	}
 	
 	var url = this.getAPIURL('dm_timeline', data);
 	this._getTimeline({
@@ -521,6 +547,7 @@ SpazTwit.prototype.getDirectMessages = function(since_id, page, processing_opts)
  * @private
  */
 SpazTwit.prototype._processDMTimeline = function(ret_items, finished_event, processing_opts) {
+	dump('Processing '+ret_items.length+' items returned from DM method');
 	this._processTimeline(SPAZCORE_SECTION_DMS, ret_items, finished_event, processing_opts);
 }
 
@@ -539,7 +566,7 @@ SpazTwit.prototype.getFavorites = function(page, processing_opts) {
 	}
 	
 	var url = this.getAPIURL('favorites', data);
-	dump('getting ')
+
 	this._getTimeline({
 		'url':url,
 		'username':this.username,
@@ -605,17 +632,42 @@ SpazTwit.prototype._processUserTimeline = function(ret_items, finished_event, pr
  * 
  * 
  */
-SpazTwit.prototype.getCombinedTimeline = function(force) {
+SpazTwit.prototype.getCombinedTimeline = function(com_opts) {
+	var friends_count, replies_count, dm_count, friends_since, dm_since, replies_since = null;
+
 	var opts = {
 		'combined':true
 	}
-	if (force) {
-		opts.force = true;
+	
+	if (com_opts) {
+		if (com_opts.friends_count) {
+			friends_count = com_opts.friends_count;
+		}
+		if (com_opts.replies_count) {
+			replies_count = com_opts.replies_count; // this is not used yet
+		}
+		if (com_opts.dm_count) {
+			dm_count = com_opts.dm_count; // this is not used yet
+		}
+		if (com_opts.friends_since) {
+			friends_since = com_opts.friend_since;
+		}
+		if (com_opts.replies_since) {
+			replies_since = com_opts.replies_since;
+		}
+		if (com_opts.dm_since) {
+			dm_since = com_opts.dm_since;
+		}
+		
+		
+		if (com_opts.force) {
+			opts.force = true;
+		}
 	}
 	
-	this.getFriendsTimeline(null, null, null, opts);
-	this.getReplies(null, null, opts);
-	this.getDirectMessages(null, null, opts);
+	this.getFriendsTimeline(friends_since, friends_count, null, opts);
+	this.getReplies(replies_since, replies_count, null, opts);
+	this.getDirectMessages(dm_since, dm_count, null, opts);
 };
 
 
@@ -743,7 +795,7 @@ SpazTwit.prototype._processSearchItem = function(item, section_name) {
 	}
 	// dump(item);
 	
-	item.CS_is_search = true;
+	item.SC_is_search = true;
 
 	/*
 		add unix timestamp .SC_created_at_unixtime for easier date comparison
@@ -837,12 +889,13 @@ SpazTwit.prototype._getTimeline = function(opts) {
         'error':function(xhr, msg, exc) {
 			dump(opts.url + ' error:'+msg)
 	        if (xhr) {
-				if (!xhr.readyState < 3) {
+				if (!xhr.readyState < 4) {
 					dump("Error:"+xhr.status+" from "+opts['url']);
 					if (xhr.responseText) {
 						try {
 							var data = JSON.parse(xhr.responseText);
 						} catch(e) {
+							dump(e.name + ":" + e.message);
 							data = xhr.responseText;
 						}
 					}
@@ -1034,7 +1087,6 @@ SpazTwit.prototype._processItem = function(item, section_name) {
 	
 	item.SC_timeline_from = section_name;
 	if (this.username) {
-		dump("this.username:"+this.username);
 		item.SC_user_received_by = this.username;
 	}
 	
@@ -1044,7 +1096,6 @@ SpazTwit.prototype._processItem = function(item, section_name) {
 	if (item.in_reply_to_screen_name && item.SC_user_received_by) {
 		if (item.in_reply_to_screen_name.toLowerCase() == item.SC_user_received_by.toLowerCase() ) {
 			item.SC_is_reply = true;
-			dump("REPLY!!!! item.SC_is_reply:"+item.SC_is_reply);
 		}
 	}
 	
@@ -1116,12 +1167,13 @@ SpazTwit.prototype._callMethod = function(opts) {
 	    'error':function(xhr, msg, exc) {
 			dump(opts.url + ' error:'+msg);
 	        if (xhr) {
-				if (!xhr.readyState < 3) {
+				if (!xhr.readyState < 4) {
 					dump("Error:"+xhr.status+" from "+opts['url']);
 					if (xhr.responseText) {
 						try {
 							var data = JSON.parse(xhr.responseText);
 						} catch(e) {
+							dump(e.name + ":" + e.message);
 							data = xhr.responseText;
 						}
 					}
@@ -1153,7 +1205,7 @@ SpazTwit.prototype._callMethod = function(opts) {
 			}
 	    },
 	    'beforeSend':function(xhr){
-			dump("beforesend");
+			dump(opts.url + ' beforesend');
 			if (opts.username && opts.password) {
 				xhr.setRequestHeader("Authorization", "Basic " + Base64.encode(opts.username + ":" + opts.password));
 			}
@@ -1534,6 +1586,7 @@ SpazTwit.prototype.removeDuplicates = function(array) {
 		}
 
 	} catch( e ) {
+		dump(e.name + ":" + e.message);
 		ret = array;
 	}
 
