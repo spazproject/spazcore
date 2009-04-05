@@ -4,8 +4,8 @@
  */
 
 /**
- * This removes any extra items from a ser of elements. Intended to be used for
- * limiting the sice of timelines
+ * This removes any extra items from a set of elements. Intended to be used for
+ * limiting the size of timelines
  * 
  * @param {string} item_selector a jquery-compatible selector to get items
  * @param {integer} max_items the max # of item we should have
