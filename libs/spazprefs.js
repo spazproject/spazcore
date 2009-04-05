@@ -173,7 +173,7 @@ SpazPrefs.prototype.load = function(name) {
 	if (sc.helpers.iswebOS()) {
 		if (!this.mojoDepot) {
 			this.mojoDepot = new Mojo.Depot({
-				name:'SpazDepot',
+				name:'SpazDepotPrefs',
 				replace:false
 			});
 		}
@@ -219,7 +219,7 @@ SpazPrefs.prototype.save = function(name) {
 	if (sc.helpers.iswebOS()) {
 		if (!this.mojoDepot) {
 			this.mojoDepot = new Mojo.Depot({
-				name:'SpazDepot',
+				name:'SpazDepotPrefs',
 				replace:false
 			});
 		}
