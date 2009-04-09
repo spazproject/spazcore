@@ -8,13 +8,10 @@
 	<script src="../vendors/json2.js" type="text/javascript" charset="utf-8"></script>
 	<script src="../vendors/webtoolkit.base64.js" type="text/javascript" charset="utf-8"></script>
 	
-	<!-- Load SpazCore libraries -->
+
+	<!-- Load SpazCore base lib -->
 	<script src="../libs/spazcore.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../libs/spazcron.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../libs/spazprefs.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../libs/spaztemplate.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../libs/spaztwit.js" type="text/javascript" charset="utf-8"></script>
-	
+
 	<!-- Load SpazCore helpers -->
 	<script src="../helpers/datetime.js" type="text/javascript" charset="utf-8"></script>
 	<script src="../helpers/javascript.js" type="text/javascript" charset="utf-8"></script>
@@ -23,6 +20,14 @@
 	<script src="../helpers/sys.js" type="text/javascript" charset="utf-8"></script>
 	<script src="../helpers/view.js" type="text/javascript" charset="utf-8"></script>
 	<script src="../helpers/xml.js" type="text/javascript" charset="utf-8"></script>
+	
+	<!-- Load SpazCore libraries -->
+	<script src="../libs/spazcron.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../libs/spazprefs.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../libs/spaztemplate.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../libs/spaztwit.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../libs/spazlocker.js" type="text/javascript" charset="utf-8"></script>
+
 	
 
 	<script src="testrunner.js" type="text/javascript" charset="utf-8"></script>
@@ -164,6 +169,13 @@
 				input   = '@mynameiszanders you should get ande.rs, so you can have z@ande.rs';
 				output  = '@mynameiszanders you should get ande.rs, so you can have <a href="mailto:z@ande.rs">z@ande.rs<\/a>';
 				equals(sc.helpers.autolink(input), output);
+
+				var extra   = "target='_blank'";
+				input   = 'There will be some extra code in this http://funkatron.com';
+				output  = 'There will be some extra code in this <a href="http://funkatron.com" '+extra+'>funkatron.com<\/a>';
+				equals(sc.helpers.autolink(input, null, extra), output);
+
+
 			});
 
 		});

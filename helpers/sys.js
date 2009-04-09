@@ -7,6 +7,7 @@
 const SPAZCORE_PLATFORM_AIR			= 'AIR';
 const SPAZCORE_PLATFORM_WEBOS		= 'webOS';
 const SPAZCORE_PLATFORM_TITANIUM	= 'Titanium';
+const SPAZCORE_PLATFORM_UNKNOWN		= '__UNKNOWN';
 
 
 /**
@@ -20,12 +21,13 @@ sc.helpers.getPlatform = function() {
 	if (window.runtime) {
 		return SPAZCORE_PLATFORM_AIR;
 	}
-	if (Mojo) {
+	if (window.Mojo) {
 		return SPAZCORE_PLATFORM_WEBOS;
 	}
-	if (ti) {
+	if (window.Titanium) {
 		return SPAZCORE_PLATFORM_TITANIUM
 	}
+	return SPAZCORE_PLATFORM_UNKNOWN;
 }
 
 /**
@@ -37,8 +39,8 @@ sc.helpers.getPlatform = function() {
 * 
 */
 sc.helpers.isPlatform = function(str) {
-	platform = sc.helpers.getPlatform();
-	if ( platform.toLowerCase() == str.toLowerCase() ) {
+	var pform = sc.helpers.getPlatform();
+	if ( pform.toLowerCase() == str.toLowerCase() ) {
 		return true;
 	} else {
 		return false;
@@ -66,7 +68,7 @@ sc.helpers.dump = function(obj) {
 
 	
 	var dumper = function(obj) {
-		return false
+		return false;
 	};
 	
 	/*
@@ -99,7 +101,15 @@ sc.helpers.dump = function(obj) {
 	*
 	*/
 	if (sc.helpers.isTitanium()) {
-		dumper = window.dump;
+		if (sc.helpers.isString(obj) || sc.helpers.isNumber(obj) || !obj) {
+			dumper = function(str) {
+				console.debug(str);
+			}
+		} else {
+			dumper = function(obj) {
+				console.dir(obj);
+			}
+		}
 	}
 	
 	

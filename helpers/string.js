@@ -4,10 +4,10 @@
  * 
  * @param {string} str
  * @param {string} type  'email', 'url', or 'both' (default is 'both')
- * @param {boolean} popup  if this is true, the <a> tag has a target="_blank" attribute added
+ * @param {boolean} target  a string to put in the target attribute
  * @return {string}
  */
-sc.helpers.autolink = function(str, type, popup) {
+sc.helpers.autolink = function(str, type, extra_code) {
 	if (!type) {
 		type = 'both';
 	}
@@ -18,7 +18,6 @@ sc.helpers.autolink = function(str, type, popup) {
 	if (type != 'email')
 	{
 		while (ms = re_noemail.exec(str)) {
-			var pop = (popup == true) ? " target=\"_blank\" ": "";
 			var period = ''
 			if ( /\.$/.test(ms[6]) ) {
 				period = '.';
@@ -35,7 +34,13 @@ sc.helpers.autolink = function(str, type, popup) {
 				}
 			}
 
-			var newstr = ms[1]+'<a href="http'+ms[4]+'://'+ms[5]+ms[6]+'"'+pop+'>'+ms[5]+ms[6]+'</a>'+period;
+			if (extra_code) {
+				extra_code = ' '+extra_code;
+			} else {
+				extra_code = ''
+			}
+
+			var newstr = ms[1]+'<a href="http'+ms[4]+'://'+ms[5]+ms[6]+'"'+extra_code+'>'+ms[5]+ms[6]+'</a>'+period;
 			str = str.replace(ms[0], newstr);
 		}
 	}
