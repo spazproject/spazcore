@@ -1,3 +1,5 @@
+const SPAZCORE_PREFS_TI_KEY = 'preferences_json';
+ 
 /**
  * A preferences lib for AIR JS apps. This requires the json2.js library
  * 
@@ -206,6 +208,12 @@ SpazPrefs.prototype.load = function(name) {
 		Titanium implementation
 		@TODO
 	*/
+	if (sc.helpers.isTitanium()) {
+		var prefs_json = Titanium.App.Properties.getString(SPAZCORE_PREFS_TI_KEY);
+		this._prefs = sc.helpers.deJSON(prefs_json);
+		jQuery().trigger('spazprefs_loaded');
+	}
+	
 }
 
 
@@ -231,7 +239,11 @@ SpazPrefs.prototype.save = function(name) {
 		Titanium implementation
 		@TODO
 	*/
-	
+	if (sc.helpers.isTitanium()) {
+		// save the file to a default place
+		var prefs_json = sc.helpers.enJSON(this._prefs);
+		Titanium.App.Properties.setString(SPAZCORE_PREFS_TI_KEY, prefs_json);
+	}
 		
 	
 };
@@ -252,7 +264,87 @@ if (sc) {
 
 
 
+/**
+ * methods for Titanium
+ */
+if (sc.helpers.isTitanium()) {
 
+	/*
+		Saves the size and placement of the window this executes in
+	*/
+	SpazPrefs.prototype.saveWindowState = function() {
+		var width  = Titanium.UI.currentWindow.getWidth();
+		var height = Titanium.UI.currentWindow.getHeight();
+		var x      = Titanium.UI.currentWindow.getX();
+		var y      = Titanium.UI.currentWindow.getY();
+		
+		if (x && y && width && height) {
+			Titanium.App.Properties.setInt('__window-width',  width);
+			Titanium.App.Properties.setInt('__window-height', height);
+			Titanium.App.Properties.setInt('__window-x',      x);
+			Titanium.App.Properties.setInt('__window-y',      y);
+		}
+	}
+
+	/*
+		Loads the size and placement of the window this executes in
+	*/
+	SpazPrefs.prototype.loadWindowState = function() {
+		if (!Titanium.App.Properties.hasProperty('__window-width')) {
+			return; // we assume if this isn't set, none are set
+		}
+		
+		var width  = Titanium.App.Properties.getInt('__window-width');
+		var height = Titanium.App.Properties.getInt('__window-height');
+		var x      = Titanium.App.Properties.getInt('__window-x');
+		var y      = Titanium.App.Properties.getInt('__window-y');
+		
+		if (x && y && width && height) {
+			Titanium.UI.currentWindow.setWidth(width);
+			Titanium.UI.currentWindow.setHeight(height);
+			Titanium.UI.currentWindow.setX(x);
+			Titanium.UI.currentWindow.setY(y);
+		}
+	}
+}
+
+
+
+/**
+ * methods for AIR 
+ * @TODO
+ */
+if (sc.helpers.isAIR()) {
+
+	/*
+		Saves the size and placement of the window this executes in
+	*/
+	this.saveWindowState = function() {
+		this.set('__window-height', window.nativeWindow.width);
+		this.set('__window-height', window.nativeWindow.height);
+		this.set('__window-x', window.nativeWindow.x);
+		this.set('__window-y', window.nativeWindow.y);
+	}
+
+	/*
+		Loads the size and placement of the window this executes in
+	*/
+	this.loadWindowState = function() {
+		var width  = this.get('__window-height');
+		var height = this.get('__window-height');
+		var x      = this.get('__window-x');
+		var y      = this.get('__window-y');
+		
+		if (x && y && width && height) {
+			window.nativeWindow.width  = width;
+			window.nativeWindow.height = height;
+			window.nativeWindow.x = x;
+			window.nativeWindow.y = y;
+		}
+		
+	}
+	
+}
 
 
 
