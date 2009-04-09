@@ -32,7 +32,7 @@ sc.helpers.autolink = function(str, type, popup) {
 
 			var newstr = ms[1]+'<a href="http'+ms[4]+'://'+ms[5]+ms[6]+'"'+pop+'>'+ms[5]+ms[6]+'</a>'+period;
 			str = str.replace(ms[0], newstr);
-			//air.trace(str)
+			//sc.helpers.dumptrace(str)
 
 		}
 	}
@@ -57,7 +57,7 @@ sc.helpers.autolink = function(str, type, popup) {
 				}
 			}
 			str = str.replace(ms[0], ms[1]+'<a href="mailto:'+ms[2]+'@'+ms[3]+'.'+ms[4]+ms[5]+'">'+ms[2]+'@'+ms[3]+'.'+ms[4]+ms[5]+'<a/>'+period);
-			//air.trace(str);
+			//sc.helpers.dumptrace(str);
 		}
 	}
 

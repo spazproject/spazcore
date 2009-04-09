@@ -75,7 +75,7 @@ sc.helpers.dump = function(obj) {
 	if (sc.helpers.isAIR()) {
 		dumper = function() {
 			for(var x in obj) {
-				air.trace("'"+x+"':"+obj[x]);
+				sc.helpers.dumptrace("'"+x+"':"+obj[x]);
 			}
 		}
 	}
@@ -127,11 +127,11 @@ sc.helpers.dump = function(obj) {
 	Open a URL in the default system web browser
 */
 sc.helpers.openInBrowser = function(url) {
-	var request = new air.URLRequest(url);
+	var request = new sc.helpers.dumpURLRequest(url);
 	try {            
-	    air.navigateToURL(request);
+	    sc.helpers.dumpnavigateToURL(request);
 	} catch (e) {
-	    air.trace(e.errorMsg);
+	    sc.helpers.dumptrace(e.errorMsg);
 	}
 }
 
@@ -139,11 +139,11 @@ sc.helpers.openInBrowser = function(url) {
 	Gets the contents of a file
 */
 sc.helpers.getFileContents = function(path) {
-	var f = new air.File(path);
+	var f = new sc.helpers.dumpFile(path);
 	if (f.exists) {
-		var fs = new air.FileStream();
-		fs.open(f, air.FileMode.READ);
-		var str = fs.readMultiByte(f.size, air.File.systemCharset);
+		var fs = new sc.helpers.dumpFileStream();
+		fs.open(f, sc.helpers.dumpFileMode.READ);
+		var str = fs.readMultiByte(f.size, sc.helpers.dumpFile.systemCharset);
 		fs.close();
 		return str;
 	} else {
@@ -164,13 +164,13 @@ sc.helpers.setFileContents = function(path, content, serialize) {
 	Spaz.dump('setFileContents for '+path+ ' to "' +content+ '"');
 	
 	try { 
-		var f = new air.File(path);
-		var fs = new air.FileStream();
-		fs.open(f, air.FileMode.WRITE);
+		var f = new sc.helpers.dumpFile(path);
+		var fs = new sc.helpers.dumpFileStream();
+		fs.open(f, sc.helpers.dumpFileMode.WRITE);
 		fs.writeUTFBytes(content);
 		fs.close();
 	} catch (e) {
-		air.trace(e.errorMsg)
+		sc.helpers.dumptrace(e.errorMsg)
 	}
 };
 
@@ -179,7 +179,7 @@ sc.helpers.setFileContents = function(path, content, serialize) {
 	Returns the current application version string
 */
 sc.helpers.getAppVersion = function() {
-	var appXML = air.NativeApplication.nativeApplication.applicationDescriptor
+	var appXML = sc.helpers.dumpNativeApplication.nativeApplication.applicationDescriptor
 	var domParser = new DOMParser();
 	appXML = domParser.parseFromString(appXML, "text/xml");
 	var version = appXML.getElementsByTagName("version")[0].firstChild.nodeValue;
@@ -199,7 +199,7 @@ sc.helpers.getUserAgent = function() {
 */
 sc.helpers.setUserAgent = function(uastring) {
 	window.htmlLoader.userAgent = uastring
-	// air.URLRequestDefaults.userAgent = uastring
+	// sc.helpers.dumpURLRequestDefaults.userAgent = uastring
 	return window.htmlLoader.userAgent
 };
 
@@ -207,8 +207,8 @@ sc.helpers.setUserAgent = function(uastring) {
 	Gets clipboard text
 */
 sc.helpers.getClipboardText = function() {
-	if(air.Clipboard.generalClipboard.hasFormat("text/plain")){
-	    var text = air.Clipboard.generalClipboard.getData("text/plain");
+	if(sc.helpers.dumpClipboard.generalClipboard.hasFormat("text/plain")){
+	    var text = sc.helpers.dumpClipboard.generalClipboard.getData("text/plain");
 		return text;
 	} else {
 		return '';
@@ -220,8 +220,8 @@ sc.helpers.getClipboardText = function() {
 */
 sc.helpers.setClipboardText = function(text) {
 	Spaz.dump('Copying "' + text + '" to clipboard');
-	air.Clipboard.generalClipboard.clear();
-	air.Clipboard.generalClipboard.setData(air.ClipboardFormats.TEXT_FORMAT,text,false);
+	sc.helpers.dumpClipboard.generalClipboard.clear();
+	sc.helpers.dumpClipboard.generalClipboard.setData(sc.helpers.dumpClipboardFormats.TEXT_FORMAT,text,false);
 }
 
 
@@ -229,7 +229,7 @@ sc.helpers.setClipboardText = function(text) {
 	Loads a value for a key from EncryptedLocalStore
 */
 sc.helpers.getEncryptedValue = function(key) {
-	var storedValue = air.EncryptedLocalStore.getItem(key);
+	var storedValue = sc.helpers.dumpEncryptedLocalStore.getItem(key);
 	var val = storedValue.readUTFBytes(storedValue.length);
 	return val;
 }
@@ -238,9 +238,9 @@ sc.helpers.getEncryptedValue = function(key) {
 	Sets a value in the EncryptedLocalStore of AIR
 */
 sc.helpers.setEncyrptedValue = function(key, val) {
-	var bytes = new air.ByteArray();
+	var bytes = new sc.helpers.dumpByteArray();
     bytes.writeUTFBytes(val);
-    air.EncryptedLocalStore.setItem(key, bytes);
+    sc.helpers.dumpEncryptedLocalStore.setItem(key, bytes);
 }
 
 
@@ -248,7 +248,7 @@ sc.helpers.setEncyrptedValue = function(key, val) {
 	Get the app storage directory
 */
 sc.helpers.getAppStoreDir = function() {
-	return air.File.applicationStorageDirectory;
+	return sc.helpers.dumpFile.applicationStorageDirectory;
 }
 
 
@@ -266,13 +266,13 @@ sc.helpers.getPreferencesFile = function(name, create) {
 /*
 	initializes a file at the given location. set overwrite to true
 	to clear out an existing file.
-	returns the air.File object or false
+	returns the sc.helpers.dumpFile object or false
 */
 sc.helpers.init_file = function(path, overwrite) {
-	var file = new air.File(path);
+	var file = new sc.helpers.dumpFile(path);
 	if ( !file.exists || (file.exists && overwrite) ) {
-		var fs = new air.FileStream();
-		fs.open(file, air.FileMode.WRITE);
+		var fs = new sc.helpers.dumpFileStream();
+		fs.open(file, sc.helpers.dumpFileMode.WRITE);
 		fs.writeUTFBytes('');
 		fs.close();
 		return file;
@@ -290,10 +290,10 @@ sc.helpers.init_file = function(path, overwrite) {
 
 
 
-// var fs = new air.FileStream();
+// var fs = new sc.helpers.dumpFileStream();
 // 
 // if (prefsFile.exists) {
-//     fs.open(prefsFile, air.FileMode.READ);
+//     fs.open(prefsFile, sc.helpers.dumpFileMode.READ);
 //     var prefsJSON = fs.readUTFBytes(prefsFile.size);
 //     var loadedpreferences = JSON.parse(prefsJSON);
 // 
@@ -305,7 +305,7 @@ sc.helpers.init_file = function(path, overwrite) {
 //         }
 //     }
 // } else {
-//     fs.open(prefsFile, air.FileMode.WRITE);
+//     fs.open(prefsFile, sc.helpers.dumpFileMode.WRITE);
 //     fs.writeUTFBytes(JSON.stringify(Spaz.Prefs.defaultPreferences));
 //     Spaz.Prefs.preferences = clone(Spaz.Prefs.defaultPreferences);
 // }

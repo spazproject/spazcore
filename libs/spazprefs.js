@@ -257,14 +257,14 @@ if (sc) {
 // 	this.prefs    = clone(this.defaults);
 // 
 // 	/*
-// 		returns the application storage directory air.File object
+// 		returns the application storage directory sc.helpers.dumpFile object
 // 	*/
 // 	this.getPrefsDir = function() {
-// 		return air.File.applicationStorageDirectory;
+// 		return sc.helpers.dumpFile.applicationStorageDirectory;
 // 	}
 // 	
 // 	/*
-// 		returns the prefs air.File object. 
+// 		returns the prefs sc.helpers.dumpFile object. 
 // 	*/
 // 	this.getPrefsFile = function(name) {
 // 		if (!name) {name='preferences';}
@@ -284,7 +284,7 @@ if (sc) {
 // 		// if file DNE, init file with defaults
 // 		if (prefsFile.exists) {
 // 			var prefsJSON = get_file_contents(prefsFile.url);
-// 			air.trace(prefsJSON);
+// 			sc.helpers.dumptrace(prefsJSON);
 // 			var loaded_prefs = JSON.parse(prefsJSON);
 // 			for (var key in loaded_prefs) {
 // 	            this.set(key, loaded_prefs[key]);
@@ -385,11 +385,11 @@ if (sc) {
 // 		Gets the contents of a file
 // 	*/
 // 	function get_file_contents(path) {
-// 		var f = new air.File(path);
+// 		var f = new sc.helpers.dumpFile(path);
 // 		if (f.exists) {
-// 			var fs = new air.FileStream();
-// 			fs.open(f, air.FileMode.READ);
-// 			var str = fs.readMultiByte(f.size, air.File.systemCharset);
+// 			var fs = new sc.helpers.dumpFileStream();
+// 			fs.open(f, sc.helpers.dumpFileMode.READ);
+// 			var str = fs.readMultiByte(f.size, sc.helpers.dumpFile.systemCharset);
 // 			fs.close();
 // 			return str;
 // 		} else {
@@ -410,13 +410,13 @@ if (sc) {
 // 		// Spaz.dump('setFileContents for '+path+ ' to "' +content+ '"');
 // 
 // 		try { 
-// 			var f = new air.File(path);
-// 			var fs = new air.FileStream();
-// 			fs.open(f, air.FileMode.WRITE);
+// 			var f = new sc.helpers.dumpFile(path);
+// 			var fs = new sc.helpers.dumpFileStream();
+// 			fs.open(f, sc.helpers.dumpFileMode.WRITE);
 // 			fs.writeUTFBytes(content);
 // 			fs.close();
 // 		} catch (e) {
-// 			air.trace(e.errorMsg)
+// 			sc.helpers.dumptrace(e.errorMsg)
 // 		}
 // 	};
 // 	
@@ -426,7 +426,7 @@ if (sc) {
 // 		Loads a value for a key from EncryptedLocalStore
 // 	*/
 // 	function get_encrypted_value(key) {
-// 		var storedValue = air.EncryptedLocalStore.getItem(key);
+// 		var storedValue = sc.helpers.dumpEncryptedLocalStore.getItem(key);
 // 		var val = storedValue.readUTFBytes(storedValue.length);
 // 		return val;
 // 	}
@@ -435,21 +435,21 @@ if (sc) {
 // 		Sets a value in the EncryptedLocalStore of AIR
 // 	*/
 // 	function set_encrypted_value(key, val) {
-// 		var bytes = new air.ByteArray();
+// 		var bytes = new sc.helpers.dumpByteArray();
 // 	    bytes.writeUTFBytes(val);
-// 	    return air.EncryptedLocalStore.setItem(key, bytes);
+// 	    return sc.helpers.dumpEncryptedLocalStore.setItem(key, bytes);
 // 	}
 // 	
 // 	/*
 // 		initializes a file at the given location. set overwrite to true
 // 		to clear out an existing file.
-// 		returns the air.File object or false
+// 		returns the sc.helpers.dumpFile object or false
 // 	*/
 // 	function init_file(path, overwrite) {
-// 		var file = new air.File(path);
+// 		var file = new sc.helpers.dumpFile(path);
 // 		if ( !file.exists || (file.exists && overwrite) ) {
-// 			var fs = new air.FileStream();
-// 			fs.open(file, air.FileMode.WRITE);
+// 			var fs = new sc.helpers.dumpFileStream();
+// 			fs.open(file, sc.helpers.dumpFileMode.WRITE);
 // 			fs.writeUTFBytes('');
 // 			fs.close();
 // 			return file;
