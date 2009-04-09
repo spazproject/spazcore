@@ -1,7 +1,7 @@
 SpazCore is a set of libraries that make it easier to create HTML+JavaScript
 applications for desktop and mobile platforms. It's *not* a framework. It
 primarily exists at this point to facilitate new versions of the Spaz Twitter
-client on platforms other than sc.helpers.dump
+client on platforms other than AIR.
 
 Initially, I'd like to target the following platforms:
 

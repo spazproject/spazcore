@@ -257,14 +257,14 @@ if (sc) {
 // 	this.prefs    = clone(this.defaults);
 // 
 // 	/*
-// 		returns the application storage directory sc.helpers.dumpFile object
+// 		returns the application storage directory air.File object
 // 	*/
 // 	this.getPrefsDir = function() {
-// 		return sc.helpers.dumpFile.applicationStorageDirectory;
+// 		return air.File.applicationStorageDirectory;
 // 	}
 // 	
 // 	/*
-// 		returns the prefs sc.helpers.dumpFile object. 
+// 		returns the prefs air.File object. 
 // 	*/
 // 	this.getPrefsFile = function(name) {
 // 		if (!name) {name='preferences';}
@@ -284,7 +284,7 @@ if (sc) {
 // 		// if file DNE, init file with defaults
 // 		if (prefsFile.exists) {
 // 			var prefsJSON = get_file_contents(prefsFile.url);
-// 			sc.helpers.dumptrace(prefsJSON);
+// 			air.trace(prefsJSON);
 // 			var loaded_prefs = JSON.parse(prefsJSON);
 // 			for (var key in loaded_prefs) {
 // 	            this.set(key, loaded_prefs[key]);
@@ -385,11 +385,11 @@ if (sc) {
 // 		Gets the contents of a file
 // 	*/
 // 	function get_file_contents(path) {
-// 		var f = new sc.helpers.dumpFile(path);
+// 		var f = new air.File(path);
 // 		if (f.exists) {
-// 			var fs = new sc.helpers.dumpFileStream();
-// 			fs.open(f, sc.helpers.dumpFileMode.READ);
-// 			var str = fs.readMultiByte(f.size, sc.helpers.dumpFile.systemCharset);
+// 			var fs = new air.FileStream();
+// 			fs.open(f, air.FileMode.READ);
+// 			var str = fs.readMultiByte(f.size, air.File.systemCharset);
 // 			fs.close();
 // 			return str;
 // 		} else {
@@ -410,13 +410,13 @@ if (sc) {
 // 		// Spaz.dump('setFileContents for '+path+ ' to "' +content+ '"');
 // 
 // 		try { 
-// 			var f = new sc.helpers.dumpFile(path);
-// 			var fs = new sc.helpers.dumpFileStream();
-// 			fs.open(f, sc.helpers.dumpFileMode.WRITE);
+// 			var f = new air.File(path);
+// 			var fs = new air.FileStream();
+// 			fs.open(f, air.FileMode.WRITE);
 // 			fs.writeUTFBytes(content);
 // 			fs.close();
 // 		} catch (e) {
-// 			sc.helpers.dumptrace(e.errorMsg)
+// 			air.trace(e.errorMsg)
 // 		}
 // 	};
 // 	
@@ -426,7 +426,7 @@ if (sc) {
 // 		Loads a value for a key from EncryptedLocalStore
 // 	*/
 // 	function get_encrypted_value(key) {
-// 		var storedValue = sc.helpers.dumpEncryptedLocalStore.getItem(key);
+// 		var storedValue = air.EncryptedLocalStore.getItem(key);
 // 		var val = storedValue.readUTFBytes(storedValue.length);
 // 		return val;
 // 	}
@@ -435,21 +435,21 @@ if (sc) {
 // 		Sets a value in the EncryptedLocalStore of AIR
 // 	*/
 // 	function set_encrypted_value(key, val) {
-// 		var bytes = new sc.helpers.dumpByteArray();
+// 		var bytes = new air.ByteArray();
 // 	    bytes.writeUTFBytes(val);
-// 	    return sc.helpers.dumpEncryptedLocalStore.setItem(key, bytes);
+// 	    return air.EncryptedLocalStore.setItem(key, bytes);
 // 	}
 // 	
 // 	/*
 // 		initializes a file at the given location. set overwrite to true
 // 		to clear out an existing file.
-// 		returns the sc.helpers.dumpFile object or false
+// 		returns the air.File object or false
 // 	*/
 // 	function init_file(path, overwrite) {
-// 		var file = new sc.helpers.dumpFile(path);
+// 		var file = new air.File(path);
 // 		if ( !file.exists || (file.exists && overwrite) ) {
-// 			var fs = new sc.helpers.dumpFileStream();
-// 			fs.open(file, sc.helpers.dumpFileMode.WRITE);
+// 			var fs = new air.FileStream();
+// 			fs.open(file, air.FileMode.WRITE);
 // 			fs.writeUTFBytes('');
 // 			fs.close();
 // 			return file;
