@@ -81,7 +81,7 @@ sc.helpers.dump = function(obj) {
 	}
 	
 	/*
-		for Nova
+		for Mojo
 	*/
 	if (sc.helpers.iswebOS()) {
 		if (sc.helpers.isString(obj) || sc.helpers.isNumber(obj) || !obj) {
@@ -132,6 +132,7 @@ sc.helpers.openInBrowser = function(url) {
 	    air.navigateToURL(request);
 	} catch (e) {
 	    air.trace(e.errorMsg);
+		dump(e.name + ":" + e.message);
 	}
 }
 
@@ -171,6 +172,7 @@ sc.helpers.setFileContents = function(path, content, serialize) {
 		fs.close();
 	} catch (e) {
 		air.trace(e.errorMsg)
+		dump(e.name + ":" + e.message);
 	}
 };
 

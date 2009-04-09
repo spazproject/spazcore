@@ -167,10 +167,13 @@ SpazPrefs.prototype.setEncrypted = function(key, val) {
  */
 SpazPrefs.prototype.load = function(name) {
 	
+	/*
+		webOS implementation
+	*/
 	if (sc.helpers.iswebOS()) {
 		if (!this.mojoDepot) {
 			this.mojoDepot = new Mojo.Depot({
-				name:'SpazDepot',
+				name:'SpazDepotPrefs',
 				replace:false
 			});
 		}
@@ -198,6 +201,11 @@ SpazPrefs.prototype.load = function(name) {
 			thisPrefs.resetPrefs();
 		}
 	}
+	
+	/*
+		Titanium implementation
+		@TODO
+	*/
 }
 
 
@@ -211,7 +219,7 @@ SpazPrefs.prototype.save = function(name) {
 	if (sc.helpers.iswebOS()) {
 		if (!this.mojoDepot) {
 			this.mojoDepot = new Mojo.Depot({
-				name:'SpazDepot',
+				name:'SpazDepotPrefs',
 				replace:false
 			});
 		}
@@ -219,6 +227,10 @@ SpazPrefs.prototype.save = function(name) {
 		this.mojoDepot.simpleAdd('SpazPrefs', this._prefs);
 	}
 	
+	/*
+		Titanium implementation
+		@TODO
+	*/
 	
 		
 	
