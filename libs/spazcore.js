@@ -1,17 +1,17 @@
 /**
  * root namespace for SpazCore
  */
-var sc = {}
+var sc = {};
 
 /**
  * namespace for app-specific stuff
  */
-sc.app = {}
+sc.app = {};
 
 /**
  * namespace for helper methods
  */
-sc.helpers = {}
+sc.helpers = {};
 
 /**
  * helper shortcuts 
