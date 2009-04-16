@@ -178,7 +178,6 @@ sc.helpers.fromHTMLSpecialChars = function(str) {
 	sc.helpers.dump(str);
 	return str;
 }
-};
 
 
 
