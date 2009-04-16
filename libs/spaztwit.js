@@ -893,7 +893,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
 					dump("Error:"+xhr.status+" from "+opts['url']);
 					if (xhr.responseText) {
 						try {
-							var data = JSON.parse(xhr.responseText);
+							var data = sc.helpers.deJSON(xhr.responseText);
 						} catch(e) {
 							dump(e.name + ":" + e.message);
 							data = xhr.responseText;
@@ -925,7 +925,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
 			// dump("Success! \n\n" + data);
 			dump(opts.url + ' success!');
 				
-			data = JSON.parse(data);
+			data = sc.helpers.deJSON(data);
 			
 			if (opts.process_callback) {
 				/*
@@ -1171,7 +1171,7 @@ SpazTwit.prototype._callMethod = function(opts) {
 					dump("Error:"+xhr.status+" from "+opts['url']);
 					if (xhr.responseText) {
 						try {
-							var data = JSON.parse(xhr.responseText);
+							var data = sc.helpers.deJSON(xhr.responseText);
 						} catch(e) {
 							dump(e.name + ":" + e.message);
 							data = xhr.responseText;
@@ -1192,7 +1192,7 @@ SpazTwit.prototype._callMethod = function(opts) {
 	    },
 	    'success':function(data) {
 			dump(opts.url + ' success');
-			data = JSON.parse(data);
+			data = sc.helpers.deJSON(data);
 			if (opts.process_callback) {
 				/*
 					using .call here and passing stwit as the first param
