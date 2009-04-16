@@ -3,6 +3,15 @@ applications for desktop and mobile platforms. It's *not* a framework. It
 primarily exists at this point to facilitate new versions of the Spaz Twitter
 client on platforms other than AIR.
 
+## Issue Tracking
+
+Bug reports and issue tracking is done at http://gitbug.appspot.com/projects/spazcore/. You can close bugs via a GitHub style web hook. You'll need the following details and to include the issue identifier (eg. #gitbug1234) in the commit message. For instance:
+
+> changed settings file which fixes bug #gitbug52
+
+
+## Roadmap
+
 Initially, I'd like to target the following platforms:
 
 * AIR
