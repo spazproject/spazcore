@@ -209,8 +209,13 @@ SpazPrefs.prototype.load = function(name) {
 		@TODO
 	*/
 	if (sc.helpers.isTitanium()) {
-		var prefs_json = Titanium.App.Properties.getString(SPAZCORE_PREFS_TI_KEY);
-		this._prefs = sc.helpers.deJSON(prefs_json);
+		if (Titanium.App.Properties.hasProperty(SPAZCORE_PREFS_TI_KEY)) {
+			var prefs_json = Titanium.App.Properties.getString(SPAZCORE_PREFS_TI_KEY);
+			this._prefs = sc.helpers.deJSON(prefs_json);
+		} else {
+			// save the defaults if this is the first time
+			this.save();
+		}
 		jQuery().trigger('spazprefs_loaded');
 	}
 	
@@ -290,8 +295,9 @@ if (sc.helpers.isTitanium()) {
 		Loads the size and placement of the window this executes in
 	*/
 	SpazPrefs.prototype.loadWindowState = function() {
-		if (!Titanium.App.Properties.hasProperty('__window-width')) {
-			return; // we assume if this isn't set, none are set
+		if (!Titanium.App.Properties.hasProperty('__window-width')) { // we assume if this isn't set, none are set
+			this.saveWindowState(); // save the current state
+			return;
 		}
 		
 		var width  = Titanium.App.Properties.getInt('__window-width');
