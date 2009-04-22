@@ -5,9 +5,7 @@ client on platforms other than AIR.
 
 ## Issue Tracking
 
-Bug reports and issue tracking is done at http://gitbug.appspot.com/projects/spazcore/. You can close bugs via a GitHub style web hook. You'll need the following details and to include the issue identifier (eg. #gitbug1234) in the commit message. For instance:
-
-> changed settings file which fixes bug #gitbug52
+Bug reports and issues should be filed on GitHub @ <http://github.com/funkatron/spazcore/issues>.
 
 
 ## Roadmap
