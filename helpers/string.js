@@ -7,7 +7,7 @@
  * @param {boolean} target  a string to put in the target attribute
  * @return {string}
  */
-sc.helpers.autolink = function(str, type, extra_code) {
+sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 	if (!type) {
 		type = 'both';
 	}
@@ -39,8 +39,14 @@ sc.helpers.autolink = function(str, type, extra_code) {
 			} else {
 				extra_code = ''
 			}
+			
+			var desc = ms[5]+ms[6];
 
-			var newstr = ms[1]+'<a href="http'+ms[4]+'://'+ms[5]+ms[6]+'"'+extra_code+'>'+ms[5]+ms[6]+'</a>'+period;
+			if (maxlen && maxlen > 0 && desc.length > maxlen) {
+				desc = desc.substr(0, maxlen)+'...';
+			}
+
+			var newstr = ms[1]+'<a href="http'+ms[4]+'://'+ms[5]+ms[6]+'"'+extra_code+'>'+desc+'</a>'+period;
 			str = str.replace(ms[0], newstr);
 		}
 	}
