@@ -4,7 +4,8 @@
  * 
  * @param {string} str
  * @param {string} type  'email', 'url', or 'both' (default is 'both')
- * @param {boolean} target  a string to put in the target attribute
+ * @param {boolean} extra_code  a string that will be inserted verbatim into <a> tag
+ * @param {integer} maxlen  the maximum length the link description can be (the string inside the <a></a> tag)
  * @return {string}
  */
 sc.helpers.autolink = function(str, type, extra_code, maxlen) {
