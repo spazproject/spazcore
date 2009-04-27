@@ -85,6 +85,9 @@
 				var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=fb">#fb</a>';
 				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
 				
+				var input  = 'hashtags inside (#parentheses) should work too';
+				var output = 'hashtags inside (<a href="http://search.twitter.com/search?q=parentheses">#parentheses</a>) should work too';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
 				
 				var input  = 'Happy Earth Hour! #downtown';
 				var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>';

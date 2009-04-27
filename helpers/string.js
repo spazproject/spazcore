@@ -134,7 +134,7 @@ sc.helpers.autolinkTwitterHashtag = function(str, tpl) {
 		tpl = '<a href="http://search.twitter.com/search?q=#hashtag_enc#">##hashtag#</a>';
 	}
 	
-	var re_hashtag = /(^|\s)#([a-zA-Z0-9\-_\.+:=]{1,}\w)([^a-zA-Z0-9\-_+]|$)/gi
+	var re_hashtag = /(^|\s|\()#([a-zA-Z0-9\-_\.+:=]{1,}\w)([^a-zA-Z0-9\-_+]|$)/gi
 	
 	var ms = [];
 	while (ms = re_hashtag.exec(str))
