@@ -838,6 +838,19 @@ SpazTwit.prototype._processSearchItem = function(item, section_name) {
 		item.SC_retrieved_unixtime = sc.helpers.getTimeAsInt();
 	}
 	
+	/*
+		normalize so we have as much user data in this object as possible
+	*/
+	item.user = {
+		'profile_image_url':item.profile_image_url,
+		'screen_name':item.from_user
+	};
+	
+	/*
+		The source info here is encoded differently
+	*/
+	item.source = sc.helpers.fromHTMLSpecialChars(item.source);
+	
 	
 	return item;
 }
