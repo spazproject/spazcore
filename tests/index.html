@@ -4,7 +4,7 @@
 	<title>QUnit SpazCore</title>    
 
 	<!-- Load required vendor libs -->
-	<script src="../vendors/jquery-1.3.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../vendors/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script>
 	<script src="../vendors/json2.js" type="text/javascript" charset="utf-8"></script>
 	<script src="../vendors/webtoolkit.base64.js" type="text/javascript" charset="utf-8"></script>
 	
@@ -85,6 +85,9 @@
 				var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=fb">#fb</a>';
 				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
 				
+				var input  = 'hashtags inside (#parentheses) should work too';
+				var output = 'hashtags inside (<a href="http://search.twitter.com/search?q=parentheses">#parentheses</a>) should work too';
+				equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
 				
 				var input  = 'Happy Earth Hour! #downtown';
 				var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>';
@@ -161,6 +164,15 @@
 				input   = '(I did one for my site; see the logo:http://bit.ly/1LkKk1)';
 				output  = '(I did one for my site; see the logo:<a href="http://bit.ly/1LkKk1">bit.ly/1LkKk1</a>)';
 				equals(sc.helpers.autolink(input), output);
+
+				input   = '(Testing for length limits; see the logo:http://bit.ly/1LkKk1)';
+				output  = '(Testing for length limits; see the logo:<a href="http://bit.ly/1LkKk1">bit.ly/1LkKk1</a>)';
+				equals(sc.helpers.autolink(input, null, null, 20), output);
+
+				input   = '(I did one for my site; see the logo:https://www.deadspin.com/5227676/stafford-welcomed-to-detroit-with-warm-prickly-arms)';
+				output  = '(I did one for my site; see the logo:<a href="https://www.deadspin.com/5227676/stafford-welcomed-to-detroit-with-warm-prickly-arms">www.deadspin.com/522...</a>)';
+				equals(sc.helpers.autolink(input, null, null, 20), output);
+
 
 				input   = '(http://bit.ly/1LkKk1?[foo]=bar,32&500;xyz)';
 				output  = '(<a href="http://bit.ly/1LkKk1?[foo]=bar,32&500;xyz">bit.ly/1LkKk1?[foo]=bar,32&500;xyz</a>)';
