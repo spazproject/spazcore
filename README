@@ -3,36 +3,9 @@ applications for desktop and mobile platforms. It's *not* a framework. It
 primarily exists at this point to facilitate new versions of the Spaz Twitter
 client on platforms other than AIR.
 
+For more details, check out the SpazCore wiki on GitHub: <http://wiki.github.com/funkatron/spazcore>.
+
 ## Issue Tracking
 
 Bug reports and issues should be filed on GitHub @ <http://github.com/funkatron/spazcore/issues>.
-
-
-## Roadmap
-
-Initially, I'd like to target the following platforms:
-
-* AIR
-* Titanium
-* Palm webOS
-
-SpazCore is not complete. It's barely started. If you're interested in
-JavaScript application development, SpazCore needs your help.
-
-Here's what is planned at the moment:
-
-* REQUIREMENTS: jQuery, JSON2.js
-	* jQuery should be used in a non-conflicting manner at all times
-* A comprehensive Twitter API Lib
-* A preferences library
-* A file access abstraction library
-* A DB abstraction library (maybe ORM)
-* A set of helper functions to make common tasks easier
-	* Input filtering (security)
-	* Strings
-	* System and app data (versions, OS, etc)
-	* File access
-	
-	
-
 
