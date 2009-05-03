@@ -211,7 +211,11 @@ SpazPrefs.prototype.load = function(name) {
 	if (sc.helpers.isTitanium()) {
 		if (Titanium.App.Properties.hasProperty(SPAZCORE_PREFS_TI_KEY)) {
 			var prefs_json = Titanium.App.Properties.getString(SPAZCORE_PREFS_TI_KEY);
-			this._prefs = sc.helpers.deJSON(prefs_json);
+			var loaded_prefs = sc.helpers.deJSON(prefs_json);
+			for (var key in loaded_prefs) {
+				dump('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
+	            this._prefs[key] = loaded_prefs[key];
+	       	}
 		} else {
 			// save the defaults if this is the first time
 			this.save();
