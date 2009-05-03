@@ -714,7 +714,7 @@ SpazTwit.prototype.search = function(query, since_id, results_per_page, page, la
 SpazTwit.prototype._processSearchTimeline = function(search_result, finished_event, processing_opts) {	
 	/*
 		Search is different enough that we need to break it out and 
-		write a custom alternative to _processTimeline
+		write a custom alternative to _processTimelines
 	*/
 	if (!processing_opts) { processing_opts = {}; }
 
@@ -771,7 +771,17 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, finished_eve
 		// dump(this.data[SPAZCORE_SECTION_SEARCH].items);
 
 
-		jQuery().trigger(finished_event, [this.data[SPAZCORE_SECTION_SEARCH].newitems]);
+		var search_info = {
+			'since_id'         : search_result.since_id,
+			'max_id'           : search_result.max_id,
+			'refresh_url'      : search_result.refresh_url,
+			'results_per_page' : search_result.results_per_page,
+			'next_page'        : search_result.next_page,
+			'completed_in'     : search_result.completed_in,
+			'page'             : search_result.page,
+			'query'            : search_result.query
+		}
+		jQuery().trigger(finished_event, [this.data[SPAZCORE_SECTION_SEARCH].newitems, search_info]);
 			
 
 
