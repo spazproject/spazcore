@@ -4,10 +4,11 @@
  * 
  * @param {string} str
  * @param {string} type  'email', 'url', or 'both' (default is 'both')
- * @param {boolean} target  a string to put in the target attribute
+ * @param {boolean} extra_code  a string that will be inserted verbatim into <a> tag
+ * @param {integer} maxlen  the maximum length the link description can be (the string inside the <a></a> tag)
  * @return {string}
  */
-sc.helpers.autolink = function(str, type, extra_code) {
+sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 	if (!type) {
 		type = 'both';
 	}
@@ -39,8 +40,14 @@ sc.helpers.autolink = function(str, type, extra_code) {
 			} else {
 				extra_code = ''
 			}
+			
+			var desc = ms[5]+ms[6];
 
-			var newstr = ms[1]+'<a href="http'+ms[4]+'://'+ms[5]+ms[6]+'"'+extra_code+'>'+ms[5]+ms[6]+'</a>'+period;
+			if (maxlen && maxlen > 0 && desc.length > maxlen) {
+				desc = desc.substr(0, maxlen)+'...';
+			}
+
+			var newstr = ms[1]+'<a href="http'+ms[4]+'://'+ms[5]+ms[6]+'"'+extra_code+'>'+desc+'</a>'+period;
 			str = str.replace(ms[0], newstr);
 		}
 	}
@@ -127,7 +134,7 @@ sc.helpers.autolinkTwitterHashtag = function(str, tpl) {
 		tpl = '<a href="http://search.twitter.com/search?q=#hashtag_enc#">##hashtag#</a>';
 	}
 	
-	var re_hashtag = /(^|\s)#([a-zA-Z0-9\-_\.+:=]{1,}\w)([^a-zA-Z0-9\-_+]|$)/gi
+	var re_hashtag = /(^|\s|\()#([a-zA-Z0-9\-_\.+:=]{1,}\w)([^a-zA-Z0-9\-_+]|$)/gi
 	
 	var ms = [];
 	while (ms = re_hashtag.exec(str))
