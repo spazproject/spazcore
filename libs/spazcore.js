@@ -1,20 +1,22 @@
 /**
- * root namespace for SpazCore
+ * 
+ * @namespace root namespace for SpazCore
  */
 var sc = {};
 
 /**
- * namespace for app-specific stuff
+ * @namespace namespace for app-specific stuff
  */
 sc.app = {};
 
 /**
- * namespace for helper methods
+ * @namespace namespace for helper methods
  */
 sc.helpers = {};
 
 /**
- * helper shortcuts 
+ * @namespace helper shortcuts 
  * this lets us write "sch.method" instead of "sc.helpers.method"
+ * 
  */
 sch = sc.helpers;

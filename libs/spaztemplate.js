@@ -1,8 +1,9 @@
 /**
  * SpazTemplate 
  * designed for fast templating functions
+ * @class SpazTemplate
  */
-SpazTemplate = function() {
+function SpazTemplate() {
 	
 	this._tpls = {};
 	
