@@ -25,9 +25,9 @@ const SPAZCORE_PREFS_TI_KEY = 'preferences_json';
  * 'spazprefs_loaded'
  * 
  * @TODO we need to pull out the platform-specifc stuff into the /platforms/... hierarchy
- * 
+ * @class SpazPrefs
  */
-var SpazPrefs = function(defaults, sanity_methods) {	
+function SpazPrefs(defaults, sanity_methods) {	
 
 	/*
 		init prefs

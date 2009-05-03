@@ -1,5 +1,7 @@
 /**
  * a library for the Ping.fm API 
+ * @class SpazPingFM
+ * 
  */
-SpazPingFM = function() {};
+function SpazPingFM() {};
 
