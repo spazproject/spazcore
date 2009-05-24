@@ -919,6 +919,9 @@ SpazTwit.prototype._getTimeline = function(opts) {
 	var xhr = jQuery.ajax({
         'complete':function(xhr, msg){
             sc.helpers.dump(opts.url + ' complete:'+msg);
+			if (msg == 'timeout') {
+				jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
+			}
         },
         'error':function(xhr, msg, exc) {
 			sc.helpers.dump(opts.url + ' error:'+msg)
@@ -935,6 +938,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
 					}
 				}
 				if (opts.failure_event_type) {
+					sc.helpers.dump("opts.failure_event_type:"+opts.failure_event_type);
 					jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
 				}
 	
@@ -957,9 +961,10 @@ SpazTwit.prototype._getTimeline = function(opts) {
         },
         'success':function(data) {
 			// sc.helpers.dump("Success! \n\n" + data);
-			sc.helpers.dump(opts.url + ' success!');
-				
+			sc.helpers.dump(opts.url + ' success!'+" data:"+data);
+			
 			data = sc.helpers.deJSON(data);
+			
 			
 			if (opts.process_callback) {
 				/*
