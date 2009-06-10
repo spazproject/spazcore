@@ -25,6 +25,7 @@ SpazTemplate.prototype.addTemplateMethod = function(name, method) {
  */
 SpazTemplate.prototype.parseTemplate = function(methodname, data) {
 	var parsed = this._tpls[methodname](data);
+	
 	return parsed;
 };
 

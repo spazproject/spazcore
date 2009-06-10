@@ -43,6 +43,12 @@ const SPAZCORE_SECTION_USER = 'user-timeline';
  * 'error_search_timeline_data' (data)
  * 'new_trends_data' (data)
  * 'error_trends_data' (data)
+ * 'new_saved_searches_data' (data)
+ * 'error_saved_searches_data' (data)
+ * 'create_saved_search_succeeded' (data)
+ * 'create_saved_search_failed' (data)
+ * 'destroy_saved_search_succeeded' (data)
+ * 'destroy_saved_search_failed' (data)
  * 'create_favorite_succeeded'
  * 'create_favorite_failed'
  * 'destroy_favorite_succeeded'
@@ -90,7 +96,7 @@ function SpazTwit(username, password) {
 		apply defaults for ajax calls
 	*/
 	jQuery.ajaxSetup( {
-        timeout:1000*60,
+        timeout:1000*45, // 45 seconds
         async:true,
     });
 
@@ -293,12 +299,16 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.stop_notifications = "notifications/leave/{{ID}}.json";
     urls.favorites_create 	= "favourings/create/{{ID}}.json";
     urls.favorites_destroy	= "favourings/destroy/{{ID}}.json";
+    urls.saved_searches_create 	= "saved_searches/create.json";
+    urls.saved_searches_destroy	= "saved_searches/destroy/{{ID}}.json";
     urls.verify_credentials = "account/verify_credentials.json";
     urls.ratelimit_status   = "account/rate_limit_status.json";
+	urls.update_profile		= "account/update_profile.json";
 
 	// search
 	urls.search				= "http://search.twitter.com/search.json";
 	urls.trends				= "http://search.twitter.com/trends.json";
+	urls.saved_searches		= "http://search.twitter.com/saved_searches.json";
 
     // misc
     urls.test 			  	= "help/test.json";
@@ -797,11 +807,7 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, finished_eve
 
 
 	} else { // no new items, but we should fire off success anyway
-		// if (!processing_opts.combined) {
-			jQuery().trigger(finished_event, [[]]);
-		// } else {
-		// 	this.combined_finished[section_name] = true;
-		// }
+		jQuery().trigger(finished_event, [[]]);
 	}
 	
 }
@@ -1132,10 +1138,17 @@ SpazTwit.prototype._processItem = function(item, section_name) {
 	/*
 		is reply? Then add .SC_is_reply
 	*/
-	if (item.in_reply_to_screen_name && item.SC_user_received_by) {
+	if ( (item.in_reply_to_screen_name && item.SC_user_received_by) ) {
 		if (item.in_reply_to_screen_name.toLowerCase() == item.SC_user_received_by.toLowerCase() ) {
 			item.SC_is_reply = true;
 		}
+	}
+	
+	/*
+		If it comes from the replies timeline, it's a reply (aka a mention)
+	*/
+	if (section_name === SPAZCORE_SECTION_REPLIES) {
+		item.SC_is_reply = true;
 	}
 	
 	/*
@@ -1500,8 +1513,32 @@ SpazTwit.prototype.unfavorite = function(id) {
 
 
 
-SpazTwit.prototype.updateLocation = function(location_str) {};
-SpazTwit.prototype.updateProfile = function(name, email, url, location, description) {};
+SpazTwit.prototype.updateLocation = function(location_str) {
+	var data = {};
+	data.location = location_str;
+	
+	this.setBaseURL('http://twitter.com/');
+	
+	var url = this.getAPIURL('update_profile');
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'update_location_succeeded',
+		'failure_event_type':'update_location_failed',
+		'data':data
+	}
+
+	/*
+		Perform a request and get true or false back
+	*/
+	var xhr = this._callMethod(opts);
+};
+
+SpazTwit.prototype.updateProfile = function(name, email, url, location, description) {
+	
+};
 
 
 
@@ -1662,6 +1699,75 @@ SpazTwit.prototype.removeExtraElements = function(items, max, remove_from_top) {
 }
 
 
+/**
+ * gets the saved searches the authenticating user has 
+ */
+SpazTwit.prototype.getSavedSearches = function() {
+	var url = this.getAPIURL('saved_searches');
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'new_saved_searches_data',
+		'failure_event_type':'error_saved_searches_data',
+		'method':'GET'
+	}
+
+	/*
+		Perform a request and get true or false back
+	*/
+	var xhr = this._callMethod(opts);
+};
+
+/**
+ * Saves the search query to the Twitter servers
+ * 
+ * @param {String} search_query 
+ */
+SpazTwit.prototype.addSavedSearch = function(search_query) {
+	var url = this.getAPIURL('saved_searches_create');
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'create_saved_search_succeeded',
+		'failure_event_type':'create_saved_search_failed',
+		'data':{'query':search_query},
+		'method':'POST'
+	};
+
+	/*
+		Perform a request and get true or false back
+	*/
+	var xhr = this._callMethod(opts);
+	
+};
+
+/**
+ * Delete the saved search corresponding to the given ID
+ * 
+ * @param {String} search_id  Note that this is converted to a string via search_id.toString()
+ */
+SpazTwit.prototype.removeSavedSearch = function(search_id) {
+	var url = this.getAPIURL('saved_searches_destroy', search_id.toString());
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'destroy_saved_search_succeeded',
+		'failure_event_type':'destroy_saved_search_failed',
+		'method':'POST'
+	};
+
+	/*
+		Perform a request and get true or false back
+	*/
+	var xhr = this._callMethod(opts);
+	
+};
 
 
 
