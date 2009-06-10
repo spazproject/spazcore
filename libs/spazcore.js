@@ -19,4 +19,4 @@ sc.helpers = {};
  * this lets us write "sch.method" instead of "sc.helpers.method"
  * 
  */
-sch = sc.helpers;
+var sch = sc.helpers;
