@@ -8,7 +8,7 @@ function SpazLocker(db, account) {
   var locker = this;
   var query = "CREATE TABLE IF NOT EXISTS `" + account + "` (id INTEGER PRIMARY KEY AUTOINCREMENT, tweet_id INTEGER, in_reply_to_id INTEGER, text TEXT, timestamp TEXT)";
   
-  console.log(query);
+  sc.helpers.dump(query);
   
   this.db.transaction(function(tx) {
     tx.executeSql(query, [], function(tx, resultSet) {
@@ -31,7 +31,7 @@ SpazLocker.prototype = {
           if(failure)
             failure(err.message);
           else
-            console.log("There was an error: " + err.message);
+            sc.helpers.dump("There was an error: " + err.message);
         });
     });
   },
@@ -46,7 +46,7 @@ SpazLocker.prototype = {
         if(failure)
           failure(err.message);
         else
-          console.log("There was an error: " + err.message);
+          sc.helpers.dump("There was an error: " + err.message);
       });
     });
   },
@@ -65,7 +65,7 @@ SpazLocker.prototype = {
       text + ", " +
       timestamp + ")";
     
-    console.log(query);
+    sc.helpers.dump(query);
     this.db.transaction(function(tx) {
       tx.executeSql(query, [], function(tx, resultSet) {
         if(success)
@@ -74,7 +74,7 @@ SpazLocker.prototype = {
         if(failure)
           failure(err.message);
         else
-          console.log("There was an error: " + err.message);
+          sc.helpers.dump("There was an error: " + err.message);
       });
     });
   },
@@ -88,7 +88,7 @@ SpazLocker.prototype = {
       failure = options.failure;
     }
     var query = "SELECT * FROM " + this.account + " WHERE " + col + "=" + val;
-    console.log(query);
+    sc.helpers.dump(query);
     this.run(query, success, failure);
   },
   
@@ -101,7 +101,7 @@ SpazLocker.prototype = {
       failure = options.failure;
     }
     var query = "DELETE FROM " + this.account + " WHERE " + col + "=" + val;
-    console.log(query);
+    sc.helpers.dump(query);
     this.run(query, success, failure);
   }
 };
