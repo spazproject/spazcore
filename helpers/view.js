@@ -7,32 +7,39 @@
  * This removes any extra items from a set of elements. Intended to be used for
  * limiting the size of timelines
  * 
+ * This does NOT remove bound event listeners in order to increase speed. Be careful!
+ * 
  * @param {string} item_selector a jquery-compatible selector to get items
  * @param {integer} max_items the max # of item we should have
  * @param {boolean} remove_from_top whether or not to remove extra items from the top. default is FALSE
  * @requires jQuery
  */
 sc.helpers.removeExtraElements = function(item_selector, max_items, remove_from_top) {
-	
+
 	if (!remove_from_top) {
 		remove_from_top = false;
 	}
-	
+
 	jqitems = jQuery(item_selector);
-	dump('Items found with '+item_selector);
-	dump(jqitems);
+
+	var parent = jqitems.parent().get(0);
+
 	var diff = jqitems.length - max_items;
+
 	if (diff > 0) {
-		
+
 		if (!remove_from_top) {
-			dump("numEntries is " + jqitems.length + " > " + max_items + "; removing last " + diff + " entries");
-	        jqitems.slice(diff * -1).remove();
+	        jqitems.slice(diff * -1).each( function() {
+				parent.removeChild( this );
+			} );
 		} else {
-			dump("numEntries is " + jqitems.length + " > " + max_items + "; removing first " + diff + " entries");
-	        jqitems.slice(diff).remove();
+	        jqitems.slice(diff).each( function() {
+				parent.removeChild( this );
+			} );
 		}
 	}
 }
+
 
 
 /**
