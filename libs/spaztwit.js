@@ -1,4 +1,13 @@
 /**
+ * @depends ../helpers/string.js 
+ * @depends ../helpers/datetime.js 
+ * @depends ../helpers/event.js 
+ * @depends ../helpers/json.js 
+ * @depends ../helpers/sys.js 
+ */
+
+
+/**
  * various const definitions
  */
 const SPAZCORE_SECTION_FRIENDS = 'friends';
@@ -1148,6 +1157,13 @@ SpazTwit.prototype._processItem = function(item, section_name) {
 		If it comes from the replies timeline, it's a reply (aka a mention)
 	*/
 	if (section_name === SPAZCORE_SECTION_REPLIES) {
+		item.SC_is_reply = true;
+	}
+	
+	/*
+		Does it contain my name? then it's a reply
+	*/
+	if (this.username && sc.helpers.containsScreenName(item.text, this.username) ) {
 		item.SC_is_reply = true;
 	}
 	

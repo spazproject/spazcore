@@ -1,4 +1,22 @@
 /**
+ * determines if a string contains the given screen name prefixed with a @
+ * this is mainly used for determining if a message should be considered a 'mention'
+ * @param {string} str  the string to check
+ * @param {string} sn   the screen name to look for
+ * @return {boolean} 
+ */
+sc.helpers.containsScreenName = function(str, sn) {
+	
+	var re = new RegExp('(?:\s|\b|^[[:alnum:]]|^)@('+sn+')(?:\s|\b|$)', 'gi');
+	if ( re.match(str) ) {
+		return true;
+	}
+	return false;
+	
+};
+
+
+/**
  * This is a port of the CodeIgniter helper "autolink" to javascript
  * It finds and links both web addresses and email addresses
  * 
