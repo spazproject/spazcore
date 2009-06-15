@@ -44,7 +44,7 @@ function SpazPrefs(defaults, sanity_methods) {
 
 
 	if (sanity_methods) {
-		dump('need to add sanity_method parsing');
+		sc.helpers.dump('need to add sanity_method parsing');
 	}
 	
 	if (defaults) {
@@ -71,11 +71,11 @@ SpazPrefs.prototype.setDefaults = function(defaults) {
  */
 SpazPrefs.prototype._applyDefaults = function() {
 	for (key in this._defaults) {
-		dump('Copying default "' + key + '":"' + this._defaults[key] + '" (' + typeof(this._defaults[key]) + ')');
+		sc.helpers.dump('Copying default "' + key + '":"' + this._defaults[key] + '" (' + typeof(this._defaults[key]) + ')');
 		this._prefs[key] = this._defaults[key];
 
 		if (this._sanity_methods[key] && this._sanity_methods[key].onSet) {
-			dump("Calling "+key+".onSet()");
+			sc.helpers.dump("Calling "+key+".onSet()");
 			this._sanity_methods[key].onSet();
 		}
 	}
@@ -100,10 +100,10 @@ SpazPrefs.prototype.get = function(key, encrypted) {
 		return this.getEncrypted(key);
 	} 
 	
-	dump('Looking for pref "'+key+'"');
+	sc.helpers.dump('Looking for pref "'+key+'"');
 	
 	if (this._prefs[key]) {
-		dump('Found pref "'+key+'" of value "'+this._prefs[key]+'" ('+typeof(this._prefs[key])+')');
+		sc.helpers.dump('Found pref "'+key+'" of value "'+this._prefs[key]+'" ('+typeof(this._prefs[key])+')');
 		return this._prefs[key];
 	} else {
 		return false;
@@ -116,7 +116,7 @@ SpazPrefs.prototype.get = function(key, encrypted) {
  */
 SpazPrefs.prototype.set = function(key, val, encrypted) {
 	
-	dump('Setting and saving "'+key+'" to "'+val+'" ('+typeof(val)+')');
+	sc.helpers.dump('Setting and saving "'+key+'" to "'+val+'" ('+typeof(val)+')');
 	
 	if (encrypted) {
 		return this.setEncrypted(key, val);
@@ -191,20 +191,20 @@ SpazPrefs.prototype.load = function(name) {
 		var thisPrefs = this;
 		function onGet(loaded_prefs) {
 			if (loaded_prefs) {
-				dump('Prefs loaded');
+				sc.helpers.dump('Prefs loaded');
 				for (var key in loaded_prefs) {
-					dump('Copying loaded pref "' + key + '":"' + thisPrefs._prefs[key] + '" (' + typeof(thisPrefs._prefs[key]) + ')');
+					sc.helpers.dump('Copying loaded pref "' + key + '":"' + thisPrefs._prefs[key] + '" (' + typeof(thisPrefs._prefs[key]) + ')');
 		            thisPrefs._prefs[key] = loaded_prefs[key];
 		       	}
 			} else {
-				dump('Prefs loading failed in onGet')
+				sc.helpers.dump('Prefs loading failed in onGet')
 				thisPrefs.resetPrefs();
 			}
 			jQuery().trigger('spazprefs_loaded');
 		}
 		
 		function onFail() {
-			dump('Prefs loading failed in onFail');
+			sc.helpers.dump('Prefs loading failed in onFail');
 			thisPrefs.resetPrefs();
 		}
 	}
@@ -218,7 +218,7 @@ SpazPrefs.prototype.load = function(name) {
 			var prefs_json = Titanium.App.Properties.getString(SPAZCORE_PREFS_TI_KEY);
 			var loaded_prefs = sc.helpers.deJSON(prefs_json);
 			for (var key in loaded_prefs) {
-				dump('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
+				sc.helpers.dump('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
 	            this._prefs[key] = loaded_prefs[key];
 	       	}
 		} else {
