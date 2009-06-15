@@ -20,7 +20,7 @@ sc.helpers.removeExtraElements = function(item_selector, max_items, remove_from_
 		remove_from_top = false;
 	}
 
-	jqitems = jQuery(item_selector);
+	var jqitems = jQuery(item_selector);
 
 	var parent = jqitems.parent().get(0);
 
@@ -30,11 +30,11 @@ sc.helpers.removeExtraElements = function(item_selector, max_items, remove_from_
 
 		if (!remove_from_top) {
 	        jqitems.slice(diff * -1).each( function() {
-				parent.removeChild( this );
+				this.parentNode.removeChild( this );
 			} );
 		} else {
 	        jqitems.slice(diff).each( function() {
-				parent.removeChild( this );
+				this.parentNode.removeChild( this );
 			} );
 		}
 	}

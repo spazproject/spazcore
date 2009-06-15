@@ -19,6 +19,11 @@ const SPAZCORE_SECTION_PUBLIC = 'public';
 const SPAZCORE_SECTION_SEARCH = 'search';
 const SPAZCORE_SECTION_USER = 'user-timeline';
 
+const SPAZCORE_SERVICE_TWITTER = 'twitter';
+const SPAZCORE_SERVICE_IDENTICA = 'identi.ca';
+const SPAZCORE_SERVICE_CUSTOM = 'custom';
+const SPAZCORE_SERVICEURL_TWITTER = 'https://twitter.com/';
+const SPAZCORE_SERVICEURL_IDENTICA = 'https://identi.ca/api/';
 
 /**
  * A Twitter API library for Javascript
@@ -99,7 +104,7 @@ function SpazTwit(username, password) {
 	this.me = {};
 	
 
-	this.setBaseURL('https://twitter.com/');
+	this.setBaseURL(SPAZCORE_SERVICEURL_TWITTER);
 
 	/*
 		apply defaults for ajax calls
@@ -240,12 +245,36 @@ SpazTwit.prototype.combinedTimelineHasErrors = function() {
 
 
 
-/*
+/**
  * sets the base URL
- * @param newurl string
-*/
+ * @param {string} newurl
+ */
 SpazTwit.prototype.setBaseURL= function(newurl) {
 	this.baseurl = newurl;
+};
+
+
+/**
+ * sets the base URL by the service type
+ * @param {string} service  see SPAZCORE_SERVICE_* 
+ */
+SpazTwit.prototype.setBaseURLByService= function(service) {
+	
+	var baseurl = '';
+	
+	switch (service) {
+		case SPAZCORE_SERVICE_TWITTER:
+			baseurl = SPAZCORE_SERVICEURL_TWITTER;
+			break;
+		case SPAZCORE_SERVICE_IDENTICA:
+			baseurl = SPAZCORE_SERVICEURL_IDENTICA;
+			break;
+		default:
+			baseurl = SPAZCORE_SERVICEURL_TWITTER;
+			break;
+	}
+	
+	this.baseurl = baseurl;
 };
 
 
@@ -315,9 +344,15 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 	urls.update_profile		= "account/update_profile.json";
 
 	// search
-	urls.search				= "http://search.twitter.com/search.json";
-	urls.trends				= "http://search.twitter.com/trends.json";
-	urls.saved_searches		= "http://search.twitter.com/saved_searches.json";
+	if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER) {
+		urls.search				= "http://search.twitter.com/search.json";
+		urls.trends				= "http://search.twitter.com/trends.json";
+		urls.saved_searches		= "http://search.twitter.com/saved_searches.json";
+	} else {
+		urls.search				= "search.json";
+		urls.trends				= "trends.json";
+		urls.saved_searches		= "saved_searches.json";
+	}
 
     // misc
     urls.test 			  	= "help/test.json";
@@ -342,7 +377,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 			urldata = '';
 		}
 		
-		if (key == 'search' || key == 'trends') {
+		if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER && (key == 'search' || key == 'trends')) {
 			return this._postProcessURL(urls[key] + urldata);
 		} else {
 			return this._postProcessURL(this.baseurl + urls[key] + urldata);
@@ -1533,7 +1568,7 @@ SpazTwit.prototype.updateLocation = function(location_str) {
 	var data = {};
 	data.location = location_str;
 	
-	this.setBaseURL('http://twitter.com/');
+	this.setBaseURL(SPAZCORE_SERVICEURL_TWITTER);
 	
 	var url = this.getAPIURL('update_profile');
 	
