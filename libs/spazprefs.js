@@ -100,7 +100,10 @@ SpazPrefs.prototype.get = function(key, encrypted) {
 		return this.getEncrypted(key);
 	} 
 	
+	dump('Looking for pref "'+key+'"');
+	
 	if (this._prefs[key]) {
+		dump('Found pref "'+key+'" of value "'+this._prefs[key]+'" ('+typeof(this._prefs[key])+')');
 		return this._prefs[key];
 	} else {
 		return false;
