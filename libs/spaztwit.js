@@ -323,7 +323,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.dm_sent            = "direct_messages/sent.json";
     urls.friendslist        = "statuses/friends.json";
     urls.followerslist      = "statuses/followers.json";
-    urls.show_user			= "users/{{ID}}.json";
+    urls.show_user			= "users/show/{{ID}}.json";
     urls.featuredlist       = "statuses/featured.json";
 
     // Action URLs
