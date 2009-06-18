@@ -69,10 +69,16 @@ sc.helpers.triggerCustomEvent = function(event_type, target, data, bubble) {
  * Alias for sc.helpers.addListener 
  * @function
  */
-var sc.helpers.listen = sc.helpers.addListener;
+sc.helpers.listen = sc.helpers.addListener;
 
 /**
  * Alias for sc.helpers.removeListener
  * @function
  */
-var sc.helpers.unlisten = sc.helpers.removeListener;
+sc.helpers.unlisten = sc.helpers.removeListener;
+
+/**
+ * Alias for sc.helpers.triggerCustomEvent 
+ * @function
+ */
+sc.helpers.trigger  = sc.helpers.triggerCustomEvent;

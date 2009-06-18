@@ -20,3 +20,6 @@ sc.helpers = {};
  * 
  */
 var sch = sc.helpers;
+
+
+sc.events = {};
