@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>SpazCore URL Shortener Example</title>
+	
+	<!-- Load required vendor libs -->
+	<script src="vendors/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="vendors/json2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="vendors/webtoolkit.base64.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore base lib -->
+	<script src="libs/spazcore.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore helpers -->
+	<script src="helpers/datetime.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/event.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/javascript.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/json.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/string.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/sys.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/view.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/xml.js" type="text/javascript" charset="utf-8"></script>
+	
+	<!-- Load SpazCore libraries -->
+	<script src="libs/spazcron.js" type="text/javascript" charset="utf-8"></script>
+	<script src="libs/spazprefs.js" type="text/javascript" charset="utf-8"></script>
+	<script src="libs/spazshorturl.js" type="text/javascript" charset="utf-8"></script>
+	<script src="libs/spaztemplate.js" type="text/javascript" charset="utf-8"></script>
+	<script src="libs/spaztwit.js" type="text/javascript" charset="utf-8"></script>
+	<script src="libs/spazlocker.js" type="text/javascript" charset="utf-8"></script>
+	
+	<script type="text/javascript" charset="utf-8">
+	
+	/*
+		display the data passed from the event
+	*/
+	function showShortUrl(e) {
+		
+		$('#results').fadeIn(200, function() {
+			$('#short-url').html(e[SPAZCORE_EVENTDATA_ATTRIBUTE].shorturl);	
+		});
+		
+	}
+
+	function showLongUrl(e) {
+		
+		$('#expand-results').fadeIn(200, function() {
+			$('#expanded_url').html(e[SPAZCORE_EVENTDATA_ATTRIBUTE].longurl);
+		});
+		
+	}
+	
+	$().ready( function() {
+
+		/*
+			add event listeners
+		*/
+		sc.helpers.listen($('#shorten').get(0), sc.events.newShortURLSuccess, showShortUrl);	
+
+		sc.helpers.listen($('#expand').get(0), sc.events.newExpandURLSuccess, showLongUrl);	
+
+		/*
+			Make a shortURL object instance
+		*/
+		var shurl = new SpazShortURL( $('#service').val() );
+
+		$('#shorten').click(function() {
+
+			$('#results').fadeOut(200);
+			
+			var longurl = $('#long_url').val();
+			
+			/*
+				shorten the long URL and set the event target
+				to the #shorten element ('this' in this scope)
+			*/
+			shurl.shorten(longurl, {
+				'event_target':this
+			});
+			
+		});
+
+
+		$('#expand').click(function() {
+			
+			$('#expand-results').fadeOut(200);
+			
+			var longurl = $('#expand_short_url').val();
+			
+			/*
+				shorten the long URL and set the event target
+				to the #shorten element ('this' in this scope)
+			*/
+			shurl.expand(longurl, {
+				'event_target':this
+			});
+			
+		});
+		
+	});
+	</script>
+	
+</head>
+
+<body>
+	<form>
+		<label for="long_url">Long url</label>
+		<input type="text" name="long_url" size="60" value="http://www.cherny.com/webdev/60/javascript-function-arguments-default-values-passing-objects-and-overloading" id="long_url" /><br>
+
+		<select name="service" id="service">
+			<option value="short.ie">short.ie</option>
+			<option value="bit.ly">bit.ly</option>
+			<option value="is.gd">is.gd</option>
+		</select>
+		<input type="button" name="shorten" value="Shorten!" id="shorten">
+	</form>
+	
+	<div id="results">
+		<p>Short URL: <span id="short-url"></span></p>
+	</div>
+
+	<form>
+		<label for="expand_short_url">Short url</label>
+		<input type="text" name="expand_short_url" size="60" value="http://short.ie/hv6uo5" id="expand_short_url" /><br>
+		<input type="button" name="expand" value="Expand!" id="expand">
+	</form>
+	
+	<div id="expand-results">
+		<p>Long URL: <span id="expanded_url"></span></p>
+	</div>
+
+</body>
+</html>
