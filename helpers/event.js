@@ -13,11 +13,26 @@ const SPAZCORE_EVENTDATA_ATTRIBUTE = 'sc_data';
  * @param {boolean} use_capture  defaults to false
  * @function
  */
-sc.helpers.addListener = function(target, event_type, handler, use_capture) {
+sc.helpers.addListener = function(target, event_type, handler, scope, use_capture) {
 	if (use_capture !== true) {
 		use_capture = false;
 	}
-	target.addEventListener(event_type, handler, use_capture);
+	
+	if (scope) {
+		
+		function scope_perserver(e) {
+			handler.call(scope, e);
+		}
+		
+		target.addEventListener(event_type, scope_perserver, use_capture);
+
+	} else {
+		
+		target.addEventListener(event_type, handler, use_capture);
+
+	}
+	
+	
 };
 
 
@@ -32,11 +47,22 @@ sc.helpers.addListener = function(target, event_type, handler, use_capture) {
  * @param {boolean} use_capture  defaults to false
  * @function
  */
-sc.helpers.removeListener = function(target, event_type, handler, use_capture) {
+sc.helpers.removeListener = function(target, event_type, handler, scope, use_capture) {
 	if (use_capture !== true) {
 		use_capture = false;
 	}
-	target.removeEventListener(event_type, handler, use_capture);
+	
+	if (scope) {
+		
+		function scope_perserver(e) {
+			handler.call(scope, e);
+		}
+		
+		target.removeEventListener(event_type, scope_perserver, use_capture);
+
+	} else {
+		target.removeEventListener(event_type, handler, use_capture);
+	}
 };
 
 
@@ -64,6 +90,14 @@ sc.helpers.triggerCustomEvent = function(event_type, target, data, bubble) {
 	target.dispatchEvent(ev);
 	
 };
+
+/**
+ * retrieves the data added to this event object
+ * @param {DOMEvent} event_obj 
+ */
+sc.helpers.getEventData = function(event_obj) {
+	return event_obj[SPAZCORE_EVENTDATA_ATTRIBUTE];
+}
 
 /**
  * Alias for sc.helpers.addListener 
