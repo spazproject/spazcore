@@ -15,23 +15,65 @@
  */
 var SpazTimeline = function(opts) {
 	
+	var thisTL = this;	
+	/**
+	 * This is a wrapper function for the refresher interval
+	 * we define this here and use a closure to solve a scope issue when the interval fires
+	 * @function
+	 */
+	this.refresh = function() {
+		thisTL.requestData.call(thisTL);
+	};
+	
 	/*
 		By breaking this out, we can more easily override the 
 		constructor process
 	*/
-	this._init(opts)
+	this._init(opts);
 };
 
 
 SpazTimeline.prototype._init = function(opts) {
 	
-	this.max_items    = 100;	
-	this.refresh_time = 1000*60*2; // mseconds
-	this.refresher    = null;
-	this.timeline_container_selector = '#timeline';
+	var opts = opts || {};
 	
+	this.max_items                   = opts.max_items     || 100;	
+	this.refresh_time                = opts.refresh_time  || 1000*60*2; // mseconds
 	
+	this.timeline_container_selector = opts.timeline_container_selector || '#timeline';
+	this.timeline_item_selector      = opts.timeline_item_selector		|| 'div.timeline-entry';
+	// this.entry_relative_time_selector= opts.entry_relative_time_selector|| '.date';
 	
+	this.add_method			 		 = opts.add_method    || 'prepend';  // prepend or append
+	
+	this.success_event				 = opts.success_event || 'timeline-success';
+	this.failure_event				 = opts.failure_event || 'timeline-failure';
+	
+	this.renderer	                 = opts.renderer      || null;  // required
+	this.request_data				 = opts.request_data  || null;  // required
+	this.data_success				 = opts.data_success  || null;  // required
+	this.data_failure				 = opts.data_failure  || null;
+	this.refresher                   = opts.refresher     || null;
+	
+	if (!this.renderer) {
+		throw new Error ("renderer is required");
+	}
+	if (!this.request_data) {
+		throw new Error ("request_data is required");
+	}
+	if (!this.data_success) {
+		throw new Error ("data_success is required");
+	}
+
+
+
+};
+
+/**
+ * call this after initialization 
+ */
+SpazTimeline.prototype.start = function() {
+	this.requestData();
 };
 
 
@@ -40,25 +82,36 @@ SpazTimeline.prototype._init = function(opts) {
  * 
  * @todo needs to be written to handle async call
  */
-SpazTimeline.prototype.getData = function() {
+SpazTimeline.prototype.requestData = function() {
 	this.stopRefresher();
 	
+	this.stopListening();
+	this.startListening();
+	
 	// call an appropriate model function
-	var items = Model.getData();
-	
-	// bind a listener to wait for this
-	this.addItems(items);
-	this.startRefresher();
-	
+	var items = this.request_data();	
 };
 
 
 
+SpazTimeline.prototype.startListening = function() {
+	var thisTL = this;
+	sc.helpers.listen(document, this.success_event, thisTL.onSuccess, this);
+	sc.helpers.listen(document, this.failure_event, thisTL.onFailure, this);
+};
+
+
+SpazTimeline.prototype.stopListening = function() {
+	var thisTL = this;
+	sc.helpers.unlisten(document, this.success_event, thisTL.onSuccess, this);
+	sc.helpers.unlisten(document, this.failure_event, thisTL.onFailure, this);
+};
+
 
 
 SpazTimeline.prototype.startRefresher = function() {
-	this.stopInterval();
-	this.refresher = setInterval(this.getData, this.refresh_time);
+	this.stopRefresher();
+	this.refresher = setInterval(this.refresh, this.refresh_time);
 };
 
 
@@ -67,20 +120,73 @@ SpazTimeline.prototype.stopRefresher = function() {
 };
 
 
-SpazTimeline.prototype.addItems = function(items) {
-	for (var x=0; x<items.length, x++) {
-		this.addItem(item);
-	}
+SpazTimeline.prototype.onSuccess = function(e) {
+	var data = sc.helpers.getEventData(e);
+	this.data_success.call(this, e, data);
+	this.startRefresher();	
+};
+
+SpazTimeline.prototype.onFailure = function(e) {
+	var data = sc.helpers.getEventData(e);
+	this.data_failure.call(this, e, data);
+	this.startRefresher();	
 };
 
 
-SpazTimeline.prototype.addItem = function(itemobj) {
+
+/**
+ * Stuff we should do when we're done using this, including
+ * removing event listeners an stopping the refresher 
+ */
+SpazTimeline.prototype.cleanup = function() {
+	this.stopListening();
+	this.stopRefresher();
+};
+
+/**
+ * given an array of objects, this will render them and add them to the timeline
+ * @param {array} items
+ */
+SpazTimeline.prototype.addItems = function(items) {
+	var items_html    = [];
+	var timeline_html = '';
 	
-	// 1. render the item to html with a templating call
-	View.tpl.render('timeline_item', itemobj);
-	// 2. add the html item to the timeline
+	for (var x=0; x<items.length; x++) {
+		items_html.push( this.renderItem(items[x], this.renderer) );
+	}
 	
+	if (this.add_method === 'append') {
+		items_html.reverse();
+		timeline_html = '<div>'+items_html.join('')+'</div>';
+		this.append(timeline_html);
+	} else {
+		timeline_html = '<div>'+items_html.join('')+'</div>';
+		this.prepend(timeline_html);
+	}
 	
+	this.removeExtraItems();
+	
+};
+
+
+SpazTimeline.prototype.renderItem = function(item, templatefunc) {
+	
+	var html = templatefunc(item);
+	
+	return html;
+	
+}
+
+
+SpazTimeline.prototype.removeExtraItems = function() {
+	
+	if (this.add_method === 'append') {
+		var remove_from_top = true;
+	} else {
+		remove_from_top = false;
+	}
+	
+	sc.helpers.removeExtraElements(this.getEntrySelector(), this.max_items, remove_from_top);
 };
 
 
@@ -90,7 +196,8 @@ SpazTimeline.prototype.removeItems = function(selector) {};
 SpazTimeline.prototype.removeItem = function(selector) {};
 
 /**
- * @type {boolean} 
+ * @param {string} selector
+ * @return {boolean} 
  */
 SpazTimeline.prototype.itemExists = function(selector) {
 	var items = this.select(selector);
@@ -126,7 +233,6 @@ SpazTimeline.prototype.filterItems = function(selector, type) {};
 SpazTimeline.prototype.sortItems = function(selector, sortfunc) {
 	var items = this.select(selector);
 	items.sort(sortfunc);
-	
 };
 
 
@@ -148,8 +254,12 @@ SpazTimeline.prototype.select = function(selector, container) {
  * wrapper for prepending to timeline 
  */
 SpazTimeline.prototype.prepend = function(htmlitem) {
-	jQuery(container).prepend(htmlitem);
+	jQuery(this.timeline_container_selector).prepend(htmlitem);
 };
 SpazTimeline.prototype.append = function(htmlitem) {
-	jQuery(container).append(htmlitem);
+	jQuery(this.timeline_container_selector).append(htmlitem);
+};
+
+SpazTimeline.prototype.getEntrySelector = function() {
+	return this.timeline_container_selector + ' ' + this.timeline_item_selector;
 };

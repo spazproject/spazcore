@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>SpazCore Example Shell</title>
+	
+	<!-- Load required vendor libs -->
+	<script src="vendors/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="vendors/json2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="vendors/webtoolkit.base64.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore base lib -->
+	<script src="libs/spazcore.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore helpers -->
+	<script src="helpers/datetime.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/event.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/javascript.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/json.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/string.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/sys.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/view.js" type="text/javascript" charset="utf-8"></script>
+	<script src="helpers/xml.js" type="text/javascript" charset="utf-8"></script>
+	
+	<!-- Load SpazCore libraries -->
+	<script src="libs/spazcron.js" type="text/javascript" charset="utf-8"></script>
+	<script src="libs/spazprefs.js" type="text/javascript" charset="utf-8"></script>
+	<script src="libs/spazshorturl.js" type="text/javascript" charset="utf-8"></script>
+	<script src="libs/spaztemplate.js" type="text/javascript" charset="utf-8"></script>
+	<script src="libs/spaztimeline.js" type="text/javascript" charset="utf-8"></script>
+	<script src="libs/spaztwit.js" type="text/javascript" charset="utf-8"></script>
+	<script src="libs/spazlocker.js" type="text/javascript" charset="utf-8"></script>
+	
+	<script type="application/x-javascript">
+		var tpl  = new SpazTemplate();
+		tpl.addTemplateMethod('tweet', function(d) {
+			var html = '';
+
+			html += '<div class="timeline-entry';
+			if (!d.not_new) {
+				html += ' new';
+			}
+			if (d.SC_is_reply) {
+				html += ' reply'
+			}
+			html += '" data-status-id="'+d.id+'" data-user-id="'+d.user.id+'" data-user-screen_name="'+d.user.screen_name+'" data-timestamp="'+d.created_at_unixtime+'">';
+			html += '	<div class="user" data-user-id="'+d.user.id+'" data-user-screen_name="'+d.user.screen_name+'">';
+			html += '		<img src="'+d.user.profile_image_url+'" title="'+d.user.screen_name+'" />';
+			html += '	</div>';
+			html += '	<div class="status">';
+			html += '		<div class="meta-wrapper">';
+			html += '			<div class="screen-name">'+d.user.screen_name;
+			if (d.user.protected) {
+				html += '			<div class="protected-icon"></div>';
+			}
+			html += '			</div>';
+			html += '			<div class="meta" data-status-id="'+d.id+'"><span class="date" data-created_at="'+d.created_at+'">'+d.relative_time+'</span></div>';
+			html += '		</div>';
+			html += '	 	<div class="text">';
+			html += '			'+d.text+'';
+			html += '		</div>';
+			html += '	</div>';
+			html += '</div>';
+
+			return html;
+		});
+		
+		var twit = new SpazTwit();
+		
+		var tl   = new SpazTimeline({
+			'timeline_container_selector' :'#public-timeline',
+			'entry_relative_time_selector':'span.date',
+			
+			'success_event':'new_public_timeline_data',
+			'failure_event':'error_public_timeline_data',
+			
+			'refresh_time':1000*60,
+			'max_items':30,
+
+			'request_data': function() {
+				twit.getPublicTimeline();
+			},
+			'data_success': function(e, data) {
+				tl.addItems(data);
+				sc.helpers.updateRelativeTimes('#public-timeline div.timeline-entry span.date', 'data-created_at');
+			},
+			'data_failure': function(e, data) {
+				
+			},
+			'renderer': function(obj) {
+				return tpl.parseTemplate('tweet', obj);
+			}
+		});
+		
+
+				
+		
+		$().ready(function() {
+			
+			tl.start();
+			
+		});
+		
+	</script>
+	
+	
+</head>
+
+<body>
+	
+	<div id="public-timeline"></div>
+
+</body>
+</html>

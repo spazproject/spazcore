@@ -46,10 +46,18 @@
 		
 	}
 
+	function showMultipleShortURLs(e) {
+		
+		$('#multiple-results').fadeIn(200, function() {
+			$('#shortened-URLs').html(e[SPAZCORE_EVENTDATA_ATTRIBUTE].shorturl);	
+		});
+		
+	}
+
 	function showLongUrl(e) {
 		
 		$('#expand-results').fadeIn(200, function() {
-			$('#expanded_url').html(e[SPAZCORE_EVENTDATA_ATTRIBUTE].longurl);
+			$('#shortened-URLs').html(e[SPAZCORE_EVENTDATA_ATTRIBUTE].longurl);
 		});
 		
 	}
@@ -61,7 +69,9 @@
 		*/
 		sc.helpers.listen($('#shorten').get(0), sc.events.newShortURLSuccess, showShortUrl);	
 
-		sc.helpers.listen($('#expand').get(0), sc.events.newExpandURLSuccess, showLongUrl);	
+		sc.helpers.listen($('#expand').get(0), sc.events.newExpandURLSuccess, showLongUrl);
+		
+		sc.helpers.listen($('#shorten-multiple').get(0), sc.events.newShortURLSuccess, showMultipleShortURLs);
 
 		/*
 			Make a shortURL object instance
@@ -91,12 +101,42 @@
 			
 			var longurl = $('#expand_short_url').val();
 			
+			shurl.expand(longurl, {
+				'event_target':this
+			});
+			
+		});
+
+
+
+		$('#shorten-multiple').click(function() {
+			
+			/*
+				we use bitly because it supports multiple urls per request
+			*/
+			var bitly = new SpazShortURL( SPAZCORE_SHORTURL_SERVICE_BITLY );
+			
+			$('#multiple-results').fadeOut(200);
+			
+			var msgtext = $('#multiple_url').val();
+			
+			/*
+				search and build an array of URLS
+			*/
+			var urls = sc.helpers.extractURLs(msgtext);
+
 			/*
 				shorten the long URL and set the event target
 				to the #shorten element ('this' in this scope)
 			*/
-			shurl.expand(longurl, {
-				'event_target':this
+			bitly.shorten(urls, {
+				'event_target':this,
+				'apiopts': {
+					'version':'2.0.1',
+					'format':'json',
+					'login':'spazcore',
+					'apiKey':'R_f3b86681a63a6bbefc7d8949fd915f1d'
+				}
 			});
 			
 		});
@@ -123,6 +163,7 @@
 		<p>Short URL: <span id="short-url"></span></p>
 	</div>
 
+
 	<form>
 		<label for="expand_short_url">Short url</label>
 		<input type="text" name="expand_short_url" size="60" value="http://short.ie/hv6uo5" id="expand_short_url" /><br>
@@ -132,6 +173,20 @@
 	<div id="expand-results">
 		<p>Long URL: <span id="expanded_url"></span></p>
 	</div>
+	
+	
+	<form>
+		<label for="multiple_url">Multiple URLs</label><br>
+		<textarea name="multiple_url" id="multiple_url" rows="8" cols="40">sweet baby jesus http://www.irregularwebcomic.net/2339.html apricot jam: http://www.flickr.com/photos/mellowynk/3649114702/</textarea><br>
+		<input type="button" name="shorten-multiple" value="Shorten Multiple!" id="shorten-multiple">
+	</form>
+	
+	<div id="multiple-results">
+		<p>Shortened URLs: <span id="shortened-URLs"></span></p>
+	</div>
+	
+	
+	
 
 </body>
 </html>

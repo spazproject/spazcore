@@ -31,12 +31,23 @@ function SpazShortURL(service) {
 }
 
 SpazShortURL.prototype.getAPIObj = function(service) {
+	
 	var apis = {}
-		
+	
 	apis[SPAZCORE_SHORTURL_SERVICE_BITLY] = {
 		'url'	  : 'http://bit.ly/api',
-		'getData' : function(longurl){
-			return { 'url':longurl };
+		'getData' : function(longurl, opts){
+			
+			/*
+				use the api if we're doing multiple URLs
+			*/
+			if (sc.helpers.isArray(longurl)) {
+				apis[SPAZCORE_SHORTURL_SERVICE_BITLY].url = 'http://api.bit.ly/shorten';
+				opts.longUrl = longurl;
+				return opts;
+			} else {
+				return { 'url':longurl };				
+			}
 		}
 	};
 		
@@ -61,7 +72,7 @@ SpazShortURL.prototype.getAPIObj = function(service) {
 		
 	apis[SPAZCORE_SHORTURL_SERVICE_ISGD] = {
 		'url'	  : 'http://is.gd/api.php',
-		'getData' : function(longurl) {
+		'getData' : function(longurl, opts) {
 			return { 'longurl':longurl };
 		}
 	};
@@ -76,6 +87,11 @@ SpazShortURL.prototype.getAPIObj = function(service) {
  * @param {object} opts   right now opts.event_target (a DOMelement) and opts.apiopts (passed to api's getData() call) are supported
  */
 SpazShortURL.prototype.shorten = function(longurl, opts) {
+	
+	/*
+		we call getData now in case it needs to override anything
+	*/
+	var data = this.api.getData(longurl, opts.apiopts);
 	
 	var shortener = this;
 	
@@ -118,7 +134,7 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 		beforeSend:function(xhr) {},
 		type:"GET",
 		url :this.api.url,
-		data:this.api.getData(longurl, opts.apiopts)
+		data:data
 	});
 };
 
