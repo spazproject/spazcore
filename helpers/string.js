@@ -28,6 +28,25 @@ sc.helpers.extractURLs = function(str) {
 	return URLs;
 };
 
+/**
+ * given as string and a mapping object, replace multiple values in the string (or vice versa)
+ * map should be of format
+ * {
+ * 	'searchforme':'replacewithme',
+ * 	'searchforme2':'replacewithme2',
+ * 	'searchforme3':'replacewithme3'
+ * }
+ * @param {string} str
+ * @param {object} map
+ * @return {string}
+ */
+sc.helpers.replaceMultiple = function(str, map) {
+	for (var key in map) {
+		str = str.replace(key, map[key]);
+	}
+	return str;
+};
+
 
 /**
  * This is a port of the CodeIgniter helper "autolink" to javascript

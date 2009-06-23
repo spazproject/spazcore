@@ -48,16 +48,22 @@
 
 	function showMultipleShortURLs(e) {
 		
-		$('#multiple-results').fadeIn(200, function() {
-			$('#shortened-URLs').html(e[SPAZCORE_EVENTDATA_ATTRIBUTE].shorturl);	
-		});
+		// $('#multiple-results').fadeIn(200, function() {
+		// 	$('#shortened-URLs').html(sc.helpers.getEventData(e));	
+		// });
+		
+		var data = sc.helpers.getEventData(e);
+		
+		var html = jQuery('#multiple_url').val();
+		html = sc.helpers.replaceMultiple(html, data);
+		jQuery('#multiple_url').val(html);
 		
 	}
 
 	function showLongUrl(e) {
 		
 		$('#expand-results').fadeIn(200, function() {
-			$('#shortened-URLs').html(e[SPAZCORE_EVENTDATA_ATTRIBUTE].longurl);
+			$('#expanded_url').html(e[SPAZCORE_EVENTDATA_ATTRIBUTE].longurl);
 		});
 		
 	}
@@ -180,12 +186,6 @@
 		<textarea name="multiple_url" id="multiple_url" rows="8" cols="40">sweet baby jesus http://www.irregularwebcomic.net/2339.html apricot jam: http://www.flickr.com/photos/mellowynk/3649114702/</textarea><br>
 		<input type="button" name="shorten-multiple" value="Shorten Multiple!" id="shorten-multiple">
 	</form>
-	
-	<div id="multiple-results">
-		<p>Shortened URLs: <span id="shortened-URLs"></span></p>
-	</div>
-	
-	
 	
 
 </body>
