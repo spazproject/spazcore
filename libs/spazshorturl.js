@@ -42,13 +42,28 @@ SpazShortURL.prototype.getAPIObj = function(service) {
 				use the api if we're doing multiple URLs
 			*/
 			if (sc.helpers.isArray(longurl)) {
+				apis[SPAZCORE_SHORTURL_SERVICE_BITLY].processing_multiple = true;
 				apis[SPAZCORE_SHORTURL_SERVICE_BITLY].url = 'http://api.bit.ly/shorten';
 				opts.longUrl = longurl;
 				return opts;
 			} else {
+				apis[SPAZCORE_SHORTURL_SERVICE_BITLY].processing_multiple = false;
 				return { 'url':longurl };				
 			}
+		},
+		'processResult' : function(data) {
+			if (apis[SPAZCORE_SHORTURL_SERVICE_BITLY].processing_multiple === true) {
+				var result = sc.helpers.deJSON(data);
+				var rs = {}
+				for (var i in result.results) {
+					rs[i] = result.results[i].shortUrl;
+				}
+				return rs;
+			} else {
+				return data;
+			}
 		}
+		
 	};
 		
 	apis[SPAZCORE_SHORTURL_SERVICE_SHORTIE] = {
@@ -88,21 +103,21 @@ SpazShortURL.prototype.getAPIObj = function(service) {
  */
 SpazShortURL.prototype.shorten = function(longurl, opts) {
 	
-	/*
-		we call getData now in case it needs to override anything
-	*/
-	var data = this.api.getData(longurl, opts.apiopts);
-	
 	var shortener = this;
 	
 	if (!opts) { opts = {} };
-	
+
 	/*
 		set defaults if needed
 	*/
 	opts.event_target = opts.event_target || document;
 	opts.apiopts	  = opts.apiopts	  || null;
-	
+
+	/*
+		we call getData now in case it needs to override anything
+	*/
+	var data = this.api.getData(longurl, opts.apiopts);
+		
 
 	var xhr = jQuery.ajax({
 		complete:function(xhr, rstr) {
@@ -123,13 +138,16 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 		},
 		success:function(data) {
 			// var shorturl = trim(data);
-			var shorturl = data;
-			shortener._onShortenResponseSuccess({
-					'shorturl':shorturl,
+			if (shortener.api.processResult) {
+				return_data = shortener.api.processResult(data);
+			} else {
+				return_data = {
+					'shorturl':data,
 					'longurl' :longurl
-				},
-				opts.event_target
-			);
+				}
+			}
+			
+			shortener._onShortenResponseSuccess(return_data, opts.event_target);
 		},
 		beforeSend:function(xhr) {},
 		type:"GET",
