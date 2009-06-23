@@ -112,11 +112,15 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 	*/
 	opts.event_target = opts.event_target || document;
 	opts.apiopts	  = opts.apiopts	  || null;
-
+	
 	/*
 		we call getData now in case it needs to override anything
 	*/
-	var data = this.api.getData(longurl, opts.apiopts);
+	var apidata = this.api.getData(longurl, opts.apiopts);
+
+	if (sc.helpers.getMojoURL) {
+		this.api.url = sc.helpers.getMojoURL(this.api.url);
+	}
 		
 
 	var xhr = jQuery.ajax({
@@ -138,6 +142,7 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 		},
 		success:function(data) {
 			// var shorturl = trim(data);
+			var return_data = {};
 			if (shortener.api.processResult) {
 				return_data = shortener.api.processResult(data);
 			} else {
@@ -146,14 +151,13 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 					'longurl' :longurl
 				}
 			}
-			
 			shortener._onShortenResponseSuccess(return_data, opts.event_target);
 		},
-		beforeSend:function(xhr) {},
-		type:"GET",
-		url :this.api.url,
-		data:data
+		'type':"POST",
+		'url' :this.api.url,
+		'data':apidata
 	});
+
 };
 
 SpazShortURL.prototype._onShortenResponseSuccess = function(data, target) {

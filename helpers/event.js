@@ -80,12 +80,12 @@ sc.helpers.triggerCustomEvent = function(event_type, target, data, bubble) {
 	if (bubble !== false) {
 		bubble = true;
 	}
-	
+
 	var ev = document.createEvent("Events"); // use the Events event module
-	
+
 	ev.initEvent(event_type, bubble, true);
 
-    ev[SPAZCORE_EVENTDATA_ATTRIBUTE] = data;
+	ev[SPAZCORE_EVENTDATA_ATTRIBUTE] = data;
 
 	target.dispatchEvent(ev);
 	

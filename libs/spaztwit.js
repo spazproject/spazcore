@@ -1639,21 +1639,17 @@ SpazTwit.prototype._postProcessURL = function(url) {
 	
 	if (typeof Mojo != "undefined") { // we're in webOS		
 		if (use_palmhost_proxy) { // we are not on an emu or device, so proxy calls
-		// if (window.palmService === undefined) { // we are not on an emu or device, so proxy calls
 			var re = /https?:\/\/.[^\/:]*(?::[0-9]+)?/;
 			var match = url.match(re);
 			if (match && match[0] != Mojo.hostingPrefix) {
 				url = "/proxy?url=" + encodeURIComponent(url);
 			}
-			// this.controller.scene.showAlertDialog("Proxy URL is "+url);
 			return url;		
 		} else {
-			// this.controller.scene.showAlertDialog("URL is "+url);
 			return url;
 		}
 		
 	} else {
-		// this.controller.scene.showAlertDialog("URL is "+url);
 		return url;
 	}
 }

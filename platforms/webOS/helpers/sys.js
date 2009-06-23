@@ -31,3 +31,26 @@ sc.helpers.dump = function(obj) {
 	}
 
 }
+
+
+/**
+ * this is specific to webOS, for retrieving the proper URL prefixed with the Palm Host proxy if needed 
+ */
+sc.helpers.getMojoURL = function(url) {
+	if (typeof Mojo != "undefined") { // we're in webOS		
+		if (use_palmhost_proxy) { // we are not on an emu or device, so proxy calls
+			var re = /https?:\/\/.[^\/:]*(?::[0-9]+)?/;
+			var match = url.match(re);
+			if (match && match[0] != Mojo.hostingPrefix) {
+				url = "/proxy?url=" + encodeURIComponent(url);
+			}
+			return url;		
+		} else {
+			return url;
+		}
+
+	} else {
+		return url;
+	}
+	
+};
