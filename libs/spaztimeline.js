@@ -1,9 +1,7 @@
 /**
  * @fileOverview File containing the SpazTimeline object definition
  * @author <a href="mailto:coj@funkatron.com">coj@funkatron.com</a>
- * @version 0.1 
  */
-
 
 
 /**
@@ -43,6 +41,7 @@ SpazTimeline.prototype._init = function(opts) {
 	this.timeline_container_selector = opts.timeline_container_selector || '#timeline';
 	this.timeline_item_selector      = opts.timeline_item_selector		|| 'div.timeline-entry';
 	// this.entry_relative_time_selector= opts.entry_relative_time_selector|| '.date';
+	this.event_target				 = opts.event_target || $(this.timeline_container_selector).get(0);
 	
 	this.add_method			 		 = opts.add_method    || 'prepend';  // prepend or append
 	
@@ -96,15 +95,15 @@ SpazTimeline.prototype.requestData = function() {
 
 SpazTimeline.prototype.startListening = function() {
 	var thisTL = this;
-	sc.helpers.listen(document, this.success_event, thisTL.onSuccess, this);
-	sc.helpers.listen(document, this.failure_event, thisTL.onFailure, this);
+	sc.helpers.listen(this.event_target, this.success_event, thisTL.onSuccess, this);
+	sc.helpers.listen(this.event_target, this.failure_event, thisTL.onFailure, this);
 };
 
 
 SpazTimeline.prototype.stopListening = function() {
 	var thisTL = this;
-	sc.helpers.unlisten(document, this.success_event, thisTL.onSuccess, this);
-	sc.helpers.unlisten(document, this.failure_event, thisTL.onFailure, this);
+	sc.helpers.unlisten(this.event_target, this.success_event, thisTL.onSuccess, this);
+	sc.helpers.unlisten(this.event_target, this.failure_event, thisTL.onFailure, this);
 };
 
 
