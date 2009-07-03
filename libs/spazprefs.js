@@ -85,6 +85,7 @@ SpazPrefs.prototype._applyDefaults = function() {
  * resets all prefs to defaults and saves 
  */
 SpazPrefs.prototype.resetPrefs = function() {
+	
 	this._applyDefaults();
 	this.save();
 };
@@ -174,26 +175,28 @@ SpazPrefs.prototype.setEncrypted = function(key, val) {
  */
 SpazPrefs.prototype.load = function(name) {
 	
+	var thisPrefs = this;
+	
 	/*
 		webOS implementation
 	*/
 	if (sc.helpers.iswebOS()) {
+
+		dump('this is webOS');
 		if (!this.mojoDepot) {
+			sc.helpers.dump('making depot');
 			this.mojoDepot = new Mojo.Depot({
 				name:'SpazDepotPrefs',
 				replace:false
 			});
 		}
-		
 
-		this.mojoDepot.simpleGet('SpazPrefs', onGet, onFail);
 		
-		var thisPrefs = this;
 		function onGet(loaded_prefs) {
 			if (loaded_prefs) {
 				sc.helpers.dump('Prefs loaded');
 				for (var key in loaded_prefs) {
-					sc.helpers.dump('Copying loaded pref "' + key + '":"' + thisPrefs._prefs[key] + '" (' + typeof(thisPrefs._prefs[key]) + ')');
+					//sc.helpers.dump('Copying loaded pref "' + key + '":"' + thisPrefs._prefs[key] + '" (' + typeof(thisPrefs._prefs[key]) + ')');
 		            thisPrefs._prefs[key] = loaded_prefs[key];
 		       	}
 			} else {
@@ -201,12 +204,18 @@ SpazPrefs.prototype.load = function(name) {
 				thisPrefs.resetPrefs();
 			}
 			jQuery().trigger('spazprefs_loaded');
-		}
-		
+		};
+
 		function onFail() {
 			sc.helpers.dump('Prefs loading failed in onFail');
 			thisPrefs.resetPrefs();
-		}
+			jQuery().trigger('spazprefs_loaded');
+		};
+		
+		sc.helpers.dump('simpleget depot');
+		this.mojoDepot.simpleGet('SpazPrefs', onGet, onFail);
+		sc.helpers.dump('sent simpleget');
+
 	}
 	
 	/*
@@ -242,7 +251,7 @@ SpazPrefs.prototype.save = function(name) {
 		if (!this.mojoDepot) {
 			this.mojoDepot = new Mojo.Depot({
 				name:'SpazDepotPrefs',
-				replace:false
+				replace:true
 			});
 		}
 		
