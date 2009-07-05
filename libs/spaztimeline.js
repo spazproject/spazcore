@@ -41,7 +41,7 @@ SpazTimeline.prototype._init = function(opts) {
 	this.timeline_container_selector = opts.timeline_container_selector || '#timeline';
 	this.timeline_item_selector      = opts.timeline_item_selector		|| 'div.timeline-entry';
 	// this.entry_relative_time_selector= opts.entry_relative_time_selector|| '.date';
-	this.event_target				 = opts.event_target || $(this.timeline_container_selector).get(0);
+	this.event_target				 = opts.event_target || jQuery(this.timeline_container_selector).get(0);
 	
 	this.add_method			 		 = opts.add_method    || 'prepend';  // prepend or append
 	
