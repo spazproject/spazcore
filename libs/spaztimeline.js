@@ -75,6 +75,13 @@ SpazTimeline.prototype.start = function() {
 	this.requestData();
 };
 
+/**
+ * right now this does the same as start(), but could change in the future 
+ */
+SpazTimeline.prototype.refresh = function() {
+	this.requestData();
+};
+
 
 /**
  * This is the method that gets data from the model and calls addItems() on what is returned 
@@ -105,8 +112,6 @@ SpazTimeline.prototype.stopListening = function() {
 	sc.helpers.unlisten(this.event_target, this.success_event, thisTL.onSuccess, this);
 	sc.helpers.unlisten(this.event_target, this.failure_event, thisTL.onFailure, this);
 };
-
-
 
 SpazTimeline.prototype.startRefresher = function() {
 	this.stopRefresher();
