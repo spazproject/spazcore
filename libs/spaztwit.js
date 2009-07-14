@@ -252,6 +252,12 @@ SpazTwit.prototype.combinedTimelineHasErrors = function() {
  * @param {string} newurl
  */
 SpazTwit.prototype.setBaseURL= function(newurl) {
+	
+	var lastchar = newurl.charAt(newurl.length -1);
+	if (lastchar !== '/') {
+		newurl = newurl + '/';
+	}
+	
 	this.baseurl = newurl;
 };
 
