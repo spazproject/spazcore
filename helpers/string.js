@@ -209,6 +209,17 @@ sc.helpers.autolinkTwitterHashtag = function(str, tpl) {
 }
 
 
+
+
+sc.helpers.makeItemsClickable = function(str) {
+	str = sc.helpers.autolink(str);
+	str = sc.helpers.autolinkTwitterScreenname(str);
+	str = sc.helpers.autolinkTwitterHashtag(str);
+	return str;
+};
+
+
+
 /**
  * Simple html tag remover
  * @param {string} str
