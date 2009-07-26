@@ -4,6 +4,9 @@ Borrowed from Mike Demers (slightly altered)
 https://twitter.pbwiki.com/RelativeTimeScripts
 */
 sc.helpers.getRelativeTime = function(time_value) {
+	
+	sc.helpers.dump(time_value);
+	
 	var parsed_date = new Date(time_value);
 	var now = new Date;
 	var delta = parseInt( (now.getTime() - parsed_date.getTime()) / 1000);

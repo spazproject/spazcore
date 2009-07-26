@@ -88,6 +88,7 @@ function SpazTwit(username, password, opts) {
 	
 	this.opts            = opts || {};
 	this.opts.event_mode = this.opts.event_mode || 'DOM';
+	this.opts.event_target = this.opts.event_target || document;
 	
 	this.setSource('SpazCore');
 	
@@ -447,7 +448,7 @@ SpazTwit.prototype._processAuthenticatedUser = function(data, finished_event) {
 	this.me = data;
 	this.initializeData();
 	// jQuery().trigger(finished_event, [this.me]);
-	this.triggerEvent(document, finished_event, this.me);
+	this.triggerEvent(finished_event, this.me);
 	
 }
 
@@ -857,13 +858,13 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, finished_eve
 			'query'            : search_result.query
 		}
 		// jQuery().trigger(finished_event, [this.data[SPAZCORE_SECTION_SEARCH].newitems, search_info]);
-		this.triggerEvent(document, finished_event, [this.data[SPAZCORE_SECTION_SEARCH].newitems, search_info]);
+		this.triggerEvent(finished_event, [this.data[SPAZCORE_SECTION_SEARCH].newitems, search_info]);
 		
 
 
 	} else { // no new items, but we should fire off success anyway
 		// jQuery().trigger(finished_event, [[]]);
-		this.triggerEvent(document, finished_event, []);
+		this.triggerEvent(finished_event, []);
 	}
 	
 }
@@ -960,7 +961,7 @@ SpazTwit.prototype._processTrends = function(trends_result, finished_event, proc
 			}
 		}
 		// jQuery().trigger(finished_event, [ret_items]);
-		this.triggerEvent(document, finished_event, ret_items);
+		this.triggerEvent(finished_event, ret_items);
 		
 	}
 }
@@ -983,11 +984,10 @@ SpazTwit.prototype._getTimeline = function(opts) {
 	var xhr = jQuery.ajax({
         'complete':function(xhr, msg){
             sc.helpers.dump(opts.url + ' complete:'+msg);
-			// if (msg.toLower().strpos('timeout') != -1) {
-			// 	// jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
-			// 	stwit.triggerEvent(document, opts.failure_event_type, {'url':opts.url, 'xhr':xhr, 'msg':msg});
-			// 	
-			// }
+			if (msg == 'timeout') {
+				// jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
+				stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':xhr, 'msg':msg});				
+			}
         },
         'error':function(xhr, msg, exc) {
 			sc.helpers.dump(opts.url + ' error:"'+msg+'"')
@@ -1008,7 +1008,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
 				if (opts.failure_event_type) {
 					sc.helpers.dump("opts.failure_event_type:"+opts.failure_event_type);
 					// jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
-					stwit.triggerEvent(document, opts.failure_event_type, {'url':opts.url, 'xhr':xhr, 'msg':msg});
+					stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':xhr, 'msg':msg});
 					
 				}
 	
@@ -1016,15 +1016,12 @@ SpazTwit.prototype._getTimeline = function(opts) {
                 sc.helpers.dump("Error:Unknown from "+opts['url']);
 				if (opts.failure_event_type) {
 					// jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':null, 'msg':'Unknown Error'}]);
-					stwit.triggerEvent(document, opts.failure_event_type, {'url':opts.url, 'xhr':xhr, 'msg':'Unknown Error'});
+					stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':xhr, 'msg':'Unknown Error'});
+					
 				}
             }
 			// jQuery().trigger('spaztwit_ajax_error', [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
-			sc.helpers.dump('triggering spaztwit_ajax_error');
-			stwit.triggerEvent(document, 'spaztwit_ajax_error', {'url':opts.url, 'xhr':xhr, 'msg':msg});
-			
-			
-			
+			stwit.triggerEvent('spaztwit_ajax_error', {'url':opts.url, 'xhr':xhr, 'msg':msg});
 			
 			if (opts.processing_opts && opts.processing_opts.combined) {
 				sc.helpers.dump('adding to combined processing errors');
@@ -1059,7 +1056,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
 				opts.process_callback.call(stwit, data, opts.success_event_type, opts.processing_opts)
 			} else {
 				// jQuery().trigger(opts.success_event_type, [data]);
-				stwit.triggerEvent(document, opts.success_event_type, data);
+				stwit.triggerEvent(opts.success_event_type, data);
 				
 			}
 			
@@ -1119,7 +1116,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 			// sc.helpers.dump(ret_items);
 			
 			// jQuery().trigger(finished_event, [ret_items]);
-			this.triggerEvent(document, finished_event, ret_items);
+			this.triggerEvent(finished_event, ret_items);
 			
 		} else { // this is a "normal" timeline that we want to be persistent
 			
@@ -1152,7 +1149,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 			*/
 			if (!processing_opts.combined) {
 				// jQuery().trigger(finished_event, [this.data[section_name].newitems]);
-				this.triggerEvent(document, finished_event, this.data[section_name].newitems);
+				this.triggerEvent(finished_event, this.data[section_name].newitems);
 			} else {
 				this.combined_finished[section_name] = true;
 				sc.helpers.dump("this.combined_finished["+section_name+"]:"+this.combined_finished[section_name]);
@@ -1183,7 +1180,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 	} else { // no new items, but we should fire off success anyway
 		if (!processing_opts.combined) {
 			// jQuery().trigger(finished_event, []);
-			this.triggerEvent(document, finished_event);
+			this.triggerEvent(finished_event);
 			
 		} else {
 			this.combined_finished[section_name] = true;
@@ -1197,11 +1194,11 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 		
 		if (this.combinedTimelineHasErrors()) {
 			// jQuery().trigger('error_combined_timeline_data', [this.combined_errors]);
-			this.triggerEvent(document, 'error_combined_timeline_data', this.combined_errors);
+			this.triggerEvent('error_combined_timeline_data', this.combined_errors);
 		}
 		
 		// jQuery().trigger('new_combined_timeline_data', [this.data[SPAZCORE_SECTION_COMBINED].newitems]);
-		this.triggerEvent(document, 'new_combined_timeline_data', this.data[SPAZCORE_SECTION_COMBINED].newitems);
+		this.triggerEvent('new_combined_timeline_data', this.data[SPAZCORE_SECTION_COMBINED].newitems);
 		this.data[SPAZCORE_SECTION_COMBINED].newitems = []; // reset combined.newitems
 		this.initializeCombinedTracker();
 	}
@@ -1325,20 +1322,19 @@ SpazTwit.prototype._callMethod = function(opts) {
 				}
 				if (opts.failure_event_type) {
 					// jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
-					stwit.triggerEvent(document, opts.failure_event_type, {'url':opts.url, 'xhr':xhr, 'msg':msg});
+					stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':xhr, 'msg':msg});
 				}
 	
 	        } else {
 	            sc.helpers.dump("Error:Unknown from "+opts['url']);
 				if (opts.failure_event_type) {
 					// jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':null, 'msg':'Unknown Error'}]);
-					stwit.triggerEvent(document, opts.failure_event_type, {'url':opts.url, 'xhr':null, 'msg':'Unknown Error'});
+					stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':null, 'msg':'Unknown Error'});
 
 				}
 	        }
 			// jQuery().trigger('spaztwit_ajax_error', [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
-			stwit.triggerEvent(document, 'spaztwit_ajax_error', {'url':opts.url, 'xhr':xhr, 'msg':msg});
-			
+			stwit.triggerEvent(spaztwit_ajax_error, {'url':opts.url, 'xhr':xhr, 'msg':msg});
 	    },
 	    'success':function(data) {
 			sc.helpers.dump(opts.url + ' success');
@@ -1352,7 +1348,7 @@ SpazTwit.prototype._callMethod = function(opts) {
 				opts.process_callback.call(stwit, data, opts.success_event_type)
 			} else {
 				// jQuery().trigger(opts.success_event_type, [data]);
-				stwit.triggerEvent(document, opts.success_event_type, data);
+				stwit.triggerEvent(opts.success_event_type, data);
 				
 			}
 	    },
@@ -1566,7 +1562,7 @@ SpazTwit.prototype._processOneItem = function(data, finished_event) {
 	*/
 	data = this._processItem(data);
 	// jQuery().trigger(finished_event, [data]);
-	this.triggerEvent(document, finished_event, data);
+	this.triggerEvent(finished_event, data);
 	
 };
 
@@ -1869,7 +1865,9 @@ SpazTwit.prototype.removeSavedSearch = function(search_id) {
 
 
 
-SpazTwit.prototype.triggerEvent = function(target, type, data) {
+SpazTwit.prototype.triggerEvent = function(type, data) {
+	
+	var target = this.opts.event_target || document;
 	
 	sc.helpers.dump('TriggerEvent: target:'+target.toString()+ ' type:'+type+ ' data:'+data.toString());
 	
