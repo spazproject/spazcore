@@ -1854,7 +1854,7 @@ SpazTwit.prototype.removeSavedSearch = function(search_id) {
 
 SpazTwit.prototype.triggerEvent = function(type, data) {
 	
-	var target = this.opts.event_target || target || document;
+	var target = this.opts.event_target || document;
 	
 	if (this.opts.event_mode === 'jquery') {
 		data = [data];
