@@ -23,6 +23,26 @@ var SpazTimeline = function(opts) {
 		thisTL.requestData.call(thisTL);
 	};
 	
+	
+	/**
+	 * Again, due to scope issues, we define this here to take advantage of the closure 
+	 */
+	SpazTimeline.prototype.onSuccess = function(e) {
+		var data = sc.helpers.getEventData(e);
+		thisTL.data_success.call(thisTL, e, data);
+		thisTL.startRefresher();	
+	};
+
+	/**
+	 * Again, due to scope issues, we define this here to take advantage of the closure 
+	 */
+	SpazTimeline.prototype.onFailure = function(e) {
+		var data = sc.helpers.getEventData(e);
+		thisTL.data_failure.call(thisTL, e, data);
+		thisTL.startRefresher();	
+	};
+	
+	
 	/*
 		By breaking this out, we can more easily override the 
 		constructor process
@@ -102,15 +122,15 @@ SpazTimeline.prototype.requestData = function() {
 
 SpazTimeline.prototype.startListening = function() {
 	var thisTL = this;
-	sc.helpers.listen(this.event_target, this.success_event, thisTL.onSuccess, this);
-	sc.helpers.listen(this.event_target, this.failure_event, thisTL.onFailure, this);
+	sc.helpers.listen(thisTL.event_target, thisTL.success_event, thisTL.onSuccess);
+	sc.helpers.listen(thisTL.event_target, thisTL.failure_event, thisTL.onFailure);
 };
 
 
 SpazTimeline.prototype.stopListening = function() {
 	var thisTL = this;
-	sc.helpers.unlisten(this.event_target, this.success_event, thisTL.onSuccess, this);
-	sc.helpers.unlisten(this.event_target, this.failure_event, thisTL.onFailure, this);
+	sc.helpers.unlisten(thisTL.event_target, thisTL.success_event, thisTL.onSuccess);
+	sc.helpers.unlisten(thisTL.event_target, thisTL.failure_event, thisTL.onFailure);
 };
 
 SpazTimeline.prototype.startRefresher = function() {
@@ -124,17 +144,7 @@ SpazTimeline.prototype.stopRefresher = function() {
 };
 
 
-SpazTimeline.prototype.onSuccess = function(e) {
-	var data = sc.helpers.getEventData(e);
-	this.data_success.call(this, e, data);
-	this.startRefresher();	
-};
 
-SpazTimeline.prototype.onFailure = function(e) {
-	var data = sc.helpers.getEventData(e);
-	this.data_failure.call(this, e, data);
-	this.startRefresher();	
-};
 
 
 
