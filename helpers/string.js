@@ -8,7 +8,7 @@
 sc.helpers.containsScreenName = function(str, sn) {
 	
 	var re = new RegExp('(?:\s|\b|^[[:alnum:]]|^)@('+sn+')(?:\s|\b|$)', 'gi');
-	if ( re.match(str) ) {
+	if ( re.test(str) ) {
 		return true;
 	}
 	return false;
@@ -211,7 +211,7 @@ sc.helpers.autolinkTwitterHashtag = function(str, tpl) {
 
 
 
-sc.helpers.makeItemsClickable = function(str) {
+sc.helpers.makeClickable = function(str) {
 	str = sc.helpers.autolink(str);
 	str = sc.helpers.autolinkTwitterScreenname(str);
 	str = sc.helpers.autolinkTwitterHashtag(str);

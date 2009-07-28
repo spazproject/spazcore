@@ -1334,7 +1334,7 @@ SpazTwit.prototype._callMethod = function(opts) {
 				}
 	        }
 			// jQuery().trigger('spaztwit_ajax_error', [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
-			stwit.triggerEvent(spaztwit_ajax_error, {'url':opts.url, 'xhr':xhr, 'msg':msg});
+			stwit.triggerEvent('spaztwit_ajax_error', {'url':opts.url, 'xhr':xhr, 'msg':msg});
 	    },
 	    'success':function(data) {
 			sc.helpers.dump(opts.url + ' success');
@@ -1868,8 +1868,9 @@ SpazTwit.prototype.removeSavedSearch = function(search_id) {
 SpazTwit.prototype.triggerEvent = function(type, data) {
 	
 	var target = this.opts.event_target || document;
+	var data   = data || null;
 	
-	sc.helpers.dump('TriggerEvent: target:'+target.toString()+ ' type:'+type+ ' data:'+data.toString());
+	sc.helpers.dump('TriggerEvent: target:'+target.toString()+ ' type:'+type+ ' data:'+data);
 	
 	if (this.opts.event_mode === 'jquery') {
 		data = [data];

@@ -15,7 +15,7 @@ sc.helpers.deJSON = function(json)
 		done = true;
 	} finally {
 		if (!done) {
-			sc.helpers.dump("Could not parse JSON text " + text);
+			sc.helpers.dump("Could not parse JSON text " + json);
 		}
 	}
 

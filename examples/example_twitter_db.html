@@ -1,0 +1,210 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>SpazCore Example: Twitter DB</title>
+	
+	<!-- Load required vendor libs -->
+	<script src="../vendors/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../vendors/json2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../vendors/webtoolkit.base64.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore base lib -->
+	<script src="../libs/spazcore.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore helpers -->
+	<script src="../helpers/datetime.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../helpers/event.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../helpers/javascript.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../helpers/json.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../helpers/string.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../helpers/sys.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../helpers/view.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../helpers/xml.js" type="text/javascript" charset="utf-8"></script>
+	
+	<!-- Load SpazCore libraries -->
+	<script src="../libs/spazcron.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../libs/spazprefs.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../libs/spazshorturl.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../libs/spaztemplate.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../libs/spaztimeline.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../libs/spaztwit.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../libs/spazlocker.js" type="text/javascript" charset="utf-8"></script>
+	
+	
+	<style type="text/css" media="screen">
+		body {
+			font: normal normal normal 1em Arial, sans-serif;
+		}
+		div#timeline {
+			
+		}
+		div.timeline-entry {
+			padding:5px;
+			border-bottom:1px solid #999;
+			min-height:64px;
+		}
+		div.timeline-entry.new {
+			background-color:#FFFFEE;
+		}
+			div.timeline-entry .user {
+				float:left;
+				max-width:48px;
+			}
+			div.timeline-entry .status {
+				margin-left:64px;
+			}
+				div.timeline-entry .status .meta-wrapper {
+					font-weight:bold;
+					height:1.3em;
+				}
+					div.timeline-entry .status .meta-wrapper .screen-name {
+						float:left;
+					}
+					div.timeline-entry .status .meta-wrapper .meta {
+						float:right;
+					}
+				
+
+	</style>
+	
+	
+	<script type="text/javascript" charset="utf-8">
+		var tpl  = new SpazTemplate();
+		tpl.addTemplateMethod('tweet', function(d) {
+			var html = '';
+
+			html += '<div class="timeline-entry';
+			if (!d.not_new) {
+				html += ' new';
+			}
+			if (d.SC_is_reply) {
+				html += ' reply'
+			}
+			html += '" data-status-id="'+d.id+'" data-user-id="'+d.user.id+'" data-user-screen_name="'+d.user.screen_name+'" data-timestamp="'+d.created_at_unixtime+'">';
+			html += '	<div class="user" data-user-id="'+d.user.id+'" data-user-screen_name="'+d.user.screen_name+'">';
+			html += '		<img src="'+d.user.profile_image_url+'" title="'+d.user.screen_name+'" />';
+			html += '	</div>';
+			html += '	<div class="status">';
+			html += '		<div class="meta-wrapper">';
+			html += '			<div class="screen-name">'+d.user.screen_name;
+			if (d.user.protected) {
+				html += '			<div class="protected-icon"></div>';
+			}
+			html += '			</div>';
+			html += '			<div class="meta" data-status-id="'+d.id+'"><span class="date" data-created_at="'+d.created_at+'">'+d.relative_time+'</span></div>';
+			html += '		</div>';
+			html += '	 	<div class="text">';
+			html += '			'+d.text+'';
+			html += '		</div>';
+			html += '	</div>';
+			html += '</div>';
+
+			return html;
+		});
+				
+		
+		$().ready(function() {
+		
+			var tl_sl = '#timeline';
+			var tl_el = jQuery(tl_sl).get(0);
+			
+		
+		
+			var twit = new SpazTwit(null,null,{
+				'event_target':tl_el
+			});
+
+			var tl   = new SpazTimeline({
+				'timeline_container_selector' :tl_sl,
+				'entry_relative_time_selector':'span.date',
+
+				'success_event':'new_friends_timeline_data',
+				'failure_event':'error_friends_timeline_data',
+
+				'refresh_time':1000*60,
+				'max_items':30,
+
+				'request_data': function() {
+					twit.getFriendsTimeline();
+					sc.helpers.markAllAsRead(tl_sl+' div.timeline-entry');
+				},
+				'data_success': function(e, data) {
+					console.dir(data);
+					if (data && sc.helpers.isArray(data)) {
+						data = data.reverse();
+						tl.addItems(data);
+						sc.helpers.updateRelativeTimes(tl_sl+' div.timeline-entry span.date', 'data-created_at');
+					}
+				},
+				'data_failure': function(e, data) {
+
+				},
+				'renderer': function(obj) {
+					obj.text = sc.helpers.makeClickable(obj.text);
+					
+					return tpl.parseTemplate('tweet', obj);
+				}
+			});
+
+			function handleVerifySuccess() {
+				tl.start();
+				$('#timeline-menu').show();
+			}
+			function handleVerifyFailure() {
+				alert('login failed');
+			}
+
+			sc.helpers.addListener(tl_el, 'verify_credentials_succeeded', handleVerifySuccess);
+			sc.helpers.addListener(tl_el, 'verify_credentials_failed', handleVerifyFailure);
+		
+		
+			var username = $('#username').val();
+			var password = $('#password').val();
+			if (username && password) {
+				console.log('setting credientials')
+				twit.setCredentials(username, password);
+			}
+			
+			$('#refresh').live('click', function() {
+				tl.start();
+			});
+			
+			
+			$('#refresh').trigger('click');
+			
+			
+		});
+		
+		
+	</script>
+	
+	
+</head>
+
+<body>
+	
+	<h1 id="twitter_db_example_for_titanium_desktop">Twitter DB example for Titanium Desktop</h1>
+	
+	
+	<label for="username">Username</label><input type="text" name="username" value="spaztest2" id="username">
+	<label for="password">Password</label><input type="password" name="password" value="booboo" id="password">
+	<!-- <input type="button" name="login" value="Login" id="login"> -->
+	
+	
+	<div id="timeline">
+		
+		
+	</div>
+	
+	<div id="timeline-menu">
+		<input type="button" name="refresh" value="Refresh" id="refresh">
+		<input type="button" name="showall" value="Show All" id="showall">		
+	</div>
+		
+		
+</body>
+</html>
