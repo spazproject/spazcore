@@ -28,6 +28,16 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 			}
 		},
 
+		"posterous": {
+			"email_tpl"  :"post@posterous.com",
+			"message_in" :"subject",
+			"email_info_url":"http://posterous.com/main/editemails",
+			'help_text'  :"Log into posterous, click 'Manage' submit your email address for posting",
+			'getToAddress': function(opts) {
+				return thisSPM.apis['posterous'].email_tpl;
+			}
+		},
+
 		"twitgoo": {
 			"email_tpl"  :"m@twitgoo.com",
 			"message_in" :"subject",
