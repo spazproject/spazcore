@@ -17,7 +17,7 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 	thisSPM = this;
 	
 	var apis = {
-		"yfrog": {
+/*		"yfrog": {
 			"email_tpl"  :"{{username}}.??????@yfrog.com",
 			"message_in" :"subject",
 			"email_info_url":"http://yfrog.com/froggy.php",
@@ -26,15 +26,26 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 				var username = opts.username;
 				return thisSPM.apis['yfrog'].email_tpl.replace('{{username}}', username);
 			}
-		},
-
+		}, 
+*/
 		"posterous": {
 			"email_tpl"  :"post@posterous.com",
 			"message_in" :"subject",
 			"email_info_url":"http://posterous.com/main/editemails",
-			'help_text'  :"Log into posterous, click 'Manage' submit your email address for posting",
+			'help_text'  :"Post instantly to your Posterous blog. Setup autopost to post back to Twitter/Identica! Login for more information and controls."
 			'getToAddress': function(opts) {
 				return thisSPM.apis['posterous'].email_tpl;
+			}
+		},
+
+		"pikchur": {
+			"email_tpl"  :"{{username}}.???@pikchur.com",
+			"message_in" :"subject",
+			"email_info_url":"http://pikchur.com/dashboard/profile",
+			'help_text'  :"Log-in to pikchur with your Twitter username and password, and click 'Profile' Your customized posting email will be listed",
+			'getToAddress': function(opts) {
+				var username = opts.username;
+				return thisSPM.apis['pikchur'].email_tpl.replace('{{username}}', username);
 			}
 		},
 
