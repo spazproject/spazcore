@@ -31,8 +31,8 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 		"posterous": {
 			"email_tpl"  :"post@posterous.com",
 			"message_in" :"subject",
-			"email_info_url":"http://posterous.com/main/editemails",
-			'help_text'  :"Log into posterous, click 'Manage' submit your email address for posting",
+			"email_info_url":"http://posterous.com/autopost",
+			'help_text'  :"Post instantly to your Posterous blog. Setup autopost to post back to Twitter! Login for more information and controls.",
 			'getToAddress': function(opts) {
 				return thisSPM.apis['posterous'].email_tpl;
 			}
@@ -124,9 +124,9 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 				
 				
 				
-			},
+			}
 		}
-	}
+	};
 	
 	return apis;
 
