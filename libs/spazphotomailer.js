@@ -17,7 +17,7 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 	thisSPM = this;
 	
 	var apis = {
-/*		"yfrog": {
+		"yfrog": {
 			"email_tpl"  :"{{username}}.??????@yfrog.com",
 			"message_in" :"subject",
 			"email_info_url":"http://yfrog.com/froggy.php",
@@ -27,7 +27,7 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 				return thisSPM.apis['yfrog'].email_tpl.replace('{{username}}', username);
 			}
 		}, 
-*/
+
 		"posterous": {
 			"email_tpl"  :"post@posterous.com",
 			"message_in" :"subject",
