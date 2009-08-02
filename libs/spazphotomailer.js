@@ -26,18 +26,18 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 				var username = opts.username;
 				return thisSPM.apis['yfrog'].email_tpl.replace('{{username}}', username);
 			}
-		}, 
+		},
 
 		"posterous": {
 			"email_tpl"  :"post@posterous.com",
 			"message_in" :"subject",
-			"email_info_url":"http://posterous.com/main/editemails",
-			'help_text'  :"Post instantly to your Posterous blog. Setup autopost to post back to Twitter/Identica! Login for more information and controls."
+			"email_info_url":"http://posterous.com/autopost",
+			'help_text'  :"Post instantly to your Posterous blog. Setup autopost to post back to Twitter! Login for more information and controls.",
 			'getToAddress': function(opts) {
 				return thisSPM.apis['posterous'].email_tpl;
 			}
 		},
-
+		
 		"pikchur": {
 			"email_tpl"  :"{{username}}.???@pikchur.com",
 			"message_in" :"subject",
@@ -48,6 +48,7 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 				return thisSPM.apis['pikchur'].email_tpl.replace('{{username}}', username);
 			}
 		},
+
 
 		"twitgoo": {
 			"email_tpl"  :"m@twitgoo.com",
@@ -135,9 +136,9 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 				
 				
 				
-			},
+			}
 		}
-	}
+	};
 	
 	return apis;
 
