@@ -1,13 +1,16 @@
 /*
-makes relative time out of "Sun Jul 08 19:01:12 +0000 2007" type string
-Borrowed from Mike Demers (slightly altered)
-https://twitter.pbwiki.com/RelativeTimeScripts
+* makes relative time out of "Sun Jul 08 19:01:12 +0000 2007" type string
+* Borrowed from Mike Demers (slightly altered)
+* https://twitter.pbwiki.com/RelativeTimeScripts
+* 
+* This requires date.js
+* http://www.datejs.com/
 */
 sc.helpers.getRelativeTime = function(time_value) {
 	
 	sc.helpers.dump(time_value);
 	
-	var parsed_date = new Date(time_value);
+	var parsed_date = new Date.parse(time_value);
 	var now = new Date;
 	var delta = parseInt( (now.getTime() - parsed_date.getTime()) / 1000);
 	
