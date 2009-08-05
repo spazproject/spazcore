@@ -9,34 +9,41 @@
 	
 	<!-- Load required vendor libs -->
 	<script src="../vendors/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../vendors/json2.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../vendors/webtoolkit.base64.js" type="text/javascript" charset="utf-8"></script>
 
 	<!-- Load SpazCore base lib -->
-	<script src="../libs/spazcore.js" type="text/javascript" charset="utf-8"></script>
+	<script src="spazcore-full.js"></script>
 
-	<!-- Load SpazCore helpers -->
-	<script src="../helpers/datetime.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../helpers/event.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../helpers/javascript.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../helpers/json.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../helpers/string.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../helpers/sys.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../helpers/view.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../helpers/xml.js" type="text/javascript" charset="utf-8"></script>
-	
-	<!-- Load SpazCore libraries -->
-	<script src="../libs/spazcron.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../libs/spazprefs.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../libs/spazshorttext.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../libs/spazshorturl.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../libs/spaztemplate.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../libs/spaztwit.js" type="text/javascript" charset="utf-8"></script>
-	<script src="../libs/spazlocker.js" type="text/javascript" charset="utf-8"></script>
 	
 	<script type="text/javascript" charset="utf-8">
 	
 		var shortener = new SpazShortText();
+		
+		var maxlen = 140;
+		
+		function updateCharCount(textarea_id, counter_id, max, on_over, on_under) {
+
+			var entry_el = document.getElementById(textarea_id);
+			var count_el = document.getElementById(counter_id);
+			var curr_count = entry_el.value.length;
+			var left = max - curr_count;
+			count_el.innerText = left.toString();
+			
+			
+			var info = {
+				'entry_el':entry_el,
+				'count_el':count_el,
+				'curr_count':curr_count,
+				'left':left,
+				'max':max
+			};
+			
+			if (left < 0) {
+				on_over.call(entry_el, info);
+			} else if (left >= 0) {
+				on_under.call(entry_el, info);
+			}
+
+		}
 	
 		$().ready(function() {
 			
@@ -45,7 +52,26 @@
 				var shorttext = shortener.shorten(longtext);
 				$('#message').val(shorttext);
 				$('#saved').text( 'saved '+(longtext.length - shorttext.length)+' characters' );
+				ucc();
 			});
+			
+			
+			sc.helpers.listen($('#message').get(0), 'keyup', ucc);
+			sc.helpers.listen($('#message').get(0), 'focus', ucc);
+			sc.helpers.listen($('#message').get(0), 'blur', ucc);
+			
+			ucc(); // call it once to initialize
+
+			function ucc() {
+				updateCharCount('message', 'charleft', 140,
+				function(info) { // if we're over limit
+					$(info.count_el).css('color','#990000');
+					$(info.entry_el).css('background-color','#FFCCCC');
+				}, function(info) { // if we're under limit
+					$(info.count_el).css('color','#000000');
+					$(info.entry_el).css('background-color','#FFFFFF');
+				});
+			};
 			
 		});
 	</script>
@@ -55,6 +81,7 @@
 	<form>
 		<textarea name="message" rows="8" cols="60" id="message">About to watch Night at the Museum at the Texas state history museum- love the IMAX experience </textarea><br>
 		<input type="button" name="shorten" value="Shorten!" id="shorten">
+		<span id="charleft" class="normal"></span> chars left
 		<span id="saved"></span>
 	</form>
 
