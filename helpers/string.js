@@ -532,7 +532,7 @@ sc.helpers.Utf8 = {
 **/
  
 sc.helpers.trim = function (str, chars) {
-	return ltrim(rtrim(str, chars), chars);
+	return sc.helpers.ltrim(sc.helpers.rtrim(str, chars), chars);
 }
  
 sc.helpers.ltrim = function (str, chars) {
