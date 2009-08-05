@@ -6,21 +6,21 @@
  */
 function SpazCron(time_interval) {
 	if (!time_interval) {
-		this.time_interval = 15*1000; // 15 seconds
+		this.time_interval = 15 * 1000; // 15 seconds
 	} else {
-		this.time_interval = time_interval*1000;
+		this.time_interval = time_interval * 1000;
 	}
 	
 	this.interval = null; // this is a stub for the interval object
 	
-	this._jobs = [];
+	this.$jobs = [];
 		
-};
+}
 
 /**
  * add a job to the set 
  */
-SpazCron.prototype.addJob = function(name, func, mintime) {
+SpazCron.prototype.addJob = function (name, func, mintime) {
 	/*
 		make a new SpazCronJob and add it to this._jobs
 	*/
@@ -29,7 +29,7 @@ SpazCron.prototype.addJob = function(name, func, mintime) {
 /**
  * remove a job to the set 
  */
-SpazCron.prototype.removeJob = function(name) {
+SpazCron.prototype.removeJob = function (name) {
 	/*
 		find a job in this._jobs and remove it from the array
 	*/
@@ -38,7 +38,7 @@ SpazCron.prototype.removeJob = function(name) {
 /**
  * start execution of jobs
  */
-SpazCron.prototype.start = function() {
+SpazCron.prototype.start = function () {
 	/*
 		create the interval obj to fun this.execJobs every this.time_interval seconds
 	*/
@@ -47,7 +47,7 @@ SpazCron.prototype.start = function() {
 /**
  * start execution of jobs
  */
-SpazCron.prototype.stop = function() {
+SpazCron.prototype.stop = function () {
 	/*
 		clear the interval obj
 	*/
@@ -57,7 +57,7 @@ SpazCron.prototype.stop = function() {
 /**
  * execute the jobs in the set
  */
-SpazCron.prototype.execJobs = function() {
+SpazCron.prototype.execJobs = function () {
 	/*
 		loop through the jobs in this._jobs and execute each one
 	*/
@@ -70,14 +70,14 @@ SpazCron.prototype.execJobs = function() {
  * @param {function} func  the function that the job executes
  * @param {mintime} integer  the amount of time that must pass for job to re-execute, in SECONDS
  */
-SpazCronJob = function(name, func, mintime) {
+var SpazCronJob = function (name, func, mintime) {
 	this.last_run = 0; // last time run in seconds
 	this.name = name;
 	this.func = func;
 	this.mintime = mintime; // minimum amount of time 
 };
 
-SpazCronJob.prototype.execute = function() {
+SpazCronJob.prototype.execute = function () {
 	/*
 		if the time passed > this.mintime, then execute this.func
 	*/
