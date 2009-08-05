@@ -6,11 +6,17 @@
 * This requires date.js
 * http://www.datejs.com/
 */
-sc.helpers.getRelativeTime = function(time_value) {
+sc.helpers.getRelativeTime = function(time_value, use_dateparse) {
 	
-	sc.helpers.dump(time_value);
+	console.log(time_value);
 	
-	var parsed_date = new Date.parse(time_value);
+	
+	if (use_dateparse === true) {
+		var parsed_date = new Date.parse(time_value);
+	} else {
+		var parsed_date = new Date(time_value);
+	}
+	
 	var now = new Date;
 	var delta = parseInt( (now.getTime() - parsed_date.getTime()) / 1000);
 	
