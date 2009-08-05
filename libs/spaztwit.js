@@ -1064,7 +1064,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
         'beforeSend':function(xhr){
 			sc.helpers.dump("beforesend");
 			if (opts.username && opts.password) {
-				xhr.setRequestHeader("Authorization", "Basic " + Base64.encode(opts.username + ":" + opts.password));
+				xhr.setRequestHeader("Authorization", "Basic " + sc.helpers.Base64.encode(opts.username + ":" + opts.password));
 			}
         },
         'type':"GET",
@@ -1355,7 +1355,7 @@ SpazTwit.prototype._callMethod = function(opts) {
 	    'beforeSend':function(xhr){
 			sc.helpers.dump(opts.url + ' beforesend');
 			if (opts.username && opts.password) {
-				xhr.setRequestHeader("Authorization", "Basic " + Base64.encode(opts.username + ":" + opts.password));
+				xhr.setRequestHeader("Authorization", "Basic " + sc.helpers.Base64.encode(opts.username + ":" + opts.password));
 			}
 	    },
 	    'type': method,
