@@ -6,10 +6,7 @@
 * This requires date.js
 * http://www.datejs.com/
 */
-sc.helpers.getRelativeTime = function(time_value, use_dateparse) {
-	
-	console.log(time_value);
-	
+sc.helpers.getRelativeTime = function(time_value, use_dateparse) {	
 	
 	if (use_dateparse === true) {
 		var parsed_date = new Date.parse(time_value);
