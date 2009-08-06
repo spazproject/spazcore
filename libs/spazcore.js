@@ -1,7 +1,7 @@
 /**
  * SPAZCORE
- * version 0.1
- * 2009-08-05
+ * version 0.1.1
+ * 2009-08-06
  * 
  * License
  * 

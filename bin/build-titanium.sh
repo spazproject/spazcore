@@ -24,5 +24,6 @@ cat libs/spazcore.js \
 	libs/spaztemplate.js \
 	libs/spaztimeline.js \
 	libs/spaztwit.js \
-	> spazcore-full.js
-	
+	platforms/Titanium/helpers/sys.js \
+	platforms/Titanium/libs/spazprefs.js \
+	> spazcore-titanium.js
