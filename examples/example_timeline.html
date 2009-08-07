@@ -48,40 +48,54 @@
 			return html;
 		});
 		
-		var twit = new SpazTwit();
-		
-		var tl   = new SpazTimeline({
-			'timeline_container_selector' :'#public-timeline',
-			'entry_relative_time_selector':'span.date',
-			
-			'success_event':'new_public_timeline_data',
-			'failure_event':'error_public_timeline_data',
-			
-			'refresh_time':1000*60,
-			'max_items':30,
 
-			'request_data': function() {
-				twit.getPublicTimeline();
-			},
-			'data_success': function(e, data) {
-				tl.addItems(data);
-				sc.helpers.updateRelativeTimes('#public-timeline div.timeline-entry span.date', 'data-created_at');
-			},
-			'data_failure': function(e, data) {
-				
-			},
-			'renderer': function(obj) {
-				return tpl.parseTemplate('tweet', obj);
-			}
-		});
 		
 
 				
 		
 		$().ready(function() {
 			
-			tl.start();
+
 			
+			/*
+				instantiate a twitter API object
+				pass null as username and pass and give it an 
+				event_target, the dame as our timeline div
+			*/
+			var twit = new SpazTwit(null, null, {
+				'event_target':document.getElementById('public-timeline')
+			});
+			
+			/*
+				By default, the timeline will listen for success and failure events
+				in the timeline_container_selector's element.
+			*/
+			var tl   = new SpazTimeline({
+				'timeline_container_selector' :'#public-timeline',
+				'entry_relative_time_selector':'span.date', // this actually isn't used right now
+
+				'success_event':'new_public_timeline_data',
+				'failure_event':'error_public_timeline_data',
+				
+				'refresh_time':1000*60, // timeline will auto-refresh
+				'max_items':30,
+
+				'request_data': function() { // how we get data. This would connect to a model
+					twit.getPublicTimeline();
+				},
+				'data_success': function(e, data) { // what to do on success
+					tl.addItems(data);
+					sc.helpers.updateRelativeTimes('#public-timeline div.timeline-entry span.date', 'data-created_at');
+				},
+				'data_failure': function(e, data) { // what to do on failure
+
+				},
+				'renderer': function(obj) { // the function called on each item to render it as HTML
+					return tpl.parseTemplate('tweet', obj);
+				}
+			});
+			
+			tl.start(); // starts the timeline
 		});
 		
 	</script>
