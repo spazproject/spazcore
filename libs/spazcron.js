@@ -1,3 +1,14 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc;
+
 
 /**
  * SpazCron handles repetitive tasks in a somewhat cron-like way. 

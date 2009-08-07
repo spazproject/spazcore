@@ -1,3 +1,17 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+plusplus: false,
+regexp: false,
+sub: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, jQuery, window, Mojo, use_palmhost_proxy;
+
 /**
  * @depends ../helpers/string.js 
  * @depends ../helpers/datetime.js 
@@ -8,22 +22,22 @@
 
 
 /**
- * various const definitions
+ * various constant definitions
  */
-const SPAZCORE_SECTION_FRIENDS = 'friends';
-const SPAZCORE_SECTION_REPLIES = 'replies';
-const SPAZCORE_SECTION_DMS = 'dms';
-const SPAZCORE_SECTION_FAVORITES = 'favorites';
-const SPAZCORE_SECTION_COMBINED = 'combined';
-const SPAZCORE_SECTION_PUBLIC = 'public';
-const SPAZCORE_SECTION_SEARCH = 'search';
-const SPAZCORE_SECTION_USER = 'user-timeline';
+var SPAZCORE_SECTION_FRIENDS = 'friends';
+var SPAZCORE_SECTION_REPLIES = 'replies';
+var SPAZCORE_SECTION_DMS = 'dms';
+var SPAZCORE_SECTION_FAVORITES = 'favorites';
+var SPAZCORE_SECTION_COMBINED = 'combined';
+var SPAZCORE_SECTION_PUBLIC = 'public';
+var SPAZCORE_SECTION_SEARCH = 'search';
+var SPAZCORE_SECTION_USER = 'user-timeline';
 
-const SPAZCORE_SERVICE_TWITTER = 'twitter';
-const SPAZCORE_SERVICE_IDENTICA = 'identi.ca';
-const SPAZCORE_SERVICE_CUSTOM = 'custom';
-const SPAZCORE_SERVICEURL_TWITTER = 'https://twitter.com/';
-const SPAZCORE_SERVICEURL_IDENTICA = 'https://identi.ca/api/';
+var SPAZCORE_SERVICE_TWITTER = 'twitter';
+var SPAZCORE_SERVICE_IDENTICA = 'identi.ca';
+var SPAZCORE_SERVICE_CUSTOM = 'custom';
+var SPAZCORE_SERVICEURL_TWITTER = 'https://twitter.com/';
+var SPAZCORE_SERVICEURL_IDENTICA = 'https://identi.ca/api/';
 
 /**
  * A Twitter API library for Javascript
@@ -121,11 +135,11 @@ function SpazTwit(username, password, opts) {
 	 * remap dump calls as appropriate 
 	 */
 	if (sc && sc.helpers && sc.helpers.dump) {
-		dump = sc.helpers.dump;
+		window.dump = sc.helpers.dump;
 	} else { // do nothing!
-		function dump(input) {
+		var dump = function(input) {
 			return;
-		}
+		};
 	}
 }
 
@@ -380,13 +394,13 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 
     if (urls[key]) {
 	
-		if (urldata && typeof urldata != "string") {
+		if (urldata && typeof urldata !== "string") {
 			urldata = '?'+jQuery.param(urldata);
 		} else {
 			urldata = '';
 		}
 		
-		if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER && (key == 'search' || key == 'trends')) {
+		if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER && (key === 'search' || key === 'trends')) {
 			return this._postProcessURL(urls[key] + urldata);
 		} else {
 			return this._postProcessURL(this.baseurl + urls[key] + urldata);
@@ -984,14 +998,14 @@ SpazTwit.prototype._getTimeline = function(opts) {
 	var xhr = jQuery.ajax({
         'complete':function(xhr, msg){
             sc.helpers.dump(opts.url + ' complete:'+msg);
-			if (msg == 'timeout') {
+			if (msg === 'timeout') {
 				// jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
 				stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':xhr, 'msg':msg});				
 			}
         },
         'error':function(xhr, msg, exc) {
 			sc.helpers.dump(opts.url + ' error:"'+msg+'"');
-			if (msg.toLowerCase().indexOf('timeout') != -1) {
+			if (msg.toLowerCase().indexOf('timeout') !== -1) {
 				stwit.triggerEvent(document, opts.failure_event_type, {'url':opts.url, 'xhr':null, 'msg':msg});
 			} else if (xhr) {
 				if (!xhr.readyState < 4) {
@@ -1209,7 +1223,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
  * This modifies a Twitter post, adding some properties. All new properties are
  * prepended with "SC_"
  * 
- * this executes within the jQuery.each scope, so this == the item 
+ * this executes within the jQuery.each scope, so this === the item 
  */
 SpazTwit.prototype._processItem = function(item, section_name) {
 	
@@ -1222,7 +1236,7 @@ SpazTwit.prototype._processItem = function(item, section_name) {
 		is reply? Then add .SC_is_reply
 	*/
 	if ( (item.in_reply_to_screen_name && item.SC_user_received_by) ) {
-		if (item.in_reply_to_screen_name.toLowerCase() == item.SC_user_received_by.toLowerCase() ) {
+		if (item.in_reply_to_screen_name.toLowerCase() === item.SC_user_received_by.toLowerCase() ) {
 			item.SC_is_reply = true;
 		}
 	}
@@ -1291,15 +1305,18 @@ SpazTwit.prototype._processItem = function(item, section_name) {
  * @private
  */
 SpazTwit.prototype._callMethod = function(opts) {
+	
+	var method;
+	
 	/*
 		for closure references
 	*/
 	var stwit = this;
 	
 	if (opts.method) {
-		var method = opts.method;
+		method = opts.method;
 	} else {
-		var method = 'POST';
+		method = 'POST';
 	}
 	
 	var xhr = jQuery.ajax({
@@ -1651,11 +1668,11 @@ SpazTwit.prototype.test = function() {};
  */
 SpazTwit.prototype._postProcessURL = function(url) {
 	
-	if (typeof Mojo != "undefined") { // we're in webOS		
+	if (typeof Mojo !== "undefined") { // we're in webOS		
 		if (use_palmhost_proxy) { // we are not on an emu or device, so proxy calls
 			var re = /https?:\/\/.[^\/:]*(?::[0-9]+)?/;
 			var match = url.match(re);
-			if (match && match[0] != Mojo.hostingPrefix) {
+			if (match && match[0] !== Mojo.hostingPrefix) {
 				url = "/proxy?url=" + encodeURIComponent(url);
 			}
 			return url;		
@@ -1866,9 +1883,8 @@ SpazTwit.prototype.removeSavedSearch = function(search_id) {
 
 
 SpazTwit.prototype.triggerEvent = function(type, data) {
-	
 	var target = this.opts.event_target || document;
-	var data   = data || null;
+	data   = data || null;
 	
 	sc.helpers.dump('TriggerEvent: target:'+target.toString()+ ' type:'+type+ ' data:'+data);
 	
@@ -1886,8 +1902,8 @@ SpazTwit.prototype.triggerEvent = function(type, data) {
  * shortcut for SpazTwit if the SpazCore libraries are being used
  * 
  */
-if (SpazTwit) {
-	scTwit = SpazTwit;
+if (sc) {
+	var scTwit = SpazTwit;
 }
 
 

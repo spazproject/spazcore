@@ -1,3 +1,15 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+plusplus: false,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc;
+
 /**
  * SpazTemplate 
  * designed for fast templating functions
@@ -7,7 +19,7 @@ function SpazTemplate() {
 	
 	this._tpls = {};
 	
-};
+}
 
 /**
  * @param string name      the name to call the method with in parseTemplate

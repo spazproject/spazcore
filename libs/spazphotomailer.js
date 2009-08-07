@@ -1,3 +1,16 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+sub: true,
+plusplus: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, jQuery;
+
 function SpazPhotoMailer(opts) {
 
 	this.apis = this.getAPIs();
@@ -14,7 +27,7 @@ SpazPhotoMailer.prototype.getAPILabels = function() {
 
 SpazPhotoMailer.prototype.getAPIs = function() {
 	
-	thisSPM = this;
+	var thisSPM = this;
 	
 	var apis = {
 		"yfrog": {
@@ -90,7 +103,7 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 					jQuery.ajax({
 						
 						'success':function(data, textStatus) {
-							var profile = sch.deJSON(data);
+							var profile = sc.helpers.deJSON(data);
 							
 						},
 						
@@ -107,7 +120,7 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 						
 					});
 					
-				};
+				}
 				
 				function getTweetPhoto(username, password, settings_url) {
 
@@ -116,7 +129,7 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 					jQuery.ajax({
 						
 						'success':function(data, textStatus) {
-							var settings = sch.deJSON(data);
+							var settings = sc.helpers.deJSON(data);
 							success(settings.Email);
 						},
 						

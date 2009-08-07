@@ -1,3 +1,14 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, jQuery;
+
 /**
  * A library to do url shortening 
  */
@@ -5,9 +16,9 @@
 /**
  * Constants to refer to services 
  */
-const SPAZCORE_SHORTURL_SERVICE_SHORTIE = 'short.ie';
-const SPAZCORE_SHORTURL_SERVICE_ISGD	= 'is.gd';
-const SPAZCORE_SHORTURL_SERVICE_BITLY	= 'bit.ly';
+var SPAZCORE_SHORTURL_SERVICE_SHORTIE = 'short.ie';
+var SPAZCORE_SHORTURL_SERVICE_ISGD	= 'is.gd';
+var SPAZCORE_SHORTURL_SERVICE_BITLY	= 'bit.ly';
 
 
 /**
@@ -28,7 +39,7 @@ function SpazShortURL(service) {
 	
 	this.api = this.getAPIObj(service);
 	
-};
+}
 
 SpazShortURL.prototype.getAPIObj = function(service) {
 	
@@ -71,14 +82,14 @@ SpazShortURL.prototype.getAPIObj = function(service) {
 		'getData' : function(longurl, opts){
 			
 			if (longurl.match(/ /gi)) {
-				var longurl = longurl.replace(/ /gi, '%20');
+				longurl = longurl.replace(/ /gi, '%20');
 			}
 			
 			var shortie = {
 				orig: longurl,
 				url:  longurl,
 				email:	 '',
-				private: 'false',
+				'private': 'false',
 				format:	 'rest'
 			};
 			return shortie;
@@ -93,7 +104,7 @@ SpazShortURL.prototype.getAPIObj = function(service) {
 	};
 	
 	return apis[service];
-}
+};
 
 
 /**
@@ -127,9 +138,9 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 		complete:function(xhr, rstr) {
 		},
 		'error':function(xhr, msg, exc) {
-			sc.helpers.dump(shortener.api.url + ' error:'+msg)
+			sc.helpers.dump(shortener.api.url + ' error:'+msg);
 			
-			var errobj = {'url':shortener.api.url, 'xhr':null, 'msg':null}
+			var errobj = {'url':shortener.api.url, 'xhr':null, 'msg':null};
 			
 			if (xhr) {
 				errobj.xhr = xhr;

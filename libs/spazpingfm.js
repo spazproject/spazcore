@@ -1,3 +1,14 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc;
+
 /**
  * A library to interact with Ping.FM 
  */
@@ -33,7 +44,7 @@ function SpazPingFM(opts) {
 	this.devkey  = opts.devkey  || null;
 	this.userkey = opts.userkey || null;
 	
-};
+}
 
 
 SpazPingFM.prototype.getAPIKey = function() {

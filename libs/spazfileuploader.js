@@ -1,3 +1,15 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, DOMParser, jQuery;
+
+
 /**
  * A file uploader class for SpazCore 
  */
@@ -57,70 +69,64 @@ SpazFileUploader.prototype.getAPIs = function() {
 				var loader = event.target;
 
 				var parser=new DOMParser();
-				xmldoc = parser.parseFromString(loader.data,"text/xml");
+				var xmldoc = parser.parseFromString(loader.data,"text/xml");
 
 				var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
-				if (rspAttr.getNamedItem("stat").nodeValue == 'ok')
+				if (rspAttr.getNamedItem("stat").nodeValue === 'ok')
 				{
-					var mediaurl = $(xmldoc).find('mediaurl').text();
-					prepPhotoPost(mediaurl);
-					$('#status-text').html('Complete');
+					var mediaurl = jQuery(xmldoc).find('mediaurl').text();
 				} 
 				else
 				{
 					var errAttributes = xmldoc.getElementsByTagName("err")[0].attributes;
-					errMsg = errAttributes.getNamedItem("msg").nodeValue;
+					var errMsg = errAttributes.getNamedItem("msg").nodeValue;
 				}
 			}
 		},
 	    'twitpic' : {
-			'upload_url' : 'http://twitpic.com/api/upload'
+			'upload_url' : 'http://twitpic.com/api/upload',
 			'gethumb_url': '',
 			'getfull_url': '',
 			'processResult': function(event, apiobj) {
 				var loader = event.target;
 
 				var parser=new DOMParser();
-				xmldoc = parser.parseFromString(loader.data,"text/xml");
+				var xmldoc = parser.parseFromString(loader.data,"text/xml");
 
 				var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
-				if (rspAttr.getNamedItem("stat").nodeValue == 'ok')
+				if (rspAttr.getNamedItem("stat").nodeValue === 'ok')
 				{
-					var mediaurl = $(xmldoc).find('mediaurl').text();
-					prepPhotoPost(mediaurl);
-					$('#status-text').html('Complete');
+					var mediaurl = jQuery(xmldoc).find('mediaurl').text();
 				} 
 				else
 				{
 					var errAttributes = xmldoc.getElementsByTagName("err")[0].attributes;
-					errMsg = errAttributes.getNamedItem("msg").nodeValue;
+					var errMsg = errAttributes.getNamedItem("msg").nodeValue;
 				}
 			}
 		},
 		'twitgoo' : {
-			'upload_url' : 'http://twitgoo.com/api/upload'
+			'upload_url' : 'http://twitgoo.com/api/upload',
 			'gethumb_url': '',
 			'getfull_url': '',
 			'processResult': function(event, apiobj) {
 				var loader = event.target;
 
 				var parser=new DOMParser();
-				xmldoc = parser.parseFromString(loader.data,"text/xml");
+				var xmldoc = parser.parseFromString(loader.data,"text/xml");
 
 				var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
-				if (rspAttr.getNamedItem("stat").nodeValue == 'ok')
+				if (rspAttr.getNamedItem("stat").nodeValue === 'ok')
 				{
-					var mediaurl = $(xmldoc).find('mediaurl').text();
-					prepPhotoPost(mediaurl);
-					$('#status-text').html('Complete');
+					var mediaurl = jQuery(xmldoc).find('mediaurl').text();
 				} 
 				else
 				{
 					var errAttributes = xmldoc.getElementsByTagName("err")[0].attributes;
-					errMsg = errAttributes.getNamedItem("msg").nodeValue;
+					var errMsg = errAttributes.getNamedItem("msg").nodeValue;
 				}
 			}
-		},
+		}
 		
 	};
 
@@ -150,12 +156,14 @@ SpazFileUploader.prototype.setAPI = function(apilabel) {
  */
 SpazFileUploader.prototype.upload = function(file_url, opts) {
 
+	var api;
+
 	var thisSFU = this;
 
 	if (opts.api) {
-		var api = this.apis.api;
+		api = this.apis.api;
 	} else {
-		var api = this.api;
+		api = this.api;
 	}
 	
 	var username = opts.username || null;
