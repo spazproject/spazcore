@@ -1,3 +1,14 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+regexp: false,
+undef: true,
+white: false,
+onevar: false 
+ */
+
 /**
  * SPAZCORE
  * version 0.1.1

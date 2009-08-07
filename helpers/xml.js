@@ -1,3 +1,14 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, DOMParser;
+ 
 sc.helpers.createXMLFromString = function (string) {
 	var xmlParser, xmlDocument;
 	try {

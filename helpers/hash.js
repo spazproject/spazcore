@@ -1,3 +1,23 @@
+/*jslint 
+bitwise: false,
+browser: true,
+nomen: false,
+debug: true,
+eqeqeq: false,
+forin: true,
+laxbreak: true,
+plusplus: false,
+newcap: false,
+undef: false,
+white: false,
+onevar: false 
+ */
+var sc;
+ 
+/*
+	We're more lax with JSLint here because this is almost all not our code
+*/
+
 /**
  * Licence
  * As long as you leave the copyright notice of the original script, or link
@@ -121,7 +141,7 @@ sc.helpers.Base64 = {
 	_utf8_decode : function (utftext) {
 		var string = "";
 		var i = 0;
-		var c = c1 = c2 = 0;
+		var c = 0, c1 = 0, c2 = 0, c3 = 0;
 
 		while ( i < utftext.length ) {
 
@@ -148,7 +168,7 @@ sc.helpers.Base64 = {
 		return string;
 	}
 
-}
+};
 
 
 
@@ -185,7 +205,7 @@ sc.helpers.crc32 = function (str) {
 		}
  
 		return utftext;
-	};
+	}
  
 	str = Utf8Encode(str);
  
@@ -249,22 +269,22 @@ sc.helpers.MD5 = function (string) {
 	function FF(a,b,c,d,x,s,ac) {
 		a = AddUnsigned(a, AddUnsigned(AddUnsigned(F(b, c, d), x), ac));
 		return AddUnsigned(RotateLeft(a, s), b);
-	};
+	}
  
 	function GG(a,b,c,d,x,s,ac) {
 		a = AddUnsigned(a, AddUnsigned(AddUnsigned(G(b, c, d), x), ac));
 		return AddUnsigned(RotateLeft(a, s), b);
-	};
+	}
  
 	function HH(a,b,c,d,x,s,ac) {
 		a = AddUnsigned(a, AddUnsigned(AddUnsigned(H(b, c, d), x), ac));
 		return AddUnsigned(RotateLeft(a, s), b);
-	};
+	}
  
 	function II(a,b,c,d,x,s,ac) {
 		a = AddUnsigned(a, AddUnsigned(AddUnsigned(I(b, c, d), x), ac));
 		return AddUnsigned(RotateLeft(a, s), b);
-	};
+	}
  
 	function ConvertToWordArray(string) {
 		var lWordCount;
@@ -287,7 +307,7 @@ sc.helpers.MD5 = function (string) {
 		lWordArray[lNumberOfWords-2] = lMessageLength<<3;
 		lWordArray[lNumberOfWords-1] = lMessageLength>>>29;
 		return lWordArray;
-	};
+	}
  
 	function WordToHex(lValue) {
 		var WordToHexValue="",WordToHexValue_temp="",lByte,lCount;
@@ -297,7 +317,7 @@ sc.helpers.MD5 = function (string) {
 			WordToHexValue = WordToHexValue + WordToHexValue_temp.substr(WordToHexValue_temp.length-2,2);
 		}
 		return WordToHexValue;
-	};
+	}
  
 	function Utf8Encode(string) {
 		string = string.replace(/\r\n/g,"\n");
@@ -323,7 +343,7 @@ sc.helpers.MD5 = function (string) {
 		}
  
 		return utftext;
-	};
+	}
  
 	var x=Array();
 	var k,AA,BB,CC,DD,a,b,c,d;
@@ -413,7 +433,7 @@ sc.helpers.MD5 = function (string) {
 	var temp = WordToHex(a)+WordToHex(b)+WordToHex(c)+WordToHex(d);
  
 	return temp.toLowerCase();
-}
+};
 
 /**
 *
@@ -427,7 +447,7 @@ sc.helpers.SHA1 = function (msg) {
 	function rotate_left(n,s) {
 		var t4 = ( n<<s ) | (n>>>(32-s));
 		return t4;
-	};
+	}
  
 	function lsb_hex(val) {
 		var str="";
@@ -441,7 +461,7 @@ sc.helpers.SHA1 = function (msg) {
 			str += vh.toString(16) + vl.toString(16);
 		}
 		return str;
-	};
+	}
  
 	function cvt_hex(val) {
 		var str="";
@@ -453,7 +473,7 @@ sc.helpers.SHA1 = function (msg) {
 			str += v.toString(16);
 		}
 		return str;
-	};
+	}
  
  
 	function Utf8Encode(string) {
@@ -480,7 +500,7 @@ sc.helpers.SHA1 = function (msg) {
 		}
  
 		return utftext;
-	};
+	}
  
 	var blockstart;
 	var i, j;
@@ -497,7 +517,7 @@ sc.helpers.SHA1 = function (msg) {
  
 	var msg_len = msg.length;
  
-	var word_array = new Array();
+	var word_array = [];
 	for( i=0; i<msg_len-3; i+=4 ) {
 		j = msg.charCodeAt(i)<<24 | msg.charCodeAt(i+1)<<16 |
 		msg.charCodeAt(i+2)<<8 | msg.charCodeAt(i+3);
@@ -523,7 +543,7 @@ sc.helpers.SHA1 = function (msg) {
  
 	word_array.push( i );
  
-	while( (word_array.length % 16) != 14 ) word_array.push( 0 );
+	while( (word_array.length % 16) != 14 ) {word_array.push( 0 );}
  
 	word_array.push( msg_len>>>29 );
 	word_array.push( (msg_len<<3)&0x0ffffffff );
@@ -531,8 +551,8 @@ sc.helpers.SHA1 = function (msg) {
  
 	for ( blockstart=0; blockstart<word_array.length; blockstart+=16 ) {
  
-		for( i=0; i<16; i++ ) W[i] = word_array[blockstart+i];
-		for( i=16; i<=79; i++ ) W[i] = rotate_left(W[i-3] ^ W[i-8] ^ W[i-14] ^ W[i-16], 1);
+		for( i=0; i<16; i++ ) {W[i] = word_array[blockstart+i];}
+		for( i=16; i<=79; i++ ) {W[i] = rotate_left(W[i-3] ^ W[i-8] ^ W[i-14] ^ W[i-16], 1);}
  
 		A = H0;
 		B = H1;
@@ -584,11 +604,11 @@ sc.helpers.SHA1 = function (msg) {
  
 	}
  
-	var temp = cvt_hex(H0) + cvt_hex(H1) + cvt_hex(H2) + cvt_hex(H3) + cvt_hex(H4);
+	temp = cvt_hex(H0) + cvt_hex(H1) + cvt_hex(H2) + cvt_hex(H3) + cvt_hex(H4);
  
 	return temp.toLowerCase();
  
-}
+};
 
 
 
@@ -622,16 +642,16 @@ sc.helpers.SHA256 = function (s){
 	function Gamma1256(x) { return (S(x, 17) ^ S(x, 19) ^ R(x, 10)); }
  
 	function core_sha256 (m, l) {
-		var K = new Array(0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5, 0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3, 0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174, 0xE49B69C1, 0xEFBE4786, 0xFC19DC6, 0x240CA1CC, 0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA, 0x983E5152, 0xA831C66D, 0xB00327C8, 0xBF597FC7, 0xC6E00BF3, 0xD5A79147, 0x6CA6351, 0x14292967, 0x27B70A85, 0x2E1B2138, 0x4D2C6DFC, 0x53380D13, 0x650A7354, 0x766A0ABB, 0x81C2C92E, 0x92722C85, 0xA2BFE8A1, 0xA81A664B, 0xC24B8B70, 0xC76C51A3, 0xD192E819, 0xD6990624, 0xF40E3585, 0x106AA070, 0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5, 0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3, 0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2);
-		var HASH = new Array(0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19);
-		var W = new Array(64);
+		var K = [0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5, 0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3, 0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174, 0xE49B69C1, 0xEFBE4786, 0xFC19DC6, 0x240CA1CC, 0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA, 0x983E5152, 0xA831C66D, 0xB00327C8, 0xBF597FC7, 0xC6E00BF3, 0xD5A79147, 0x6CA6351, 0x14292967, 0x27B70A85, 0x2E1B2138, 0x4D2C6DFC, 0x53380D13, 0x650A7354, 0x766A0ABB, 0x81C2C92E, 0x92722C85, 0xA2BFE8A1, 0xA81A664B, 0xC24B8B70, 0xC76C51A3, 0xD192E819, 0xD6990624, 0xF40E3585, 0x106AA070, 0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5, 0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3, 0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2];
+		var HASH = [0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19];
+		var W = [64];
 		var a, b, c, d, e, f, g, h, i, j;
 		var T1, T2;
  
 		m[l >> 5] |= 0x80 << (24 - l % 32);
 		m[((l + 64 >> 9) << 4) + 15] = l;
  
-		for ( var i = 0; i<m.length; i+=16 ) {
+		for ( i = 0; i<m.length; i+=16 ) {
 			a = HASH[0];
 			b = HASH[1];
 			c = HASH[2];
@@ -641,9 +661,9 @@ sc.helpers.SHA256 = function (s){
 			g = HASH[6];
 			h = HASH[7];
  
-			for ( var j = 0; j<64; j++) {
-				if (j < 16) W[j] = m[j + i];
-				else W[j] = safe_add(safe_add(safe_add(Gamma1256(W[j - 2]), W[j - 7]), Gamma0256(W[j - 15])), W[j - 16]);
+			for ( j = 0; j<64; j++) {
+				if (j < 16) {W[j] = m[j + i];}
+				else {W[j] = safe_add(safe_add(safe_add(Gamma1256(W[j - 2]), W[j - 7]), Gamma0256(W[j - 15])), W[j - 16]);}
  
 				T1 = safe_add(safe_add(safe_add(safe_add(h, Sigma1256(e)), Ch(e, f, g)), K[j]), W[j]);
 				T2 = safe_add(Sigma0256(a), Maj(a, b, c));
@@ -718,7 +738,7 @@ sc.helpers.SHA256 = function (s){
 	s = Utf8Encode(s);
 	return binb2hex(core_sha256(str2binb(s), s.length * chrsz));
  
-}
+};
 
 
 

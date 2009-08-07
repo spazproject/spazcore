@@ -1,3 +1,16 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+regexp: false,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, Mojo, use_palmhost_proxy;
+ 
+ 
 /**
  * This should contain definitions for all methods from helpers/sys.js tagged @platformsub 
  */
@@ -7,10 +20,12 @@
  * dump an object's first level to console
  */
 sc.helpers.dump = function(obj) {
+	var dumper;
+	
 	if (sc.helpers.isString(obj) || sc.helpers.isNumber(obj) || !obj) {
-		var dumper = Mojo.Log.info;
+		dumper = Mojo.Log.info;
 	} else {
-		var dumper = Mojo.Log.logProperties;
+		dumper = Mojo.Log.logProperties;
 	}
 
 	if (sc.helpers.isString(obj)) {
@@ -22,26 +37,22 @@ sc.helpers.dump = function(obj) {
 	} else if (obj === null) {
 		dumper('NULL');
 	} else { // this is an object. we hope.
-		if (dump) { // we really prefer to use dump if it is available
-			dumper(obj);
-		} else {
-			dumper(obj)
-		}
-
+		dumper(obj);
 	}
 
-}
+};
 
 
 /**
  * this is specific to webOS, for retrieving the proper URL prefixed with the Palm Host proxy if needed 
+ * @param {string} url
  */
 sc.helpers.getMojoURL = function(url) {
-	if (typeof Mojo != "undefined") { // we're in webOS		
+	if (typeof Mojo !== "undefined") { // we're in webOS		
 		if (use_palmhost_proxy) { // we are not on an emu or device, so proxy calls
 			var re = /https?:\/\/.[^\/:]*(?::[0-9]+)?/;
 			var match = url.match(re);
-			if (match && match[0] != Mojo.hostingPrefix) {
+			if (match && match[0] !== Mojo.hostingPrefix) {
 				url = "/proxy?url=" + encodeURIComponent(url);
 			}
 			return url;		
