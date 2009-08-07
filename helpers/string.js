@@ -69,7 +69,7 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 	if (type != 'email')
 	{
 		while (ms = re_noemail.exec(str)) {
-			var period = ''
+			var period = '';
 			if ( /\.$/.test(ms[6]) ) {
 				period = '.';
 				ms[6] = ms[6].slice(0, -1);
@@ -88,7 +88,7 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 			if (extra_code) {
 				extra_code = ' '+extra_code;
 			} else {
-				extra_code = ''
+				extra_code = '';
 			}
 			
 			var desc = ms[5]+ms[6];
@@ -106,7 +106,7 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 	{
 		while (ms = re_nourl.exec(str))
 		{
-			var period = ''
+			var period = '';
 			if ( /\./.test(ms[5]) ) {
 				period = '.';
 				ms[5] = ms[5].slice(0, -1);
@@ -129,7 +129,7 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 	return str;
 
 
-}
+};
 
 /**
  * turns twitter style username refs ('@username') into links
@@ -145,7 +145,7 @@ sc.helpers.autolinkTwitterScreenname = function(str, tpl) {
 		tpl = '<a href="http://twitter.com/#username#">@#username#</a>';
 	}
 	
-	var re_uname = /(^|\s|\(\[|,|\()@([a-zA-Z0-9_]+)([^a-zA-Z0-9_]|$)/gi
+	var re_uname = /(^|\s|\(\[|,|\()@([a-zA-Z0-9_]+)([^a-zA-Z0-9_]|$)/gi;
 	
 	var ms = [];
 	while (ms = re_uname.exec(str))
@@ -166,7 +166,7 @@ sc.helpers.autolinkTwitterScreenname = function(str, tpl) {
 
 	}
 	return str;
-}
+};
 
 
 
@@ -184,7 +184,7 @@ sc.helpers.autolinkTwitterHashtag = function(str, tpl) {
 		tpl = '<a href="http://search.twitter.com/search?q=#hashtag_enc#">##hashtag#</a>';
 	}
 	
-	var re_hashtag = /(^|\s|\()#([a-zA-Z0-9\-_\.+:=]{1,}\w)([^a-zA-Z0-9\-_+]|$)/gi
+	var re_hashtag = /(^|\s|\()#([a-zA-Z0-9\-_\.+:=]{1,}\w)([^a-zA-Z0-9\-_+]|$)/gi;
 	
 	var ms = [];
 	while (ms = re_hashtag.exec(str))
@@ -206,7 +206,7 @@ sc.helpers.autolinkTwitterHashtag = function(str, tpl) {
 
 	}
 	return str;
-}
+};
 
 
 
@@ -245,7 +245,7 @@ sc.helpers.fromHTMLSpecialChars = function(str) {
 	str = str.replace(/&apos;/gi, '\'');
 	sc.helpers.dump(str);
 	return str;
-}
+};
 
 
 
@@ -276,7 +276,7 @@ sc.helpers.htmlentities = function(string, quote_style) {
     }
     
     return tmp_str;
-}
+};
 
 sc.helpers._get_html_translation_table = function(table, quote_style) {
     // http://kevin.vanzonneveld.net
@@ -446,7 +446,7 @@ sc.helpers._get_html_translation_table = function(table, quote_style) {
     }
     
     return histogram;
-}
+};
 
 
 
@@ -518,7 +518,7 @@ sc.helpers.Utf8 = {
 		return string;
 	}
  
-}
+};
 
 
 
@@ -533,14 +533,14 @@ sc.helpers.Utf8 = {
  
 sc.helpers.trim = function (str, chars) {
 	return sc.helpers.ltrim(sc.helpers.rtrim(str, chars), chars);
-}
+};
  
 sc.helpers.ltrim = function (str, chars) {
 	chars = chars || "\\s";
 	return str.replace(new RegExp("^[" + chars + "]+", "g"), "");
-}
+};
  
 sc.helpers.rtrim = function (str, chars) {
 	chars = chars || "\\s";
 	return str.replace(new RegExp("[" + chars + "]+$", "g"), "");
-}
+};

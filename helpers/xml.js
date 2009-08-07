@@ -9,6 +9,6 @@ sc.helpers.createXMLFromString = function (string) {
 		dump(e.name + ":" + e.message);
 		return null;
 	}
-}
+};
 
 

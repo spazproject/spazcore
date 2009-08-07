@@ -15,7 +15,7 @@ sc.helpers.getRelativeTime = function(time_value, use_dateparse) {
 	}
 	
 	var now = new Date;
-	var delta = parseInt( (now.getTime() - parsed_date.getTime()) / 1000);
+	var delta = parseInt( (now.getTime() - parsed_date.getTime()) / 1000, 10);
 	
 	if (delta < 10) {
 		return 'Just now';
@@ -24,7 +24,7 @@ sc.helpers.getRelativeTime = function(time_value, use_dateparse) {
 	} else if(delta < 120) {
 		return '1 min ago';
 	} else if(delta < (45*60)) {
-		return Math.round(parseInt(delta / 60)).toString() + ' min ago';
+		return Math.round(parseInt(delta / 60, 10)).toString() + ' min ago';
 	} else if(delta < (90*60)) {
 		return '1 hr ago';
 	} else if(delta < (24*60*60)) {
@@ -38,17 +38,17 @@ sc.helpers.getRelativeTime = function(time_value, use_dateparse) {
 	} else {
 		return Math.round(delta / 86400).toString() + ' days ago';
 	}
-}
+};
 
 
 sc.helpers.httpTimeToInt = function(entryDate) {
 	var parsedDate = new Date;
 	parsedDate.setTime(Date.parse(entryDate));
 	return parsedDate.getTime();
-}
+};
 
 
 sc.helpers.getTimeAsInt = function() {
 	var now = new Date;
 	return now.getTime();
-}
+};
