@@ -1,3 +1,15 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+plusplus: false,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, jQuery;
+
 /**
  * @fileOverview File containing the SpazTimeline object definition
  * @author <a href="mailto:coj@funkatron.com">coj@funkatron.com</a>
@@ -53,7 +65,7 @@ var SpazTimeline = function(opts) {
 
 SpazTimeline.prototype._init = function(opts) {
 	
-	var opts = opts || {};
+	opts = opts || {};
 	
 	this.max_items                   = opts.max_items     || 100;	
 	this.refresh_time                = opts.refresh_time  || 1000*60*2; // mseconds

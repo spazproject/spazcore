@@ -1,4 +1,15 @@
-const SPAZCORE_PREFS_TI_KEY = 'preferences_json';
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, Titanium, air, window, jQuery, Mojo;
+
+var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
  
 /**
  * A preferences lib for AIR JS apps. This requires the json2.js library
@@ -53,7 +64,7 @@ function SpazPrefs(defaults, sanity_methods) {
 	}
 	
 	this.loaded = false;
-};
+}
 
 
 /**
@@ -70,6 +81,7 @@ SpazPrefs.prototype.setDefaults = function(defaults) {
  * call the onSet sanity method if it is defined for a given pref keys.
  */
 SpazPrefs.prototype._applyDefaults = function() {
+	var key;
 	for (key in this._defaults) {
 		sc.helpers.dump('Copying default "' + key + '":"' + this._defaults[key] + '" (' + typeof(this._defaults[key]) + ')');
 		this._prefs[key] = this._defaults[key];
@@ -141,7 +153,7 @@ SpazPrefs.prototype.set = function(key, val, encrypted) {
  */
 SpazPrefs.prototype.setSanityMethod = function(key, type, method) {
 	
-	if (type != 'onGet' && type != 'onSet') {
+	if (type !== 'onGet' && type !== 'onSet') {
 		return false;
 	}
 	
@@ -182,7 +194,7 @@ SpazPrefs.prototype.load = function(name) {
 	*/
 	if (sc.helpers.iswebOS()) {
 
-		dump('this is webOS');
+		sc.helpers.dump('this is webOS');
 		if (!this.mojoDepot) {
 			sc.helpers.dump('making depot');
 			this.mojoDepot = new Mojo.Depot({
@@ -192,7 +204,7 @@ SpazPrefs.prototype.load = function(name) {
 		}
 
 		
-		function onGet(loaded_prefs) {
+		var onGet = function(loaded_prefs) {
 			if (loaded_prefs) {
 				sc.helpers.dump('Prefs loaded');
 				for (var key in loaded_prefs) {
@@ -206,7 +218,7 @@ SpazPrefs.prototype.load = function(name) {
 			jQuery().trigger('spazprefs_loaded');
 		};
 
-		function onFail() {
+		var onFail = function() {
 			sc.helpers.dump('Prefs loading failed in onFail');
 			thisPrefs.resetPrefs();
 			jQuery().trigger('spazprefs_loaded');
@@ -277,7 +289,7 @@ SpazPrefs.prototype.save = function(name) {
  * shortcut for SpazPrefs
  */
 if (sc) {
-	scPrefs = SpazPrefs;
+	var scPrefs = SpazPrefs;
 }
 
 

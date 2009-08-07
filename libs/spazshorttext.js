@@ -1,3 +1,14 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc;
+
 /**
  * A library to shorten text 
  */
@@ -201,9 +212,11 @@ SpazShortText.prototype.genBaseMaps = function() {
  * This processes the base maps into the this.map object of regexes and replacements 
  */
 SpazShortText.prototype.processBaseMaps = function() {
-	for (var key in this.basemap) {
-		var val = this.basemap[key];
-		var regex = new RegExp('(\\b)'+key+'(\\b)', 'gi');
+	var key, val, regex, israw;
+	
+	for (key in this.basemap) {
+		val = this.basemap[key];
+		regex = new RegExp('(\\b)'+key+'(\\b)', 'gi');
 		this.map[key] = {
 			'short':'$1'+val+'$2',
 			'regex':regex
@@ -213,9 +226,9 @@ SpazShortText.prototype.processBaseMaps = function() {
 	/*
 		take the rawmap stuff and glob it into this.map, so we only have one to worry about
 	*/
-	for (var key in this.baserawmap) {
-		var val = this.baserawmap[key];
-		var regex = new RegExp(key, 'gi');
+	for (key in this.baserawmap) {
+		val = this.baserawmap[key];
+		regex = new RegExp(key, 'gi');
 		this.map[key] = {
 			'short':val,
 			'regex':regex
@@ -252,7 +265,7 @@ SpazShortText.prototype.shorten = function(text) {
  * @param {boolean} israw is true, this mapping won't be altered at all when processed into a regex
  */
 SpazShortText.prototype.addMap = function(search, replace, israw) {
-	var israw = israw || false;
+	israw = israw || false;
 	
 	if (israw) {
 		this.baserawmap[search] = replace;
