@@ -1,8 +1,11 @@
 /*jslint 
+bitwise: false,
 browser: true,
+newcap: false,
 nomen: false,
 debug: true,
 forin: true,
+plusplus: false,
 undef: true,
 white: false,
 onevar: false 
@@ -18,7 +21,7 @@ var sc;
  */
 sc.helpers.containsScreenName = function(str, sn) {
 	
-	var re = new RegExp('(?:\s|\b|^[[:alnum:]]|^)@('+sn+')(?:\s|\b|$)', 'gi');
+	var re = new RegExp('(?:\\s|\\b|^[[:alnum:]]|^)@('+sn+')(?:\\s|\\b|$)', 'gi');
 	if ( re.test(str) ) {
 		return true;
 	}
@@ -33,7 +36,7 @@ sc.helpers.extractURLs = function(str) {
 	var wwwlinks = /(^|\s|\(|:)(((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+))/gi;
 	var match = [];
 	var URLs = [];
-	while ( (match = wwwlinks.exec(str)) != null ) {
+	while ( (match = wwwlinks.exec(str)) !== null ) {
 		URLs.push(match[2]);
 	}
 	return URLs;
@@ -76,11 +79,13 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 
 	var re_noemail = /(^|\s|\(|:)((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
 	var re_nourl   = /(^|\s|\()([a-zA-Z0-9_\.\-\+]+)@([a-zA-Z0-9\-]+)\.([a-zA-Z0-9\-\.]*)([^\s\)<]+)/gi;
+	
+	var x, ms, period;
 
-	if (type != 'email')
+	if (type !== 'email')
 	{
-		while (ms = re_noemail.exec(str)) {
-			var period = '';
+		while ((ms = re_noemail.exec(str))) {
+
 			if ( /\.$/.test(ms[6]) ) {
 				period = '.';
 				ms[6] = ms[6].slice(0, -1);
@@ -90,7 +95,7 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 				sometimes we can end up with a null instead of a blank string,
 				so we need to force the issue in javascript.
 			*/
-			for (var x=0; x<ms.length; x++) {
+			for (x=0; x<ms.length; x++) {
 				if (!ms[x]) {
 					ms[x] = '';
 				}
@@ -113,11 +118,11 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 		}
 	}
 
-	if (type != 'url')
+	if (type !== 'url')
 	{
-		while (ms = re_nourl.exec(str))
+		while ((ms = re_nourl.exec(str)))
 		{
-			var period = '';
+			period = '';
 			if ( /\./.test(ms[5]) ) {
 				period = '.';
 				ms[5] = ms[5].slice(0, -1);
@@ -127,7 +132,7 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 				sometimes we can end up with a null instead of a blank string,
 				so we need to force the issue in javascript.
 			*/
-			for (var x=0; x<ms.length; x++) {
+			for (x=0; x<ms.length; x++) {
 				if (!ms[x]) {
 					ms[x] = '';
 				}
@@ -327,24 +332,24 @@ sc.helpers._get_html_translation_table = function(table, quote_style) {
         useQuoteStyle = constMappingQuoteStyle[useQuoteStyle];
     }
  
-    if (useTable == 'HTML_SPECIALCHARS') {
+    if (useTable === 'HTML_SPECIALCHARS') {
         // ascii decimals for better compatibility
         entities['38'] = '&amp;';
-        if (useQuoteStyle != 'ENT_NOQUOTES') {
+        if (useQuoteStyle !== 'ENT_NOQUOTES') {
             entities['34'] = '&quot;';
         }
-        if (useQuoteStyle == 'ENT_QUOTES') {
+        if (useQuoteStyle === 'ENT_QUOTES') {
             entities['39'] = '&#039;';
         }
         entities['60'] = '&lt;';
         entities['62'] = '&gt;';
-    } else if (useTable == 'HTML_ENTITIES') {
+    } else if (useTable === 'HTML_ENTITIES') {
         // ascii decimals for better compatibility
       entities['38']  = '&amp;';
-        if (useQuoteStyle != 'ENT_NOQUOTES') {
+        if (useQuoteStyle !== 'ENT_NOQUOTES') {
             entities['34'] = '&quot;';
         }
-        if (useQuoteStyle == 'ENT_QUOTES') {
+        if (useQuoteStyle === 'ENT_QUOTES') {
             entities['39'] = '&#039;';
         }
       entities['60']  = '&lt;';
@@ -447,7 +452,6 @@ sc.helpers._get_html_translation_table = function(table, quote_style) {
       entities['255'] = '&yuml;';
     } else {
         throw Error("Table: "+useTable+' not supported');
-        return false;
     }
     
     // ascii decimals to real symbols
@@ -502,7 +506,7 @@ sc.helpers.Utf8 = {
 	decode : function (utftext) {
 		var string = "";
 		var i = 0;
-		var c = c1 = c2 = 0;
+		var c = 0, c1 = 0, c2 = 0, c3 = 0;
  
 		while ( i < utftext.length ) {
  
