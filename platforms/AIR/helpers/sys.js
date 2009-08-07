@@ -1,3 +1,14 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, air, window, DOMParser;
+ 
 /*
 	We load this file to redefine platform-specific methods
 */
@@ -6,15 +17,16 @@
 	dump an object's first level to console
 */
 sc.helpers.dump = function(obj) {
+	var dumper;
 	
 	if (sc.helpers.isString(obj) || sc.helpers.isNumber(obj) || !obj) {
-		var dumper = air.trace;
+		dumper = air.trace;
 	} else {
-		var dumper = function() {
+		dumper = function() {
 			for(var x in obj) {
 				air.trace("'"+x+"':"+obj[x]);
 			}
-		}
+		};
 	}
 	
 	if (sc.helpers.isString(obj)) {
@@ -26,9 +38,9 @@ sc.helpers.dump = function(obj) {
 	} else if (obj === null) {
 		dumper('NULL');
 	} else { // this should be a "normal" object
-		dumper(obj)
+		dumper(obj);
 	}
-}
+};
 
 
 /*
@@ -41,7 +53,7 @@ sc.helpers.openInBrowser = function(url) {
 	} catch (e) {
 	    air.trace(e.errorMsg);
 	}
-}
+};
 
 
 /*
@@ -58,7 +70,7 @@ sc.helpers.getFileContents = function(path) {
 	} else {
 		return false;
 	}
-}
+};
 
 
 sc.helpers.setFileContents = function(path, content, serialize) {
@@ -67,7 +79,7 @@ sc.helpers.setFileContents = function(path, content, serialize) {
 		content = JSON.stringify(content);
 	}
 	
-	Spaz.dump('setFileContents for '+path+ ' to "' +content+ '"');
+	sc.helpers.dump('setFileContents for '+path+ ' to "' +content+ '"');
 	
 	try { 
 		var f = new air.File(path);
@@ -76,8 +88,8 @@ sc.helpers.setFileContents = function(path, content, serialize) {
 		fs.writeUTFBytes(content);
 		fs.close();
 	} catch (e) {
-		air.trace(e.errorMsg)
-		dump(e.name + ":" + e.message);
+		air.trace(e.errorMsg);
+		sc.helpers.dump(e.name + ":" + e.message);
 	}
 };
 
@@ -86,7 +98,7 @@ sc.helpers.setFileContents = function(path, content, serialize) {
 	Returns the current application version string
 */
 sc.helpers.getAppVersion = function() {
-	var appXML = air.NativeApplication.nativeApplication.applicationDescriptor
+	var appXML = air.NativeApplication.nativeApplication.applicationDescriptor;
 	var domParser = new DOMParser();
 	appXML = domParser.parseFromString(appXML, "text/xml");
 	var version = appXML.getElementsByTagName("version")[0].firstChild.nodeValue;
@@ -122,16 +134,16 @@ sc.helpers.getClipboardText = function() {
 	} else {
 		return '';
 	}
-}
+};
 
 /*
 	Sets clipboard text
 */
 sc.helpers.setClipboardText = function(text) {
-	Spaz.dump('Copying "' + text + '" to clipboard');
+	sc.helpers.dump('Copying "' + text + '" to clipboard');
 	air.Clipboard.generalClipboard.clear();
 	air.Clipboard.generalClipboard.setData(air.ClipboardFormats.TEXT_FORMAT,text,false);
-}
+};
 
 
 /*
@@ -141,7 +153,7 @@ sc.helpers.getEncryptedValue = function(key) {
 	var storedValue = air.EncryptedLocalStore.getItem(key);
 	var val = storedValue.readUTFBytes(storedValue.length);
 	return val;
-}
+};
 
 /*
 	Sets a value in the EncryptedLocalStore of AIR
@@ -150,7 +162,7 @@ sc.helpers.setEncyrptedValue = function(key, val) {
 	var bytes = new air.ByteArray();
     bytes.writeUTFBytes(val);
     air.EncryptedLocalStore.setItem(key, bytes);
-}
+};
 
 
 /*
@@ -158,7 +170,7 @@ sc.helpers.setEncyrptedValue = function(key, val) {
 */
 sc.helpers.getAppStoreDir = function() {
 	return air.File.applicationStorageDirectory;
-}
+};
 
 
 /**
@@ -167,11 +179,11 @@ sc.helpers.getAppStoreDir = function() {
 sc.helpers.getPreferencesFile = function(name, create) {
 	if (!name) {name='preferences';}
 	
-	var prefsFile = getAppStoreDir();
+	var prefsFile = sc.helpers.getAppStoreDir();
 	prefsFile = prefsFile.resolvePath(name+".json");
 	
 	return prefsFile;
-}
+};
 
 /*
 	initializes a file at the given location. set overwrite to true
@@ -190,4 +202,4 @@ sc.helpers.init_file = function(path, overwrite) {
 		return false;
 	}
 
-}
+};

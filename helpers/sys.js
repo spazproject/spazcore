@@ -1,3 +1,14 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc;
+ 
 /**
  * These are system-oriented functions, mostly utilizing AIR apis
  * to interact with the OS

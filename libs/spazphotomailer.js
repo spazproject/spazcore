@@ -42,7 +42,7 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 			"email_tpl"  :"{{username}}.???@pikchur.com",
 			"message_in" :"subject",
 			"email_info_url":"http://pikchur.com/dashboard/profile",
-			'help_text'  :"Log-in to pikchur with your Twitter username and password, and click 'Profile' Your customized posting email will be listed",
+			'help_text'  :"Log-in to pikchur with your Twitter username and password, and click 'Profile.' Your customized posting email will be listed",
 			'getToAddress': function(opts) {
 				var username = opts.username;
 				return thisSPM.apis['pikchur'].email_tpl.replace('{{username}}', username);

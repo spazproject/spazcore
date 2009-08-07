@@ -1,7 +1,18 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc;
+ 
 /**
  * a constant that defines the attribute where we'll store extra data in the event 
  */
-const SPAZCORE_EVENTDATA_ATTRIBUTE = 'sc_data';
+var SPAZCORE_EVENTDATA_ATTRIBUTE = 'sc_data';
 
 
 /**
@@ -14,22 +25,19 @@ const SPAZCORE_EVENTDATA_ATTRIBUTE = 'sc_data';
  * @function
  */
 sc.helpers.addListener = function(target, event_type, handler, scope, use_capture) {
+
+	function scope_perserver(e) {
+		handler.call(scope, e);
+	}
+	
 	if (use_capture !== true) {
 		use_capture = false;
 	}
 	
 	if (scope) {
-		
-		function scope_perserver(e) {
-			handler.call(scope, e);
-		}
-		
 		target.addEventListener(event_type, scope_perserver, use_capture);
-
 	} else {
-		
 		target.addEventListener(event_type, handler, use_capture);
-
 	}
 	
 	
@@ -48,18 +56,17 @@ sc.helpers.addListener = function(target, event_type, handler, scope, use_captur
  * @function
  */
 sc.helpers.removeListener = function(target, event_type, handler, scope, use_capture) {
+
+	function scope_perserver(e) {
+		handler.call(scope, e);
+	}
+
 	if (use_capture !== true) {
 		use_capture = false;
 	}
 	
 	if (scope) {
-		
-		function scope_perserver(e) {
-			handler.call(scope, e);
-		}
-		
 		target.removeEventListener(event_type, scope_perserver, use_capture);
-
 	} else {
 		target.removeEventListener(event_type, handler, use_capture);
 	}
@@ -97,7 +104,7 @@ sc.helpers.triggerCustomEvent = function(event_type, target, data, bubble) {
  */
 sc.helpers.getEventData = function(event_obj) {
 	return event_obj[SPAZCORE_EVENTDATA_ATTRIBUTE];
-}
+};
 
 /**
  * Alias for sc.helpers.addListener 

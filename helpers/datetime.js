@@ -1,3 +1,14 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc;
+ 
 /*
 * makes relative time out of "Sun Jul 08 19:01:12 +0000 2007" type string
 * Borrowed from Mike Demers (slightly altered)
@@ -8,14 +19,16 @@
 */
 sc.helpers.getRelativeTime = function(time_value, use_dateparse) {	
 	
+	var parsed_date;
+	
 	if (use_dateparse === true) {
-		var parsed_date = new Date.parse(time_value);
+		parsed_date = new Date.parse(time_value);
 	} else {
-		var parsed_date = new Date(time_value);
+		parsed_date = new Date(time_value);
 	}
 	
-	var now = new Date;
-	var delta = parseInt( (now.getTime() - parsed_date.getTime()) / 1000);
+	var now = new Date();
+	var delta = parseInt( (now.getTime() - parsed_date.getTime()) / 1000, 10);
 	
 	if (delta < 10) {
 		return 'Just now';
@@ -24,11 +37,11 @@ sc.helpers.getRelativeTime = function(time_value, use_dateparse) {
 	} else if(delta < 120) {
 		return '1 min ago';
 	} else if(delta < (45*60)) {
-		return Math.round(parseInt(delta / 60)).toString() + ' min ago';
+		return Math.round(parseInt(delta / 60, 10)).toString() + ' min ago';
 	} else if(delta < (90*60)) {
 		return '1 hr ago';
 	} else if(delta < (24*60*60)) {
-		if (Math.round(delta / 3600) == 1) {
+		if (Math.round(delta / 3600) === 1) {
 			return '2 hr ago';
 		} else {
 			return Math.round(delta / 3600).toString() + ' hr ago';
@@ -38,17 +51,25 @@ sc.helpers.getRelativeTime = function(time_value, use_dateparse) {
 	} else {
 		return Math.round(delta / 86400).toString() + ' days ago';
 	}
-}
+};
 
 
-sc.helpers.httpTimeToInt = function(entryDate) {
-	var parsedDate = new Date;
-	parsedDate.setTime(Date.parse(entryDate));
+sc.helpers.httpTimeToInt = function(entry_date, use_dateparse) {
+	var parsedDate = new Date();
+	
+	if (use_dateparse === true) {
+		entry_date = new Date.parse(entry_date);
+	} else {
+		entry_date = new Date(entry_date);
+	}
+	
+	parsedDate.setTime(entry_date);
 	return parsedDate.getTime();
-}
+};
 
 
 sc.helpers.getTimeAsInt = function() {
-	var now = new Date;
+	var now = new Date();
 	return now.getTime();
-}
+};
+

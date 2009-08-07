@@ -1,3 +1,14 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc;
+ 
 /**
  * determines if a string contains the given screen name prefixed with a @
  * this is mainly used for determining if a message should be considered a 'mention'

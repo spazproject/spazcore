@@ -1,3 +1,14 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, Titanium;
+ 
 /**
  * This should contain definitions for all methods from helpers/sys.js tagged @platformsub 
  */
@@ -7,15 +18,16 @@
  * dump an object's first level to console
  */
 sc.helpers.dump = function(obj) {
-
+	var dumper;
+	
 	if (sc.helpers.isString(obj) || sc.helpers.isNumber(obj) || !obj) {
-		var dumper = function(str) {
+		dumper = function(str) {
 			console.debug(str);
-		}
+		};
 	} else {
-		var dumper = function(obj) {
+		dumper = function(obj) {
 			console.dir(obj);
-		}
+		};
 	}
 	
 	if (sc.helpers.isString(obj)) {
@@ -27,6 +39,6 @@ sc.helpers.dump = function(obj) {
 	} else if (obj === null) {
 		dumper('NULL');
 	} else { // this should be a "normal" object
-		dumper(obj)
+		dumper(obj);
 	}
-}
+};

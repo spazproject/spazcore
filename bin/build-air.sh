@@ -25,5 +25,6 @@ cat libs/spazcore.js \
 	libs/spaztimeline.js \
 	libs/spaztwit.js \
 	platforms/AIR/helpers/sys.js \
+	platforms/AIR/helpers/network.js \
 	platforms/AIR/libs/spazprefs.js \
 	> spazcore-air.js
