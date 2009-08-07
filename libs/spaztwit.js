@@ -101,8 +101,8 @@ function SpazTwit(username, password, opts) {
 	*/
 	this.cache = {
 		users:{},
-		posts:{},
-	}
+		posts:{}
+	};
 	
 	this.me = {};
 	
@@ -114,7 +114,7 @@ function SpazTwit(username, password, opts) {
 	*/
 	jQuery.ajaxSetup( {
         timeout:1000*45, // 45 seconds
-        async:true,
+        async:true
     });
 
 	/**
@@ -132,10 +132,10 @@ function SpazTwit(username, password, opts) {
 
 SpazTwit.prototype.getUsername = function() {
 	return this.username;
-}
+};
 SpazTwit.prototype.getPassword = function() {
 	return this.password;
-}
+};
 
 /**
  * retrieves the last status id retrieved for a given section
@@ -152,7 +152,7 @@ SpazTwit.prototype.getLastId   = function(section) {
  * @param {integer} id  the new last id retrieved for this section
  */
 SpazTwit.prototype.setLastId   = function(section, id) {
-	this.data[section].lastid = parseInt(id);
+	this.data[section].lastid = parseInt(id, 10);
 };
 
 
@@ -240,7 +240,7 @@ SpazTwit.prototype.combinedTimelineFinished = function() {
  */
 SpazTwit.prototype.combinedTimelineHasErrors = function() {
 	if (this.combined_errors.length > 0) {
-		return true
+		return true;
 	} else {
 		return false;
 	}
@@ -370,9 +370,9 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 	
 	if (urls[key].indexOf('{{ID}}') > -1) {
 		if (typeof(urldata) === 'string') {
-			urls[key] = urls[key].replace('{{ID}}', urldata)
+			urls[key] = urls[key].replace('{{ID}}', urldata);
 		} else if (urldata && typeof(urldata) === 'object') {
-			urls[key] = urls[key].replace('{{ID}}', urldata.id)
+			urls[key] = urls[key].replace('{{ID}}', urldata.id);
 		}
 		
 	}
@@ -393,7 +393,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 		}
         
     } else {
-        return false
+        return false;
     }
 
 };
@@ -427,7 +427,7 @@ SpazTwit.prototype.verifyCredentials = function(username, password) {
 		'success_event_type':'verify_credentials_succeeded',
 		'failure_event_type':'verify_credentials_failed',
 		'method':'GET'
-	}
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -450,7 +450,7 @@ SpazTwit.prototype._processAuthenticatedUser = function(data, finished_event) {
 	// jQuery().trigger(finished_event, [this.me]);
 	this.triggerEvent(finished_event, this.me);
 	
-}
+};
 
 
 /**
@@ -518,7 +518,7 @@ SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page, processi
  */
 SpazTwit.prototype._processFriendsTimeline = function(ret_items, finished_event, processing_opts) {
 	this._processTimeline(SPAZCORE_SECTION_FRIENDS, ret_items, finished_event, processing_opts);
-}
+};
 
 
 /**
@@ -573,7 +573,7 @@ SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts)
 SpazTwit.prototype._processRepliesTimeline = function(ret_items, finished_event, processing_opts) {
 	sc.helpers.dump('Processing '+ret_items.length+' items returned from replies method');
 	this._processTimeline(SPAZCORE_SECTION_REPLIES, ret_items, finished_event, processing_opts);
-}
+};
 
 /**
  *  
@@ -625,7 +625,7 @@ SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processin
 SpazTwit.prototype._processDMTimeline = function(ret_items, finished_event, processing_opts) {
 	sc.helpers.dump('Processing '+ret_items.length+' items returned from DM method');
 	this._processTimeline(SPAZCORE_SECTION_DMS, ret_items, finished_event, processing_opts);
-}
+};
 
 /**
  *  
@@ -659,7 +659,7 @@ SpazTwit.prototype.getFavorites = function(page, processing_opts) {
  */
 SpazTwit.prototype._processFavoritesTimeline = function(ret_items, finished_event, processing_opts) {
 	this._processTimeline(SPAZCORE_SECTION_FAVORITES, ret_items, finished_event, processing_opts);
-}
+};
 
 
 
@@ -698,7 +698,7 @@ SpazTwit.prototype.getUserTimeline = function(id, count, page) {
  */
 SpazTwit.prototype._processUserTimeline = function(ret_items, finished_event, processing_opts) {
 	this._processTimeline(SPAZCORE_SECTION_USER, ret_items, finished_event, processing_opts);
-}
+};
 
 
 
@@ -713,7 +713,7 @@ SpazTwit.prototype.getCombinedTimeline = function(com_opts) {
 
 	var opts = {
 		'combined':true
-	}
+	};
 	
 	if (com_opts) {
 		if (com_opts.friends_count) {
@@ -825,7 +825,7 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, finished_eve
 		/*
 			set lastid
 		*/ 
-		var lastid = ret_items[ret_items.length-1].id
+		var lastid = ret_items[ret_items.length-1].id;
 		this.data[SPAZCORE_SECTION_SEARCH].lastid = lastid;
 		sc.helpers.dump('this.data['+SPAZCORE_SECTION_SEARCH+'].lastid:'+this.data[SPAZCORE_SECTION_SEARCH].lastid);
 
@@ -856,7 +856,7 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, finished_eve
 			'completed_in'     : search_result.completed_in,
 			'page'             : search_result.page,
 			'query'            : search_result.query
-		}
+		};
 		// jQuery().trigger(finished_event, [this.data[SPAZCORE_SECTION_SEARCH].newitems, search_info]);
 		this.triggerEvent(finished_event, [this.data[SPAZCORE_SECTION_SEARCH].newitems, search_info]);
 		
@@ -867,7 +867,7 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, finished_eve
 		this.triggerEvent(finished_event, []);
 	}
 	
-}
+};
 
 
 
@@ -926,7 +926,7 @@ SpazTwit.prototype._processSearchItem = function(item, section_name) {
 	
 	
 	return item;
-}
+};
 
 
 SpazTwit.prototype.getTrends = function() {
@@ -964,7 +964,7 @@ SpazTwit.prototype._processTrends = function(trends_result, finished_event, proc
 		this.triggerEvent(finished_event, ret_items);
 		
 	}
-}
+};
 
 
 /**
@@ -990,7 +990,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
 			}
         },
         'error':function(xhr, msg, exc) {
-			sc.helpers.dump(opts.url + ' error:"'+msg+'"')
+			sc.helpers.dump(opts.url + ' error:"'+msg+'"');
 			if (msg.toLowerCase().indexOf('timeout') != -1) {
 				stwit.triggerEvent(document, opts.failure_event_type, {'url':opts.url, 'xhr':null, 'msg':msg});
 			} else if (xhr) {
@@ -1053,7 +1053,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
 					ensures that "this" inside the callback refers to our
 					SpazTwit object, and not the jQuery.Ajax object
 				*/
-				opts.process_callback.call(stwit, data, opts.success_event_type, opts.processing_opts)
+				opts.process_callback.call(stwit, data, opts.success_event_type, opts.processing_opts);
 			} else {
 				// jQuery().trigger(opts.success_event_type, [data]);
 				stwit.triggerEvent(opts.success_event_type, data);
@@ -1069,7 +1069,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
         },
         'type':"GET",
         'url': 		opts.url,
-        'data': 	opts.data,
+        'data': 	opts.data
 	});
 	
 	return xhr;
@@ -1121,7 +1121,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 		} else { // this is a "normal" timeline that we want to be persistent
 			
 			// set lastid
-			var lastid = ret_items[ret_items.length-1].id
+			var lastid = ret_items[ret_items.length-1].id;
 			this.data[section_name].lastid = lastid;
 			sc.helpers.dump('this.data['+section_name+'].lastid:'+this.data[section_name].lastid);
 
@@ -1163,7 +1163,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 			this.data[SPAZCORE_SECTION_COMBINED].newitems = this.data[SPAZCORE_SECTION_COMBINED].newitems.concat(this.data[section_name].newitems);
 			
 			// sort these items -- the timelines can be out of order when combined
-			this.data[SPAZCORE_SECTION_COMBINED].newitems = this.data[SPAZCORE_SECTION_COMBINED].newitems.sort(this._sortItemsByDateAsc)
+			this.data[SPAZCORE_SECTION_COMBINED].newitems = this.data[SPAZCORE_SECTION_COMBINED].newitems.sort(this._sortItemsByDateAsc);
 			
 			this.data[SPAZCORE_SECTION_COMBINED].items = this.data[SPAZCORE_SECTION_COMBINED].items.concat(this.data[SPAZCORE_SECTION_COMBINED].newitems);
 			this.data[SPAZCORE_SECTION_COMBINED].items = this.removeDuplicates(this.data[SPAZCORE_SECTION_COMBINED].items);
@@ -1299,7 +1299,7 @@ SpazTwit.prototype._callMethod = function(opts) {
 	if (opts.method) {
 		var method = opts.method;
 	} else {
-		var method = 'POST'
+		var method = 'POST';
 	}
 	
 	var xhr = jQuery.ajax({
@@ -1345,7 +1345,7 @@ SpazTwit.prototype._callMethod = function(opts) {
 					ensures that "this" inside the callback refers to our
 					SpazTwit object, and not the jQuery.Ajax object
 				*/
-				opts.process_callback.call(stwit, data, opts.success_event_type)
+				opts.process_callback.call(stwit, data, opts.success_event_type);
 			} else {
 				// jQuery().trigger(opts.success_event_type, [data]);
 				stwit.triggerEvent(opts.success_event_type, data);
@@ -1381,7 +1381,7 @@ SpazTwit.prototype.getUser = function(user_id) {
 		'success_event_type':'get_user_succeeded',
 		'failure_event_type':'get_user_failed',
 		'method':'GET'
-	}
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -1406,8 +1406,8 @@ SpazTwit.prototype.addFriend = function(user_id) {
 		'password':this.password,
 		'success_event_type':'create_friendship_succeeded',
 		'failure_event_type':'create_friendship_failed',
-		'data':data,
-	}
+		'data':data
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -1426,8 +1426,8 @@ SpazTwit.prototype.removeFriend = function(user_id) {
 		'password':this.password,
 		'success_event_type':'destroy_friendship_succeeded',
 		'failure_event_type':'destroy_friendship_failed',
-		'data':data,
-	}
+		'data':data
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -1448,8 +1448,8 @@ SpazTwit.prototype.block = function(user_id) {
 		'password':this.password,
 		'success_event_type':'create_block_succeeded',
 		'failure_event_type':'create_block_failed',
-		'data':data,
-	}
+		'data':data
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -1468,8 +1468,8 @@ SpazTwit.prototype.unblock = function(user_id) {
 		'password':this.password,
 		'success_event_type':'destroy_block_succeeded',
 		'failure_event_type':'destroy_block_failed',
-		'data':data,
-	}
+		'data':data
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -1508,7 +1508,7 @@ SpazTwit.prototype.update = function(status, source, in_reply_to_status_id) {
 		'process_callback': this._processUpdateReturn,
 		'success_event_type':'update_succeeded',
 		'failure_event_type':'update_failed'
-	}
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -1545,7 +1545,7 @@ SpazTwit.prototype.getOne = function(id) {
 		'success_event_type':'get_one_status_succeeded',
 		'failure_event_type':'get_one_status_failed',
 		'method':'GET'
-	}
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -1578,8 +1578,8 @@ SpazTwit.prototype.favorite = function(id) {
 		'password':this.password,
 		'success_event_type':'create_favorite_succeeded',
 		'failure_event_type':'create_favorite_failed',
-		'data':data,
-	}
+		'data':data
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -1600,7 +1600,7 @@ SpazTwit.prototype.unfavorite = function(id) {
 		'success_event_type':'destroy_favorite_succeeded',
 		'failure_event_type':'destroy_favorite_failed',
 		'data':data
-	}
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -1626,7 +1626,7 @@ SpazTwit.prototype.updateLocation = function(location_str) {
 		'success_event_type':'update_location_succeeded',
 		'failure_event_type':'update_location_failed',
 		'data':data
-	}
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -1666,7 +1666,7 @@ SpazTwit.prototype._postProcessURL = function(url) {
 	} else {
 		return url;
 	}
-}
+};
 
 
 /**
@@ -1680,7 +1680,7 @@ SpazTwit.prototype._postProcessURL = function(url) {
  */
 SpazTwit.prototype._sortItemsAscending = function(a,b) {
 	return (a.id - b.id);
-}
+};
 
 /**
  * sorting function for an array of tweets. Desc by ID.
@@ -1693,7 +1693,7 @@ SpazTwit.prototype._sortItemsAscending = function(a,b) {
  */
 SpazTwit.prototype._sortItemsDescending = function(a,b) {
 	return (b.id - a.id);
-}
+};
 
 
 
@@ -1712,7 +1712,7 @@ SpazTwit.prototype._sortItemsByDateAsc = function(a,b) {
 	var time_a = sc.helpers.httpTimeToInt(a.created_at);
 	var time_b = sc.helpers.httpTimeToInt(b.created_at);
 	return (time_a - time_b);
-}
+};
 
 /**
  * sorting function for an array of tweets. Desc by date.
@@ -1729,7 +1729,7 @@ SpazTwit.prototype._sortItemsByDateDesc = function(a,b) {
 	var time_a = sc.helpers.httpTimeToInt(a.created_at);
 	var time_b = sc.helpers.httpTimeToInt(b.created_at);
 	return (time_b - time_a);
-}
+};
 
 
 /**
@@ -1762,7 +1762,7 @@ SpazTwit.prototype.removeDuplicates = function(array) {
 
 	return ret;
 	
-}
+};
 
 
 /**
@@ -1790,7 +1790,7 @@ SpazTwit.prototype.removeExtraElements = function(items, max, remove_from_top) {
 	}
 	
 	return items;
-}
+};
 
 
 /**
@@ -1806,7 +1806,7 @@ SpazTwit.prototype.getSavedSearches = function() {
 		'success_event_type':'new_saved_searches_data',
 		'failure_event_type':'error_saved_searches_data',
 		'method':'GET'
-	}
+	};
 
 	/*
 		Perform a request and get true or false back

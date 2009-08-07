@@ -97,7 +97,7 @@ sc.helpers.triggerCustomEvent = function(event_type, target, data, bubble) {
  */
 sc.helpers.getEventData = function(event_obj) {
 	return event_obj[SPAZCORE_EVENTDATA_ATTRIBUTE];
-}
+};
 
 /**
  * Alias for sc.helpers.addListener 

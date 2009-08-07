@@ -11,11 +11,11 @@ sc.helpers.dump = function(obj) {
 	if (sc.helpers.isString(obj) || sc.helpers.isNumber(obj) || !obj) {
 		var dumper = function(str) {
 			console.debug(str);
-		}
+		};
 	} else {
 		var dumper = function(obj) {
 			console.dir(obj);
-		}
+		};
 	}
 	
 	if (sc.helpers.isString(obj)) {
@@ -27,6 +27,6 @@ sc.helpers.dump = function(obj) {
 	} else if (obj === null) {
 		dumper('NULL');
 	} else { // this should be a "normal" object
-		dumper(obj)
+		dumper(obj);
 	}
-}
+};

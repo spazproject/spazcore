@@ -13,7 +13,7 @@ sc.helpers.isString = function(thing) {
         return (criterion != null);
     }
     return false;
-}
+};
 
 
 sc.helpers.isNumber = function(chk) {
@@ -30,14 +30,14 @@ sc.helpers.isArray = function(obj) {
 	  return false;
    else
 	  return true;
-}
+};
 
 /*
 	Returns a copy of the object using the jQuery.extend() method
 */
 sc.helpers.clone = function(oldObj) {
 	return jQuery.extend({}/* clone */, oldObj);
-}
+};
 
 /**
  * We use this to do a form of inheritance, where the child inherits
@@ -51,4 +51,4 @@ sc.helpers.clone = function(oldObj) {
 sc.helpers.extend = function(child, supertype)
 {
    child.prototype.__proto__ = supertype.prototype;
-}
+};

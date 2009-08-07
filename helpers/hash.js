@@ -148,7 +148,7 @@ sc.helpers.Base64 = {
 		return string;
 	}
 
-}
+};
 
 
 
@@ -413,7 +413,7 @@ sc.helpers.MD5 = function (string) {
 	var temp = WordToHex(a)+WordToHex(b)+WordToHex(c)+WordToHex(d);
  
 	return temp.toLowerCase();
-}
+};
 
 /**
 *
@@ -588,7 +588,7 @@ sc.helpers.SHA1 = function (msg) {
  
 	return temp.toLowerCase();
  
-}
+};
 
 
 
@@ -718,7 +718,7 @@ sc.helpers.SHA256 = function (s){
 	s = Utf8Encode(s);
 	return binb2hex(core_sha256(str2binb(s), s.length * chrsz));
  
-}
+};
 
 
 

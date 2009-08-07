@@ -13,7 +13,7 @@ const SPAZCORE_SHORTURL_SERVICE_BITLY	= 'bit.ly';
 /**
  * events raised here 
  */
-if (!sc.events) { sc.events = {} };
+if (!sc.events) { sc.events = {}; }
 sc.events.newShortURLSuccess	= 'newShortURLSuccess';
 sc.events.newShortURLFailure	= 'newShortURLFailure';
 sc.events.newExpandURLSuccess = 'recoverLongURLSuccess';
@@ -28,11 +28,11 @@ function SpazShortURL(service) {
 	
 	this.api = this.getAPIObj(service);
 	
-}
+};
 
 SpazShortURL.prototype.getAPIObj = function(service) {
 	
-	var apis = {}
+	var apis = {};
 	
 	apis[SPAZCORE_SHORTURL_SERVICE_BITLY] = {
 		'url'	  : 'http://bit.ly/api',
@@ -54,7 +54,7 @@ SpazShortURL.prototype.getAPIObj = function(service) {
 		'processResult' : function(data) {
 			if (apis[SPAZCORE_SHORTURL_SERVICE_BITLY].processing_multiple === true) {
 				var result = sc.helpers.deJSON(data);
-				var rs = {}
+				var rs = {};
 				for (var i in result.results) {
 					rs[i] = result.results[i].shortUrl;
 				}
@@ -105,7 +105,7 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 	
 	var shortener = this;
 	
-	if (!opts) { opts = {} };
+	if (!opts) { opts = {}; }
 
 	/*
 		set defaults if needed
@@ -149,7 +149,7 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 				return_data = {
 					'shorturl':data,
 					'longurl' :longurl
-				}
+				};
 			}
 			shortener._onShortenResponseSuccess(return_data, opts.event_target);
 		},
@@ -178,9 +178,9 @@ SpazShortURL.prototype.expand = function(shorturl, opts) {
 		complete:function(xhr, rstr) {
 		},
 		'error':function(xhr, msg, exc) {
-			sc.helpers.dump(this.url + ' error:'+msg)
+			sc.helpers.dump(this.url + ' error:'+msg);
 			
-			var errobj = {'url':this.url, 'xhr':null, 'msg':null}
+			var errobj = {'url':this.url, 'xhr':null, 'msg':null};
 			
 			if (xhr) {
 				errobj.xhr = xhr;

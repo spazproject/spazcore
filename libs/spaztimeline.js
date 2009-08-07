@@ -189,7 +189,7 @@ SpazTimeline.prototype.renderItem = function(item, templatefunc) {
 	
 	return html;
 	
-}
+};
 
 
 SpazTimeline.prototype.removeExtraItems = function() {
@@ -259,7 +259,7 @@ SpazTimeline.prototype.sortItems = function(selector, sortfunc) {
  */
 SpazTimeline.prototype.select = function(selector, container) {
 	if (!container) {
-		container = this.timeline_container_selector
+		container = this.timeline_container_selector;
 	}
 	return jQuery(selector, container).get();
 };

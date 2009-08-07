@@ -25,12 +25,12 @@ sc.helpers.dump = function(obj) {
 		if (dump) { // we really prefer to use dump if it is available
 			dumper(obj);
 		} else {
-			dumper(obj)
+			dumper(obj);
 		}
 
 	}
 
-}
+};
 
 
 /**
