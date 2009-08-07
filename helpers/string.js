@@ -80,7 +80,7 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 	var re_noemail = /(^|\s|\(|:)((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
 	var re_nourl   = /(^|\s|\()([a-zA-Z0-9_\.\-\+]+)@([a-zA-Z0-9\-]+)\.([a-zA-Z0-9\-\.]*)([^\s\)<]+)/gi;
 	
-	var x, ms, period;
+	var x, ms, period = '';
 
 	if (type !== 'email')
 	{
@@ -138,7 +138,6 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 				}
 			}
 			str = str.replace(ms[0], ms[1]+'<a href="mailto:'+ms[2]+'@'+ms[3]+'.'+ms[4]+ms[5]+'">'+ms[2]+'@'+ms[3]+'.'+ms[4]+ms[5]+'</a>'+period);
-			//air.trace(str);
 		}
 	}
 
