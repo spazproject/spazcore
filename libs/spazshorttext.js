@@ -175,7 +175,7 @@ SpazShortText.prototype.genBaseMaps = function() {
 		'nine'					:'9',
 		'ten'					:'10',
 		'eleven'				:'11',
-		'twelve'				:'12',
+		'twelve'				:'12'
 	};
 	
 	
@@ -207,7 +207,7 @@ SpazShortText.prototype.processBaseMaps = function() {
 		this.map[key] = {
 			'short':'$1'+val+'$2',
 			'regex':regex
-		}
+		};
 	}
 	
 	/*
@@ -219,7 +219,7 @@ SpazShortText.prototype.processBaseMaps = function() {
 		this.map[key] = {
 			'short':val,
 			'regex':regex
-		}
+		};
 	}
 	
 	

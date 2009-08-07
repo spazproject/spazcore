@@ -72,4 +72,3 @@ sc.helpers.getTimeAsInt = function() {
 	var now = new Date();
 	return now.getTime();
 };
-

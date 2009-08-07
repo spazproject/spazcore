@@ -109,7 +109,7 @@ SpazPrefs.prototype.get = function(key, encrypted) {
 	} else {
 		return false;
 	}
-}
+};
 
 
 /**
@@ -126,7 +126,7 @@ SpazPrefs.prototype.set = function(key, val, encrypted) {
 	this._prefs[key] = val;
 	
 	this.save();
-}
+};
 
 
 
@@ -200,7 +200,7 @@ SpazPrefs.prototype.load = function(name) {
 		            thisPrefs._prefs[key] = loaded_prefs[key];
 		       	}
 			} else {
-				sc.helpers.dump('Prefs loading failed in onGet')
+				sc.helpers.dump('Prefs loading failed in onGet');
 				thisPrefs.resetPrefs();
 			}
 			jQuery().trigger('spazprefs_loaded');
@@ -237,7 +237,7 @@ SpazPrefs.prototype.load = function(name) {
 		jQuery().trigger('spazprefs_loaded');
 	}
 	
-}
+};
 
 
 
@@ -307,7 +307,7 @@ if (sc.helpers.isTitanium()) {
 			Titanium.App.Properties.setInt('__window-x',      x);
 			Titanium.App.Properties.setInt('__window-y',      y);
 		}
-	}
+	};
 
 	/*
 		Loads the size and placement of the window this executes in
@@ -329,7 +329,7 @@ if (sc.helpers.isTitanium()) {
 			Titanium.UI.currentWindow.setX(x);
 			Titanium.UI.currentWindow.setY(y);
 		}
-	}
+	};
 }
 
 
@@ -348,7 +348,7 @@ if (sc.helpers.isAIR()) {
 		this.set('__window-height', window.nativeWindow.height);
 		this.set('__window-x', window.nativeWindow.x);
 		this.set('__window-y', window.nativeWindow.y);
-	}
+	};
 
 	/*
 		Loads the size and placement of the window this executes in
@@ -366,7 +366,7 @@ if (sc.helpers.isAIR()) {
 			window.nativeWindow.y = y;
 		}
 		
-	}
+	};
 	
 }
 

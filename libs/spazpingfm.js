@@ -5,7 +5,7 @@
 /**
  * events raised here 
  */
-if (!sc.events) { sc.events = {} };
+if (!sc.events) { sc.events = {}; }
 sc.events.pingfmGetUserKeySuccess		= 'pingfmGetUserKeySuccess';
 sc.events.pingfmGetUserKeyFailure		= 'pingfmGetUserKeyFailure';
 sc.events.pingfmValidateUserKeySuccess	= 'pingfmValidateUserKeySuccess';
