@@ -49,7 +49,7 @@ sc.helpers.removeExtraElements = function(item_selector, max_items, remove_from_
 			} );
 		}
 	}
-}
+};
 
 
 
@@ -64,7 +64,7 @@ sc.helpers.removeExtraElements = function(item_selector, max_items, remove_from_
 sc.helpers.removeDuplicateElements = function(item_selector, remove_from_top) {
 	dump('removeDuplicateElements TODO');
 
-}
+};
 
 
 
@@ -82,7 +82,7 @@ sc.helpers.updateRelativeTimes = function(item_selector, time_attribute) {
 		var relative_time = sch.getRelativeTime(time);
 		jQuery(this).html( relative_time );
 	});
-}
+};
 
 
 /**
@@ -94,4 +94,4 @@ sc.helpers.updateRelativeTimes = function(item_selector, time_attribute) {
  */
 sc.helpers.markAllAsRead = function(item_selector) {
 	jQuery(item_selector).removeClass('new');
-}
+};

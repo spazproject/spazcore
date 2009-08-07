@@ -38,10 +38,10 @@ sc.helpers.getPlatform = function() {
 		return SPAZCORE_PLATFORM_WEBOS;
 	}
 	if (window.Titanium) {
-		return SPAZCORE_PLATFORM_TITANIUM
+		return SPAZCORE_PLATFORM_TITANIUM;
 	}
 	return SPAZCORE_PLATFORM_UNKNOWN;
-}
+};
 
 /**
 * checks to see if current platform is the one passed in
@@ -58,20 +58,20 @@ sc.helpers.isPlatform = function(str) {
 	} else {
 		return false;
 	}
-}
+};
 
 
 sc.helpers.isAIR = function() {
 	return sc.helpers.isPlatform(SPAZCORE_PLATFORM_AIR);
-}
+};
 
 sc.helpers.iswebOS = function() {
 	return sc.helpers.isPlatform(SPAZCORE_PLATFORM_WEBOS);
-}
+};
 
 sc.helpers.isTitanium = function() {
 	return sc.helpers.isPlatform(SPAZCORE_PLATFORM_TITANIUM);
-}
+};
 
 
 /**
@@ -80,7 +80,7 @@ sc.helpers.isTitanium = function() {
  */
 sc.helpers.dump = function(obj) {
 	// stub
-}
+};
 
 /**
  * Open a URL in the default system web browser
@@ -88,7 +88,7 @@ sc.helpers.dump = function(obj) {
  */
 sc.helpers.openInBrowser = function(url) {
 	// stub
-}
+};
 
 /**
  * Gets the contents of a file
@@ -96,7 +96,7 @@ sc.helpers.openInBrowser = function(url) {
  */
 sc.helpers.getFileContents = function(path) {
 	// stub
-}
+};
 
 /**
  * Saves the contents to a specified path. Serializes a passed object if 
@@ -139,7 +139,7 @@ sc.helpers.setUserAgent = function(uastring) {
  */
 sc.helpers.getClipboardText = function() {
 	// stub
-}
+};
 
 /**
  * Sets clipboard text
@@ -147,7 +147,7 @@ sc.helpers.getClipboardText = function() {
  */
 sc.helpers.setClipboardText = function(text) {
 	// stub
-}
+};
 
 
 /**
@@ -156,7 +156,7 @@ sc.helpers.setClipboardText = function(text) {
  */
 sc.helpers.getEncryptedValue = function(key) {
 	// stub
-}
+};
 
 /**
  * Sets a value in the EncryptedLocalStore of AIR
@@ -164,7 +164,7 @@ sc.helpers.getEncryptedValue = function(key) {
  */
 sc.helpers.setEncyrptedValue = function(key, val) {
 	// stub
-}
+};
 
 
 /**
@@ -174,7 +174,7 @@ sc.helpers.setEncyrptedValue = function(key, val) {
  */
 sc.helpers.getAppStoreDir = function() {
 	// stub
-}
+};
 
 /**
  * Get the preferences file
@@ -182,7 +182,7 @@ sc.helpers.getAppStoreDir = function() {
  */
 sc.helpers.getPreferencesFile = function(name, create) {
 	// stub
-}
+};
 
 /**
  * initializes a file at the given location. set overwrite to true
@@ -192,4 +192,4 @@ sc.helpers.getPreferencesFile = function(name, create) {
 */
 sc.helpers.init_file = function(path, overwrite) {
 	// stub
-}
+};
