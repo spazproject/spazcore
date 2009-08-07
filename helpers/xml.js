@@ -16,8 +16,7 @@ sc.helpers.createXMLFromString = function (string) {
 		xmlDocument = xmlParser.parseFromString(string, 'text/xml');
 		return xmlDocument;
 	} catch (e) {
-		air.trace("Can't create XML document.");
-		dump(e.name + ":" + e.message);
+		sc.helpers.dump(e.name + ":" + e.message);
 		return null;
 	}
 };

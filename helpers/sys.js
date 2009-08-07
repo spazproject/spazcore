@@ -7,7 +7,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc;
+var sc, window;
  
 /**
  * These are system-oriented functions, mostly utilizing AIR apis
@@ -17,10 +17,10 @@ var sc;
  */
 
 
-const SPAZCORE_PLATFORM_AIR			= 'AIR';
-const SPAZCORE_PLATFORM_WEBOS		= 'webOS';
-const SPAZCORE_PLATFORM_TITANIUM	= 'Titanium';
-const SPAZCORE_PLATFORM_UNKNOWN		= '__UNKNOWN';
+var SPAZCORE_PLATFORM_AIR			= 'AIR';
+var SPAZCORE_PLATFORM_WEBOS		= 'webOS';
+var SPAZCORE_PLATFORM_TITANIUM	= 'Titanium';
+var SPAZCORE_PLATFORM_UNKNOWN		= '__UNKNOWN';
 
 
 /**
@@ -53,7 +53,7 @@ sc.helpers.getPlatform = function() {
 */
 sc.helpers.isPlatform = function(str) {
 	var pform = sc.helpers.getPlatform();
-	if ( pform.toLowerCase() == str.toLowerCase() ) {
+	if ( pform.toLowerCase() === str.toLowerCase() ) {
 		return true;
 	} else {
 		return false;

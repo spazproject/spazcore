@@ -7,7 +7,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc;
+var sc, jQuery;
  
 /**
  * View helper methods for Twitter apps
@@ -62,7 +62,7 @@ sc.helpers.removeExtraElements = function(item_selector, max_items, remove_from_
  * @TODO
  */
 sc.helpers.removeDuplicateElements = function(item_selector, remove_from_top) {
-	dump('removeDuplicateElements TODO');
+	sc.helpers.dump('removeDuplicateElements TODO');
 
 };
 
@@ -79,7 +79,7 @@ sc.helpers.removeDuplicateElements = function(item_selector, remove_from_top) {
 sc.helpers.updateRelativeTimes = function(item_selector, time_attribute) {
 	jQuery(item_selector).each(function(i) {
 		var time = jQuery(this).attr(time_attribute);
-		var relative_time = sch.getRelativeTime(time);
+		var relative_time = sc.helpers.getRelativeTime(time);
 		jQuery(this).html( relative_time );
 	});
 };
