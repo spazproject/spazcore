@@ -55,6 +55,13 @@ sc.helpers.getRelativeTime = function(time_value, use_dateparse) {
 
 
 sc.helpers.httpTimeToInt = function(entry_date, use_dateparse) {
+	return sc.helpers.dateToInt(entry_date, use_dateparse)
+};
+
+/**
+ * this returns milliseconds, not seconds! 
+ */
+sc.helpers.dateToInt = function(entry_date, use_dateparse) {
 	var parsedDate = new Date();
 	
 	if (use_dateparse === true) {

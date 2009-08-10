@@ -248,7 +248,7 @@ sc.helpers.stripTags = function(str) {
 
 
 /**
- * Converts the following entities into regulat chars: &lt; &gt; &quot; &apos;
+ * Converts the following entities into regular chars: &lt; &gt; &quot; &apos;
  */
 sc.helpers.fromHTMLSpecialChars = function(str) {
 	str = str.replace(/&lt;/gi, '<');
@@ -258,6 +258,8 @@ sc.helpers.fromHTMLSpecialChars = function(str) {
 	str = str.replace(/&quot;/gi, '"');
 	sc.helpers.dump(str);
 	str = str.replace(/&apos;/gi, '\'');
+	sc.helpers.dump(str);
+	str = str.replace(/&amp;/gi, '&');
 	sc.helpers.dump(str);
 	return str;
 };
