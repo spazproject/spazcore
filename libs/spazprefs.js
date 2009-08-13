@@ -202,7 +202,6 @@ SpazPrefs.prototype.load = function(name) {
 				replace:false
 			});
 		}
-
 		
 		var onGet = function(loaded_prefs) {
 			if (loaded_prefs) {
@@ -263,7 +262,7 @@ SpazPrefs.prototype.save = function(name) {
 		if (!this.mojoDepot) {
 			this.mojoDepot = new Mojo.Depot({
 				name:'SpazDepotPrefs',
-				replace:true
+				replace:false
 			});
 		}
 		
