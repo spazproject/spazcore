@@ -14,10 +14,7 @@ cat libs/spazcore.js \
 	helpers/sys.js \
 	helpers/view.js \
 	helpers/xml.js \
-    libs/spazcron.js \
-	libs/spazlocker.js \
 	libs/spazphotomailer.js \
-	libs/spazpingfm.js \
 	libs/spazprefs.js \
 	libs/spazshorttext.js \
 	libs/spazshorturl.js \
