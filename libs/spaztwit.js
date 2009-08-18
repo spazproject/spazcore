@@ -855,11 +855,6 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, finished_eve
 		this.data[SPAZCORE_SECTION_SEARCH].items = this.removeDuplicates(this.data[SPAZCORE_SECTION_SEARCH].items);
 		this.data[SPAZCORE_SECTION_SEARCH].items = this.removeExtraElements(this.data[SPAZCORE_SECTION_SEARCH].items, this.data[SPAZCORE_SECTION_SEARCH].max);
 
-		// sc.helpers.dump('New '+SPAZCORE_SECTION_SEARCH+' items: ('+this.data[SPAZCORE_SECTION_SEARCH].newitems.length+')');
-		// sc.helpers.dump(this.data[SPAZCORE_SECTION_SEARCH].newitems);
-		// sc.helpers.dump('All '+SPAZCORE_SECTION_SEARCH+' items ('+this.data[SPAZCORE_SECTION_SEARCH].items.length+'):');
-		// sc.helpers.dump(this.data[SPAZCORE_SECTION_SEARCH].items);
-
 
 		var search_info = {
 			'since_id'         : search_result.since_id,
@@ -1126,10 +1121,6 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 		
 		if (section_name === SPAZCORE_SECTION_USER) { // special case -- we don't keep this data, just parse and fire it off
 
-			// sc.helpers.dump('New '+section_name+' items: ('+ret_items.length+')');
-			// sc.helpers.dump(ret_items);
-			
-			// jQuery().trigger(finished_event, [ret_items]);
 			this.triggerEvent(finished_event, ret_items);
 			
 		} else { // this is a "normal" timeline that we want to be persistent
@@ -1142,16 +1133,8 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 			// add new items to data.newitems array
 			this.data[section_name].newitems = ret_items;
 
-			// concat new items onto data.items array
-			this.data[section_name].items = this.data[section_name].items.concat(this.data[section_name].newitems);
-			this.data[section_name].items = this.removeDuplicates(this.data[section_name].items);
-			this.data[section_name].items = this.removeExtraElements(this.data[section_name].items, this.data[section_name].max);
+			this._addToSectionItems(section_name, this.data[section_name].newitems);
 
-
-			// sc.helpers.dump('New '+section_name+' items: ('+this.data[section_name].newitems.length+')');
-			// sc.helpers.dump(this.data[section_name].newitems);
-			// sc.helpers.dump('All '+section_name+' items ('+this.data[section_name].items.length+'):');
-			// sc.helpers.dump(this.data[section_name].items);
 
 			// @todo check length of data.items, and remove oldest extras if necessary
 			/*
@@ -1162,8 +1145,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 				Fire off the new section data event
 			*/
 			if (!processing_opts.combined) {
-				// jQuery().trigger(finished_event, [this.data[section_name].newitems]);
-				this.triggerEvent(finished_event, this.data[section_name].newitems);
+				this.triggerEvent(finished_event, this.data[section_name].items);
 			} else {
 				this.combined_finished[section_name] = true;
 				sc.helpers.dump("this.combined_finished["+section_name+"]:"+this.combined_finished[section_name]);
@@ -1172,21 +1154,9 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 
 
 			/*
-				do combined stuff
+				add on to newitems array for combined section
 			*/
 			this.data[SPAZCORE_SECTION_COMBINED].newitems = this.data[SPAZCORE_SECTION_COMBINED].newitems.concat(this.data[section_name].newitems);
-			
-			// sort these items -- the timelines can be out of order when combined
-			this.data[SPAZCORE_SECTION_COMBINED].newitems = this.data[SPAZCORE_SECTION_COMBINED].newitems.sort(this._sortItemsByDateAsc);
-			
-			this.data[SPAZCORE_SECTION_COMBINED].items = this.data[SPAZCORE_SECTION_COMBINED].items.concat(this.data[SPAZCORE_SECTION_COMBINED].newitems);
-			this.data[SPAZCORE_SECTION_COMBINED].items = this.removeDuplicates(this.data[SPAZCORE_SECTION_COMBINED].items);
-			this.data[SPAZCORE_SECTION_COMBINED].items = this.removeExtraElements(this.data[SPAZCORE_SECTION_COMBINED].items, this.data[SPAZCORE_SECTION_COMBINED].max);
-
-			// sc.helpers.dump('Combined new items ('+this.data[SPAZCORE_SECTION_COMBINED].newitems.length+'):');
-			// sc.helpers.dump(this.data[SPAZCORE_SECTION_COMBINED].newitems);
-			// sc.helpers.dump('Combined all items ('+this.data[SPAZCORE_SECTION_COMBINED].items.length+'):');
-			// sc.helpers.dump(this.data[SPAZCORE_SECTION_COMBINED].items);
 			
 		}
 
@@ -1206,18 +1176,61 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 	*/
 	if (this.combinedTimelineFinished()) {
 		
+		/*
+			we do this stuff here to avoid processing repeatedly
+		*/
+		
+		this._addToSectionItems(SPAZCORE_SECTION_COMBINED, this.data[SPAZCORE_SECTION_COMBINED].newitems, this._sortItemsByDateAsc);
+		
+		// sort these items -- the timelines can be out of order when combined
+
+		sc.helpers.dump('Removing duplicates in '+SPAZCORE_SECTION_COMBINED+' newitems');
+		
+		this.data[SPAZCORE_SECTION_COMBINED].newitems = this._cleanupItemArray(this.data[SPAZCORE_SECTION_COMBINED].newitems, this.data[SPAZCORE_SECTION_COMBINED].max, this._sortItemsByDateAsc);
+		
 		if (this.combinedTimelineHasErrors()) {
-			// jQuery().trigger('error_combined_timeline_data', [this.combined_errors]);
 			this.triggerEvent('error_combined_timeline_data', this.combined_errors);
 		}
 		
-		// jQuery().trigger('new_combined_timeline_data', [this.data[SPAZCORE_SECTION_COMBINED].newitems]);
 		this.triggerEvent('new_combined_timeline_data', this.data[SPAZCORE_SECTION_COMBINED].newitems);
 		this.data[SPAZCORE_SECTION_COMBINED].newitems = []; // reset combined.newitems
 		this.initializeCombinedTracker();
 	}
 };
 
+
+/**
+ * Adds an array of items to the .items property of the appropriate section, then
+ * removes dupes, extras, and optionally sorts the section items
+ * @param {string} section_name
+ * @param {array}  arr  an array of items
+ * @param {function}  sortfunc - optional 
+ */
+SpazTwit.prototype._addToSectionItems = function(section_name, arr, sortfunc) {
+	// concat new items onto data.items array
+	this.data[section_name].items = this.data[section_name].items.concat(arr);
+
+	this._cleanupItemArray(this.data[section_name].items, this.data[section_name].max, sortfunc);
+}
+
+/**
+ * Sorts (optionally), removes dupes, and removes extra items from a given
+ * array of section items
+ * 
+ * @param {array} arr
+ * @param {max} integer
+ * @param {func} sortfunc - optional
+ * 
+ * @return {array} 
+ */
+SpazTwit.prototype._cleanupItemArray = function(arr, max, sortfunc) {
+	if (sortfunc) {
+		arr = arr.sort(sortfunc);
+	}
+	arr = this.removeDuplicates(arr);
+	arr = this.removeExtraElements(arr, max);
+	return arr;
+};
 
 /**
  * This modifies a Twitter post, adding some properties. All new properties are
@@ -1757,26 +1770,26 @@ SpazTwit.prototype._sortItemsByDateDesc = function(a,b) {
  * @param {array} array an array of Twitter message objects
  * @return {array}
  */
-SpazTwit.prototype.removeDuplicates = function(array) {
+SpazTwit.prototype.removeDuplicates = function(arr) {
 	
-	var ret = [], done = {};
+	var ret = [], done = {}, length = arr.length;
 
 	try {
-
-		for ( var i = 0, length = array.length; i < length; i++ ) {
-			var id = array[i].id;
-
+		for ( var i = 0; i < length; i++ ) {
+			var id = arr[i].id;
+			
 			if ( !done[ id ] ) {
 				done[ id ] = true;
-				ret.push( array[ i ] );
+				ret.push( arr[ i ] );
+			} else {
+				sc.helpers.dump("removing dupe " + arr[i].id + ', "'+arr[i].text+'"');
 			}
 		}
 
 	} catch( e ) {
 		sc.helpers.dump(e.name + ":" + e.message);
-		ret = array;
+		ret = arr;
 	}
-
 	return ret;
 	
 };
