@@ -1,3 +1,67 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+regexp: false,
+undef: true,
+white: false,
+onevar: false 
+ */
+
+/**
+ * SPAZCORE
+ * version 0.1.1
+ * 2009-08-06
+ * 
+ * License
+ * 
+ * Copyright (c) 2008-2009, Edward Finkler, Funkatron Productions
+ * 
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ *         Redistributions of source code must retain the above copyright
+ *         notice, this list of conditions and the following disclaimer.
+ * 
+ *         Redistributions in binary form must reproduce the above
+ *         copyright notice, this list of conditions and the following
+ *         disclaimer in the documentation and/or other materials provided
+ *         with the distribution.
+ * 
+ *         Neither the name of Edward Finkler, Funkatron Productions nor
+ *         the names of its contributors may be used to endorse or promote
+ *         products derived from this software without specific prior written
+ *         permission.
+ * 
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * 
+ * SpazCore includes code from other software projects. Their licenses follow:
+ * 
+ * date.js
+ * @copyright: Copyright (c) 2006-2008, Coolite Inc. (http://www.coolite.com/). All rights reserved.
+ * @license: Licensed under The MIT License. See license.txt and http://www.datejs.com/license/.
+ * 
+ * webtoolkit.info (hash libs, trim funcs, utf8 encoder/decoder)
+ * http://www.webtoolkit.info/
+ * As long as you leave the copyright notice of the original script, or link
+ * back to this website, you can use any of the content published on this
+ * website free of charge for any use: commercial or noncommercial.
+ */
+ 
 /**
  * 
  * @namespace root namespace for SpazCore
@@ -50,152 +114,2180 @@ sc.events = {};
  * @depends spaztimeline.js
  * @depends spaztwit.js
  */
-/**
+Date.CultureInfo = {
+	/* Culture Name */
+    name: "en-US",
+    englishName: "English (United States)",
+    nativeName: "English (United States)",
+    
+    /* Day Name Strings */
+    dayNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+    abbreviatedDayNames: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    shortestDayNames: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+    firstLetterDayNames: ["S", "M", "T", "W", "T", "F", "S"],
+    
+    /* Month Name Strings */
+    monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    abbreviatedMonthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+
+	/* AM/PM Designators */
+    amDesignator: "AM",
+    pmDesignator: "PM",
+
+    firstDayOfWeek: 0,
+    twoDigitYearMax: 2029,
+    
+    /**
+     * The dateElementOrder is based on the order of the 
+     * format specifiers in the formatPatterns.DatePattern. 
+     *
+     * Example:
+     <pre>
+     shortDatePattern    dateElementOrder
+     ------------------  ---------------- 
+     "M/d/yyyy"          "mdy"
+     "dd/MM/yyyy"        "dmy"
+     "yyyy-MM-dd"        "ymd"
+     </pre>
+     *
+     * The correct dateElementOrder is required by the parser to
+     * determine the expected order of the date elements in the
+     * string being parsed.
+     */
+    dateElementOrder: "mdy",
+    
+    /* Standard date and time format patterns */
+    formatPatterns: {
+        shortDate: "M/d/yyyy",
+        longDate: "dddd, MMMM dd, yyyy",
+        shortTime: "h:mm tt",
+        longTime: "h:mm:ss tt",
+        fullDateTime: "dddd, MMMM dd, yyyy h:mm:ss tt",
+        sortableDateTime: "yyyy-MM-ddTHH:mm:ss",
+        universalSortableDateTime: "yyyy-MM-dd HH:mm:ssZ",
+        rfc1123: "ddd, dd MMM yyyy HH:mm:ss GMT",
+        monthDay: "MMMM dd",
+        yearMonth: "MMMM, yyyy"
+    },
+
+    /**
+     * NOTE: If a string format is not parsing correctly, but
+     * you would expect it parse, the problem likely lies below. 
+     * 
+     * The following regex patterns control most of the string matching
+     * within the parser.
+     * 
+     * The Month name and Day name patterns were automatically generated
+     * and in general should be (mostly) correct. 
+     *
+     * Beyond the month and day name patterns are natural language strings.
+     * Example: "next", "today", "months"
+     *
+     * These natural language string may NOT be correct for this culture. 
+     * If they are not correct, please translate and edit this file
+     * providing the correct regular expression pattern. 
+     *
+     * If you modify this file, please post your revised CultureInfo file
+     * to the Datejs Forum located at http://www.datejs.com/forums/.
+     *
+     * Please mark the subject of the post with [CultureInfo]. Example:
+     *    Subject: [CultureInfo] Translated "da-DK" Danish(Denmark)
+     * 
+     * We will add the modified patterns to the master source files.
+     *
+     * As well, please review the list of "Future Strings" section below. 
+     */	
+    regexPatterns: {
+        jan: /^jan(uary)?/i,
+        feb: /^feb(ruary)?/i,
+        mar: /^mar(ch)?/i,
+        apr: /^apr(il)?/i,
+        may: /^may/i,
+        jun: /^jun(e)?/i,
+        jul: /^jul(y)?/i,
+        aug: /^aug(ust)?/i,
+        sep: /^sep(t(ember)?)?/i,
+        oct: /^oct(ober)?/i,
+        nov: /^nov(ember)?/i,
+        dec: /^dec(ember)?/i,
+
+        sun: /^su(n(day)?)?/i,
+        mon: /^mo(n(day)?)?/i,
+        tue: /^tu(e(s(day)?)?)?/i,
+        wed: /^we(d(nesday)?)?/i,
+        thu: /^th(u(r(s(day)?)?)?)?/i,
+        fri: /^fr(i(day)?)?/i,
+        sat: /^sa(t(urday)?)?/i,
+
+        future: /^next/i,
+        past: /^last|past|prev(ious)?/i,
+        add: /^(\+|aft(er)?|from|hence)/i,
+        subtract: /^(\-|bef(ore)?|ago)/i,
+        
+        yesterday: /^yes(terday)?/i,
+        today: /^t(od(ay)?)?/i,
+        tomorrow: /^tom(orrow)?/i,
+        now: /^n(ow)?/i,
+        
+        millisecond: /^ms|milli(second)?s?/i,
+        second: /^sec(ond)?s?/i,
+        minute: /^mn|min(ute)?s?/i,
+		hour: /^h(our)?s?/i,
+		week: /^w(eek)?s?/i,
+        month: /^m(onth)?s?/i,
+        day: /^d(ay)?s?/i,
+        year: /^y(ear)?s?/i,
+		
+        shortMeridian: /^(a|p)/i,
+        longMeridian: /^(a\.?m?\.?|p\.?m?\.?)/i,
+        timezone: /^((e(s|d)t|c(s|d)t|m(s|d)t|p(s|d)t)|((gmt)?\s*(\+|\-)\s*\d\d\d\d?)|gmt|utc)/i,
+        ordinalSuffix: /^\s*(st|nd|rd|th)/i,
+        timeContext: /^\s*(\:|a(?!u|p)|p)/i
+    },
+
+	timezones: [{name:"UTC", offset:"-000"}, {name:"GMT", offset:"-000"}, {name:"EST", offset:"-0500"}, {name:"EDT", offset:"-0400"}, {name:"CST", offset:"-0600"}, {name:"CDT", offset:"-0500"}, {name:"MST", offset:"-0700"}, {name:"MDT", offset:"-0600"}, {name:"PST", offset:"-0800"}, {name:"PDT", offset:"-0700"}]
+};
+
+/********************
+ ** Future Strings **
+ ********************
+ * 
+ * The following list of strings may not be currently being used, but 
+ * may be incorporated into the Datejs library later. 
+ *
+ * We would appreciate any help translating the strings below.
+ * 
+ * If you modify this file, please post your revised CultureInfo file
+ * to the Datejs Forum located at http://www.datejs.com/forums/.
+ *
+ * Please mark the subject of the post with [CultureInfo]. Example:
+ *    Subject: [CultureInfo] Translated "da-DK" Danish(Denmark)b
+ *
+ * English Name        Translated
+ * ------------------  -----------------
+ * about               about
+ * ago                 ago
+ * date                date
+ * time                time
+ * calendar            calendar
+ * show                show
+ * hourly              hourly
+ * daily               daily
+ * weekly              weekly
+ * bi-weekly           bi-weekly
+ * fortnight           fortnight
+ * monthly             monthly
+ * bi-monthly          bi-monthly
+ * quarter             quarter
+ * quarterly           quarterly
+ * yearly              yearly
+ * annual              annual
+ * annually            annually
+ * annum               annum
+ * again               again
+ * between             between
+ * after               after
+ * from now            from now
+ * repeat              repeat
+ * times               times
+ * per                 per
+ * min (abbrev minute) min
+ * morning             morning
+ * noon                noon
+ * night               night
+ * midnight            midnight
+ * mid-night           mid-night
+ * evening             evening
+ * final               final
+ * future              future
+ * spring              spring
+ * summer              summer
+ * fall                fall
+ * winter              winter
+ * end of              end of
+ * end                 end
+ * long                long
+ * short               short
+ *//**
  * @version: 1.0 Alpha-1
  * @author: Coolite Inc. http://www.coolite.com/
- * @date: 2008-05-13
+ * @date: 2008-04-13
  * @copyright: Copyright (c) 2006-2008, Coolite Inc. (http://www.coolite.com/). All rights reserved.
  * @license: Licensed under The MIT License. See license.txt and http://www.datejs.com/license/. 
  * @website: http://www.datejs.com/
  */
-Date.CultureInfo={name:"en-US",englishName:"English (United States)",nativeName:"English (United States)",dayNames:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],abbreviatedDayNames:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],shortestDayNames:["Su","Mo","Tu","We","Th","Fr","Sa"],firstLetterDayNames:["S","M","T","W","T","F","S"],monthNames:["January","February","March","April","May","June","July","August","September","October","November","December"],abbreviatedMonthNames:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],amDesignator:"AM",pmDesignator:"PM",firstDayOfWeek:0,twoDigitYearMax:2029,dateElementOrder:"mdy",formatPatterns:{shortDate:"M/d/yyyy",longDate:"dddd, MMMM dd, yyyy",shortTime:"h:mm tt",longTime:"h:mm:ss tt",fullDateTime:"dddd, MMMM dd, yyyy h:mm:ss tt",sortableDateTime:"yyyy-MM-ddTHH:mm:ss",universalSortableDateTime:"yyyy-MM-dd HH:mm:ssZ",rfc1123:"ddd, dd MMM yyyy HH:mm:ss GMT",monthDay:"MMMM dd",yearMonth:"MMMM, yyyy"},regexPatterns:{jan:/^jan(uary)?/i,feb:/^feb(ruary)?/i,mar:/^mar(ch)?/i,apr:/^apr(il)?/i,may:/^may/i,jun:/^jun(e)?/i,jul:/^jul(y)?/i,aug:/^aug(ust)?/i,sep:/^sep(t(ember)?)?/i,oct:/^oct(ober)?/i,nov:/^nov(ember)?/i,dec:/^dec(ember)?/i,sun:/^su(n(day)?)?/i,mon:/^mo(n(day)?)?/i,tue:/^tu(e(s(day)?)?)?/i,wed:/^we(d(nesday)?)?/i,thu:/^th(u(r(s(day)?)?)?)?/i,fri:/^fr(i(day)?)?/i,sat:/^sa(t(urday)?)?/i,future:/^next/i,past:/^last|past|prev(ious)?/i,add:/^(\+|aft(er)?|from|hence)/i,subtract:/^(\-|bef(ore)?|ago)/i,yesterday:/^yes(terday)?/i,today:/^t(od(ay)?)?/i,tomorrow:/^tom(orrow)?/i,now:/^n(ow)?/i,millisecond:/^ms|milli(second)?s?/i,second:/^sec(ond)?s?/i,minute:/^mn|min(ute)?s?/i,hour:/^h(our)?s?/i,week:/^w(eek)?s?/i,month:/^m(onth)?s?/i,day:/^d(ay)?s?/i,year:/^y(ear)?s?/i,shortMeridian:/^(a|p)/i,longMeridian:/^(a\.?m?\.?|p\.?m?\.?)/i,timezone:/^((e(s|d)t|c(s|d)t|m(s|d)t|p(s|d)t)|((gmt)?\s*(\+|\-)\s*\d\d\d\d?)|gmt|utc)/i,ordinalSuffix:/^\s*(st|nd|rd|th)/i,timeContext:/^\s*(\:|a(?!u|p)|p)/i},timezones:[{name:"UTC",offset:"-000"},{name:"GMT",offset:"-000"},{name:"EST",offset:"-0500"},{name:"EDT",offset:"-0400"},{name:"CST",offset:"-0600"},{name:"CDT",offset:"-0500"},{name:"MST",offset:"-0700"},{name:"MDT",offset:"-0600"},{name:"PST",offset:"-0800"},{name:"PDT",offset:"-0700"}]};
-(function(){var $D=Date,$P=$D.prototype,$C=$D.CultureInfo,p=function(s,l){if(!l){l=2;}
-return("000"+s).slice(l*-1);};$P.clearTime=function(){this.setHours(0);this.setMinutes(0);this.setSeconds(0);this.setMilliseconds(0);return this;};$P.setTimeToNow=function(){var n=new Date();this.setHours(n.getHours());this.setMinutes(n.getMinutes());this.setSeconds(n.getSeconds());this.setMilliseconds(n.getMilliseconds());return this;};$D.today=function(){return new Date().clearTime();};$D.compare=function(date1,date2){if(isNaN(date1)||isNaN(date2)){throw new Error(date1+" - "+date2);}else if(date1 instanceof Date&&date2 instanceof Date){return(date1<date2)?-1:(date1>date2)?1:0;}else{throw new TypeError(date1+" - "+date2);}};$D.equals=function(date1,date2){return(date1.compareTo(date2)===0);};$D.getDayNumberFromName=function(name){var n=$C.dayNames,m=$C.abbreviatedDayNames,o=$C.shortestDayNames,s=name.toLowerCase();for(var i=0;i<n.length;i++){if(n[i].toLowerCase()==s||m[i].toLowerCase()==s||o[i].toLowerCase()==s){return i;}}
-return-1;};$D.getMonthNumberFromName=function(name){var n=$C.monthNames,m=$C.abbreviatedMonthNames,s=name.toLowerCase();for(var i=0;i<n.length;i++){if(n[i].toLowerCase()==s||m[i].toLowerCase()==s){return i;}}
-return-1;};$D.isLeapYear=function(year){return((year%4===0&&year%100!==0)||year%400===0);};$D.getDaysInMonth=function(year,month){return[31,($D.isLeapYear(year)?29:28),31,30,31,30,31,31,30,31,30,31][month];};$D.getTimezoneAbbreviation=function(offset){var z=$C.timezones,p;for(var i=0;i<z.length;i++){if(z[i].offset===offset){return z[i].name;}}
-return null;};$D.getTimezoneOffset=function(name){var z=$C.timezones,p;for(var i=0;i<z.length;i++){if(z[i].name===name.toUpperCase()){return z[i].offset;}}
-return null;};$P.clone=function(){return new Date(this.getTime());};$P.compareTo=function(date){return Date.compare(this,date);};$P.equals=function(date){return Date.equals(this,date||new Date());};$P.between=function(start,end){return this.getTime()>=start.getTime()&&this.getTime()<=end.getTime();};$P.isAfter=function(date){return this.compareTo(date||new Date())===1;};$P.isBefore=function(date){return(this.compareTo(date||new Date())===-1);};$P.isToday=function(){return this.isSameDay(new Date());};$P.isSameDay=function(date){return this.clone().clearTime().equals(date.clone().clearTime());};$P.addMilliseconds=function(value){this.setMilliseconds(this.getMilliseconds()+value);return this;};$P.addSeconds=function(value){return this.addMilliseconds(value*1000);};$P.addMinutes=function(value){return this.addMilliseconds(value*60000);};$P.addHours=function(value){return this.addMilliseconds(value*3600000);};$P.addDays=function(value){this.setDate(this.getDate()+value);return this;};$P.addWeeks=function(value){return this.addDays(value*7);};$P.addMonths=function(value){var n=this.getDate();this.setDate(1);this.setMonth(this.getMonth()+value);this.setDate(Math.min(n,$D.getDaysInMonth(this.getFullYear(),this.getMonth())));return this;};$P.addYears=function(value){return this.addMonths(value*12);};$P.add=function(config){if(typeof config=="number"){this._orient=config;return this;}
-var x=config;if(x.milliseconds){this.addMilliseconds(x.milliseconds);}
-if(x.seconds){this.addSeconds(x.seconds);}
-if(x.minutes){this.addMinutes(x.minutes);}
-if(x.hours){this.addHours(x.hours);}
-if(x.weeks){this.addWeeks(x.weeks);}
-if(x.months){this.addMonths(x.months);}
-if(x.years){this.addYears(x.years);}
-if(x.days){this.addDays(x.days);}
-return this;};var $y,$m,$d;$P.getWeek=function(){var a,b,c,d,e,f,g,n,s,w;$y=(!$y)?this.getFullYear():$y;$m=(!$m)?this.getMonth()+1:$m;$d=(!$d)?this.getDate():$d;if($m<=2){a=$y-1;b=(a/4|0)-(a/100|0)+(a/400|0);c=((a-1)/4|0)-((a-1)/100|0)+((a-1)/400|0);s=b-c;e=0;f=$d-1+(31*($m-1));}else{a=$y;b=(a/4|0)-(a/100|0)+(a/400|0);c=((a-1)/4|0)-((a-1)/100|0)+((a-1)/400|0);s=b-c;e=s+1;f=$d+((153*($m-3)+2)/5)+58+s;}
-g=(a+b)%7;d=(f+g-e)%7;n=(f+3-d)|0;if(n<0){w=53-((g-s)/5|0);}else if(n>364+s){w=1;}else{w=(n/7|0)+1;}
-$y=$m=$d=null;return w;};$P.getISOWeek=function(){$y=this.getUTCFullYear();$m=this.getUTCMonth()+1;$d=this.getUTCDate();return p(this.getWeek());};$P.setWeek=function(n){return this.moveToDayOfWeek(1).addWeeks(n-this.getWeek());};$D._validate=function(n,min,max,name){if(typeof n=="undefined"){return false;}else if(typeof n!="number"){throw new TypeError(n+" is not a Number.");}else if(n<min||n>max){throw new RangeError(n+" is not a valid value for "+name+".");}
-return true;};$D.validateMillisecond=function(value){return $D._validate(value,0,999,"millisecond");};$D.validateSecond=function(value){return $D._validate(value,0,59,"second");};$D.validateMinute=function(value){return $D._validate(value,0,59,"minute");};$D.validateHour=function(value){return $D._validate(value,0,23,"hour");};$D.validateDay=function(value,year,month){return $D._validate(value,1,$D.getDaysInMonth(year,month),"day");};$D.validateMonth=function(value){return $D._validate(value,0,11,"month");};$D.validateYear=function(value){return $D._validate(value,0,9999,"year");};$P.set=function(config){if($D.validateMillisecond(config.millisecond)){this.addMilliseconds(config.millisecond-this.getMilliseconds());}
-if($D.validateSecond(config.second)){this.addSeconds(config.second-this.getSeconds());}
-if($D.validateMinute(config.minute)){this.addMinutes(config.minute-this.getMinutes());}
-if($D.validateHour(config.hour)){this.addHours(config.hour-this.getHours());}
-if($D.validateMonth(config.month)){this.addMonths(config.month-this.getMonth());}
-if($D.validateYear(config.year)){this.addYears(config.year-this.getFullYear());}
-if($D.validateDay(config.day,this.getFullYear(),this.getMonth())){this.addDays(config.day-this.getDate());}
-if(config.timezone){this.setTimezone(config.timezone);}
-if(config.timezoneOffset){this.setTimezoneOffset(config.timezoneOffset);}
-if(config.week&&$D._validate(config.week,0,53,"week")){this.setWeek(config.week);}
-return this;};$P.moveToFirstDayOfMonth=function(){return this.set({day:1});};$P.moveToLastDayOfMonth=function(){return this.set({day:$D.getDaysInMonth(this.getFullYear(),this.getMonth())});};$P.moveToNthOccurrence=function(dayOfWeek,occurrence){var shift=0;if(occurrence>0){shift=occurrence-1;}
-else if(occurrence===-1){this.moveToLastDayOfMonth();if(this.getDay()!==dayOfWeek){this.moveToDayOfWeek(dayOfWeek,-1);}
-return this;}
-return this.moveToFirstDayOfMonth().addDays(-1).moveToDayOfWeek(dayOfWeek,+1).addWeeks(shift);};$P.moveToDayOfWeek=function(dayOfWeek,orient){var diff=(dayOfWeek-this.getDay()+7*(orient||+1))%7;return this.addDays((diff===0)?diff+=7*(orient||+1):diff);};$P.moveToMonth=function(month,orient){var diff=(month-this.getMonth()+12*(orient||+1))%12;return this.addMonths((diff===0)?diff+=12*(orient||+1):diff);};$P.getOrdinalNumber=function(){return Math.ceil((this.clone().clearTime()-new Date(this.getFullYear(),0,1))/86400000)+1;};$P.getTimezone=function(){return $D.getTimezoneAbbreviation(this.getUTCOffset());};$P.setTimezoneOffset=function(offset){var here=this.getTimezoneOffset(),there=Number(offset)*-6/10;return this.addMinutes(there-here);};$P.setTimezone=function(offset){return this.setTimezoneOffset($D.getTimezoneOffset(offset));};$P.hasDaylightSavingTime=function(){return(Date.today().set({month:0,day:1}).getTimezoneOffset()!==Date.today().set({month:6,day:1}).getTimezoneOffset());};$P.isDaylightSavingTime=function(){return(this.hasDaylightSavingTime()&&new Date().getTimezoneOffset()===Date.today().set({month:6,day:1}).getTimezoneOffset());};$P.getUTCOffset=function(){var n=this.getTimezoneOffset()*-10/6,r;if(n<0){r=(n-10000).toString();return r.charAt(0)+r.substr(2);}else{r=(n+10000).toString();return"+"+r.substr(1);}};$P.getElapsed=function(date){return(date||new Date())-this;};if(!$P.toISOString){$P.toISOString=function(){function f(n){return n<10?'0'+n:n;}
-return'"'+this.getUTCFullYear()+'-'+
-f(this.getUTCMonth()+1)+'-'+
-f(this.getUTCDate())+'T'+
-f(this.getUTCHours())+':'+
-f(this.getUTCMinutes())+':'+
-f(this.getUTCSeconds())+'Z"';};}
-$P._toString=$P.toString;$P.toString=function(format){var x=this;if(format&&format.length==1){var c=$C.formatPatterns;x.t=x.toString;switch(format){case"d":return x.t(c.shortDate);case"D":return x.t(c.longDate);case"F":return x.t(c.fullDateTime);case"m":return x.t(c.monthDay);case"r":return x.t(c.rfc1123);case"s":return x.t(c.sortableDateTime);case"t":return x.t(c.shortTime);case"T":return x.t(c.longTime);case"u":return x.t(c.universalSortableDateTime);case"y":return x.t(c.yearMonth);}}
-var ord=function(n){switch(n*1){case 1:case 21:case 31:return"st";case 2:case 22:return"nd";case 3:case 23:return"rd";default:return"th";}};return format?format.replace(/(\\)?(dd?d?d?|MM?M?M?|yy?y?y?|hh?|HH?|mm?|ss?|tt?|S)/g,function(m){if(m.charAt(0)==="\\"){return m.replace("\\","");}
-x.h=x.getHours;switch(m){case"hh":return p(x.h()<13?(x.h()===0?12:x.h()):(x.h()-12));case"h":return x.h()<13?(x.h()===0?12:x.h()):(x.h()-12);case"HH":return p(x.h());case"H":return x.h();case"mm":return p(x.getMinutes());case"m":return x.getMinutes();case"ss":return p(x.getSeconds());case"s":return x.getSeconds();case"yyyy":return p(x.getFullYear(),4);case"yy":return p(x.getFullYear());case"dddd":return $C.dayNames[x.getDay()];case"ddd":return $C.abbreviatedDayNames[x.getDay()];case"dd":return p(x.getDate());case"d":return x.getDate();case"MMMM":return $C.monthNames[x.getMonth()];case"MMM":return $C.abbreviatedMonthNames[x.getMonth()];case"MM":return p((x.getMonth()+1));case"M":return x.getMonth()+1;case"t":return x.h()<12?$C.amDesignator.substring(0,1):$C.pmDesignator.substring(0,1);case"tt":return x.h()<12?$C.amDesignator:$C.pmDesignator;case"S":return ord(x.getDate());default:return m;}}):this._toString();};}());
-(function(){var $D=Date,$P=$D.prototype,$C=$D.CultureInfo,$N=Number.prototype;$P._orient=+1;$P._nth=null;$P._is=false;$P._same=false;$P._isSecond=false;$N._dateElement="day";$P.next=function(){this._orient=+1;return this;};$D.next=function(){return $D.today().next();};$P.last=$P.prev=$P.previous=function(){this._orient=-1;return this;};$D.last=$D.prev=$D.previous=function(){return $D.today().last();};$P.is=function(){this._is=true;return this;};$P.same=function(){this._same=true;this._isSecond=false;return this;};$P.today=function(){return this.same().day();};$P.weekday=function(){if(this._is){this._is=false;return(!this.is().sat()&&!this.is().sun());}
-return false;};$P.at=function(time){return(typeof time==="string")?$D.parse(this.toString("d")+" "+time):this.set(time);};$N.fromNow=$N.after=function(date){var c={};c[this._dateElement]=this;return((!date)?new Date():date.clone()).add(c);};$N.ago=$N.before=function(date){var c={};c[this._dateElement]=this*-1;return((!date)?new Date():date.clone()).add(c);};var dx=("sunday monday tuesday wednesday thursday friday saturday").split(/\s/),mx=("january february march april may june july august september october november december").split(/\s/),px=("Millisecond Second Minute Hour Day Week Month Year").split(/\s/),pxf=("Milliseconds Seconds Minutes Hours Date Week Month FullYear").split(/\s/),nth=("final first second third fourth fifth").split(/\s/),de;$P.toObject=function(){var o={};for(var i=0;i<px.length;i++){o[px[i].toLowerCase()]=this["get"+pxf[i]]();}
-return o;};$D.fromObject=function(config){config.week=null;return Date.today().set(config);};var df=function(n){return function(){if(this._is){this._is=false;return this.getDay()==n;}
-if(this._nth!==null){if(this._isSecond){this.addSeconds(this._orient*-1);}
-this._isSecond=false;var ntemp=this._nth;this._nth=null;var temp=this.clone().moveToLastDayOfMonth();this.moveToNthOccurrence(n,ntemp);if(this>temp){throw new RangeError($D.getDayName(n)+" does not occur "+ntemp+" times in the month of "+$D.getMonthName(temp.getMonth())+" "+temp.getFullYear()+".");}
-return this;}
-return this.moveToDayOfWeek(n,this._orient);};};var sdf=function(n){return function(){var t=$D.today(),shift=n-t.getDay();if(n===0&&$C.firstDayOfWeek===1&&t.getDay()!==0){shift=shift+7;}
-return t.addDays(shift);};};for(var i=0;i<dx.length;i++){$D[dx[i].toUpperCase()]=$D[dx[i].toUpperCase().substring(0,3)]=i;$D[dx[i]]=$D[dx[i].substring(0,3)]=sdf(i);$P[dx[i]]=$P[dx[i].substring(0,3)]=df(i);}
-var mf=function(n){return function(){if(this._is){this._is=false;return this.getMonth()===n;}
-return this.moveToMonth(n,this._orient);};};var smf=function(n){return function(){return $D.today().set({month:n,day:1});};};for(var j=0;j<mx.length;j++){$D[mx[j].toUpperCase()]=$D[mx[j].toUpperCase().substring(0,3)]=j;$D[mx[j]]=$D[mx[j].substring(0,3)]=smf(j);$P[mx[j]]=$P[mx[j].substring(0,3)]=mf(j);}
-var ef=function(j){return function(){if(this._isSecond){this._isSecond=false;return this;}
-if(this._same){this._same=this._is=false;var o1=this.toObject(),o2=(arguments[0]||new Date()).toObject(),v="",k=j.toLowerCase();for(var m=(px.length-1);m>-1;m--){v=px[m].toLowerCase();if(o1[v]!=o2[v]){return false;}
-if(k==v){break;}}
-return true;}
-if(j.substring(j.length-1)!="s"){j+="s";}
-return this["add"+j](this._orient);};};var nf=function(n){return function(){this._dateElement=n;return this;};};for(var k=0;k<px.length;k++){de=px[k].toLowerCase();$P[de]=$P[de+"s"]=ef(px[k]);$N[de]=$N[de+"s"]=nf(de);}
-$P._ss=ef("Second");var nthfn=function(n){return function(dayOfWeek){if(this._same){return this._ss(arguments[0]);}
-if(dayOfWeek||dayOfWeek===0){return this.moveToNthOccurrence(dayOfWeek,n);}
-this._nth=n;if(n===2&&(dayOfWeek===undefined||dayOfWeek===null)){this._isSecond=true;return this.addSeconds(this._orient);}
-return this;};};for(var l=0;l<nth.length;l++){$P[nth[l]]=(l===0)?nthfn(-1):nthfn(l);}}());
-(function(){Date.Parsing={Exception:function(s){this.message="Parse error at '"+s.substring(0,10)+" ...'";}};var $P=Date.Parsing;var _=$P.Operators={rtoken:function(r){return function(s){var mx=s.match(r);if(mx){return([mx[0],s.substring(mx[0].length)]);}else{throw new $P.Exception(s);}};},token:function(s){return function(s){return _.rtoken(new RegExp("^\s*"+s+"\s*"))(s);};},stoken:function(s){return _.rtoken(new RegExp("^"+s));},until:function(p){return function(s){var qx=[],rx=null;while(s.length){try{rx=p.call(this,s);}catch(e){qx.push(rx[0]);s=rx[1];continue;}
-break;}
-return[qx,s];};},many:function(p){return function(s){var rx=[],r=null;while(s.length){try{r=p.call(this,s);}catch(e){return[rx,s];}
-rx.push(r[0]);s=r[1];}
-return[rx,s];};},optional:function(p){return function(s){var r=null;try{r=p.call(this,s);}catch(e){return[null,s];}
-return[r[0],r[1]];};},not:function(p){return function(s){try{p.call(this,s);}catch(e){return[null,s];}
-throw new $P.Exception(s);};},ignore:function(p){return p?function(s){var r=null;r=p.call(this,s);return[null,r[1]];}:null;},product:function(){var px=arguments[0],qx=Array.prototype.slice.call(arguments,1),rx=[];for(var i=0;i<px.length;i++){rx.push(_.each(px[i],qx));}
-return rx;},cache:function(rule){var cache={},r=null;return function(s){try{r=cache[s]=(cache[s]||rule.call(this,s));}catch(e){r=cache[s]=e;}
-if(r instanceof $P.Exception){throw r;}else{return r;}};},any:function(){var px=arguments;return function(s){var r=null;for(var i=0;i<px.length;i++){if(px[i]==null){continue;}
-try{r=(px[i].call(this,s));}catch(e){r=null;}
-if(r){return r;}}
-throw new $P.Exception(s);};},each:function(){var px=arguments;return function(s){var rx=[],r=null;for(var i=0;i<px.length;i++){if(px[i]==null){continue;}
-try{r=(px[i].call(this,s));}catch(e){throw new $P.Exception(s);}
-rx.push(r[0]);s=r[1];}
-return[rx,s];};},all:function(){var px=arguments,_=_;return _.each(_.optional(px));},sequence:function(px,d,c){d=d||_.rtoken(/^\s*/);c=c||null;if(px.length==1){return px[0];}
-return function(s){var r=null,q=null;var rx=[];for(var i=0;i<px.length;i++){try{r=px[i].call(this,s);}catch(e){break;}
-rx.push(r[0]);try{q=d.call(this,r[1]);}catch(ex){q=null;break;}
-s=q[1];}
-if(!r){throw new $P.Exception(s);}
-if(q){throw new $P.Exception(q[1]);}
-if(c){try{r=c.call(this,r[1]);}catch(ey){throw new $P.Exception(r[1]);}}
-return[rx,(r?r[1]:s)];};},between:function(d1,p,d2){d2=d2||d1;var _fn=_.each(_.ignore(d1),p,_.ignore(d2));return function(s){var rx=_fn.call(this,s);return[[rx[0][0],r[0][2]],rx[1]];};},list:function(p,d,c){d=d||_.rtoken(/^\s*/);c=c||null;return(p instanceof Array?_.each(_.product(p.slice(0,-1),_.ignore(d)),p.slice(-1),_.ignore(c)):_.each(_.many(_.each(p,_.ignore(d))),px,_.ignore(c)));},set:function(px,d,c){d=d||_.rtoken(/^\s*/);c=c||null;return function(s){var r=null,p=null,q=null,rx=null,best=[[],s],last=false;for(var i=0;i<px.length;i++){q=null;p=null;r=null;last=(px.length==1);try{r=px[i].call(this,s);}catch(e){continue;}
-rx=[[r[0]],r[1]];if(r[1].length>0&&!last){try{q=d.call(this,r[1]);}catch(ex){last=true;}}else{last=true;}
-if(!last&&q[1].length===0){last=true;}
-if(!last){var qx=[];for(var j=0;j<px.length;j++){if(i!=j){qx.push(px[j]);}}
-p=_.set(qx,d).call(this,q[1]);if(p[0].length>0){rx[0]=rx[0].concat(p[0]);rx[1]=p[1];}}
-if(rx[1].length<best[1].length){best=rx;}
-if(best[1].length===0){break;}}
-if(best[0].length===0){return best;}
-if(c){try{q=c.call(this,best[1]);}catch(ey){throw new $P.Exception(best[1]);}
-best[1]=q[1];}
-return best;};},forward:function(gr,fname){return function(s){return gr[fname].call(this,s);};},replace:function(rule,repl){return function(s){var r=rule.call(this,s);return[repl,r[1]];};},process:function(rule,fn){return function(s){var r=rule.call(this,s);return[fn.call(this,r[0]),r[1]];};},min:function(min,rule){return function(s){var rx=rule.call(this,s);if(rx[0].length<min){throw new $P.Exception(s);}
-return rx;};}};var _generator=function(op){return function(){var args=null,rx=[];if(arguments.length>1){args=Array.prototype.slice.call(arguments);}else if(arguments[0]instanceof Array){args=arguments[0];}
-if(args){for(var i=0,px=args.shift();i<px.length;i++){args.unshift(px[i]);rx.push(op.apply(null,args));args.shift();return rx;}}else{return op.apply(null,arguments);}};};var gx="optional not ignore cache".split(/\s/);for(var i=0;i<gx.length;i++){_[gx[i]]=_generator(_[gx[i]]);}
-var _vector=function(op){return function(){if(arguments[0]instanceof Array){return op.apply(null,arguments[0]);}else{return op.apply(null,arguments);}};};var vx="each any all".split(/\s/);for(var j=0;j<vx.length;j++){_[vx[j]]=_vector(_[vx[j]]);}}());(function(){var $D=Date,$P=$D.prototype,$C=$D.CultureInfo;var flattenAndCompact=function(ax){var rx=[];for(var i=0;i<ax.length;i++){if(ax[i]instanceof Array){rx=rx.concat(flattenAndCompact(ax[i]));}else{if(ax[i]){rx.push(ax[i]);}}}
-return rx;};$D.Grammar={};$D.Translator={hour:function(s){return function(){this.hour=Number(s);};},minute:function(s){return function(){this.minute=Number(s);};},second:function(s){return function(){this.second=Number(s);};},meridian:function(s){return function(){this.meridian=s.slice(0,1).toLowerCase();};},timezone:function(s){return function(){var n=s.replace(/[^\d\+\-]/g,"");if(n.length){this.timezoneOffset=Number(n);}else{this.timezone=s.toLowerCase();}};},day:function(x){var s=x[0];return function(){this.day=Number(s.match(/\d+/)[0]);};},month:function(s){return function(){this.month=(s.length==3)?"jan feb mar apr may jun jul aug sep oct nov dec".indexOf(s)/4:Number(s)-1;};},year:function(s){return function(){var n=Number(s);this.year=((s.length>2)?n:(n+(((n+2000)<$C.twoDigitYearMax)?2000:1900)));};},rday:function(s){return function(){switch(s){case"yesterday":this.days=-1;break;case"tomorrow":this.days=1;break;case"today":this.days=0;break;case"now":this.days=0;this.now=true;break;}};},finishExact:function(x){x=(x instanceof Array)?x:[x];for(var i=0;i<x.length;i++){if(x[i]){x[i].call(this);}}
-var now=new Date();if((this.hour||this.minute)&&(!this.month&&!this.year&&!this.day)){this.day=now.getDate();}
-if(!this.year){this.year=now.getFullYear();}
-if(!this.month&&this.month!==0){this.month=now.getMonth();}
-if(!this.day){this.day=1;}
-if(!this.hour){this.hour=0;}
-if(!this.minute){this.minute=0;}
-if(!this.second){this.second=0;}
-if(this.meridian&&this.hour){if(this.meridian=="p"&&this.hour<12){this.hour=this.hour+12;}else if(this.meridian=="a"&&this.hour==12){this.hour=0;}}
-if(this.day>$D.getDaysInMonth(this.year,this.month)){throw new RangeError(this.day+" is not a valid value for days.");}
-var r=new Date(this.year,this.month,this.day,this.hour,this.minute,this.second);if(this.timezone){r.set({timezone:this.timezone});}else if(this.timezoneOffset){r.set({timezoneOffset:this.timezoneOffset});}
-return r;},finish:function(x){x=(x instanceof Array)?flattenAndCompact(x):[x];if(x.length===0){return null;}
-for(var i=0;i<x.length;i++){if(typeof x[i]=="function"){x[i].call(this);}}
-var today=$D.today();if(this.now&&!this.unit&&!this.operator){return new Date();}else if(this.now){today=new Date();}
-var expression=!!(this.days&&this.days!==null||this.orient||this.operator);var gap,mod,orient;orient=((this.orient=="past"||this.operator=="subtract")?-1:1);if(!this.now&&"hour minute second".indexOf(this.unit)!=-1){today.setTimeToNow();}
-if(this.month||this.month===0){if("year day hour minute second".indexOf(this.unit)!=-1){this.value=this.month+1;this.month=null;expression=true;}}
-if(!expression&&this.weekday&&!this.day&&!this.days){var temp=Date[this.weekday]();this.day=temp.getDate();if(!this.month){this.month=temp.getMonth();}
-this.year=temp.getFullYear();}
-if(expression&&this.weekday&&this.unit!="month"){this.unit="day";gap=($D.getDayNumberFromName(this.weekday)-today.getDay());mod=7;this.days=gap?((gap+(orient*mod))%mod):(orient*mod);}
-if(this.month&&this.unit=="day"&&this.operator){this.value=(this.month+1);this.month=null;}
-if(this.value!=null&&this.month!=null&&this.year!=null){this.day=this.value*1;}
-if(this.month&&!this.day&&this.value){today.set({day:this.value*1});if(!expression){this.day=this.value*1;}}
-if(!this.month&&this.value&&this.unit=="month"&&!this.now){this.month=this.value;expression=true;}
-if(expression&&(this.month||this.month===0)&&this.unit!="year"){this.unit="month";gap=(this.month-today.getMonth());mod=12;this.months=gap?((gap+(orient*mod))%mod):(orient*mod);this.month=null;}
-if(!this.unit){this.unit="day";}
-if(!this.value&&this.operator&&this.operator!==null&&this[this.unit+"s"]&&this[this.unit+"s"]!==null){this[this.unit+"s"]=this[this.unit+"s"]+((this.operator=="add")?1:-1)+(this.value||0)*orient;}else if(this[this.unit+"s"]==null||this.operator!=null){if(!this.value){this.value=1;}
-this[this.unit+"s"]=this.value*orient;}
-if(this.meridian&&this.hour){if(this.meridian=="p"&&this.hour<12){this.hour=this.hour+12;}else if(this.meridian=="a"&&this.hour==12){this.hour=0;}}
-if(this.weekday&&!this.day&&!this.days){var temp=Date[this.weekday]();this.day=temp.getDate();if(temp.getMonth()!==today.getMonth()){this.month=temp.getMonth();}}
-if((this.month||this.month===0)&&!this.day){this.day=1;}
-if(!this.orient&&!this.operator&&this.unit=="week"&&this.value&&!this.day&&!this.month){return Date.today().setWeek(this.value);}
-if(expression&&this.timezone&&this.day&&this.days){this.day=this.days;}
-return(expression)?today.add(this):today.set(this);}};var _=$D.Parsing.Operators,g=$D.Grammar,t=$D.Translator,_fn;g.datePartDelimiter=_.rtoken(/^([\s\-\.\,\/\x27]+)/);g.timePartDelimiter=_.stoken(":");g.whiteSpace=_.rtoken(/^\s*/);g.generalDelimiter=_.rtoken(/^(([\s\,]|at|@|on)+)/);var _C={};g.ctoken=function(keys){var fn=_C[keys];if(!fn){var c=$C.regexPatterns;var kx=keys.split(/\s+/),px=[];for(var i=0;i<kx.length;i++){px.push(_.replace(_.rtoken(c[kx[i]]),kx[i]));}
-fn=_C[keys]=_.any.apply(null,px);}
-return fn;};g.ctoken2=function(key){return _.rtoken($C.regexPatterns[key]);};g.h=_.cache(_.process(_.rtoken(/^(0[0-9]|1[0-2]|[1-9])/),t.hour));g.hh=_.cache(_.process(_.rtoken(/^(0[0-9]|1[0-2])/),t.hour));g.H=_.cache(_.process(_.rtoken(/^([0-1][0-9]|2[0-3]|[0-9])/),t.hour));g.HH=_.cache(_.process(_.rtoken(/^([0-1][0-9]|2[0-3])/),t.hour));g.m=_.cache(_.process(_.rtoken(/^([0-5][0-9]|[0-9])/),t.minute));g.mm=_.cache(_.process(_.rtoken(/^[0-5][0-9]/),t.minute));g.s=_.cache(_.process(_.rtoken(/^([0-5][0-9]|[0-9])/),t.second));g.ss=_.cache(_.process(_.rtoken(/^[0-5][0-9]/),t.second));g.hms=_.cache(_.sequence([g.H,g.m,g.s],g.timePartDelimiter));g.t=_.cache(_.process(g.ctoken2("shortMeridian"),t.meridian));g.tt=_.cache(_.process(g.ctoken2("longMeridian"),t.meridian));g.z=_.cache(_.process(_.rtoken(/^((\+|\-)\s*\d\d\d\d)|((\+|\-)\d\d\:?\d\d)/),t.timezone));g.zz=_.cache(_.process(_.rtoken(/^((\+|\-)\s*\d\d\d\d)|((\+|\-)\d\d\:?\d\d)/),t.timezone));g.zzz=_.cache(_.process(g.ctoken2("timezone"),t.timezone));g.timeSuffix=_.each(_.ignore(g.whiteSpace),_.set([g.tt,g.zzz]));g.time=_.each(_.optional(_.ignore(_.stoken("T"))),g.hms,g.timeSuffix);g.d=_.cache(_.process(_.each(_.rtoken(/^([0-2]\d|3[0-1]|\d)/),_.optional(g.ctoken2("ordinalSuffix"))),t.day));g.dd=_.cache(_.process(_.each(_.rtoken(/^([0-2]\d|3[0-1])/),_.optional(g.ctoken2("ordinalSuffix"))),t.day));g.ddd=g.dddd=_.cache(_.process(g.ctoken("sun mon tue wed thu fri sat"),function(s){return function(){this.weekday=s;};}));g.M=_.cache(_.process(_.rtoken(/^(1[0-2]|0\d|\d)/),t.month));g.MM=_.cache(_.process(_.rtoken(/^(1[0-2]|0\d)/),t.month));g.MMM=g.MMMM=_.cache(_.process(g.ctoken("jan feb mar apr may jun jul aug sep oct nov dec"),t.month));g.y=_.cache(_.process(_.rtoken(/^(\d\d?)/),t.year));g.yy=_.cache(_.process(_.rtoken(/^(\d\d)/),t.year));g.yyy=_.cache(_.process(_.rtoken(/^(\d\d?\d?\d?)/),t.year));g.yyyy=_.cache(_.process(_.rtoken(/^(\d\d\d\d)/),t.year));_fn=function(){return _.each(_.any.apply(null,arguments),_.not(g.ctoken2("timeContext")));};g.day=_fn(g.d,g.dd);g.month=_fn(g.M,g.MMM);g.year=_fn(g.yyyy,g.yy);g.orientation=_.process(g.ctoken("past future"),function(s){return function(){this.orient=s;};});g.operator=_.process(g.ctoken("add subtract"),function(s){return function(){this.operator=s;};});g.rday=_.process(g.ctoken("yesterday tomorrow today now"),t.rday);g.unit=_.process(g.ctoken("second minute hour day week month year"),function(s){return function(){this.unit=s;};});g.value=_.process(_.rtoken(/^\d\d?(st|nd|rd|th)?/),function(s){return function(){this.value=s.replace(/\D/g,"");};});g.expression=_.set([g.rday,g.operator,g.value,g.unit,g.orientation,g.ddd,g.MMM]);_fn=function(){return _.set(arguments,g.datePartDelimiter);};g.mdy=_fn(g.ddd,g.month,g.day,g.year);g.ymd=_fn(g.ddd,g.year,g.month,g.day);g.dmy=_fn(g.ddd,g.day,g.month,g.year);g.date=function(s){return((g[$C.dateElementOrder]||g.mdy).call(this,s));};g.format=_.process(_.many(_.any(_.process(_.rtoken(/^(dd?d?d?|MM?M?M?|yy?y?y?|hh?|HH?|mm?|ss?|tt?|zz?z?)/),function(fmt){if(g[fmt]){return g[fmt];}else{throw $D.Parsing.Exception(fmt);}}),_.process(_.rtoken(/^[^dMyhHmstz]+/),function(s){return _.ignore(_.stoken(s));}))),function(rules){return _.process(_.each.apply(null,rules),t.finishExact);});var _F={};var _get=function(f){return _F[f]=(_F[f]||g.format(f)[0]);};g.formats=function(fx){if(fx instanceof Array){var rx=[];for(var i=0;i<fx.length;i++){rx.push(_get(fx[i]));}
-return _.any.apply(null,rx);}else{return _get(fx);}};g._formats=g.formats(["\"yyyy-MM-ddTHH:mm:ssZ\"","yyyy-MM-ddTHH:mm:ssZ","yyyy-MM-ddTHH:mm:ssz","yyyy-MM-ddTHH:mm:ss","yyyy-MM-ddTHH:mmZ","yyyy-MM-ddTHH:mmz","yyyy-MM-ddTHH:mm","ddd, MMM dd, yyyy H:mm:ss tt","ddd MMM d yyyy HH:mm:ss zzz","MMddyyyy","ddMMyyyy","Mddyyyy","ddMyyyy","Mdyyyy","dMyyyy","yyyy","Mdyy","dMyy","d"]);g._start=_.process(_.set([g.date,g.time,g.expression],g.generalDelimiter,g.whiteSpace),t.finish);g.start=function(s){try{var r=g._formats.call({},s);if(r[1].length===0){return r;}}catch(e){}
-return g._start.call({},s);};$D._parse=$D.parse;$D.parse=function(s){var r=null;if(!s){return null;}
-if(s instanceof Date){return s;}
-try{r=$D.Grammar.start.call({},s.replace(/^\s*(\S*(\s+\S+)*)\s*$/,"$1"));}catch(e){return null;}
-return((r[1].length===0)?r[0]:null);};$D.getParseFunction=function(fx){var fn=$D.Grammar.formats(fx);return function(s){var r=null;try{r=fn.call({},s);}catch(e){return null;}
-return((r[1].length===0)?r[0]:null);};};$D.parseExact=function(s,fx){return $D.getParseFunction(fx)(s);};}());
-/*
+ 
+(function () {
+    var $D = Date, 
+        $P = $D.prototype, 
+        $C = $D.CultureInfo,
+        p = function (s, l) {
+            if (!l) {
+                l = 2;
+            }
+            return ("000" + s).slice(l * -1);
+        };
+            
+    /**
+     * Resets the time of this Date object to 12:00 AM (00:00), which is the start of the day.
+     * @param {Boolean}  .clone() this date instance before clearing Time
+     * @return {Date}    this
+     */
+    $P.clearTime = function () {
+        this.setHours(0);
+        this.setMinutes(0);
+        this.setSeconds(0);
+        this.setMilliseconds(0);
+        return this;
+    };
+
+    /**
+     * Resets the time of this Date object to the current time ('now').
+     * @return {Date}    this
+     */
+    $P.setTimeToNow = function () {
+        var n = new Date();
+        this.setHours(n.getHours());
+        this.setMinutes(n.getMinutes());
+        this.setSeconds(n.getSeconds());
+        this.setMilliseconds(n.getMilliseconds());
+        return this;
+    };
+
+    /** 
+     * Gets a date that is set to the current date. The time is set to the start of the day (00:00 or 12:00 AM).
+     * @return {Date}    The current date.
+     */
+    $D.today = function () {
+        return new Date().clearTime();
+    };
+
+    /**
+     * Compares the first date to the second date and returns an number indication of their relative values.  
+     * @param {Date}     First Date object to compare [Required].
+     * @param {Date}     Second Date object to compare to [Required].
+     * @return {Number}  -1 = date1 is lessthan date2. 0 = values are equal. 1 = date1 is greaterthan date2.
+     */
+    $D.compare = function (date1, date2) {
+        if (isNaN(date1) || isNaN(date2)) { 
+            throw new Error(date1 + " - " + date2); 
+        } else if (date1 instanceof Date && date2 instanceof Date) {
+            return (date1 < date2) ? -1 : (date1 > date2) ? 1 : 0;
+        } else { 
+            throw new TypeError(date1 + " - " + date2); 
+        }
+    };
+    
+    /**
+     * Compares the first Date object to the second Date object and returns true if they are equal.  
+     * @param {Date}     First Date object to compare [Required]
+     * @param {Date}     Second Date object to compare to [Required]
+     * @return {Boolean} true if dates are equal. false if they are not equal.
+     */
+    $D.equals = function (date1, date2) { 
+        return (date1.compareTo(date2) === 0); 
+    };
+
+    /**
+     * Gets the day number (0-6) if given a CultureInfo specific string which is a valid dayName, abbreviatedDayName or shortestDayName (two char).
+     * @param {String}   The name of the day (eg. "Monday, "Mon", "tuesday", "tue", "We", "we").
+     * @return {Number}  The day number
+     */
+    $D.getDayNumberFromName = function (name) {
+        var n = $C.dayNames, m = $C.abbreviatedDayNames, o = $C.shortestDayNames, s = name.toLowerCase();
+        for (var i = 0; i < n.length; i++) { 
+            if (n[i].toLowerCase() == s || m[i].toLowerCase() == s || o[i].toLowerCase() == s) { 
+                return i; 
+            }
+        }
+        return -1;  
+    };
+    
+    /**
+     * Gets the month number (0-11) if given a Culture Info specific string which is a valid monthName or abbreviatedMonthName.
+     * @param {String}   The name of the month (eg. "February, "Feb", "october", "oct").
+     * @return {Number}  The day number
+     */
+    $D.getMonthNumberFromName = function (name) {
+        var n = $C.monthNames, m = $C.abbreviatedMonthNames, s = name.toLowerCase();
+        for (var i = 0; i < n.length; i++) {
+            if (n[i].toLowerCase() == s || m[i].toLowerCase() == s) { 
+                return i; 
+            }
+        }
+        return -1;
+    };
+
+    /**
+     * Determines if the current date instance is within a LeapYear.
+     * @param {Number}   The year.
+     * @return {Boolean} true if date is within a LeapYear, otherwise false.
+     */
+    $D.isLeapYear = function (year) { 
+        return ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0); 
+    };
+
+    /**
+     * Gets the number of days in the month, given a year and month value. Automatically corrects for LeapYear.
+     * @param {Number}   The year.
+     * @param {Number}   The month (0-11).
+     * @return {Number}  The number of days in the month.
+     */
+    $D.getDaysInMonth = function (year, month) {
+        return [31, ($D.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
+    };
+ 
+    $D.getTimezoneAbbreviation = function (offset) {
+        var z = $C.timezones, p;
+        for (var i = 0; i < z.length; i++) {
+            if (z[i].offset === offset) {
+                return z[i].name;
+            }
+        }
+        return null;
+    };
+    
+    $D.getTimezoneOffset = function (name) {
+        var z = $C.timezones, p;
+        for (var i = 0; i < z.length; i++) {
+            if (z[i].name === name.toUpperCase()) {
+                return z[i].offset;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Returns a new Date object that is an exact date and time copy of the original instance.
+     * @return {Date}    A new Date instance
+     */
+    $P.clone = function () {
+        return new Date(this.getTime()); 
+    };
+
+    /**
+     * Compares this instance to a Date object and returns an number indication of their relative values.  
+     * @param {Date}     Date object to compare [Required]
+     * @return {Number}  -1 = this is lessthan date. 0 = values are equal. 1 = this is greaterthan date.
+     */
+    $P.compareTo = function (date) {
+        return Date.compare(this, date);
+    };
+
+    /**
+     * Compares this instance to another Date object and returns true if they are equal.  
+     * @param {Date}     Date object to compare. If no date to compare, new Date() [now] is used.
+     * @return {Boolean} true if dates are equal. false if they are not equal.
+     */
+    $P.equals = function (date) {
+        return Date.equals(this, date || new Date());
+    };
+
+    /**
+     * Determines if this instance is between a range of two dates or equal to either the start or end dates.
+     * @param {Date}     Start of range [Required]
+     * @param {Date}     End of range [Required]
+     * @return {Boolean} true is this is between or equal to the start and end dates, else false
+     */
+    $P.between = function (start, end) {
+        return this.getTime() >= start.getTime() && this.getTime() <= end.getTime();
+    };
+
+    /**
+     * Determines if this date occurs after the date to compare to.
+     * @param {Date}     Date object to compare. If no date to compare, new Date() ("now") is used.
+     * @return {Boolean} true if this date instance is greater than the date to compare to (or "now"), otherwise false.
+     */
+    $P.isAfter = function (date) {
+        return this.compareTo(date || new Date()) === 1;
+    };
+
+    /**
+     * Determines if this date occurs before the date to compare to.
+     * @param {Date}     Date object to compare. If no date to compare, new Date() ("now") is used.
+     * @return {Boolean} true if this date instance is less than the date to compare to (or "now").
+     */
+    $P.isBefore = function (date) {
+        return (this.compareTo(date || new Date()) === -1);
+    };
+
+    /**
+     * Determines if the current Date instance occurs today.
+     * @return {Boolean} true if this date instance is 'today', otherwise false.
+     */
+    
+    /**
+     * Determines if the current Date instance occurs on the same Date as the supplied 'date'. 
+     * If no 'date' to compare to is provided, the current Date instance is compared to 'today'. 
+     * @param {date}     Date object to compare. If no date to compare, the current Date ("now") is used.
+     * @return {Boolean} true if this Date instance occurs on the same Day as the supplied 'date'.
+     */
+    $P.isToday = $P.isSameDay = function (date) {
+        return this.clone().clearTime().equals((date || new Date()).clone().clearTime());
+    };
+    
+    /**
+     * Adds the specified number of milliseconds to this instance. 
+     * @param {Number}   The number of milliseconds to add. The number can be positive or negative [Required]
+     * @return {Date}    this
+     */
+    $P.addMilliseconds = function (value) {
+        this.setMilliseconds(this.getMilliseconds() + value * 1);
+        return this;
+    };
+
+    /**
+     * Adds the specified number of seconds to this instance. 
+     * @param {Number}   The number of seconds to add. The number can be positive or negative [Required]
+     * @return {Date}    this
+     */
+    $P.addSeconds = function (value) { 
+        return this.addMilliseconds(value * 1000); 
+    };
+
+    /**
+     * Adds the specified number of seconds to this instance. 
+     * @param {Number}   The number of seconds to add. The number can be positive or negative [Required]
+     * @return {Date}    this
+     */
+    $P.addMinutes = function (value) { 
+        return this.addMilliseconds(value * 60000); /* 60*1000 */
+    };
+
+    /**
+     * Adds the specified number of hours to this instance. 
+     * @param {Number}   The number of hours to add. The number can be positive or negative [Required]
+     * @return {Date}    this
+     */
+    $P.addHours = function (value) { 
+        return this.addMilliseconds(value * 3600000); /* 60*60*1000 */
+    };
+
+    /**
+     * Adds the specified number of days to this instance. 
+     * @param {Number}   The number of days to add. The number can be positive or negative [Required]
+     * @return {Date}    this
+     */
+    $P.addDays = function (value) {
+        this.setDate(this.getDate() + value * 1);
+        return this;
+    };
+
+    /**
+     * Adds the specified number of weeks to this instance. 
+     * @param {Number}   The number of weeks to add. The number can be positive or negative [Required]
+     * @return {Date}    this
+     */
+    $P.addWeeks = function (value) { 
+        return this.addDays(value * 7);
+    };
+
+    /**
+     * Adds the specified number of months to this instance. 
+     * @param {Number}   The number of months to add. The number can be positive or negative [Required]
+     * @return {Date}    this
+     */
+    $P.addMonths = function (value) {
+        var n = this.getDate();
+        this.setDate(1);
+        this.setMonth(this.getMonth() + value * 1);
+        this.setDate(Math.min(n, $D.getDaysInMonth(this.getFullYear(), this.getMonth())));
+        return this;
+    };
+
+    /**
+     * Adds the specified number of years to this instance. 
+     * @param {Number}   The number of years to add. The number can be positive or negative [Required]
+     * @return {Date}    this
+     */
+    $P.addYears = function (value) {
+        return this.addMonths(value * 12);
+    };
+
+    /**
+     * Adds (or subtracts) to the value of the years, months, weeks, days, hours, minutes, seconds, milliseconds of the date instance using given configuration object. Positive and Negative values allowed.
+     * Example
+    <pre><code>
+    Date.today().add( { days: 1, months: 1 } )
+     
+    new Date().add( { years: -1 } )
+    </code></pre> 
+     * @param {Object}   Configuration object containing attributes (months, days, etc.)
+     * @return {Date}    this
+     */
+    $P.add = function (config) {
+        if (typeof config == "number") {
+            this._orient = config;
+            return this;    
+        }
+        
+        var x = config;
+        
+        if (x.milliseconds) { 
+            this.addMilliseconds(x.milliseconds); 
+        }
+        if (x.seconds) { 
+            this.addSeconds(x.seconds); 
+        }
+        if (x.minutes) { 
+            this.addMinutes(x.minutes); 
+        }
+        if (x.hours) { 
+            this.addHours(x.hours); 
+        }
+        if (x.weeks) { 
+            this.addWeeks(x.weeks); 
+        }    
+        if (x.months) { 
+            this.addMonths(x.months); 
+        }
+        if (x.years) { 
+            this.addYears(x.years); 
+        }
+        if (x.days) {
+            this.addDays(x.days); 
+        }
+        return this;
+    };
+    
+    var $y, $m, $d;
+    
+    /**
+     * Get the week number. Week one (1) is the week which contains the first Thursday of the year. Monday is considered the first day of the week.
+     * This algorithm is a JavaScript port of the work presented by Claus Tøndering at http://www.tondering.dk/claus/cal/node8.html#SECTION00880000000000000000
+     * .getWeek() Algorithm Copyright (c) 2008 Claus Tondering.
+     * The .getWeek() function does NOT convert the date to UTC. The local datetime is used. Please use .getISOWeek() to get the week of the UTC converted date.
+     * @return {Number}  1 to 53
+     */
+    $P.getWeek = function () {
+        var a, b, c, d, e, f, g, n, s, w;
+        
+        $y = (!$y) ? this.getFullYear() : $y;
+        $m = (!$m) ? this.getMonth() + 1 : $m;
+        $d = (!$d) ? this.getDate() : $d;
+
+        if ($m <= 2) {
+            a = $y - 1;
+            b = (a / 4 | 0) - (a / 100 | 0) + (a / 400 | 0);
+            c = ((a - 1) / 4 | 0) - ((a - 1) / 100 | 0) + ((a - 1) / 400 | 0);
+            s = b - c;
+            e = 0;
+            f = $d - 1 + (31 * ($m - 1));
+        } else {
+            a = $y;
+            b = (a / 4 | 0) - (a / 100 | 0) + (a / 400 | 0);
+            c = ((a - 1) / 4 | 0) - ((a - 1) / 100 | 0) + ((a - 1) / 400 | 0);
+            s = b - c;
+            e = s + 1;
+            f = $d + ((153 * ($m - 3) + 2) / 5) + 58 + s;
+        }
+        
+        g = (a + b) % 7;
+        d = (f + g - e) % 7;
+        n = (f + 3 - d) | 0;
+
+        if (n < 0) {
+            w = 53 - ((g - s) / 5 | 0);
+        } else if (n > 364 + s) {
+            w = 1;
+        } else {
+            w = (n / 7 | 0) + 1;
+        }
+        
+        $y = $m = $d = null;
+        
+        return w;
+    };
+    
+    /**
+     * Get the ISO 8601 week number. Week one ("01") is the week which contains the first Thursday of the year. Monday is considered the first day of the week.
+     * The .getISOWeek() function does convert the date to it's UTC value. Please use .getWeek() to get the week of the local date.
+     * @return {String}  "01" to "53"
+     */
+    $P.getISOWeek = function () {
+        $y = this.getUTCFullYear();
+        $m = this.getUTCMonth() + 1;
+        $d = this.getUTCDate();
+        return p(this.getWeek());
+    };
+
+    /**
+     * Moves the date to Monday of the week set. Week one (1) is the week which contains the first Thursday of the year.
+     * @param {Number}   A Number (1 to 53) that represents the week of the year.
+     * @return {Date}    this
+     */    
+    $P.setWeek = function (n) {
+        return this.moveToDayOfWeek(1).addWeeks(n - this.getWeek());
+    };
+
+    // private
+    var validate = function (n, min, max, name) {
+        if (typeof n == "undefined") {
+            return false;
+        } else if (typeof n != "number") {
+            throw new TypeError(n + " is not a Number."); 
+        } else if (n < min || n > max) {
+            throw new RangeError(n + " is not a valid value for " + name + "."); 
+        }
+        return true;
+    };
+
+    /**
+     * Validates the number is within an acceptable range for milliseconds [0-999].
+     * @param {Number}   The number to check if within range.
+     * @return {Boolean} true if within range, otherwise false.
+     */
+    $D.validateMillisecond = function (value) {
+        return validate(value, 0, 999, "millisecond");
+    };
+
+    /**
+     * Validates the number is within an acceptable range for seconds [0-59].
+     * @param {Number}   The number to check if within range.
+     * @return {Boolean} true if within range, otherwise false.
+     */
+    $D.validateSecond = function (value) {
+        return validate(value, 0, 59, "second");
+    };
+
+    /**
+     * Validates the number is within an acceptable range for minutes [0-59].
+     * @param {Number}   The number to check if within range.
+     * @return {Boolean} true if within range, otherwise false.
+     */
+    $D.validateMinute = function (value) {
+        return validate(value, 0, 59, "minute");
+    };
+
+    /**
+     * Validates the number is within an acceptable range for hours [0-23].
+     * @param {Number}   The number to check if within range.
+     * @return {Boolean} true if within range, otherwise false.
+     */
+    $D.validateHour = function (value) {
+        return validate(value, 0, 23, "hour");
+    };
+
+    /**
+     * Validates the number is within an acceptable range for the days in a month [0-MaxDaysInMonth].
+     * @param {Number}   The number to check if within range.
+     * @return {Boolean} true if within range, otherwise false.
+     */
+    $D.validateDay = function (value, year, month) {
+        return validate(value, 1, $D.getDaysInMonth(year, month), "day");
+    };
+
+    /**
+     * Validates the number is within an acceptable range for months [0-11].
+     * @param {Number}   The number to check if within range.
+     * @return {Boolean} true if within range, otherwise false.
+     */
+    $D.validateMonth = function (value) {
+        return validate(value, 0, 11, "month");
+    };
+
+    /**
+     * Validates the number is within an acceptable range for years.
+     * @param {Number}   The number to check if within range.
+     * @return {Boolean} true if within range, otherwise false.
+     */
+    $D.validateYear = function (value) {
+        return validate(value, 0, 9999, "year");
+    };
+
+    /**
+     * Set the value of year, month, day, hour, minute, second, millisecond of date instance using given configuration object.
+     * Example
+    <pre><code>
+    Date.today().set( { day: 20, month: 1 } )
+
+    new Date().set( { millisecond: 0 } )
+    </code></pre>
+     * 
+     * @param {Object}   Configuration object containing attributes (month, day, etc.)
+     * @return {Date}    this
+     */
+    $P.set = function (config) {
+        if ($D.validateMillisecond(config.millisecond)) {
+            this.addMilliseconds(config.millisecond - this.getMilliseconds()); 
+        }
+        
+        if ($D.validateSecond(config.second)) {
+            this.addSeconds(config.second - this.getSeconds()); 
+        }
+        
+        if ($D.validateMinute(config.minute)) {
+            this.addMinutes(config.minute - this.getMinutes()); 
+        }
+        
+        if ($D.validateHour(config.hour)) {
+            this.addHours(config.hour - this.getHours()); 
+        }
+        
+        if ($D.validateMonth(config.month)) {
+            this.addMonths(config.month - this.getMonth()); 
+        }
+
+        if ($D.validateYear(config.year)) {
+            this.addYears(config.year - this.getFullYear()); 
+        }
+        
+	    /* day has to go last because you can't validate the day without first knowing the month */
+        if ($D.validateDay(config.day, this.getFullYear(), this.getMonth())) {
+            this.addDays(config.day - this.getDate()); 
+        }
+        
+        if (config.timezone) { 
+            this.setTimezone(config.timezone); 
+        }
+        
+        if (config.timezoneOffset) { 
+            this.setTimezoneOffset(config.timezoneOffset); 
+        }
+
+        if (config.week && validate(config.week, 0, 53, "week")) {
+            this.setWeek(config.week);
+        }
+        
+        return this;   
+    };
+
+    /**
+     * Moves the date to the first day of the month.
+     * @return {Date}    this
+     */
+    $P.moveToFirstDayOfMonth = function () {
+        return this.set({ day: 1 });
+    };
+
+    /**
+     * Moves the date to the last day of the month.
+     * @return {Date}    this
+     */
+    $P.moveToLastDayOfMonth = function () { 
+        return this.set({ day: $D.getDaysInMonth(this.getFullYear(), this.getMonth())});
+    };
+
+    /**
+     * Moves the date to the next n'th occurrence of the dayOfWeek starting from the beginning of the month. The number (-1) is a magic number and will return the last occurrence of the dayOfWeek in the month.
+     * @param {Number}   The dayOfWeek to move to
+     * @param {Number}   The n'th occurrence to move to. Use (-1) to return the last occurrence in the month
+     * @return {Date}    this
+     */
+    $P.moveToNthOccurrence = function (dayOfWeek, occurrence) {
+        var shift = 0;
+        if (occurrence > 0) {
+            shift = occurrence - 1;
+        }
+        else if (occurrence === -1) {
+            this.moveToLastDayOfMonth();
+            if (this.getDay() !== dayOfWeek) {
+                this.moveToDayOfWeek(dayOfWeek, -1);
+            }
+            return this;
+        }
+        return this.moveToFirstDayOfMonth().addDays(-1).moveToDayOfWeek(dayOfWeek, +1).addWeeks(shift);
+    };
+
+    /**
+     * Move to the next or last dayOfWeek based on the orient value.
+     * @param {Number}   The dayOfWeek to move to
+     * @param {Number}   Forward (+1) or Back (-1). Defaults to +1. [Optional]
+     * @return {Date}    this
+     */
+    $P.moveToDayOfWeek = function (dayOfWeek, orient) {
+        var diff = (dayOfWeek - this.getDay() + 7 * (orient || +1)) % 7;
+        return this.addDays((diff === 0) ? diff += 7 * (orient || +1) : diff);
+    };
+
+    /**
+     * Move to the next or last month based on the orient value.
+     * @param {Number}   The month to move to. 0 = January, 11 = December
+     * @param {Number}   Forward (+1) or Back (-1). Defaults to +1. [Optional]
+     * @return {Date}    this
+     */
+    $P.moveToMonth = function (month, orient) {
+        var diff = (month - this.getMonth() + 12 * (orient || +1)) % 12;
+        return this.addMonths((diff === 0) ? diff += 12 * (orient || +1) : diff);
+    };
+
+    /**
+     * Get the Ordinal day (numeric day number) of the year, adjusted for leap year.
+     * @return {Number} 1 through 365 (366 in leap years)
+     */
+    $P.getOrdinalNumber = function () {
+        return Math.ceil((this.clone().clearTime() - new Date(this.getFullYear(), 0, 1)) / 86400000) + 1;
+    };
+
+    /**
+     * Get the time zone abbreviation of the current date.
+     * @return {String} The abbreviated time zone name (e.g. "EST")
+     */
+    $P.getTimezone = function () {
+        return $D.getTimezoneAbbreviation(this.getUTCOffset());
+    };
+
+    $P.setTimezoneOffset = function (offset) {
+        var here = this.getTimezoneOffset(), there = Number(offset) * -6 / 10;
+        return this.addMinutes(there - here); 
+    };
+
+    $P.setTimezone = function (offset) { 
+        return this.setTimezoneOffset($D.getTimezoneOffset(offset)); 
+    };
+
+    /**
+     * Indicates whether Daylight Saving Time is observed in the current time zone.
+     * @return {Boolean} true|false
+     */
+    $P.hasDaylightSavingTime = function () { 
+        return (Date.today().set({month: 0, day: 1}).getTimezoneOffset() !== Date.today().set({month: 6, day: 1}).getTimezoneOffset());
+    };
+    
+    /**
+     * Indicates whether this Date instance is within the Daylight Saving Time range for the current time zone.
+     * @return {Boolean} true|false
+     */
+    $P.isDaylightSavingTime = function () {
+        return Date.today().set({month: 0, day: 1}).getTimezoneOffset() != this.getTimezoneOffset();
+    };
+
+    /**
+     * Get the offset from UTC of the current date.
+     * @return {String} The 4-character offset string prefixed with + or - (e.g. "-0500")
+     */
+    $P.getUTCOffset = function () {
+        var n = this.getTimezoneOffset() * -10 / 6, r;
+        if (n < 0) { 
+            r = (n - 10000).toString(); 
+            return r.charAt(0) + r.substr(2); 
+        } else { 
+            r = (n + 10000).toString();  
+            return "+" + r.substr(1); 
+        }
+    };
+
+    /**
+     * Returns the number of milliseconds between this date and date.
+     * @param {Date} Defaults to now
+     * @return {Number} The diff in milliseconds
+     */
+    $P.getElapsed = function (date) {
+        return (date || new Date()) - this;
+    };
+
+    if (!$P.toISOString) {
+        /**
+         * Converts the current date instance into a string with an ISO 8601 format. The date is converted to it's UTC value.
+         * @return {String}  ISO 8601 string of date
+         */
+        $P.toISOString = function () {
+            // From http://www.json.org/json.js. Public Domain. 
+            function f(n) {
+                return n < 10 ? '0' + n : n;
+            }
+
+            return '"' + this.getUTCFullYear()   + '-' +
+                f(this.getUTCMonth() + 1) + '-' +
+                f(this.getUTCDate())      + 'T' +
+                f(this.getUTCHours())     + ':' +
+                f(this.getUTCMinutes())   + ':' +
+                f(this.getUTCSeconds())   + 'Z"';
+        };
+    }
+    
+    // private
+    $P._toString = $P.toString;
+
+    /**
+     * Converts the value of the current Date object to its equivalent string representation.
+     * Format Specifiers
+    <pre>
+    CUSTOM DATE AND TIME FORMAT STRINGS
+    Format  Description                                                                  Example
+    ------  ---------------------------------------------------------------------------  -----------------------
+     s      The seconds of the minute between 0-59.                                      "0" to "59"
+     ss     The seconds of the minute with leading zero if required.                     "00" to "59"
+     
+     m      The minute of the hour between 0-59.                                         "0"  or "59"
+     mm     The minute of the hour with leading zero if required.                        "00" or "59"
+     
+     h      The hour of the day between 1-12.                                            "1"  to "12"
+     hh     The hour of the day with leading zero if required.                           "01" to "12"
+     
+     H      The hour of the day between 0-23.                                            "0"  to "23"
+     HH     The hour of the day with leading zero if required.                           "00" to "23"
+     
+     d      The day of the month between 1 and 31.                                       "1"  to "31"
+     dd     The day of the month with leading zero if required.                          "01" to "31"
+     ddd    Abbreviated day name. $C.abbreviatedDayNames.                                "Mon" to "Sun" 
+     dddd   The full day name. $C.dayNames.                                              "Monday" to "Sunday"
+     
+     M      The month of the year between 1-12.                                          "1" to "12"
+     MM     The month of the year with leading zero if required.                         "01" to "12"
+     MMM    Abbreviated month name. $C.abbreviatedMonthNames.                            "Jan" to "Dec"
+     MMMM   The full month name. $C.monthNames.                                          "January" to "December"
+
+     yy     The year as a two-digit number.                                              "99" or "08"
+     yyyy   The full four digit year.                                                    "1999" or "2008"
+     
+     t      Displays the first character of the A.M./P.M. designator.                    "A" or "P"
+            $C.amDesignator or $C.pmDesignator
+     tt     Displays the A.M./P.M. designator.                                           "AM" or "PM"
+            $C.amDesignator or $C.pmDesignator
+     
+     S      The ordinal suffix ("st, "nd", "rd" or "th") of the current day.            "st, "nd", "rd" or "th"
+
+|| *Format* || *Description* || *Example* ||
+|| d      || The CultureInfo shortDate Format Pattern                                     || "M/d/yyyy" ||
+|| D      || The CultureInfo longDate Format Pattern                                      || "dddd, MMMM dd, yyyy" ||
+|| F      || The CultureInfo fullDateTime Format Pattern                                  || "dddd, MMMM dd, yyyy h:mm:ss tt" ||
+|| m      || The CultureInfo monthDay Format Pattern                                      || "MMMM dd" ||
+|| r      || The CultureInfo rfc1123 Format Pattern                                       || "ddd, dd MMM yyyy HH:mm:ss GMT" ||
+|| s      || The CultureInfo sortableDateTime Format Pattern                              || "yyyy-MM-ddTHH:mm:ss" ||
+|| t      || The CultureInfo shortTime Format Pattern                                     || "h:mm tt" ||
+|| T      || The CultureInfo longTime Format Pattern                                      || "h:mm:ss tt" ||
+|| u      || The CultureInfo universalSortableDateTime Format Pattern                     || "yyyy-MM-dd HH:mm:ssZ" ||
+|| y      || The CultureInfo yearMonth Format Pattern                                     || "MMMM, yyyy" ||
+     
+
+    STANDARD DATE AND TIME FORMAT STRINGS
+    Format  Description                                                                  Example ("en-US")
+    ------  ---------------------------------------------------------------------------  -----------------------
+     d      The CultureInfo shortDate Format Pattern                                     "M/d/yyyy"
+     D      The CultureInfo longDate Format Pattern                                      "dddd, MMMM dd, yyyy"
+     F      The CultureInfo fullDateTime Format Pattern                                  "dddd, MMMM dd, yyyy h:mm:ss tt"
+     m      The CultureInfo monthDay Format Pattern                                      "MMMM dd"
+     r      The CultureInfo rfc1123 Format Pattern                                       "ddd, dd MMM yyyy HH:mm:ss GMT"
+     s      The CultureInfo sortableDateTime Format Pattern                              "yyyy-MM-ddTHH:mm:ss"
+     t      The CultureInfo shortTime Format Pattern                                     "h:mm tt"
+     T      The CultureInfo longTime Format Pattern                                      "h:mm:ss tt"
+     u      The CultureInfo universalSortableDateTime Format Pattern                     "yyyy-MM-dd HH:mm:ssZ"
+     y      The CultureInfo yearMonth Format Pattern                                     "MMMM, yyyy"
+    </pre>
+     * @param {String}   A format string consisting of one or more format spcifiers [Optional].
+     * @return {String}  A string representation of the current Date object.
+     */
+    $P.toString = function (format) {
+        var x = this;
+        
+        // Standard Date and Time Format Strings. Formats pulled from CultureInfo file and
+        // may vary by culture. 
+        if (format && format.length == 1) {
+            var c = $C.formatPatterns;
+            x.t = x.toString;
+            switch (format) {
+            case "d": 
+                return x.t(c.shortDate);
+            case "D":
+                return x.t(c.longDate);
+            case "F":
+                return x.t(c.fullDateTime);
+            case "m":
+                return x.t(c.monthDay);
+            case "r":
+                return x.t(c.rfc1123);
+            case "s":
+                return x.t(c.sortableDateTime);
+            case "t":
+                return x.t(c.shortTime);
+            case "T":
+                return x.t(c.longTime);
+            case "u":
+                return x.t(c.universalSortableDateTime);
+            case "y":
+                return x.t(c.yearMonth);
+            }    
+        }
+        
+        var ord = function (n) {
+                switch (n * 1) {
+                case 1: 
+                case 21: 
+                case 31: 
+                    return "st";
+                case 2: 
+                case 22: 
+                    return "nd";
+                case 3: 
+                case 23: 
+                    return "rd";
+                default: 
+                    return "th";
+                }
+            };
+        
+        return format ? format.replace(/(\\)?(dd?d?d?|MM?M?M?|yy?y?y?|hh?|HH?|mm?|ss?|tt?|S)/g, 
+        function (m) {
+            if (m.charAt(0) === "\\") {
+                return m.replace("\\", "");
+            }
+            x.h = x.getHours;
+            switch (m) {
+            case "hh":
+                return p(x.h() < 13 ? (x.h() === 0 ? 12 : x.h()) : (x.h() - 12));
+            case "h":
+                return x.h() < 13 ? (x.h() === 0 ? 12 : x.h()) : (x.h() - 12);
+            case "HH":
+                return p(x.h());
+            case "H":
+                return x.h();
+            case "mm":
+                return p(x.getMinutes());
+            case "m":
+                return x.getMinutes();
+            case "ss":
+                return p(x.getSeconds());
+            case "s":
+                return x.getSeconds();
+            case "yyyy":
+                return p(x.getFullYear(), 4);
+            case "yy":
+                return p(x.getFullYear());
+            case "dddd":
+                return $C.dayNames[x.getDay()];
+            case "ddd":
+                return $C.abbreviatedDayNames[x.getDay()];
+            case "dd":
+                return p(x.getDate());
+            case "d":
+                return x.getDate();
+            case "MMMM":
+                return $C.monthNames[x.getMonth()];
+            case "MMM":
+                return $C.abbreviatedMonthNames[x.getMonth()];
+            case "MM":
+                return p((x.getMonth() + 1));
+            case "M":
+                return x.getMonth() + 1;
+            case "t":
+                return x.h() < 12 ? $C.amDesignator.substring(0, 1) : $C.pmDesignator.substring(0, 1);
+            case "tt":
+                return x.h() < 12 ? $C.amDesignator : $C.pmDesignator;
+            case "S":
+                return ord(x.getDate());
+            default: 
+                return m;
+            }
+        }
+        ) : this._toString();
+    };
+}());    /**
+ * @version: 1.0 Alpha-1
+ * @author: Coolite Inc. http://www.coolite.com/
+ * @date: 2008-04-13
+ * @copyright: Copyright (c) 2006-2008, Coolite Inc. (http://www.coolite.com/). All rights reserved.
+ * @license: Licensed under The MIT License. See license.txt and http://www.datejs.com/license/. 
+ * @website: http://www.datejs.com/
+ */
+ 
+(function () {
+    Date.Parsing = {
+        Exception: function (s) {
+            this.message = "Parse error at '" + s.substring(0, 10) + " ...'"; 
+        }
+    };
+    
+    var $P = Date.Parsing; 
+    var _ = $P.Operators = {
+        //
+        // Tokenizers
+        //
+        rtoken: function (r) { // regex token
+            return function (s) {
+                var mx = s.match(r);
+                if (mx) { 
+                    return ([ mx[0], s.substring(mx[0].length) ]); 
+                } else { 
+                    throw new $P.Exception(s); 
+                }
+            };
+        },
+        token: function (s) { // whitespace-eating token
+            return function (s) {
+                return _.rtoken(new RegExp("^\s*" + s + "\s*"))(s);
+                // Removed .strip()
+                // return _.rtoken(new RegExp("^\s*" + s + "\s*"))(s).strip();
+            };
+        },
+        stoken: function (s) { // string token
+            return _.rtoken(new RegExp("^" + s)); 
+        },
+
+        //
+        // Atomic Operators
+        // 
+
+        until: function (p) {
+            return function (s) {
+                var qx = [], rx = null;
+                while (s.length) { 
+                    try { 
+                        rx = p.call(this, s); 
+                    } catch (e) { 
+                        qx.push(rx[0]); 
+                        s = rx[1]; 
+                        continue; 
+                    }
+                    break;
+                }
+                return [ qx, s ];
+            };
+        },
+        many: function (p) {
+            return function (s) {
+                var rx = [], r = null; 
+                while (s.length) { 
+                    try { 
+                        r = p.call(this, s); 
+                    } catch (e) { 
+                        return [ rx, s ]; 
+                    }
+                    rx.push(r[0]); 
+                    s = r[1];
+                }
+                return [ rx, s ];
+            };
+        },
+
+        // generator operators -- see below
+        optional: function (p) {
+            return function (s) {
+                var r = null; 
+                try { 
+                    r = p.call(this, s); 
+                } catch (e) { 
+                    return [ null, s ]; 
+                }
+                return [ r[0], r[1] ];
+            };
+        },
+        not: function (p) {
+            return function (s) {
+                try { 
+                    p.call(this, s); 
+                } catch (e) { 
+                    return [null, s]; 
+                }
+                throw new $P.Exception(s);
+            };
+        },
+        ignore: function (p) {
+            return p ? 
+            function (s) { 
+                var r = null; 
+                r = p.call(this, s); 
+                return [null, r[1]]; 
+            } : null;
+        },
+        product: function () {
+            var px = arguments[0], 
+            qx = Array.prototype.slice.call(arguments, 1), rx = [];
+            for (var i = 0 ; i < px.length ; i++) {
+                rx.push(_.each(px[i], qx));
+            }
+            return rx;
+        },
+        cache: function (rule) { 
+            var cache = {}, r = null; 
+            return function (s) {
+                try { 
+                    r = cache[s] = (cache[s] || rule.call(this, s)); 
+                } catch (e) { 
+                    r = cache[s] = e; 
+                }
+                if (r instanceof $P.Exception) { 
+                    throw r; 
+                } else { 
+                    return r; 
+                }
+            };
+        },
+    	  
+        // vector operators -- see below
+        any: function () {
+            var px = arguments;
+            return function (s) { 
+                var r = null;
+                for (var i = 0; i < px.length; i++) { 
+                    if (px[i] == null) { 
+                        continue; 
+                    }
+                    try { 
+                        r = (px[i].call(this, s)); 
+                    } catch (e) { 
+                        r = null; 
+                    }
+                    if (r) { 
+                        return r; 
+                    }
+                } 
+                throw new $P.Exception(s);
+            };
+        },
+        each: function () { 
+            var px = arguments;
+            return function (s) { 
+                var rx = [], r = null;
+                for (var i = 0; i < px.length ; i++) { 
+                    if (px[i] == null) { 
+                        continue; 
+                    }
+                    try { 
+                        r = (px[i].call(this, s)); 
+                    } catch (e) { 
+                        throw new $P.Exception(s); 
+                    }
+                    rx.push(r[0]); 
+                    s = r[1];
+                }
+                return [ rx, s]; 
+            };
+        },
+        all: function () { 
+            var px = arguments, _ = _; 
+            return _.each(_.optional(px)); 
+        },
+
+        // delimited operators
+        sequence: function (px, d, c) {
+            d = d || _.rtoken(/^\s*/);  
+            c = c || null;
+            
+            if (px.length == 1) { 
+                return px[0]; 
+            }
+            return function (s) {
+                var r = null, q = null;
+                var rx = []; 
+                for (var i = 0; i < px.length ; i++) {
+                    try { 
+                        r = px[i].call(this, s); 
+                    } catch (e) { 
+                        break; 
+                    }
+                    rx.push(r[0]);
+                    try { 
+                        q = d.call(this, r[1]); 
+                    } catch (ex) { 
+                        q = null; 
+                        break; 
+                    }
+                    s = q[1];
+                }
+                if (!r) { 
+                    throw new $P.Exception(s); 
+                }
+                if (q) { 
+                    throw new $P.Exception(q[1]); 
+                }
+                if (c) {
+                    try { 
+                        r = c.call(this, r[1]);
+                    } catch (ey) { 
+                        throw new $P.Exception(r[1]); 
+                    }
+                }
+                return [ rx, (r?r[1]:s) ];
+            };
+        },
+    		
+	    //
+	    // Composite Operators
+	    //
+    		
+        between: function (d1, p, d2) { 
+            d2 = d2 || d1; 
+            var _fn = _.each(_.ignore(d1), p, _.ignore(d2));
+            return function (s) { 
+                var rx = _fn.call(this, s); 
+                return [[rx[0][0], r[0][2]], rx[1]]; 
+            };
+        },
+        list: function (p, d, c) {
+            d = d || _.rtoken(/^\s*/);  
+            c = c || null;
+            return (p instanceof Array ?
+                _.each(_.product(p.slice(0, -1), _.ignore(d)), p.slice(-1), _.ignore(c)) :
+                _.each(_.many(_.each(p, _.ignore(d))), px, _.ignore(c)));
+        },
+        set: function (px, d, c) {
+            d = d || _.rtoken(/^\s*/); 
+            c = c || null;
+            return function (s) {
+                // r is the current match, best the current 'best' match
+                // which means it parsed the most amount of input
+                var r = null, p = null, q = null, rx = null, best = [[], s], last = false;
+
+                // go through the rules in the given set
+                for (var i = 0; i < px.length ; i++) {
+
+                    // last is a flag indicating whether this must be the last element
+                    // if there is only 1 element, then it MUST be the last one
+                    q = null; 
+                    p = null; 
+                    r = null; 
+                    last = (px.length == 1); 
+
+                    // first, we try simply to match the current pattern
+                    // if not, try the next pattern
+                    try { 
+                        r = px[i].call(this, s);
+                    } catch (e) { 
+                        continue; 
+                    }
+
+                    // since we are matching against a set of elements, the first
+                    // thing to do is to add r[0] to matched elements
+                    rx = [[r[0]], r[1]];
+
+                    // if we matched and there is still input to parse and 
+                    // we don't already know this is the last element,
+                    // we're going to next check for the delimiter ...
+                    // if there's none, or if there's no input left to parse
+                    // than this must be the last element after all ...
+                    if (r[1].length > 0 && ! last) {
+                        try { 
+                            q = d.call(this, r[1]); 
+                        } catch (ex) { 
+                            last = true; 
+                        }
+                    } else { 
+                        last = true; 
+                    }
+
+				    // if we parsed the delimiter and now there's no more input,
+				    // that means we shouldn't have parsed the delimiter at all
+				    // so don't update r and mark this as the last element ...
+                    if (!last && q[1].length === 0) { 
+                        last = true; 
+                    }
+
+
+				    // so, if this isn't the last element, we're going to see if
+				    // we can get any more matches from the remaining (unmatched)
+				    // elements ...
+                    if (!last) {
+
+                        // build a list of the remaining rules we can match against,
+                        // i.e., all but the one we just matched against
+                        var qx = []; 
+                        for (var j = 0; j < px.length ; j++) { 
+                            if (i != j) { 
+                                qx.push(px[j]); 
+                            }
+                        }
+
+                        // now invoke recursively set with the remaining input
+                        // note that we don't include the closing delimiter ...
+                        // we'll check for that ourselves at the end
+                        p = _.set(qx, d).call(this, q[1]);
+
+                        // if we got a non-empty set as a result ...
+                        // (otw rx already contains everything we want to match)
+                        if (p[0].length > 0) {
+                            // update current result, which is stored in rx ...
+                            // basically, pick up the remaining text from p[1]
+                            // and concat the result from p[0] so that we don't
+                            // get endless nesting ...
+                            rx[0] = rx[0].concat(p[0]); 
+                            rx[1] = p[1]; 
+                        }
+                    }
+
+				    // at this point, rx either contains the last matched element
+				    // or the entire matched set that starts with this element.
+
+				    // now we just check to see if this variation is better than
+				    // our best so far, in terms of how much of the input is parsed
+                    if (rx[1].length < best[1].length) { 
+                        best = rx; 
+                    }
+
+				    // if we've parsed all the input, then we're finished
+                    if (best[1].length === 0) { 
+                        break; 
+                    }
+                }
+
+			    // so now we've either gone through all the patterns trying them
+			    // as the initial match; or we found one that parsed the entire
+			    // input string ...
+
+			    // if best has no matches, just return empty set ...
+                if (best[0].length === 0) { 
+                    return best; 
+                }
+
+			    // if a closing delimiter is provided, then we have to check it also
+                if (c) {
+                    // we try this even if there is no remaining input because the pattern
+                    // may well be optional or match empty input ...
+                    try { 
+                        q = c.call(this, best[1]); 
+                    } catch (ey) { 
+                        throw new $P.Exception(best[1]); 
+                    }
+
+                    // it parsed ... be sure to update the best match remaining input
+                    best[1] = q[1];
+                }
+
+			    // if we're here, either there was no closing delimiter or we parsed it
+			    // so now we have the best match; just return it!
+                return best;
+            };
+        },
+        forward: function (gr, fname) {
+            return function (s) { 
+                return gr[fname].call(this, s); 
+            };
+        },
+
+        //
+        // Translation Operators
+        //
+        replace: function (rule, repl) {
+            return function (s) { 
+                var r = rule.call(this, s); 
+                return [repl, r[1]]; 
+            };
+        },
+        process: function (rule, fn) {
+            return function (s) {  
+                var r = rule.call(this, s); 
+                return [fn.call(this, r[0]), r[1]]; 
+            };
+        },
+        min: function (min, rule) {
+            return function (s) {
+                var rx = rule.call(this, s); 
+                if (rx[0].length < min) { 
+                    throw new $P.Exception(s); 
+                }
+                return rx;
+            };
+        }
+    };
+	
+
+	// Generator Operators And Vector Operators
+
+	// Generators are operators that have a signature of F(R) => R,
+	// taking a given rule and returning another rule, such as 
+	// ignore, which parses a given rule and throws away the result.
+
+	// Vector operators are those that have a signature of F(R1,R2,...) => R,
+	// take a list of rules and returning a new rule, such as each.
+
+	// Generator operators are converted (via the following _generator
+	// function) into functions that can also take a list or array of rules
+	// and return an array of new rules as though the function had been
+	// called on each rule in turn (which is what actually happens).
+
+	// This allows generators to be used with vector operators more easily.
+	// Example:
+	// each(ignore(foo, bar)) instead of each(ignore(foo), ignore(bar))
+
+	// This also turns generators into vector operators, which allows
+	// constructs like:
+	// not(cache(foo, bar))
+	
+    var _generator = function (op) {
+        return function () {
+            var args = null, rx = [];
+            if (arguments.length > 1) {
+                args = Array.prototype.slice.call(arguments);
+            } else if (arguments[0] instanceof Array) {
+                args = arguments[0];
+            }
+            if (args) { 
+                for (var i = 0, px = args.shift() ; i < px.length ; i++) {
+                    args.unshift(px[i]); 
+                    rx.push(op.apply(null, args)); 
+                    args.shift();
+                    return rx;
+                } 
+            } else { 
+                return op.apply(null, arguments); 
+            }
+        };
+    };
+    
+    var gx = "optional not ignore cache".split(/\s/);
+    
+    for (var i = 0 ; i < gx.length ; i++) { 
+        _[gx[i]] = _generator(_[gx[i]]); 
+    }
+
+    var _vector = function (op) {
+        return function () {
+            if (arguments[0] instanceof Array) { 
+                return op.apply(null, arguments[0]); 
+            } else { 
+                return op.apply(null, arguments); 
+            }
+        };
+    };
+    
+    var vx = "each any all".split(/\s/);
+    
+    for (var j = 0 ; j < vx.length ; j++) { 
+        _[vx[j]] = _vector(_[vx[j]]); 
+    }
+	
+}());
+
+(function () {
+    var $D = Date, $P = $D.prototype, $C = $D.CultureInfo;
+
+    var flattenAndCompact = function (ax) { 
+        var rx = []; 
+        for (var i = 0; i < ax.length; i++) {
+            if (ax[i] instanceof Array) {
+                rx = rx.concat(flattenAndCompact(ax[i]));
+            } else { 
+                if (ax[i]) { 
+                    rx.push(ax[i]); 
+                }
+            }
+        }
+        return rx;
+    };
+    
+    $D.Grammar = {};
+	
+    $D.Translator = {
+        hour: function (s) { 
+            return function () { 
+                this.hour = Number(s); 
+            }; 
+        },
+        minute: function (s) { 
+            return function () { 
+                this.minute = Number(s); 
+            }; 
+        },
+        second: function (s) { 
+            return function () { 
+                this.second = Number(s); 
+            }; 
+        },
+        meridian: function (s) { 
+            return function () { 
+                this.meridian = s.slice(0, 1).toLowerCase(); 
+            }; 
+        },
+        timezone: function (s) {
+            return function () {
+                var n = s.replace(/[^\d\+\-]/g, "");
+                if (n.length) { 
+                    this.timezoneOffset = Number(n); 
+                } else { 
+                    this.timezone = s.toLowerCase(); 
+                }
+            };
+        },
+        day: function (x) { 
+            var s = x[0];
+            return function () { 
+                this.day = Number(s.match(/\d+/)[0]); 
+            };
+        }, 
+        month: function (s) {
+            return function () {
+                this.month = (s.length == 3) ? "jan feb mar apr may jun jul aug sep oct nov dec".indexOf(s)/4 : Number(s) - 1;
+            };
+        },
+        year: function (s) {
+            return function () {
+                var n = Number(s);
+                this.year = ((s.length > 2) ? n : 
+                    (n + (((n + 2000) < $C.twoDigitYearMax) ? 2000 : 1900))); 
+            };
+        },
+        rday: function (s) { 
+            return function () {
+                switch (s) {
+                case "yesterday": 
+                    this.days = -1;
+                    break;
+                case "tomorrow":  
+                    this.days = 1;
+                    break;
+                case "today": 
+                    this.days = 0;
+                    break;
+                case "now": 
+                    this.days = 0; 
+                    this.now = true; 
+                    break;
+                }
+            };
+        },
+        finishExact: function (x) {  
+            x = (x instanceof Array) ? x : [ x ]; 
+
+            for (var i = 0 ; i < x.length ; i++) { 
+                if (x[i]) { 
+                    x[i].call(this); 
+                }
+            }
+            
+            var now = new Date();
+            
+            if ((this.hour || this.minute) && (!this.month && !this.year && !this.day)) {
+                this.day = now.getDate();
+            }
+
+            if (!this.year) {
+                this.year = now.getFullYear();
+            }
+            
+            if (!this.month && this.month !== 0) {
+                this.month = now.getMonth();
+            }
+            
+            if (!this.day) {
+                this.day = 1;
+            }
+            
+            if (!this.hour) {
+                this.hour = 0;
+            }
+            
+            if (!this.minute) {
+                this.minute = 0;
+            }
+
+            if (!this.second) {
+                this.second = 0;
+            }
+
+            if (this.meridian && this.hour) {
+                if (this.meridian == "p" && this.hour < 12) {
+                    this.hour = this.hour + 12;
+                } else if (this.meridian == "a" && this.hour == 12) {
+                    this.hour = 0;
+                }
+            }
+            
+            if (this.day > $D.getDaysInMonth(this.year, this.month)) {
+                throw new RangeError(this.day + " is not a valid value for days.");
+            }
+
+            var r = new Date(this.year, this.month, this.day, this.hour, this.minute, this.second);
+
+            if (this.timezone) { 
+                r.set({ timezone: this.timezone }); 
+            } else if (this.timezoneOffset) { 
+                r.set({ timezoneOffset: this.timezoneOffset }); 
+            }
+            
+            return r;
+        },			
+        finish: function (x) {
+            x = (x instanceof Array) ? flattenAndCompact(x) : [ x ];
+
+            if (x.length === 0) { 
+                return null; 
+            }
+
+            for (var i = 0 ; i < x.length ; i++) { 
+                if (typeof x[i] == "function") {
+                    x[i].call(this); 
+                }
+            }
+            
+            var today = $D.today();
+            
+            if (this.now && !this.unit && !this.operator) { 
+                return new Date(); 
+            } else if (this.now) {
+                today = new Date();
+            }
+            
+            var expression = !!(this.days && this.days !== null || this.orient || this.operator);
+            
+            var gap, mod, orient;
+            orient = ((this.orient == "past" || this.operator == "subtract") ? -1 : 1);
+            
+            if(!this.now && "hour minute second".indexOf(this.unit) != -1) {
+                today.setTimeToNow();
+            }
+
+            if (this.month || this.month === 0) {
+                if ("year day hour minute second".indexOf(this.unit) != -1) {
+                    this.value = this.month + 1;
+                    this.month = null;
+                    expression = true;
+                }
+            }
+            
+            if (!expression && this.weekday && !this.day && !this.days) {
+                var temp = Date[this.weekday]();
+                this.day = temp.getDate();
+                if (!this.month) {
+                    this.month = temp.getMonth();
+                }
+                this.year = temp.getFullYear();
+            }
+            
+            if (expression && this.weekday && this.unit != "month") {
+                this.unit = "day";
+                gap = ($D.getDayNumberFromName(this.weekday) - today.getDay());
+                mod = 7;
+                this.days = gap ? ((gap + (orient * mod)) % mod) : (orient * mod);
+            }
+            
+            if (this.month && this.unit == "day" && this.operator) {
+                this.value = (this.month + 1);
+                this.month = null;
+            }
+       
+            if (this.value != null && this.month != null && this.year != null) {
+                this.day = this.value * 1;
+            }
+     
+            if (this.month && !this.day && this.value) {
+                today.set({ day: this.value * 1 });
+                if (!expression) {
+                    this.day = this.value * 1;
+                }
+            }
+
+            if (!this.month && this.value && this.unit == "month" && !this.now) {
+                this.month = this.value;
+                expression = true;
+            }
+
+            if (expression && (this.month || this.month === 0) && this.unit != "year") {
+                this.unit = "month";
+                gap = (this.month - today.getMonth());
+                mod = 12;
+                this.months = gap ? ((gap + (orient * mod)) % mod) : (orient * mod);
+                this.month = null;
+            }
+
+            if (!this.unit) { 
+                this.unit = "day"; 
+            }
+            
+            if (!this.value && this.operator && this.operator !== null && this[this.unit + "s"] && this[this.unit + "s"] !== null) {
+                this[this.unit + "s"] = this[this.unit + "s"] + ((this.operator == "add") ? 1 : -1) + (this.value||0) * orient;
+            } else if (this[this.unit + "s"] == null || this.operator != null) {
+                if (!this.value) {
+                    this.value = 1;
+                }
+                this[this.unit + "s"] = this.value * orient;
+            }
+
+            if (this.meridian && this.hour) {
+                if (this.meridian == "p" && this.hour < 12) {
+                    this.hour = this.hour + 12;
+                } else if (this.meridian == "a" && this.hour == 12) {
+                    this.hour = 0;
+                }
+            }
+            
+            if (this.weekday && !this.day && !this.days) {
+                var temp = Date[this.weekday]();
+                this.day = temp.getDate();
+                if (temp.getMonth() !== today.getMonth()) {
+                    this.month = temp.getMonth();
+                }
+            }
+            
+            if ((this.month || this.month === 0) && !this.day) { 
+                this.day = 1; 
+            }
+            
+            if (!this.orient && !this.operator && this.unit == "week" && this.value && !this.day && !this.month) {
+                return Date.today().setWeek(this.value);
+            }
+
+            if (expression && this.timezone && this.day && this.days) {
+                this.day = this.days;
+            }
+            
+            return (expression) ? today.add(this) : today.set(this);
+        }
+    };
+
+    var _ = $D.Parsing.Operators, g = $D.Grammar, t = $D.Translator, _fn;
+
+    g.datePartDelimiter = _.rtoken(/^([\s\-\.\,\/\x27]+)/); 
+    g.timePartDelimiter = _.stoken(":");
+    g.whiteSpace = _.rtoken(/^\s*/);
+    g.generalDelimiter = _.rtoken(/^(([\s\,]|at|@|on)+)/);
+  
+    var _C = {};
+    g.ctoken = function (keys) {
+        var fn = _C[keys];
+        if (! fn) {
+            var c = $C.regexPatterns;
+            var kx = keys.split(/\s+/), px = []; 
+            for (var i = 0; i < kx.length ; i++) {
+                px.push(_.replace(_.rtoken(c[kx[i]]), kx[i]));
+            }
+            fn = _C[keys] = _.any.apply(null, px);
+        }
+        return fn;
+    };
+    g.ctoken2 = function (key) { 
+        return _.rtoken($C.regexPatterns[key]);
+    };
+
+    // hour, minute, second, meridian, timezone
+    g.h = _.cache(_.process(_.rtoken(/^(0[0-9]|1[0-2]|[1-9])/), t.hour));
+    g.hh = _.cache(_.process(_.rtoken(/^(0[0-9]|1[0-2])/), t.hour));
+    g.H = _.cache(_.process(_.rtoken(/^([0-1][0-9]|2[0-3]|[0-9])/), t.hour));
+    g.HH = _.cache(_.process(_.rtoken(/^([0-1][0-9]|2[0-3])/), t.hour));
+    g.m = _.cache(_.process(_.rtoken(/^([0-5][0-9]|[0-9])/), t.minute));
+    g.mm = _.cache(_.process(_.rtoken(/^[0-5][0-9]/), t.minute));
+    g.s = _.cache(_.process(_.rtoken(/^([0-5][0-9]|[0-9])/), t.second));
+    g.ss = _.cache(_.process(_.rtoken(/^[0-5][0-9]/), t.second));
+    g.hms = _.cache(_.sequence([g.H, g.m, g.s], g.timePartDelimiter));
+  
+    // _.min(1, _.set([ g.H, g.m, g.s ], g._t));
+    g.t = _.cache(_.process(g.ctoken2("shortMeridian"), t.meridian));
+    g.tt = _.cache(_.process(g.ctoken2("longMeridian"), t.meridian));
+    g.z = _.cache(_.process(_.rtoken(/^((\+|\-)\s*\d\d\d\d)|((\+|\-)\d\d\:?\d\d)/), t.timezone));
+    g.zz = _.cache(_.process(_.rtoken(/^((\+|\-)\s*\d\d\d\d)|((\+|\-)\d\d\:?\d\d)/), t.timezone));
+    
+    g.zzz = _.cache(_.process(g.ctoken2("timezone"), t.timezone));
+    g.timeSuffix = _.each(_.ignore(g.whiteSpace), _.set([ g.tt, g.zzz ]));
+    g.time = _.each(_.optional(_.ignore(_.stoken("T"))), g.hms, g.timeSuffix);
+    	  
+    // days, months, years
+    g.d = _.cache(_.process(_.each(_.rtoken(/^([0-2]\d|3[0-1]|\d)/), 
+        _.optional(g.ctoken2("ordinalSuffix"))), t.day));
+    g.dd = _.cache(_.process(_.each(_.rtoken(/^([0-2]\d|3[0-1])/), 
+        _.optional(g.ctoken2("ordinalSuffix"))), t.day));
+    g.ddd = g.dddd = _.cache(_.process(g.ctoken("sun mon tue wed thu fri sat"), 
+        function (s) { 
+            return function () { 
+                this.weekday = s; 
+            }; 
+        }
+    ));
+    g.M = _.cache(_.process(_.rtoken(/^(1[0-2]|0\d|\d)/), t.month));
+    g.MM = _.cache(_.process(_.rtoken(/^(1[0-2]|0\d)/), t.month));
+    g.MMM = g.MMMM = _.cache(_.process(
+        g.ctoken("jan feb mar apr may jun jul aug sep oct nov dec"), t.month));
+    g.y = _.cache(_.process(_.rtoken(/^(\d\d?)/), t.year));
+    g.yy = _.cache(_.process(_.rtoken(/^(\d\d)/), t.year));
+    g.yyy = _.cache(_.process(_.rtoken(/^(\d\d?\d?\d?)/), t.year));
+    g.yyyy = _.cache(_.process(_.rtoken(/^(\d\d\d\d)/), t.year));
+	
+	// rolling these up into general purpose rules
+    _fn = function () { 
+        return _.each(_.any.apply(null, arguments), _.not(g.ctoken2("timeContext")));
+    };
+    
+    g.day = _fn(g.d, g.dd); 
+    g.month = _fn(g.M, g.MMM); 
+    g.year = _fn(g.yyyy, g.yy);
+
+    // relative date / time expressions
+    g.orientation = _.process(g.ctoken("past future"), 
+        function (s) { 
+            return function () { 
+                this.orient = s; 
+            }; 
+        }
+    );
+    g.operator = _.process(g.ctoken("add subtract"), 
+        function (s) { 
+            return function () { 
+                this.operator = s; 
+            }; 
+        }
+    );  
+    g.rday = _.process(g.ctoken("yesterday tomorrow today now"), t.rday);
+    g.unit = _.process(g.ctoken("second minute hour day week month year"), 
+        function (s) { 
+            return function () { 
+                this.unit = s; 
+            }; 
+        }
+    );
+    g.value = _.process(_.rtoken(/^\d\d?(st|nd|rd|th)?/), 
+        function (s) { 
+            return function () { 
+                this.value = s.replace(/\D/g, ""); 
+            }; 
+        }
+    );
+    g.expression = _.set([ g.rday, g.operator, g.value, g.unit, g.orientation, g.ddd, g.MMM ]);
+
+    // pre-loaded rules for different date part order preferences
+    _fn = function () { 
+        return  _.set(arguments, g.datePartDelimiter); 
+    };
+    g.mdy = _fn(g.ddd, g.month, g.day, g.year);
+    g.ymd = _fn(g.ddd, g.year, g.month, g.day);
+    g.dmy = _fn(g.ddd, g.day, g.month, g.year);
+    g.date = function (s) { 
+        return ((g[$C.dateElementOrder] || g.mdy).call(this, s));
+    }; 
+
+    // parsing date format specifiers - ex: "h:m:s tt" 
+    // this little guy will generate a custom parser based
+    // on the format string, ex: g.format("h:m:s tt")
+    g.format = _.process(_.many(
+        _.any(
+        // translate format specifiers into grammar rules
+        _.process(
+        _.rtoken(/^(dd?d?d?|MM?M?M?|yy?y?y?|hh?|HH?|mm?|ss?|tt?|zz?z?)/), 
+        function (fmt) { 
+        if (g[fmt]) { 
+            return g[fmt]; 
+        } else { 
+            throw $D.Parsing.Exception(fmt); 
+        }
+    }
+    ),
+    // translate separator tokens into token rules
+    _.process(
+    _.rtoken(/^[^dMyhHmstz]+/), // all legal separators 
+        function (s) { 
+            return _.ignore(_.stoken(s)); 
+        } 
+    )
+    )), 
+        // construct the parser ...
+        function (rules) { 
+            return _.process(_.each.apply(null, rules), t.finishExact); 
+        }
+    );
+    
+    var _F = {
+		//"M/d/yyyy": function (s) { 
+		//	var m = s.match(/^([0-2]\d|3[0-1]|\d)\/(1[0-2]|0\d|\d)\/(\d\d\d\d)/);
+		//	if (m!=null) { 
+		//		var r =  [ t.month.call(this,m[1]), t.day.call(this,m[2]), t.year.call(this,m[3]) ];
+		//		r = t.finishExact.call(this,r);
+		//		return [ r, "" ];
+		//	} else {
+		//		throw new Date.Parsing.Exception(s);
+		//	}
+		//}
+		//"M/d/yyyy": function (s) { return [ new Date(Date._parse(s)), ""]; }
+	}; 
+    var _get = function (f) { 
+        return _F[f] = (_F[f] || g.format(f)[0]);      
+    };
+  
+    g.formats = function (fx) {
+        if (fx instanceof Array) {
+            var rx = []; 
+            for (var i = 0 ; i < fx.length ; i++) {
+                rx.push(_get(fx[i])); 
+            }
+            return _.any.apply(null, rx);
+        } else { 
+            return _get(fx); 
+        }
+    };
+
+	// check for these formats first
+    g._formats = g.formats([
+        "\"yyyy-MM-ddTHH:mm:ssZ\"",
+        "yyyy-MM-ddTHH:mm:ssZ",
+        "yyyy-MM-ddTHH:mm:ssz",
+        "yyyy-MM-ddTHH:mm:ss",
+        "yyyy-MM-ddTHH:mmZ",
+        "yyyy-MM-ddTHH:mmz",
+        "yyyy-MM-ddTHH:mm",
+        "ddd, MMM dd, yyyy H:mm:ss tt",
+        "ddd MMM d yyyy HH:mm:ss zzz",
+        "MMddyyyy",
+        "ddMMyyyy",
+        "Mddyyyy",
+        "ddMyyyy",
+        "Mdyyyy",
+        "dMyyyy",
+        "yyyy",
+        "Mdyy",
+        "dMyy",
+        "d"
+    ]);
+
+	// starting rule for general purpose grammar
+    g._start = _.process(_.set([ g.date, g.time, g.expression ], 
+        g.generalDelimiter, g.whiteSpace), t.finish);
+	
+	// real starting rule: tries selected formats first, 
+	// then general purpose rule
+    g.start = function (s) {
+        try { 
+            var r = g._formats.call({}, s); 
+            if (r[1].length === 0) {
+                return r; 
+            }
+        } catch (e) {}
+        return g._start.call({}, s);
+    };
+	
+	$D._parse = $D.parse;
+
+    /**
+     * Converts the specified string value into its JavaScript Date equivalent using CultureInfo specific format information.
+     * 
+     * Example
+    <pre><code>
+    ///////////
+    // Dates //
+    ///////////
+
+    // 15-Oct-2004
+    var d1 = Date.parse("10/15/2004");
+
+    // 15-Oct-2004
+    var d1 = Date.parse("15-Oct-2004");
+
+    // 15-Oct-2004
+    var d1 = Date.parse("2004.10.15");
+
+    //Fri Oct 15, 2004
+    var d1 = Date.parse("Fri Oct 15, 2004");
+
+    ///////////
+    // Times //
+    ///////////
+
+    // Today at 10 PM.
+    var d1 = Date.parse("10 PM");
+
+    // Today at 10:30 PM.
+    var d1 = Date.parse("10:30 P.M.");
+
+    // Today at 6 AM.
+    var d1 = Date.parse("06am");
+
+    /////////////////////
+    // Dates and Times //
+    /////////////////////
+
+    // 8-July-2004 @ 10:30 PM
+    var d1 = Date.parse("July 8th, 2004, 10:30 PM");
+
+    // 1-July-2004 @ 10:30 PM
+    var d1 = Date.parse("2004-07-01T22:30:00");
+
+    ////////////////////
+    // Relative Dates //
+    ////////////////////
+
+    // Returns today's date. The string "today" is culture specific.
+    var d1 = Date.parse("today");
+
+    // Returns yesterday's date. The string "yesterday" is culture specific.
+    var d1 = Date.parse("yesterday");
+
+    // Returns the date of the next thursday.
+    var d1 = Date.parse("Next thursday");
+
+    // Returns the date of the most previous monday.
+    var d1 = Date.parse("last monday");
+
+    // Returns today's day + one year.
+    var d1 = Date.parse("next year");
+
+    ///////////////
+    // Date Math //
+    ///////////////
+
+    // Today + 2 days
+    var d1 = Date.parse("t+2");
+
+    // Today + 2 days
+    var d1 = Date.parse("today + 2 days");
+
+    // Today + 3 months
+    var d1 = Date.parse("t+3m");
+
+    // Today - 1 year
+    var d1 = Date.parse("today - 1 year");
+
+    // Today - 1 year
+    var d1 = Date.parse("t-1y"); 
+
+
+    /////////////////////////////
+    // Partial Dates and Times //
+    /////////////////////////////
+
+    // July 15th of this year.
+    var d1 = Date.parse("July 15");
+
+    // 15th day of current day and year.
+    var d1 = Date.parse("15");
+
+    // July 1st of current year at 10pm.
+    var d1 = Date.parse("7/1 10pm");
+    </code></pre>
+     *
+     * @param {String}   The string value to convert into a Date object [Required]
+     * @return {Date}    A Date object or null if the string cannot be converted into a Date.
+     */
+    $D.parse = function (s) {
+        var r = null; 
+        if (!s) { 
+            return null; 
+        }
+        if (s instanceof Date) {
+            return s;
+        }
+        try { 
+            r = $D.Grammar.start.call({}, s.replace(/^\s*(\S*(\s+\S+)*)\s*$/, "$1")); 
+        } catch (e) { 
+            return null; 
+        }
+        return ((r[1].length === 0) ? r[0] : null);
+    };
+
+    $D.getParseFunction = function (fx) {
+        var fn = $D.Grammar.formats(fx);
+        return function (s) {
+            var r = null;
+            try { 
+                r = fn.call({}, s); 
+            } catch (e) { 
+                return null; 
+            }
+            return ((r[1].length === 0) ? r[0] : null);
+        };
+    };
+    
+    /**
+     * Converts the specified string value into its JavaScript Date equivalent using the specified format {String} or formats {Array} and the CultureInfo specific format information.
+     * The format of the string value must match one of the supplied formats exactly.
+     * 
+     * Example
+    <pre><code>
+    // 15-Oct-2004
+    var d1 = Date.parseExact("10/15/2004", "M/d/yyyy");
+
+    // 15-Oct-2004
+    var d1 = Date.parse("15-Oct-2004", "M-ddd-yyyy");
+
+    // 15-Oct-2004
+    var d1 = Date.parse("2004.10.15", "yyyy.MM.dd");
+
+    // Multiple formats
+    var d1 = Date.parseExact("10/15/2004", ["M/d/yyyy", "MMMM d, yyyy"]);
+    </code></pre>
+     *
+     * @param {String}   The string value to convert into a Date object [Required].
+     * @param {Object}   The expected format {String} or an array of expected formats {Array} of the date string [Required].
+     * @return {Date}    A Date object or null if the string cannot be converted into a Date.
+     */
+    $D.parseExact = function (s, fx) { 
+        return $D.getParseFunction(fx)(s); 
+    };	
+}());/*
     http://www.JSON.org/json2.js
     2008-11-19
 
@@ -673,6 +2765,17 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
         };
     }
 })();
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc;
+ 
 /*
 * makes relative time out of "Sun Jul 08 19:01:12 +0000 2007" type string
 * Borrowed from Mike Demers (slightly altered)
@@ -681,13 +2784,18 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
 * This requires date.js
 * http://www.datejs.com/
 */
-sc.helpers.getRelativeTime = function(time_value) {
+sc.helpers.getRelativeTime = function(time_value, use_dateparse) {	
 	
-	sc.helpers.dump(time_value);
+	var parsed_date;
 	
-	var parsed_date = new Date.parse(time_value);
-	var now = new Date;
-	var delta = parseInt( (now.getTime() - parsed_date.getTime()) / 1000);
+	if (use_dateparse === true) {
+		parsed_date = new Date.parse(time_value);
+	} else {
+		parsed_date = new Date(time_value);
+	}
+	
+	var now = new Date();
+	var delta = parseInt( (now.getTime() - parsed_date.getTime()) / 1000, 10);
 	
 	if (delta < 10) {
 		return 'Just now';
@@ -696,11 +2804,11 @@ sc.helpers.getRelativeTime = function(time_value) {
 	} else if(delta < 120) {
 		return '1 min ago';
 	} else if(delta < (45*60)) {
-		return Math.round(parseInt(delta / 60)).toString() + ' min ago';
+		return Math.round(parseInt(delta / 60, 10)).toString() + ' min ago';
 	} else if(delta < (90*60)) {
 		return '1 hr ago';
 	} else if(delta < (24*60*60)) {
-		if (Math.round(delta / 3600) == 1) {
+		if (Math.round(delta / 3600) === 1) {
 			return '2 hr ago';
 		} else {
 			return Math.round(delta / 3600).toString() + ' hr ago';
@@ -710,23 +2818,49 @@ sc.helpers.getRelativeTime = function(time_value) {
 	} else {
 		return Math.round(delta / 86400).toString() + ' days ago';
 	}
-}
+};
 
 
-sc.helpers.httpTimeToInt = function(entryDate) {
-	var parsedDate = new Date;
-	parsedDate.setTime(Date.parse(entryDate));
+sc.helpers.httpTimeToInt = function(entry_date, use_dateparse) {
+	return sc.helpers.dateToInt(entry_date, use_dateparse)
+};
+
+/**
+ * this returns milliseconds, not seconds! 
+ */
+sc.helpers.dateToInt = function(entry_date, use_dateparse) {
+	var parsedDate = new Date();
+	
+	if (use_dateparse === true) {
+		entry_date = new Date.parse(entry_date);
+	} else {
+		entry_date = new Date(entry_date);
+	}
+	
+	parsedDate.setTime(entry_date);
 	return parsedDate.getTime();
-}
+};
 
 
 sc.helpers.getTimeAsInt = function() {
-	var now = new Date;
+	var now = new Date();
 	return now.getTime();
-}/**
+};
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc;
+ 
+/**
  * a constant that defines the attribute where we'll store extra data in the event 
  */
-const SPAZCORE_EVENTDATA_ATTRIBUTE = 'sc_data';
+var SPAZCORE_EVENTDATA_ATTRIBUTE = 'sc_data';
 
 
 /**
@@ -739,22 +2873,19 @@ const SPAZCORE_EVENTDATA_ATTRIBUTE = 'sc_data';
  * @function
  */
 sc.helpers.addListener = function(target, event_type, handler, scope, use_capture) {
+
+	function scope_perserver(e) {
+		handler.call(scope, e);
+	}
+	
 	if (use_capture !== true) {
 		use_capture = false;
 	}
 	
 	if (scope) {
-		
-		function scope_perserver(e) {
-			handler.call(scope, e);
-		}
-		
 		target.addEventListener(event_type, scope_perserver, use_capture);
-
 	} else {
-		
 		target.addEventListener(event_type, handler, use_capture);
-
 	}
 	
 	
@@ -773,18 +2904,17 @@ sc.helpers.addListener = function(target, event_type, handler, scope, use_captur
  * @function
  */
 sc.helpers.removeListener = function(target, event_type, handler, scope, use_capture) {
+
+	function scope_perserver(e) {
+		handler.call(scope, e);
+	}
+
 	if (use_capture !== true) {
 		use_capture = false;
 	}
 	
 	if (scope) {
-		
-		function scope_perserver(e) {
-			handler.call(scope, e);
-		}
-		
 		target.removeEventListener(event_type, scope_perserver, use_capture);
-
 	} else {
 		target.removeEventListener(event_type, handler, use_capture);
 	}
@@ -822,7 +2952,7 @@ sc.helpers.triggerCustomEvent = function(event_type, target, data, bubble) {
  */
 sc.helpers.getEventData = function(event_obj) {
 	return event_obj[SPAZCORE_EVENTDATA_ATTRIBUTE];
-}
+};
 
 /**
  * Alias for sc.helpers.addListener 
@@ -840,7 +2970,27 @@ sc.helpers.unlisten = sc.helpers.removeListener;
  * Alias for sc.helpers.triggerCustomEvent 
  * @function
  */
-sc.helpers.trigger  = sc.helpers.triggerCustomEvent;/**
+sc.helpers.trigger  = sc.helpers.triggerCustomEvent;/*jslint 
+bitwise: false,
+browser: true,
+nomen: false,
+debug: true,
+eqeqeq: false,
+forin: true,
+laxbreak: true,
+plusplus: false,
+newcap: false,
+undef: false,
+white: false,
+onevar: false 
+ */
+var sc;
+ 
+/*
+	We're more lax with JSLint here because this is almost all not our code
+*/
+
+/**
  * Licence
  * As long as you leave the copyright notice of the original script, or link
  * back to this website, you can use any of the content published on this
@@ -867,7 +3017,7 @@ sc.helpers.Base64 = {
 		var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
 		var i = 0;
 
-		input = Base64._utf8_encode(input);
+		input = sc.helpers.Base64._utf8_encode(input);
 
 		while (i < input.length) {
 
@@ -926,7 +3076,7 @@ sc.helpers.Base64 = {
 
 		}
 
-		output = Base64._utf8_decode(output);
+		output = sc.helpers.Base64._utf8_decode(output);
 
 		return output;
 
@@ -963,7 +3113,7 @@ sc.helpers.Base64 = {
 	_utf8_decode : function (utftext) {
 		var string = "";
 		var i = 0;
-		var c = c1 = c2 = 0;
+		var c = 0, c1 = 0, c2 = 0, c3 = 0;
 
 		while ( i < utftext.length ) {
 
@@ -990,7 +3140,7 @@ sc.helpers.Base64 = {
 		return string;
 	}
 
-}
+};
 
 
 
@@ -1027,7 +3177,7 @@ sc.helpers.crc32 = function (str) {
 		}
  
 		return utftext;
-	};
+	}
  
 	str = Utf8Encode(str);
  
@@ -1091,22 +3241,22 @@ sc.helpers.MD5 = function (string) {
 	function FF(a,b,c,d,x,s,ac) {
 		a = AddUnsigned(a, AddUnsigned(AddUnsigned(F(b, c, d), x), ac));
 		return AddUnsigned(RotateLeft(a, s), b);
-	};
+	}
  
 	function GG(a,b,c,d,x,s,ac) {
 		a = AddUnsigned(a, AddUnsigned(AddUnsigned(G(b, c, d), x), ac));
 		return AddUnsigned(RotateLeft(a, s), b);
-	};
+	}
  
 	function HH(a,b,c,d,x,s,ac) {
 		a = AddUnsigned(a, AddUnsigned(AddUnsigned(H(b, c, d), x), ac));
 		return AddUnsigned(RotateLeft(a, s), b);
-	};
+	}
  
 	function II(a,b,c,d,x,s,ac) {
 		a = AddUnsigned(a, AddUnsigned(AddUnsigned(I(b, c, d), x), ac));
 		return AddUnsigned(RotateLeft(a, s), b);
-	};
+	}
  
 	function ConvertToWordArray(string) {
 		var lWordCount;
@@ -1129,7 +3279,7 @@ sc.helpers.MD5 = function (string) {
 		lWordArray[lNumberOfWords-2] = lMessageLength<<3;
 		lWordArray[lNumberOfWords-1] = lMessageLength>>>29;
 		return lWordArray;
-	};
+	}
  
 	function WordToHex(lValue) {
 		var WordToHexValue="",WordToHexValue_temp="",lByte,lCount;
@@ -1139,7 +3289,7 @@ sc.helpers.MD5 = function (string) {
 			WordToHexValue = WordToHexValue + WordToHexValue_temp.substr(WordToHexValue_temp.length-2,2);
 		}
 		return WordToHexValue;
-	};
+	}
  
 	function Utf8Encode(string) {
 		string = string.replace(/\r\n/g,"\n");
@@ -1165,7 +3315,7 @@ sc.helpers.MD5 = function (string) {
 		}
  
 		return utftext;
-	};
+	}
  
 	var x=Array();
 	var k,AA,BB,CC,DD,a,b,c,d;
@@ -1255,7 +3405,7 @@ sc.helpers.MD5 = function (string) {
 	var temp = WordToHex(a)+WordToHex(b)+WordToHex(c)+WordToHex(d);
  
 	return temp.toLowerCase();
-}
+};
 
 /**
 *
@@ -1269,7 +3419,7 @@ sc.helpers.SHA1 = function (msg) {
 	function rotate_left(n,s) {
 		var t4 = ( n<<s ) | (n>>>(32-s));
 		return t4;
-	};
+	}
  
 	function lsb_hex(val) {
 		var str="";
@@ -1283,7 +3433,7 @@ sc.helpers.SHA1 = function (msg) {
 			str += vh.toString(16) + vl.toString(16);
 		}
 		return str;
-	};
+	}
  
 	function cvt_hex(val) {
 		var str="";
@@ -1295,7 +3445,7 @@ sc.helpers.SHA1 = function (msg) {
 			str += v.toString(16);
 		}
 		return str;
-	};
+	}
  
  
 	function Utf8Encode(string) {
@@ -1322,7 +3472,7 @@ sc.helpers.SHA1 = function (msg) {
 		}
  
 		return utftext;
-	};
+	}
  
 	var blockstart;
 	var i, j;
@@ -1339,7 +3489,7 @@ sc.helpers.SHA1 = function (msg) {
  
 	var msg_len = msg.length;
  
-	var word_array = new Array();
+	var word_array = [];
 	for( i=0; i<msg_len-3; i+=4 ) {
 		j = msg.charCodeAt(i)<<24 | msg.charCodeAt(i+1)<<16 |
 		msg.charCodeAt(i+2)<<8 | msg.charCodeAt(i+3);
@@ -1365,7 +3515,7 @@ sc.helpers.SHA1 = function (msg) {
  
 	word_array.push( i );
  
-	while( (word_array.length % 16) != 14 ) word_array.push( 0 );
+	while( (word_array.length % 16) != 14 ) {word_array.push( 0 );}
  
 	word_array.push( msg_len>>>29 );
 	word_array.push( (msg_len<<3)&0x0ffffffff );
@@ -1373,8 +3523,8 @@ sc.helpers.SHA1 = function (msg) {
  
 	for ( blockstart=0; blockstart<word_array.length; blockstart+=16 ) {
  
-		for( i=0; i<16; i++ ) W[i] = word_array[blockstart+i];
-		for( i=16; i<=79; i++ ) W[i] = rotate_left(W[i-3] ^ W[i-8] ^ W[i-14] ^ W[i-16], 1);
+		for( i=0; i<16; i++ ) {W[i] = word_array[blockstart+i];}
+		for( i=16; i<=79; i++ ) {W[i] = rotate_left(W[i-3] ^ W[i-8] ^ W[i-14] ^ W[i-16], 1);}
  
 		A = H0;
 		B = H1;
@@ -1426,11 +3576,11 @@ sc.helpers.SHA1 = function (msg) {
  
 	}
  
-	var temp = cvt_hex(H0) + cvt_hex(H1) + cvt_hex(H2) + cvt_hex(H3) + cvt_hex(H4);
+	temp = cvt_hex(H0) + cvt_hex(H1) + cvt_hex(H2) + cvt_hex(H3) + cvt_hex(H4);
  
 	return temp.toLowerCase();
  
-}
+};
 
 
 
@@ -1464,16 +3614,16 @@ sc.helpers.SHA256 = function (s){
 	function Gamma1256(x) { return (S(x, 17) ^ S(x, 19) ^ R(x, 10)); }
  
 	function core_sha256 (m, l) {
-		var K = new Array(0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5, 0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3, 0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174, 0xE49B69C1, 0xEFBE4786, 0xFC19DC6, 0x240CA1CC, 0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA, 0x983E5152, 0xA831C66D, 0xB00327C8, 0xBF597FC7, 0xC6E00BF3, 0xD5A79147, 0x6CA6351, 0x14292967, 0x27B70A85, 0x2E1B2138, 0x4D2C6DFC, 0x53380D13, 0x650A7354, 0x766A0ABB, 0x81C2C92E, 0x92722C85, 0xA2BFE8A1, 0xA81A664B, 0xC24B8B70, 0xC76C51A3, 0xD192E819, 0xD6990624, 0xF40E3585, 0x106AA070, 0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5, 0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3, 0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2);
-		var HASH = new Array(0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19);
-		var W = new Array(64);
+		var K = [0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5, 0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3, 0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174, 0xE49B69C1, 0xEFBE4786, 0xFC19DC6, 0x240CA1CC, 0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA, 0x983E5152, 0xA831C66D, 0xB00327C8, 0xBF597FC7, 0xC6E00BF3, 0xD5A79147, 0x6CA6351, 0x14292967, 0x27B70A85, 0x2E1B2138, 0x4D2C6DFC, 0x53380D13, 0x650A7354, 0x766A0ABB, 0x81C2C92E, 0x92722C85, 0xA2BFE8A1, 0xA81A664B, 0xC24B8B70, 0xC76C51A3, 0xD192E819, 0xD6990624, 0xF40E3585, 0x106AA070, 0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5, 0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3, 0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2];
+		var HASH = [0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19];
+		var W = [64];
 		var a, b, c, d, e, f, g, h, i, j;
 		var T1, T2;
  
 		m[l >> 5] |= 0x80 << (24 - l % 32);
 		m[((l + 64 >> 9) << 4) + 15] = l;
  
-		for ( var i = 0; i<m.length; i+=16 ) {
+		for ( i = 0; i<m.length; i+=16 ) {
 			a = HASH[0];
 			b = HASH[1];
 			c = HASH[2];
@@ -1483,9 +3633,9 @@ sc.helpers.SHA256 = function (s){
 			g = HASH[6];
 			h = HASH[7];
  
-			for ( var j = 0; j<64; j++) {
-				if (j < 16) W[j] = m[j + i];
-				else W[j] = safe_add(safe_add(safe_add(Gamma1256(W[j - 2]), W[j - 7]), Gamma0256(W[j - 15])), W[j - 16]);
+			for ( j = 0; j<64; j++) {
+				if (j < 16) {W[j] = m[j + i];}
+				else {W[j] = safe_add(safe_add(safe_add(Gamma1256(W[j - 2]), W[j - 7]), Gamma0256(W[j - 15])), W[j - 16]);}
  
 				T1 = safe_add(safe_add(safe_add(safe_add(h, Sigma1256(e)), Ch(e, f, g)), K[j]), W[j]);
 				T2 = safe_add(Sigma0256(a), Maj(a, b, c));
@@ -1560,10 +3710,21 @@ sc.helpers.SHA256 = function (s){
 	s = Utf8Encode(s);
 	return binb2hex(core_sha256(str2binb(s), s.length * chrsz));
  
-}
+};
 
 
 
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, jQuery;
+ 
 /*
 	Helpers for fundamental javascript stuff
 */
@@ -1573,17 +3734,17 @@ sc.helpers.SHA256 = function (s){
 	the first argument is a string.
 */
 sc.helpers.isString = function(thing) {
-	if (typeof thing == 'string') return true;
-    if (typeof thing == 'object' && thing !== null) {
+	if (typeof thing === 'string') {return true;}
+    if (typeof thing === 'object' && thing !== null) {
         var criterion = thing.constructor.toString().match(/string/i);
-        return (criterion != null);
+        return (criterion !== null);
     }
     return false;
-}
+};
 
 
 sc.helpers.isNumber = function(chk) {
-	return typeof chk == 'number';
+	return typeof chk === 'number';
 };
 
 
@@ -1592,18 +3753,23 @@ sc.helpers.isNumber = function(chk) {
 	http://www.breakingpar.com/bkp/home.nsf/0/87256B280015193F87256C720080D723
 */
 sc.helpers.isArray = function(obj) {
-   if (obj.constructor.toString().indexOf("Array") == -1)
-	  return false;
-   else
-	  return true;
-}
+	if (obj.constructor.toString().indexOf("Array") === -1) {
+		return false;
+	} else {
+		return true;
+	}
+};
 
 /*
 	Returns a copy of the object using the jQuery.extend() method
 */
 sc.helpers.clone = function(oldObj) {
 	return jQuery.extend({}/* clone */, oldObj);
-}
+};
+
+sc.helpers.each = function(arr, f) {
+	
+};
 
 /**
  * We use this to do a form of inheritance, where the child inherits
@@ -1617,7 +3783,18 @@ sc.helpers.clone = function(oldObj) {
 sc.helpers.extend = function(child, supertype)
 {
    child.prototype.__proto__ = supertype.prototype;
-}
+};
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc;
+ 
 /* A wrapper for JSON.parse() that correct Twitter issues and perform logging if JSON data could not be parsed
  * which will help to find out what is wrong
  * @param {String} text 
@@ -1629,7 +3806,7 @@ sc.helpers.deJSON = function(json)
 	var re = new RegExp("Couldn\\'t\\ find\\ Status\\ with\\ ID\\=[0-9]+\\,", "g");
 	json = json.replace(re, "");
 
-	var done = false
+	var done = false;
 	try {
 		var obj = JSON.parse(json);
 		done = true;
@@ -1640,7 +3817,7 @@ sc.helpers.deJSON = function(json)
 	}
 
 	return obj;
-}
+};
 
 /**
  * really just a simple wrapper for JSON.stringify	
@@ -1648,14 +3825,220 @@ sc.helpers.deJSON = function(json)
  */
 sc.helpers.enJSON = function(jsobj) {
 	return JSON.stringify(jsobj);
-}
+};
+
+
+/*
+ * Based on jQuery XML to JSON Plugin
+ * 
+ *	### jQuery XML to JSON Plugin v1.0 - 2008-07-01 ###
+ * http://www.fyneworks.com/ - diego@fyneworks.com
+ * Dual licensed under the MIT and GPL licenses:
+ *	 http://www.opensource.org/licenses/mit-license.php
+ *	 http://www.gnu.org/licenses/gpl.html
+ ###
+ Website: http://www.fyneworks.com/jquery/xml-to-json/
+*/
+/*
+ # INSPIRED BY: http://www.terracoder.com/
+		   AND: http://www.thomasfrank.se/xml_to_json.html
+											AND: http://www.kawa.net/works/js/xml/objtree-e.html
+*/
+/*
+ This simple script converts XML (document of code) into a JSON object. It is the combination of 2
+ 'xml to json' great parsers (see below) which allows for both 'simple' and 'extended' parsing modes.
+*/
+sc.helpers.xml2json = function(xml, extended) {
+	if (!xml) return {};
+	// quick fail
+	//### PARSER LIBRARY
+	// Core function
+	function parseXML(node, simple) {
+		if (!node) return null;
+		var txt = '',
+		obj = null,
+		att = null;
+		var nt = node.nodeType,
+		nn = jsVar(node.localName || node.nodeName);
+		var nv = node.text || node.nodeValue || '';
+		/*DBG*/
+		//if(window.console) console.log(['x2j',nn,nt,nv.length+' bytes']);
+		if (node.childNodes) {
+			if (node.childNodes.length > 0) {
+				/*DBG*/
+				//if(window.console) console.log(['x2j',nn,'CHILDREN',node.childNodes]);
+				jQuery.each(node.childNodes,
+				function(n, cn) {
+					var cnt = cn.nodeType,
+					cnn = jsVar(cn.localName || cn.nodeName);
+					var cnv = cn.text || cn.nodeValue || '';
+					/*DBG*/
+					//if(window.console) console.log(['x2j',nn,'node>a',cnn,cnt,cnv]);
+					if (cnt == 8) {
+						/*DBG*/
+						//if(window.console) console.log(['x2j',nn,'node>b',cnn,'COMMENT (ignore)']);
+						return;
+						// ignore comment node
+					}
+					else if (cnt == 3 || cnt == 4 || !cnn) {
+						// ignore white-space in between tags
+						if (cnv.match(/^\s+$/)) {
+							/*DBG*/
+							//if(window.console) console.log(['x2j',nn,'node>c',cnn,'WHITE-SPACE (ignore)']);
+							return;
+						};
+						/*DBG*/
+						//if(window.console) console.log(['x2j',nn,'node>d',cnn,'TEXT']);
+						txt += cnv.replace(/^\s+/, '').replace(/\s+$/, '');
+						// make sure we ditch trailing spaces from markup
+					}
+					else {
+						/*DBG*/
+						//if(window.console) console.log(['x2j',nn,'node>e',cnn,'OBJECT']);
+						obj = obj || {};
+						if (obj[cnn]) {
+							/*DBG*/
+							//if(window.console) console.log(['x2j',nn,'node>f',cnn,'ARRAY']);
+							if (!obj[cnn].length) obj[cnn] = myArr(obj[cnn]);
+							obj[cnn][obj[cnn].length] = parseXML(cn, true
+							/* simple */
+							);
+							obj[cnn].length = obj[cnn].length;
+						}
+						else {
+							/*DBG*/
+							//if(window.console) console.log(['x2j',nn,'node>g',cnn,'dig deeper...']);
+							obj[cnn] = parseXML(cn);
+						};
+					};
+				});
+			};
+			//node.childNodes.length>0
+		};
+		//node.childNodes
+		if (node.attributes) {
+			if (node.attributes.length > 0) {
+				/*DBG*/
+				//if(window.console) console.log(['x2j',nn,'ATTRIBUTES',node.attributes])
+				att = {};
+				obj = obj || {};
+				jQuery.each(node.attributes, function(a, at) {
+					var atn = jsVar(at.name),
+					atv = at.value;
+					att[atn] = atv;
+					if (obj[atn]) {
+						/*DBG*/
+						//if(window.console) console.log(['x2j',nn,'attr>',atn,'ARRAY']);
+						if (!obj[atn].length) obj[atn] = myArr(obj[atn]);
+						//[ obj[ atn ] ];
+						obj[atn][obj[atn].length] = atv;
+						obj[atn].length = obj[atn].length;
+					}
+					else {
+						/*DBG*/
+						//if(window.console) console.log(['x2j',nn,'attr>',atn,'TEXT']);
+						obj[atn] = atv;
+					};
+				});
+				//obj['attributes'] = att;
+			};
+			//node.attributes.length>0
+		};
+		//node.attributes
+		if (obj) {
+			obj = $.extend((txt != '' ? new String(txt) : {}),
+			/* {text:txt},*/
+			obj || {}
+			/*, att || {}*/
+			);
+			txt = (obj.text) ? (typeof(obj.text) == 'object' ? obj.text: [obj.text || '']).concat([txt]) : txt;
+			if (txt) obj.text = txt;
+			txt = '';
+		};
+		var out = obj || txt;
+		//console.log([extended, simple, out]);
+		if (extended) {
+			if (txt) out = {};
+			//new String(out);
+			txt = out.text || txt || '';
+			if (txt) out.text = txt;
+			if (!simple) out = myArr(out);
+		};
+		return out;
+	};
+	// parseXML
+	// Core Function End
+	// Utility functions
+	var jsVar = function(s) {
+		return String(s || '').replace(/-/g, "_");
+	};
+	var isNum = function(s) {
+		return (typeof s == "number") || String((s && typeof s == "string") ? s: '').test(/^((-)?([0-9]*)((\.{0,1})([0-9]+))?$)/);
+	};
+	var myArr = function(o) {
+		if (!o.length) o = [o];
+		o.length = o.length;
+		// here is where you can attach additional functionality, such as searching and sorting...
+		return o;
+	};
+	// Utility functions End
+	//### PARSER LIBRARY END
+	// Convert plain text to xml
+	if (typeof xml == 'string') {xml = sc.helpers.createXMLFromString(xml);}
+
+	// Quick fail if not xml (or if this is a node)
+	if (!xml.nodeType) {return;}
+	if (xml.nodeType == 3 || xml.nodeType == 4) {return xml.nodeValue;}
+
+	// Find xml root node
+	var root = (xml.nodeType == 9) ? xml.documentElement: xml;
+
+	// Convert xml to json
+	var out = parseXML(root, true
+	/* simple */
+	);
+
+	// Clean-up memory
+	xml = null;
+	root = null;
+
+	// Send output
+	return out;
+};
+
+
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc;
+ 
 
 /**
  * Stub 
  */
 function getCurrentLocation() {
 	
-}/**
+}/*jslint 
+bitwise: false,
+browser: true,
+newcap: false,
+nomen: false,
+debug: true,
+forin: true,
+plusplus: false,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc;
+ 
+/**
  * determines if a string contains the given screen name prefixed with a @
  * this is mainly used for determining if a message should be considered a 'mention'
  * @param {string} str  the string to check
@@ -1664,7 +4047,7 @@ function getCurrentLocation() {
  */
 sc.helpers.containsScreenName = function(str, sn) {
 	
-	var re = new RegExp('(?:\s|\b|^[[:alnum:]]|^)@('+sn+')(?:\s|\b|$)', 'gi');
+	var re = new RegExp('(?:\\s|\\b|^[[:alnum:]]|^)@('+sn+')(?:\\s|\\b|$)', 'gi');
 	if ( re.test(str) ) {
 		return true;
 	}
@@ -1679,7 +4062,7 @@ sc.helpers.extractURLs = function(str) {
 	var wwwlinks = /(^|\s|\(|:)(((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+))/gi;
 	var match = [];
 	var URLs = [];
-	while ( (match = wwwlinks.exec(str)) != null ) {
+	while ( (match = wwwlinks.exec(str)) !== null ) {
 		URLs.push(match[2]);
 	}
 	return URLs;
@@ -1722,11 +4105,13 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 
 	var re_noemail = /(^|\s|\(|:)((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
 	var re_nourl   = /(^|\s|\()([a-zA-Z0-9_\.\-\+]+)@([a-zA-Z0-9\-]+)\.([a-zA-Z0-9\-\.]*)([^\s\)<]+)/gi;
+	
+	var x, ms, period = '';
 
-	if (type != 'email')
+	if (type !== 'email')
 	{
-		while (ms = re_noemail.exec(str)) {
-			var period = ''
+		while ((ms = re_noemail.exec(str))) {
+
 			if ( /\.$/.test(ms[6]) ) {
 				period = '.';
 				ms[6] = ms[6].slice(0, -1);
@@ -1736,7 +4121,7 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 				sometimes we can end up with a null instead of a blank string,
 				so we need to force the issue in javascript.
 			*/
-			for (var x=0; x<ms.length; x++) {
+			for (x=0; x<ms.length; x++) {
 				if (!ms[x]) {
 					ms[x] = '';
 				}
@@ -1745,7 +4130,7 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 			if (extra_code) {
 				extra_code = ' '+extra_code;
 			} else {
-				extra_code = ''
+				extra_code = '';
 			}
 			
 			var desc = ms[5]+ms[6];
@@ -1759,11 +4144,11 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 		}
 	}
 
-	if (type != 'url')
+	if (type !== 'url')
 	{
-		while (ms = re_nourl.exec(str))
+		while ((ms = re_nourl.exec(str)))
 		{
-			var period = ''
+			period = '';
 			if ( /\./.test(ms[5]) ) {
 				period = '.';
 				ms[5] = ms[5].slice(0, -1);
@@ -1773,20 +4158,19 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 				sometimes we can end up with a null instead of a blank string,
 				so we need to force the issue in javascript.
 			*/
-			for (var x=0; x<ms.length; x++) {
+			for (x=0; x<ms.length; x++) {
 				if (!ms[x]) {
 					ms[x] = '';
 				}
 			}
 			str = str.replace(ms[0], ms[1]+'<a href="mailto:'+ms[2]+'@'+ms[3]+'.'+ms[4]+ms[5]+'">'+ms[2]+'@'+ms[3]+'.'+ms[4]+ms[5]+'</a>'+period);
-			//air.trace(str);
 		}
 	}
 
 	return str;
 
 
-}
+};
 
 /**
  * turns twitter style username refs ('@username') into links
@@ -1802,7 +4186,7 @@ sc.helpers.autolinkTwitterScreenname = function(str, tpl) {
 		tpl = '<a href="http://twitter.com/#username#">@#username#</a>';
 	}
 	
-	var re_uname = /(^|\s|\(\[|,|\()@([a-zA-Z0-9_]+)([^a-zA-Z0-9_]|$)/gi
+	var re_uname = /(^|\s|\(\[|,|\()@([a-zA-Z0-9_]+)([^a-zA-Z0-9_]|$)/gi;
 	
 	var ms = [];
 	while (ms = re_uname.exec(str))
@@ -1823,7 +4207,7 @@ sc.helpers.autolinkTwitterScreenname = function(str, tpl) {
 
 	}
 	return str;
-}
+};
 
 
 
@@ -1841,7 +4225,7 @@ sc.helpers.autolinkTwitterHashtag = function(str, tpl) {
 		tpl = '<a href="http://search.twitter.com/search?q=#hashtag_enc#">##hashtag#</a>';
 	}
 	
-	var re_hashtag = /(^|\s|\()#([a-zA-Z0-9\-_\.+:=]{1,}\w)([^a-zA-Z0-9\-_+]|$)/gi
+	var re_hashtag = /(^|\s|\()#([a-zA-Z0-9\-_\.+:=]{1,}\w)([^a-zA-Z0-9\-_+]|$)/gi;
 	
 	var ms = [];
 	while (ms = re_hashtag.exec(str))
@@ -1863,7 +4247,7 @@ sc.helpers.autolinkTwitterHashtag = function(str, tpl) {
 
 	}
 	return str;
-}
+};
 
 
 
@@ -1890,7 +4274,7 @@ sc.helpers.stripTags = function(str) {
 
 
 /**
- * Converts the following entities into regulat chars: &lt; &gt; &quot; &apos;
+ * Converts the following entities into regular chars: &lt; &gt; &quot; &apos;
  */
 sc.helpers.fromHTMLSpecialChars = function(str) {
 	str = str.replace(/&lt;/gi, '<');
@@ -1901,8 +4285,10 @@ sc.helpers.fromHTMLSpecialChars = function(str) {
 	sc.helpers.dump(str);
 	str = str.replace(/&apos;/gi, '\'');
 	sc.helpers.dump(str);
+	str = str.replace(/&amp;/gi, '&');
+	sc.helpers.dump(str);
 	return str;
-}
+};
 
 
 
@@ -1933,7 +4319,7 @@ sc.helpers.htmlentities = function(string, quote_style) {
     }
     
     return tmp_str;
-}
+};
 
 sc.helpers._get_html_translation_table = function(table, quote_style) {
     // http://kevin.vanzonneveld.net
@@ -1973,24 +4359,24 @@ sc.helpers._get_html_translation_table = function(table, quote_style) {
         useQuoteStyle = constMappingQuoteStyle[useQuoteStyle];
     }
  
-    if (useTable == 'HTML_SPECIALCHARS') {
+    if (useTable === 'HTML_SPECIALCHARS') {
         // ascii decimals for better compatibility
         entities['38'] = '&amp;';
-        if (useQuoteStyle != 'ENT_NOQUOTES') {
+        if (useQuoteStyle !== 'ENT_NOQUOTES') {
             entities['34'] = '&quot;';
         }
-        if (useQuoteStyle == 'ENT_QUOTES') {
+        if (useQuoteStyle === 'ENT_QUOTES') {
             entities['39'] = '&#039;';
         }
         entities['60'] = '&lt;';
         entities['62'] = '&gt;';
-    } else if (useTable == 'HTML_ENTITIES') {
+    } else if (useTable === 'HTML_ENTITIES') {
         // ascii decimals for better compatibility
       entities['38']  = '&amp;';
-        if (useQuoteStyle != 'ENT_NOQUOTES') {
+        if (useQuoteStyle !== 'ENT_NOQUOTES') {
             entities['34'] = '&quot;';
         }
-        if (useQuoteStyle == 'ENT_QUOTES') {
+        if (useQuoteStyle === 'ENT_QUOTES') {
             entities['39'] = '&#039;';
         }
       entities['60']  = '&lt;';
@@ -2093,7 +4479,6 @@ sc.helpers._get_html_translation_table = function(table, quote_style) {
       entities['255'] = '&yuml;';
     } else {
         throw Error("Table: "+useTable+' not supported');
-        return false;
     }
     
     // ascii decimals to real symbols
@@ -2103,7 +4488,7 @@ sc.helpers._get_html_translation_table = function(table, quote_style) {
     }
     
     return histogram;
-}
+};
 
 
 
@@ -2148,7 +4533,7 @@ sc.helpers.Utf8 = {
 	decode : function (utftext) {
 		var string = "";
 		var i = 0;
-		var c = c1 = c2 = 0;
+		var c = 0, c1 = 0, c2 = 0, c3 = 0;
  
 		while ( i < utftext.length ) {
  
@@ -2175,7 +4560,7 @@ sc.helpers.Utf8 = {
 		return string;
 	}
  
-}
+};
 
 
 
@@ -2189,18 +4574,29 @@ sc.helpers.Utf8 = {
 **/
  
 sc.helpers.trim = function (str, chars) {
-	return ltrim(rtrim(str, chars), chars);
-}
+	return sc.helpers.ltrim(sc.helpers.rtrim(str, chars), chars);
+};
  
 sc.helpers.ltrim = function (str, chars) {
 	chars = chars || "\\s";
 	return str.replace(new RegExp("^[" + chars + "]+", "g"), "");
-}
+};
  
 sc.helpers.rtrim = function (str, chars) {
 	chars = chars || "\\s";
 	return str.replace(new RegExp("[" + chars + "]+$", "g"), "");
-}/**
+};/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, window;
+ 
+/**
  * These are system-oriented functions, mostly utilizing AIR apis
  * to interact with the OS
  * 
@@ -2208,10 +4604,10 @@ sc.helpers.rtrim = function (str, chars) {
  */
 
 
-const SPAZCORE_PLATFORM_AIR			= 'AIR';
-const SPAZCORE_PLATFORM_WEBOS		= 'webOS';
-const SPAZCORE_PLATFORM_TITANIUM	= 'Titanium';
-const SPAZCORE_PLATFORM_UNKNOWN		= '__UNKNOWN';
+var SPAZCORE_PLATFORM_AIR			= 'AIR';
+var SPAZCORE_PLATFORM_WEBOS		= 'webOS';
+var SPAZCORE_PLATFORM_TITANIUM	= 'Titanium';
+var SPAZCORE_PLATFORM_UNKNOWN		= '__UNKNOWN';
 
 
 /**
@@ -2229,10 +4625,10 @@ sc.helpers.getPlatform = function() {
 		return SPAZCORE_PLATFORM_WEBOS;
 	}
 	if (window.Titanium) {
-		return SPAZCORE_PLATFORM_TITANIUM
+		return SPAZCORE_PLATFORM_TITANIUM;
 	}
 	return SPAZCORE_PLATFORM_UNKNOWN;
-}
+};
 
 /**
 * checks to see if current platform is the one passed in
@@ -2244,25 +4640,25 @@ sc.helpers.getPlatform = function() {
 */
 sc.helpers.isPlatform = function(str) {
 	var pform = sc.helpers.getPlatform();
-	if ( pform.toLowerCase() == str.toLowerCase() ) {
+	if ( pform.toLowerCase() === str.toLowerCase() ) {
 		return true;
 	} else {
 		return false;
 	}
-}
+};
 
 
 sc.helpers.isAIR = function() {
 	return sc.helpers.isPlatform(SPAZCORE_PLATFORM_AIR);
-}
+};
 
 sc.helpers.iswebOS = function() {
 	return sc.helpers.isPlatform(SPAZCORE_PLATFORM_WEBOS);
-}
+};
 
 sc.helpers.isTitanium = function() {
 	return sc.helpers.isPlatform(SPAZCORE_PLATFORM_TITANIUM);
-}
+};
 
 
 /**
@@ -2271,7 +4667,7 @@ sc.helpers.isTitanium = function() {
  */
 sc.helpers.dump = function(obj) {
 	// stub
-}
+};
 
 /**
  * Open a URL in the default system web browser
@@ -2279,7 +4675,7 @@ sc.helpers.dump = function(obj) {
  */
 sc.helpers.openInBrowser = function(url) {
 	// stub
-}
+};
 
 /**
  * Gets the contents of a file
@@ -2287,7 +4683,7 @@ sc.helpers.openInBrowser = function(url) {
  */
 sc.helpers.getFileContents = function(path) {
 	// stub
-}
+};
 
 /**
  * Saves the contents to a specified path. Serializes a passed object if 
@@ -2330,7 +4726,7 @@ sc.helpers.setUserAgent = function(uastring) {
  */
 sc.helpers.getClipboardText = function() {
 	// stub
-}
+};
 
 /**
  * Sets clipboard text
@@ -2338,7 +4734,7 @@ sc.helpers.getClipboardText = function() {
  */
 sc.helpers.setClipboardText = function(text) {
 	// stub
-}
+};
 
 
 /**
@@ -2347,7 +4743,7 @@ sc.helpers.setClipboardText = function(text) {
  */
 sc.helpers.getEncryptedValue = function(key) {
 	// stub
-}
+};
 
 /**
  * Sets a value in the EncryptedLocalStore of AIR
@@ -2355,7 +4751,7 @@ sc.helpers.getEncryptedValue = function(key) {
  */
 sc.helpers.setEncyrptedValue = function(key, val) {
 	// stub
-}
+};
 
 
 /**
@@ -2365,7 +4761,7 @@ sc.helpers.setEncyrptedValue = function(key, val) {
  */
 sc.helpers.getAppStoreDir = function() {
 	// stub
-}
+};
 
 /**
  * Get the preferences file
@@ -2373,7 +4769,7 @@ sc.helpers.getAppStoreDir = function() {
  */
 sc.helpers.getPreferencesFile = function(name, create) {
 	// stub
-}
+};
 
 /**
  * initializes a file at the given location. set overwrite to true
@@ -2383,7 +4779,18 @@ sc.helpers.getPreferencesFile = function(name, create) {
 */
 sc.helpers.init_file = function(path, overwrite) {
 	// stub
-}
+};
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, jQuery;
+ 
 /**
  * View helper methods for Twitter apps
  *  
@@ -2424,7 +4831,7 @@ sc.helpers.removeExtraElements = function(item_selector, max_items, remove_from_
 			} );
 		}
 	}
-}
+};
 
 
 
@@ -2437,9 +4844,9 @@ sc.helpers.removeExtraElements = function(item_selector, max_items, remove_from_
  * @TODO
  */
 sc.helpers.removeDuplicateElements = function(item_selector, remove_from_top) {
-	dump('removeDuplicateElements TODO');
+	sc.helpers.dump('removeDuplicateElements TODO');
 
-}
+};
 
 
 
@@ -2454,10 +4861,10 @@ sc.helpers.removeDuplicateElements = function(item_selector, remove_from_top) {
 sc.helpers.updateRelativeTimes = function(item_selector, time_attribute) {
 	jQuery(item_selector).each(function(i) {
 		var time = jQuery(this).attr(time_attribute);
-		var relative_time = sch.getRelativeTime(time);
+		var relative_time = sc.helpers.getRelativeTime(time);
 		jQuery(this).html( relative_time );
 	});
-}
+};
 
 
 /**
@@ -2469,7 +4876,18 @@ sc.helpers.updateRelativeTimes = function(item_selector, time_attribute) {
  */
 sc.helpers.markAllAsRead = function(item_selector) {
 	jQuery(item_selector).removeClass('new');
-}
+};
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, DOMParser;
+ 
 sc.helpers.createXMLFromString = function (string) {
 	var xmlParser, xmlDocument;
 	try {
@@ -2477,203 +4895,26 @@ sc.helpers.createXMLFromString = function (string) {
 		xmlDocument = xmlParser.parseFromString(string, 'text/xml');
 		return xmlDocument;
 	} catch (e) {
-		air.trace("Can't create XML document.");
-		dump(e.name + ":" + e.message);
+		sc.helpers.dump(e.name + ":" + e.message);
 		return null;
 	}
-}
-
-
-
-/**
- * SpazCron handles repetitive tasks in a somewhat cron-like way. 
- * @param {integer} interval the interval to check for executable jobs IN SECONDS
- * @class SpazCron
- */
-function SpazCron(time_interval) {
-	if (!time_interval) {
-		this.time_interval = 15 * 1000; // 15 seconds
-	} else {
-		this.time_interval = time_interval * 1000;
-	}
-	
-	this.interval = null; // this is a stub for the interval object
-	
-	this.$jobs = [];
-		
-}
-
-/**
- * add a job to the set 
- */
-SpazCron.prototype.addJob = function (name, func, mintime) {
-	/*
-		make a new SpazCronJob and add it to this._jobs
-	*/
-};
-
-/**
- * remove a job to the set 
- */
-SpazCron.prototype.removeJob = function (name) {
-	/*
-		find a job in this._jobs and remove it from the array
-	*/
-};
-
-/**
- * start execution of jobs
- */
-SpazCron.prototype.start = function () {
-	/*
-		create the interval obj to fun this.execJobs every this.time_interval seconds
-	*/
-};
-
-/**
- * start execution of jobs
- */
-SpazCron.prototype.stop = function () {
-	/*
-		clear the interval obj
-	*/
-
-};
-
-/**
- * execute the jobs in the set
- */
-SpazCron.prototype.execJobs = function () {
-	/*
-		loop through the jobs in this._jobs and execute each one
-	*/
 };
 
 
-/**
- * 
- * @param {string} name  a n identifier for the job
- * @param {function} func  the function that the job executes
- * @param {mintime} integer  the amount of time that must pass for job to re-execute, in SECONDS
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+sub: true,
+plusplus: true,
+undef: true,
+white: false,
+onevar: false 
  */
-var SpazCronJob = function (name, func, mintime) {
-	this.last_run = 0; // last time run in seconds
-	this.name = name;
-	this.func = func;
-	this.mintime = mintime; // minimum amount of time 
-};
+var sc, jQuery;
 
-SpazCronJob.prototype.execute = function () {
-	/*
-		if the time passed > this.mintime, then execute this.func
-	*/
-};// Basically just ripped from JazzRecord  HTML5Adapter class
-
-function SpazLocker(db, account) {
-  this.db = openDatabase(db);
-  this.account = account;
-  this.ready = false;
-
-  var locker = this;
-  var query = "CREATE TABLE IF NOT EXISTS `" + account + "` (id INTEGER PRIMARY KEY AUTOINCREMENT, tweet_id INTEGER, in_reply_to_id INTEGER, text TEXT, timestamp TEXT)";
-  
-  sc.helpers.dump(query);
-  
-  this.db.transaction(function(tx) {
-    tx.executeSql(query, [], function(tx, resultSet) {
-      locker.ready = true;
-    });
-  });
-}
-
-SpazLocker.prototype = {
-  run: function(query, success, failure) {
-    this.db.transaction(function(tx) {
-      tx.executeSql(query, [], function(tx, resultSet) {
-          var rows = [];
-          for(var i = 0, j = resultSet.rows.length; i < j; i++) {
-            rows.push(resultSet.rows.item(i));
-          }
-          if(success)
-            success(rows);
-        }, function(tx, err) {
-          if(failure)
-            failure(err.message);
-          else
-            sc.helpers.dump("There was an error: " + err.message);
-        });
-    });
-  },
-
-  count: function(success, failure) {
-    var query = "SELECT COUNT(*) FROM " + this.account;
-    this.db.transaction(function(tx) {
-      tx.executeSql(query, [], function(tx, resultSet) {
-        if(success)
-          success(resultSet.rows.item(0)["COUNT(*)"]);
-        }, function(tx, err) {
-        if(failure)
-          failure(err.message);
-        else
-          sc.helpers.dump("There was an error: " + err.message);
-      });
-    });
-  },
-
-  store: function(data, success, failure) {
-    var tweet_id = data.tweet_id || "NULL";
-    var in_reply_to_id = data.in_reply_to_id || "NULL";
-    var text = "NULL";
-    if(data.text)
-      text = "'" + data.text + "'";
-    var timestamp = data.timestamp || "NULL";
-    
-    var query = "INSERT INTO " + this.account + " (tweet_id, in_reply_to_id, text, timestamp) VALUES(" + 
-      tweet_id + ", " +
-      in_reply_to_id + ", " +
-      text + ", " +
-      timestamp + ")";
-    
-    sc.helpers.dump(query);
-    this.db.transaction(function(tx) {
-      tx.executeSql(query, [], function(tx, resultSet) {
-        if(success)
-          success(resultSet.insertId);
-        }, function(tx, err) {
-        if(failure)
-          failure(err.message);
-        else
-          sc.helpers.dump("There was an error: " + err.message);
-      });
-    });
-  },
-  
-  retrieve: function(options, success, failure) {
-    var col = "id", val = options;
-    if(typeof options === "object") {
-      col = options.col;
-      val = options.val;
-      success = options.success;
-      failure = options.failure;
-    }
-    var query = "SELECT * FROM " + this.account + " WHERE " + col + "=" + val;
-    sc.helpers.dump(query);
-    this.run(query, success, failure);
-  },
-  
-  vanquish: function(options, success, failure) {
-    var col = "id", val = options;
-    if(typeof options === "object") {
-      col = options.col;
-      val = options.val;
-      success = options.success;
-      failure = options.failure;
-    }
-    var query = "DELETE FROM " + this.account + " WHERE " + col + "=" + val;
-    sc.helpers.dump(query);
-    this.run(query, success, failure);
-  }
-};function SpazPhotoMailer(opts) {
+function SpazPhotoMailer(opts) {
 
 	this.apis = this.getAPIs();
 	
@@ -2689,7 +4930,7 @@ SpazPhotoMailer.prototype.getAPILabels = function() {
 
 SpazPhotoMailer.prototype.getAPIs = function() {
 	
-	thisSPM = this;
+	var thisSPM = this;
 	
 	var apis = {
 		"yfrog": {
@@ -2712,6 +4953,18 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 				return thisSPM.apis['posterous'].email_tpl;
 			}
 		},
+		
+		"pikchur": {
+			"email_tpl"  :"{{username}}.???@pikchur.com",
+			"message_in" :"subject",
+			"email_info_url":"http://pikchur.com/dashboard/profile",
+			'help_text'  :"Log-in to pikchur with your Twitter username and password, and click 'Profile.' Your customized posting email will be listed",
+			'getToAddress': function(opts) {
+				var username = opts.username;
+				return thisSPM.apis['pikchur'].email_tpl.replace('{{username}}', username);
+			}
+		},
+
 
 		"twitgoo": {
 			"email_tpl"  :"m@twitgoo.com",
@@ -2753,7 +5006,7 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 					jQuery.ajax({
 						
 						'success':function(data, textStatus) {
-							var profile = sch.deJSON(data);
+							var profile = sc.helpers.deJSON(data);
 							
 						},
 						
@@ -2770,7 +5023,7 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 						
 					});
 					
-				};
+				}
 				
 				function getTweetPhoto(username, password, settings_url) {
 
@@ -2779,7 +5032,7 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 					jQuery.ajax({
 						
 						'success':function(data, textStatus) {
-							var settings = sch.deJSON(data);
+							var settings = sc.helpers.deJSON(data);
 							success(settings.Email);
 						},
 						
@@ -2814,92 +5067,18 @@ SpazPhotoMailer.prototype.setAPI = function(apilabel) {
 SpazPhotoMailer.prototype.send = function(api, photo_url, message) {
 	
 };
-/**
- * A library to interact with Ping.FM 
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
  */
+var sc, Titanium, air, window, jQuery, Mojo;
 
-/**
- * events raised here 
- */
-if (!sc.events) { sc.events = {} };
-sc.events.pingfmGetUserKeySuccess		= 'pingfmGetUserKeySuccess';
-sc.events.pingfmGetUserKeyFailure		= 'pingfmGetUserKeyFailure';
-sc.events.pingfmValidateUserKeySuccess	= 'pingfmValidateUserKeySuccess';
-sc.events.pingfmValidateUserKeyFailure	= 'pingfmValidateUserKeyFailure';
-sc.events.pingfmGetServicesSuccess		= 'pingfmGetServicesSuccess';
-sc.events.pingfmGetServicesFailure		= 'pingfmGetServicesFailure';
-sc.events.pingfmGetTriggersSuccess		= 'pingfmGetTriggersSuccess';
-sc.events.pingfmGetTriggersFailure		= 'pingfmGetTriggersFailure';
-sc.events.pingfmGetLatestSuccess		= 'pingfmGetLatestSuccess';
-sc.events.pingfmGetLatestFailure		= 'pingfmGetLatestFailure';
-sc.events.pingfmPostSuccess				= 'pingfmPostSuccess';
-sc.events.pingfmPostFailure				= 'pingfmPostFailure';
-sc.events.pingfmTriggerPostSuccess		= 'pingfmTriggerPostSuccess';
-sc.events.pingfmTriggerPostFailure		= 'pingfmTriggerPostFailure';
-
- 
-/**
- * a library for the Ping.fm API 
- * @class SpazPingFM
- * @param {object} opts
- */
-function SpazPingFM(opts) {
-	
-	this.apikey  = opts.apikey  || null;
-	this.devkey  = opts.devkey  || null;
-	this.userkey = opts.userkey || null;
-	
-};
-
-
-SpazPingFM.prototype.getAPIKey = function() {
-	return this.apikey;
-};
-SpazPingFM.prototype.setAPIKey = function(apikey) {
-	this.apikey = apikey;
-};
-
-SpazPingFM.prototype.getUserKey = function() {
-	return this.userkey;
-};
-SpazPingFM.prototype.setUserKey = function(userkey) {
-	this.userkey = userkey;
-};
-
-
-/**
- * Given a mobile key, request a user key via Ajax. Raise event on success or failure
- * Users can get their key from http://ping.fm/key/
- * 
- * All ping.fm responses are in XML. This sucks. Oh well.
- * 
- * @param {string} mobilekey
- * @return void
- */
-SpazPingFM.prototype.getUserKeyWithMobileKey = function(mobilekey) {
-	
-};
-
-
-SpazPingFM.prototype.validateUserKey = function(userkey) {
-	
-}; 
-
-/**
- * get the user's set-up services 
- */
-SpazPingFM.prototype.getServices = function() {
-	
-};
-
-
-SpazPingFM.prototype.getTriggers = function() {};
-
-SpazPingFM.prototype.getLatest = function(limit, order) {};
-
-SpazPingFM.prototype.post = function(msg, opts) {};
-
-SpazPingFM.prototype.triggerPost = function(msg, trigger, opts) {};const SPAZCORE_PREFS_TI_KEY = 'preferences_json';
+var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
  
 /**
  * A preferences lib for AIR JS apps. This requires the json2.js library
@@ -2954,7 +5133,7 @@ function SpazPrefs(defaults, sanity_methods) {
 	}
 	
 	this.loaded = false;
-};
+}
 
 
 /**
@@ -2971,6 +5150,7 @@ SpazPrefs.prototype.setDefaults = function(defaults) {
  * call the onSet sanity method if it is defined for a given pref keys.
  */
 SpazPrefs.prototype._applyDefaults = function() {
+	var key;
 	for (key in this._defaults) {
 		sc.helpers.dump('Copying default "' + key + '":"' + this._defaults[key] + '" (' + typeof(this._defaults[key]) + ')');
 		this._prefs[key] = this._defaults[key];
@@ -3010,7 +5190,7 @@ SpazPrefs.prototype.get = function(key, encrypted) {
 	} else {
 		return false;
 	}
-}
+};
 
 
 /**
@@ -3027,7 +5207,7 @@ SpazPrefs.prototype.set = function(key, val, encrypted) {
 	this._prefs[key] = val;
 	
 	this.save();
-}
+};
 
 
 
@@ -3042,7 +5222,7 @@ SpazPrefs.prototype.set = function(key, val, encrypted) {
  */
 SpazPrefs.prototype.setSanityMethod = function(key, type, method) {
 	
-	if (type != 'onGet' && type != 'onSet') {
+	if (type !== 'onGet' && type !== 'onSet') {
 		return false;
 	}
 	
@@ -3083,7 +5263,7 @@ SpazPrefs.prototype.load = function(name) {
 	*/
 	if (sc.helpers.iswebOS()) {
 
-		dump('this is webOS');
+		sc.helpers.dump('this is webOS');
 		if (!this.mojoDepot) {
 			sc.helpers.dump('making depot');
 			this.mojoDepot = new Mojo.Depot({
@@ -3091,9 +5271,8 @@ SpazPrefs.prototype.load = function(name) {
 				replace:false
 			});
 		}
-
 		
-		function onGet(loaded_prefs) {
+		var onGet = function(loaded_prefs) {
 			if (loaded_prefs) {
 				sc.helpers.dump('Prefs loaded');
 				for (var key in loaded_prefs) {
@@ -3101,13 +5280,13 @@ SpazPrefs.prototype.load = function(name) {
 		            thisPrefs._prefs[key] = loaded_prefs[key];
 		       	}
 			} else {
-				sc.helpers.dump('Prefs loading failed in onGet')
+				sc.helpers.dump('Prefs loading failed in onGet');
 				thisPrefs.resetPrefs();
 			}
 			jQuery().trigger('spazprefs_loaded');
 		};
 
-		function onFail() {
+		var onFail = function() {
 			sc.helpers.dump('Prefs loading failed in onFail');
 			thisPrefs.resetPrefs();
 			jQuery().trigger('spazprefs_loaded');
@@ -3138,7 +5317,7 @@ SpazPrefs.prototype.load = function(name) {
 		jQuery().trigger('spazprefs_loaded');
 	}
 	
-}
+};
 
 
 
@@ -3152,7 +5331,7 @@ SpazPrefs.prototype.save = function(name) {
 		if (!this.mojoDepot) {
 			this.mojoDepot = new Mojo.Depot({
 				name:'SpazDepotPrefs',
-				replace:true
+				replace:false
 			});
 		}
 		
@@ -3178,7 +5357,7 @@ SpazPrefs.prototype.save = function(name) {
  * shortcut for SpazPrefs
  */
 if (sc) {
-	scPrefs = SpazPrefs;
+	var scPrefs = SpazPrefs;
 }
 
 
@@ -3208,7 +5387,7 @@ if (sc.helpers.isTitanium()) {
 			Titanium.App.Properties.setInt('__window-x',      x);
 			Titanium.App.Properties.setInt('__window-y',      y);
 		}
-	}
+	};
 
 	/*
 		Loads the size and placement of the window this executes in
@@ -3230,7 +5409,7 @@ if (sc.helpers.isTitanium()) {
 			Titanium.UI.currentWindow.setX(x);
 			Titanium.UI.currentWindow.setY(y);
 		}
-	}
+	};
 }
 
 
@@ -3249,7 +5428,7 @@ if (sc.helpers.isAIR()) {
 		this.set('__window-height', window.nativeWindow.height);
 		this.set('__window-x', window.nativeWindow.x);
 		this.set('__window-y', window.nativeWindow.y);
-	}
+	};
 
 	/*
 		Loads the size and placement of the window this executes in
@@ -3267,7 +5446,7 @@ if (sc.helpers.isAIR()) {
 			window.nativeWindow.y = y;
 		}
 		
-	}
+	};
 	
 }
 
@@ -3490,6 +5669,17 @@ if (sc.helpers.isAIR()) {
 // 	
 // }
 
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc;
+
 /**
  * A library to shorten text 
  */
@@ -3667,7 +5857,7 @@ SpazShortText.prototype.genBaseMaps = function() {
 		'nine'					:'9',
 		'ten'					:'10',
 		'eleven'				:'11',
-		'twelve'				:'12',
+		'twelve'				:'12'
 	};
 	
 	
@@ -3693,25 +5883,27 @@ SpazShortText.prototype.genBaseMaps = function() {
  * This processes the base maps into the this.map object of regexes and replacements 
  */
 SpazShortText.prototype.processBaseMaps = function() {
-	for (var key in this.basemap) {
-		var val = this.basemap[key];
-		var regex = new RegExp('(\\b)'+key+'(\\b)', 'gi');
+	var key, val, regex, israw;
+	
+	for (key in this.basemap) {
+		val = this.basemap[key];
+		regex = new RegExp('(\\b)'+key+'(\\b)', 'gi');
 		this.map[key] = {
 			'short':'$1'+val+'$2',
 			'regex':regex
-		}
+		};
 	}
 	
 	/*
 		take the rawmap stuff and glob it into this.map, so we only have one to worry about
 	*/
-	for (var key in this.baserawmap) {
-		var val = this.baserawmap[key];
-		var regex = new RegExp(key, 'gi');
+	for (key in this.baserawmap) {
+		val = this.baserawmap[key];
+		regex = new RegExp(key, 'gi');
 		this.map[key] = {
 			'short':val,
 			'regex':regex
-		}
+		};
 	}
 	
 	
@@ -3744,7 +5936,7 @@ SpazShortText.prototype.shorten = function(text) {
  * @param {boolean} israw is true, this mapping won't be altered at all when processed into a regex
  */
 SpazShortText.prototype.addMap = function(search, replace, israw) {
-	var israw = israw || false;
+	israw = israw || false;
 	
 	if (israw) {
 		this.baserawmap[search] = replace;
@@ -3763,22 +5955,33 @@ SpazShortText.prototype.addMap = function(search, replace, israw) {
  */
 SpazShortText.prototype.getMaps = function() {
 	return this.map;
-};/**
+};/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, jQuery;
+
+/**
  * A library to do url shortening 
  */
 
 /**
  * Constants to refer to services 
  */
-const SPAZCORE_SHORTURL_SERVICE_SHORTIE = 'short.ie';
-const SPAZCORE_SHORTURL_SERVICE_ISGD	= 'is.gd';
-const SPAZCORE_SHORTURL_SERVICE_BITLY	= 'bit.ly';
+var SPAZCORE_SHORTURL_SERVICE_SHORTIE = 'short.ie';
+var SPAZCORE_SHORTURL_SERVICE_ISGD	= 'is.gd';
+var SPAZCORE_SHORTURL_SERVICE_BITLY	= 'bit.ly';
 
 
 /**
  * events raised here 
  */
-if (!sc.events) { sc.events = {} };
+if (!sc.events) { sc.events = {}; }
 sc.events.newShortURLSuccess	= 'newShortURLSuccess';
 sc.events.newShortURLFailure	= 'newShortURLFailure';
 sc.events.newExpandURLSuccess = 'recoverLongURLSuccess';
@@ -3797,7 +6000,7 @@ function SpazShortURL(service) {
 
 SpazShortURL.prototype.getAPIObj = function(service) {
 	
-	var apis = {}
+	var apis = {};
 	
 	apis[SPAZCORE_SHORTURL_SERVICE_BITLY] = {
 		'url'	  : 'http://bit.ly/api',
@@ -3819,7 +6022,7 @@ SpazShortURL.prototype.getAPIObj = function(service) {
 		'processResult' : function(data) {
 			if (apis[SPAZCORE_SHORTURL_SERVICE_BITLY].processing_multiple === true) {
 				var result = sc.helpers.deJSON(data);
-				var rs = {}
+				var rs = {};
 				for (var i in result.results) {
 					rs[i] = result.results[i].shortUrl;
 				}
@@ -3836,14 +6039,14 @@ SpazShortURL.prototype.getAPIObj = function(service) {
 		'getData' : function(longurl, opts){
 			
 			if (longurl.match(/ /gi)) {
-				var longurl = longurl.replace(/ /gi, '%20');
+				longurl = longurl.replace(/ /gi, '%20');
 			}
 			
 			var shortie = {
 				orig: longurl,
 				url:  longurl,
 				email:	 '',
-				private: 'false',
+				'private': 'false',
 				format:	 'rest'
 			};
 			return shortie;
@@ -3858,7 +6061,7 @@ SpazShortURL.prototype.getAPIObj = function(service) {
 	};
 	
 	return apis[service];
-}
+};
 
 
 /**
@@ -3870,7 +6073,7 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 	
 	var shortener = this;
 	
-	if (!opts) { opts = {} };
+	if (!opts) { opts = {}; }
 
 	/*
 		set defaults if needed
@@ -3892,9 +6095,9 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 		complete:function(xhr, rstr) {
 		},
 		'error':function(xhr, msg, exc) {
-			sc.helpers.dump(shortener.api.url + ' error:'+msg)
+			sc.helpers.dump(shortener.api.url + ' error:'+msg);
 			
-			var errobj = {'url':shortener.api.url, 'xhr':null, 'msg':null}
+			var errobj = {'url':shortener.api.url, 'xhr':null, 'msg':null};
 			
 			if (xhr) {
 				errobj.xhr = xhr;
@@ -3914,7 +6117,7 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 				return_data = {
 					'shorturl':data,
 					'longurl' :longurl
-				}
+				};
 			}
 			shortener._onShortenResponseSuccess(return_data, opts.event_target);
 		},
@@ -3943,9 +6146,9 @@ SpazShortURL.prototype.expand = function(shorturl, opts) {
 		complete:function(xhr, rstr) {
 		},
 		'error':function(xhr, msg, exc) {
-			sc.helpers.dump(this.url + ' error:'+msg)
+			sc.helpers.dump(this.url + ' error:'+msg);
 			
-			var errobj = {'url':this.url, 'xhr':null, 'msg':null}
+			var errobj = {'url':this.url, 'xhr':null, 'msg':null};
 			
 			if (xhr) {
 				errobj.xhr = xhr;
@@ -3987,6 +6190,18 @@ SpazShortURL.prototype._onExpandResponseSuccess = function(data, target) {
 SpazShortURL.prototype._onExpandResponseFailure = function(errobj, target) {
 	sc.helpers.triggerCustomEvent(sc.events.newExpandURLFailure, target, errobj);
 };
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+plusplus: false,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc;
+
 /**
  * SpazTemplate 
  * designed for fast templating functions
@@ -3996,7 +6211,7 @@ function SpazTemplate() {
 	
 	this._tpls = {};
 	
-};
+}
 
 /**
  * @param string name      the name to call the method with in parseTemplate
@@ -4030,6 +6245,18 @@ SpazTemplate.prototype.parseArray    = function(methodname, data_array) {
 	}
 	return parsed;
 };
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+plusplus: false,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, jQuery;
+
 /**
  * @fileOverview File containing the SpazTimeline object definition
  * @author <a href="mailto:coj@funkatron.com">coj@funkatron.com</a>
@@ -4085,7 +6312,7 @@ var SpazTimeline = function(opts) {
 
 SpazTimeline.prototype._init = function(opts) {
 	
-	var opts = opts || {};
+	opts = opts || {};
 	
 	this.max_items                   = opts.max_items     || 100;	
 	this.refresh_time                = opts.refresh_time  || 1000*60*2; // mseconds
@@ -4221,7 +6448,7 @@ SpazTimeline.prototype.renderItem = function(item, templatefunc) {
 	
 	return html;
 	
-}
+};
 
 
 SpazTimeline.prototype.removeExtraItems = function() {
@@ -4291,7 +6518,7 @@ SpazTimeline.prototype.sortItems = function(selector, sortfunc) {
  */
 SpazTimeline.prototype.select = function(selector, container) {
 	if (!container) {
-		container = this.timeline_container_selector
+		container = this.timeline_container_selector;
 	}
 	return jQuery(selector, container).get();
 };
@@ -4309,6 +6536,20 @@ SpazTimeline.prototype.append = function(htmlitem) {
 SpazTimeline.prototype.getEntrySelector = function() {
 	return this.timeline_container_selector + ' ' + this.timeline_item_selector;
 };
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+plusplus: false,
+regexp: false,
+sub: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, jQuery, window, Mojo, use_palmhost_proxy;
+
 /**
  * @depends ../helpers/string.js 
  * @depends ../helpers/datetime.js 
@@ -4319,22 +6560,22 @@ SpazTimeline.prototype.getEntrySelector = function() {
 
 
 /**
- * various const definitions
+ * various constant definitions
  */
-const SPAZCORE_SECTION_FRIENDS = 'friends';
-const SPAZCORE_SECTION_REPLIES = 'replies';
-const SPAZCORE_SECTION_DMS = 'dms';
-const SPAZCORE_SECTION_FAVORITES = 'favorites';
-const SPAZCORE_SECTION_COMBINED = 'combined';
-const SPAZCORE_SECTION_PUBLIC = 'public';
-const SPAZCORE_SECTION_SEARCH = 'search';
-const SPAZCORE_SECTION_USER = 'user-timeline';
+var SPAZCORE_SECTION_FRIENDS = 'friends';
+var SPAZCORE_SECTION_REPLIES = 'replies';
+var SPAZCORE_SECTION_DMS = 'dms';
+var SPAZCORE_SECTION_FAVORITES = 'favorites';
+var SPAZCORE_SECTION_COMBINED = 'combined';
+var SPAZCORE_SECTION_PUBLIC = 'public';
+var SPAZCORE_SECTION_SEARCH = 'search';
+var SPAZCORE_SECTION_USER = 'user-timeline';
 
-const SPAZCORE_SERVICE_TWITTER = 'twitter';
-const SPAZCORE_SERVICE_IDENTICA = 'identi.ca';
-const SPAZCORE_SERVICE_CUSTOM = 'custom';
-const SPAZCORE_SERVICEURL_TWITTER = 'https://twitter.com/';
-const SPAZCORE_SERVICEURL_IDENTICA = 'https://identi.ca/api/';
+var SPAZCORE_SERVICE_TWITTER = 'twitter';
+var SPAZCORE_SERVICE_IDENTICA = 'identi.ca';
+var SPAZCORE_SERVICE_CUSTOM = 'custom';
+var SPAZCORE_SERVICEURL_TWITTER = 'https://twitter.com/';
+var SPAZCORE_SERVICEURL_IDENTICA = 'https://identi.ca/api/';
 
 /**
  * A Twitter API library for Javascript
@@ -4412,8 +6653,8 @@ function SpazTwit(username, password, opts) {
 	*/
 	this.cache = {
 		users:{},
-		posts:{},
-	}
+		posts:{}
+	};
 	
 	this.me = {};
 	
@@ -4425,28 +6666,28 @@ function SpazTwit(username, password, opts) {
 	*/
 	jQuery.ajaxSetup( {
         timeout:1000*45, // 45 seconds
-        async:true,
+        async:true
     });
 
 	/**
 	 * remap dump calls as appropriate 
 	 */
 	if (sc && sc.helpers && sc.helpers.dump) {
-		dump = sc.helpers.dump;
+		window.dump = sc.helpers.dump;
 	} else { // do nothing!
-		function dump(input) {
+		var dump = function(input) {
 			return;
-		}
+		};
 	}
 }
 
 
 SpazTwit.prototype.getUsername = function() {
 	return this.username;
-}
+};
 SpazTwit.prototype.getPassword = function() {
 	return this.password;
-}
+};
 
 /**
  * retrieves the last status id retrieved for a given section
@@ -4463,7 +6704,7 @@ SpazTwit.prototype.getLastId   = function(section) {
  * @param {integer} id  the new last id retrieved for this section
  */
 SpazTwit.prototype.setLastId   = function(section, id) {
-	this.data[section].lastid = parseInt(id);
+	this.data[section].lastid = parseInt(id, 10);
 };
 
 
@@ -4551,7 +6792,7 @@ SpazTwit.prototype.combinedTimelineFinished = function() {
  */
 SpazTwit.prototype.combinedTimelineHasErrors = function() {
 	if (this.combined_errors.length > 0) {
-		return true
+		return true;
 	} else {
 		return false;
 	}
@@ -4681,9 +6922,9 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 	
 	if (urls[key].indexOf('{{ID}}') > -1) {
 		if (typeof(urldata) === 'string') {
-			urls[key] = urls[key].replace('{{ID}}', urldata)
+			urls[key] = urls[key].replace('{{ID}}', urldata);
 		} else if (urldata && typeof(urldata) === 'object') {
-			urls[key] = urls[key].replace('{{ID}}', urldata.id)
+			urls[key] = urls[key].replace('{{ID}}', urldata.id);
 		}
 		
 	}
@@ -4691,20 +6932,20 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 
     if (urls[key]) {
 	
-		if (urldata && typeof urldata != "string") {
+		if (urldata && typeof urldata !== "string") {
 			urldata = '?'+jQuery.param(urldata);
 		} else {
 			urldata = '';
 		}
 		
-		if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER && (key == 'search' || key == 'trends')) {
+		if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER && (key === 'search' || key === 'trends')) {
 			return this._postProcessURL(urls[key] + urldata);
 		} else {
 			return this._postProcessURL(this.baseurl + urls[key] + urldata);
 		}
         
     } else {
-        return false
+        return false;
     }
 
 };
@@ -4738,7 +6979,7 @@ SpazTwit.prototype.verifyCredentials = function(username, password) {
 		'success_event_type':'verify_credentials_succeeded',
 		'failure_event_type':'verify_credentials_failed',
 		'method':'GET'
-	}
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -4761,7 +7002,7 @@ SpazTwit.prototype._processAuthenticatedUser = function(data, finished_event) {
 	// jQuery().trigger(finished_event, [this.me]);
 	this.triggerEvent(finished_event, this.me);
 	
-}
+};
 
 
 /**
@@ -4829,7 +7070,7 @@ SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page, processi
  */
 SpazTwit.prototype._processFriendsTimeline = function(ret_items, finished_event, processing_opts) {
 	this._processTimeline(SPAZCORE_SECTION_FRIENDS, ret_items, finished_event, processing_opts);
-}
+};
 
 
 /**
@@ -4884,7 +7125,7 @@ SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts)
 SpazTwit.prototype._processRepliesTimeline = function(ret_items, finished_event, processing_opts) {
 	sc.helpers.dump('Processing '+ret_items.length+' items returned from replies method');
 	this._processTimeline(SPAZCORE_SECTION_REPLIES, ret_items, finished_event, processing_opts);
-}
+};
 
 /**
  *  
@@ -4936,7 +7177,7 @@ SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processin
 SpazTwit.prototype._processDMTimeline = function(ret_items, finished_event, processing_opts) {
 	sc.helpers.dump('Processing '+ret_items.length+' items returned from DM method');
 	this._processTimeline(SPAZCORE_SECTION_DMS, ret_items, finished_event, processing_opts);
-}
+};
 
 /**
  *  
@@ -4970,7 +7211,7 @@ SpazTwit.prototype.getFavorites = function(page, processing_opts) {
  */
 SpazTwit.prototype._processFavoritesTimeline = function(ret_items, finished_event, processing_opts) {
 	this._processTimeline(SPAZCORE_SECTION_FAVORITES, ret_items, finished_event, processing_opts);
-}
+};
 
 
 
@@ -5009,7 +7250,7 @@ SpazTwit.prototype.getUserTimeline = function(id, count, page) {
  */
 SpazTwit.prototype._processUserTimeline = function(ret_items, finished_event, processing_opts) {
 	this._processTimeline(SPAZCORE_SECTION_USER, ret_items, finished_event, processing_opts);
-}
+};
 
 
 
@@ -5024,7 +7265,7 @@ SpazTwit.prototype.getCombinedTimeline = function(com_opts) {
 
 	var opts = {
 		'combined':true
-	}
+	};
 	
 	if (com_opts) {
 		if (com_opts.friends_count) {
@@ -5136,7 +7377,7 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, finished_eve
 		/*
 			set lastid
 		*/ 
-		var lastid = ret_items[ret_items.length-1].id
+		var lastid = ret_items[ret_items.length-1].id;
 		this.data[SPAZCORE_SECTION_SEARCH].lastid = lastid;
 		sc.helpers.dump('this.data['+SPAZCORE_SECTION_SEARCH+'].lastid:'+this.data[SPAZCORE_SECTION_SEARCH].lastid);
 
@@ -5167,7 +7408,7 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, finished_eve
 			'completed_in'     : search_result.completed_in,
 			'page'             : search_result.page,
 			'query'            : search_result.query
-		}
+		};
 		// jQuery().trigger(finished_event, [this.data[SPAZCORE_SECTION_SEARCH].newitems, search_info]);
 		this.triggerEvent(finished_event, [this.data[SPAZCORE_SECTION_SEARCH].newitems, search_info]);
 		
@@ -5178,7 +7419,7 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, finished_eve
 		this.triggerEvent(finished_event, []);
 	}
 	
-}
+};
 
 
 
@@ -5237,7 +7478,7 @@ SpazTwit.prototype._processSearchItem = function(item, section_name) {
 	
 	
 	return item;
-}
+};
 
 
 SpazTwit.prototype.getTrends = function() {
@@ -5275,7 +7516,7 @@ SpazTwit.prototype._processTrends = function(trends_result, finished_event, proc
 		this.triggerEvent(finished_event, ret_items);
 		
 	}
-}
+};
 
 
 /**
@@ -5295,14 +7536,14 @@ SpazTwit.prototype._getTimeline = function(opts) {
 	var xhr = jQuery.ajax({
         'complete':function(xhr, msg){
             sc.helpers.dump(opts.url + ' complete:'+msg);
-			if (msg == 'timeout') {
+			if (msg === 'timeout') {
 				// jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
 				stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':xhr, 'msg':msg});				
 			}
         },
         'error':function(xhr, msg, exc) {
-			sc.helpers.dump(opts.url + ' error:"'+msg+'"')
-			if (msg.toLowerCase().indexOf('timeout') != -1) {
+			sc.helpers.dump(opts.url + ' error:"'+msg+'"');
+			if (msg.toLowerCase().indexOf('timeout') !== -1) {
 				stwit.triggerEvent(document, opts.failure_event_type, {'url':opts.url, 'xhr':null, 'msg':msg});
 			} else if (xhr) {
 				if (!xhr.readyState < 4) {
@@ -5364,7 +7605,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
 					ensures that "this" inside the callback refers to our
 					SpazTwit object, and not the jQuery.Ajax object
 				*/
-				opts.process_callback.call(stwit, data, opts.success_event_type, opts.processing_opts)
+				opts.process_callback.call(stwit, data, opts.success_event_type, opts.processing_opts);
 			} else {
 				// jQuery().trigger(opts.success_event_type, [data]);
 				stwit.triggerEvent(opts.success_event_type, data);
@@ -5375,12 +7616,12 @@ SpazTwit.prototype._getTimeline = function(opts) {
         'beforeSend':function(xhr){
 			sc.helpers.dump("beforesend");
 			if (opts.username && opts.password) {
-				xhr.setRequestHeader("Authorization", "Basic " + Base64.encode(opts.username + ":" + opts.password));
+				xhr.setRequestHeader("Authorization", "Basic " + sc.helpers.Base64.encode(opts.username + ":" + opts.password));
 			}
         },
         'type':"GET",
         'url': 		opts.url,
-        'data': 	opts.data,
+        'data': 	opts.data
 	});
 	
 	return xhr;
@@ -5432,7 +7673,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 		} else { // this is a "normal" timeline that we want to be persistent
 			
 			// set lastid
-			var lastid = ret_items[ret_items.length-1].id
+			var lastid = ret_items[ret_items.length-1].id;
 			this.data[section_name].lastid = lastid;
 			sc.helpers.dump('this.data['+section_name+'].lastid:'+this.data[section_name].lastid);
 
@@ -5474,7 +7715,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
 			this.data[SPAZCORE_SECTION_COMBINED].newitems = this.data[SPAZCORE_SECTION_COMBINED].newitems.concat(this.data[section_name].newitems);
 			
 			// sort these items -- the timelines can be out of order when combined
-			this.data[SPAZCORE_SECTION_COMBINED].newitems = this.data[SPAZCORE_SECTION_COMBINED].newitems.sort(this._sortItemsByDateAsc)
+			this.data[SPAZCORE_SECTION_COMBINED].newitems = this.data[SPAZCORE_SECTION_COMBINED].newitems.sort(this._sortItemsByDateAsc);
 			
 			this.data[SPAZCORE_SECTION_COMBINED].items = this.data[SPAZCORE_SECTION_COMBINED].items.concat(this.data[SPAZCORE_SECTION_COMBINED].newitems);
 			this.data[SPAZCORE_SECTION_COMBINED].items = this.removeDuplicates(this.data[SPAZCORE_SECTION_COMBINED].items);
@@ -5520,7 +7761,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, finished
  * This modifies a Twitter post, adding some properties. All new properties are
  * prepended with "SC_"
  * 
- * this executes within the jQuery.each scope, so this == the item 
+ * this executes within the jQuery.each scope, so this === the item 
  */
 SpazTwit.prototype._processItem = function(item, section_name) {
 	
@@ -5533,7 +7774,7 @@ SpazTwit.prototype._processItem = function(item, section_name) {
 		is reply? Then add .SC_is_reply
 	*/
 	if ( (item.in_reply_to_screen_name && item.SC_user_received_by) ) {
-		if (item.in_reply_to_screen_name.toLowerCase() == item.SC_user_received_by.toLowerCase() ) {
+		if (item.in_reply_to_screen_name.toLowerCase() === item.SC_user_received_by.toLowerCase() ) {
 			item.SC_is_reply = true;
 		}
 	}
@@ -5602,15 +7843,18 @@ SpazTwit.prototype._processItem = function(item, section_name) {
  * @private
  */
 SpazTwit.prototype._callMethod = function(opts) {
+	
+	var method;
+	
 	/*
 		for closure references
 	*/
 	var stwit = this;
 	
 	if (opts.method) {
-		var method = opts.method;
+		method = opts.method;
 	} else {
-		var method = 'POST'
+		method = 'POST';
 	}
 	
 	var xhr = jQuery.ajax({
@@ -5656,7 +7900,7 @@ SpazTwit.prototype._callMethod = function(opts) {
 					ensures that "this" inside the callback refers to our
 					SpazTwit object, and not the jQuery.Ajax object
 				*/
-				opts.process_callback.call(stwit, data, opts.success_event_type)
+				opts.process_callback.call(stwit, data, opts.success_event_type);
 			} else {
 				// jQuery().trigger(opts.success_event_type, [data]);
 				stwit.triggerEvent(opts.success_event_type, data);
@@ -5666,7 +7910,7 @@ SpazTwit.prototype._callMethod = function(opts) {
 	    'beforeSend':function(xhr){
 			sc.helpers.dump(opts.url + ' beforesend');
 			if (opts.username && opts.password) {
-				xhr.setRequestHeader("Authorization", "Basic " + Base64.encode(opts.username + ":" + opts.password));
+				xhr.setRequestHeader("Authorization", "Basic " + sc.helpers.Base64.encode(opts.username + ":" + opts.password));
 			}
 	    },
 	    'type': method,
@@ -5692,7 +7936,7 @@ SpazTwit.prototype.getUser = function(user_id) {
 		'success_event_type':'get_user_succeeded',
 		'failure_event_type':'get_user_failed',
 		'method':'GET'
-	}
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -5717,8 +7961,8 @@ SpazTwit.prototype.addFriend = function(user_id) {
 		'password':this.password,
 		'success_event_type':'create_friendship_succeeded',
 		'failure_event_type':'create_friendship_failed',
-		'data':data,
-	}
+		'data':data
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -5737,8 +7981,8 @@ SpazTwit.prototype.removeFriend = function(user_id) {
 		'password':this.password,
 		'success_event_type':'destroy_friendship_succeeded',
 		'failure_event_type':'destroy_friendship_failed',
-		'data':data,
-	}
+		'data':data
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -5759,8 +8003,8 @@ SpazTwit.prototype.block = function(user_id) {
 		'password':this.password,
 		'success_event_type':'create_block_succeeded',
 		'failure_event_type':'create_block_failed',
-		'data':data,
-	}
+		'data':data
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -5779,8 +8023,8 @@ SpazTwit.prototype.unblock = function(user_id) {
 		'password':this.password,
 		'success_event_type':'destroy_block_succeeded',
 		'failure_event_type':'destroy_block_failed',
-		'data':data,
-	}
+		'data':data
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -5819,7 +8063,7 @@ SpazTwit.prototype.update = function(status, source, in_reply_to_status_id) {
 		'process_callback': this._processUpdateReturn,
 		'success_event_type':'update_succeeded',
 		'failure_event_type':'update_failed'
-	}
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -5856,7 +8100,7 @@ SpazTwit.prototype.getOne = function(id) {
 		'success_event_type':'get_one_status_succeeded',
 		'failure_event_type':'get_one_status_failed',
 		'method':'GET'
-	}
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -5889,8 +8133,8 @@ SpazTwit.prototype.favorite = function(id) {
 		'password':this.password,
 		'success_event_type':'create_favorite_succeeded',
 		'failure_event_type':'create_favorite_failed',
-		'data':data,
-	}
+		'data':data
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -5911,7 +8155,7 @@ SpazTwit.prototype.unfavorite = function(id) {
 		'success_event_type':'destroy_favorite_succeeded',
 		'failure_event_type':'destroy_favorite_failed',
 		'data':data
-	}
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -5937,7 +8181,7 @@ SpazTwit.prototype.updateLocation = function(location_str) {
 		'success_event_type':'update_location_succeeded',
 		'failure_event_type':'update_location_failed',
 		'data':data
-	}
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -5962,11 +8206,11 @@ SpazTwit.prototype.test = function() {};
  */
 SpazTwit.prototype._postProcessURL = function(url) {
 	
-	if (typeof Mojo != "undefined") { // we're in webOS		
+	if (typeof Mojo !== "undefined") { // we're in webOS		
 		if (use_palmhost_proxy) { // we are not on an emu or device, so proxy calls
 			var re = /https?:\/\/.[^\/:]*(?::[0-9]+)?/;
 			var match = url.match(re);
-			if (match && match[0] != Mojo.hostingPrefix) {
+			if (match && match[0] !== Mojo.hostingPrefix) {
 				url = "/proxy?url=" + encodeURIComponent(url);
 			}
 			return url;		
@@ -5977,7 +8221,7 @@ SpazTwit.prototype._postProcessURL = function(url) {
 	} else {
 		return url;
 	}
-}
+};
 
 
 /**
@@ -5991,7 +8235,7 @@ SpazTwit.prototype._postProcessURL = function(url) {
  */
 SpazTwit.prototype._sortItemsAscending = function(a,b) {
 	return (a.id - b.id);
-}
+};
 
 /**
  * sorting function for an array of tweets. Desc by ID.
@@ -6004,7 +8248,7 @@ SpazTwit.prototype._sortItemsAscending = function(a,b) {
  */
 SpazTwit.prototype._sortItemsDescending = function(a,b) {
 	return (b.id - a.id);
-}
+};
 
 
 
@@ -6023,7 +8267,7 @@ SpazTwit.prototype._sortItemsByDateAsc = function(a,b) {
 	var time_a = sc.helpers.httpTimeToInt(a.created_at);
 	var time_b = sc.helpers.httpTimeToInt(b.created_at);
 	return (time_a - time_b);
-}
+};
 
 /**
  * sorting function for an array of tweets. Desc by date.
@@ -6040,7 +8284,7 @@ SpazTwit.prototype._sortItemsByDateDesc = function(a,b) {
 	var time_a = sc.helpers.httpTimeToInt(a.created_at);
 	var time_b = sc.helpers.httpTimeToInt(b.created_at);
 	return (time_b - time_a);
-}
+};
 
 
 /**
@@ -6073,7 +8317,7 @@ SpazTwit.prototype.removeDuplicates = function(array) {
 
 	return ret;
 	
-}
+};
 
 
 /**
@@ -6101,7 +8345,7 @@ SpazTwit.prototype.removeExtraElements = function(items, max, remove_from_top) {
 	}
 	
 	return items;
-}
+};
 
 
 /**
@@ -6117,7 +8361,7 @@ SpazTwit.prototype.getSavedSearches = function() {
 		'success_event_type':'new_saved_searches_data',
 		'failure_event_type':'error_saved_searches_data',
 		'method':'GET'
-	}
+	};
 
 	/*
 		Perform a request and get true or false back
@@ -6177,9 +8421,8 @@ SpazTwit.prototype.removeSavedSearch = function(search_id) {
 
 
 SpazTwit.prototype.triggerEvent = function(type, data) {
-	
 	var target = this.opts.event_target || document;
-	var data   = data || null;
+	data   = data || null;
 	
 	sc.helpers.dump('TriggerEvent: target:'+target.toString()+ ' type:'+type+ ' data:'+data);
 	
@@ -6197,8 +8440,8 @@ SpazTwit.prototype.triggerEvent = function(type, data) {
  * shortcut for SpazTwit if the SpazCore libraries are being used
  * 
  */
-if (SpazTwit) {
-	scTwit = SpazTwit;
+if (sc) {
+	var scTwit = SpazTwit;
 }
 
 

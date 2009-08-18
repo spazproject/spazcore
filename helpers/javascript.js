@@ -51,6 +51,10 @@ sc.helpers.clone = function(oldObj) {
 	return jQuery.extend({}/* clone */, oldObj);
 };
 
+sc.helpers.each = function(arr, f) {
+	
+};
+
 /**
  * We use this to do a form of inheritance, where the child inherits
  * the methods and properties of the supertype
