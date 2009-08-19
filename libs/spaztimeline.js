@@ -39,7 +39,7 @@ var SpazTimeline = function(opts) {
 	/**
 	 * Again, due to scope issues, we define this here to take advantage of the closure 
 	 */
-	SpazTimeline.prototype.onSuccess = function(e) {
+	this.onSuccess = function(e) {
 		var data = sc.helpers.getEventData(e);
 		thisTL.data_success.call(thisTL, e, data);
 		thisTL.startRefresher();	
@@ -48,7 +48,7 @@ var SpazTimeline = function(opts) {
 	/**
 	 * Again, due to scope issues, we define this here to take advantage of the closure 
 	 */
-	SpazTimeline.prototype.onFailure = function(e) {
+	this.onFailure = function(e) {
 		var data = sc.helpers.getEventData(e);
 		thisTL.data_failure.call(thisTL, e, data);
 		thisTL.startRefresher();	
@@ -134,6 +134,7 @@ SpazTimeline.prototype.requestData = function() {
 
 SpazTimeline.prototype.startListening = function() {
 	var thisTL = this;
+	sch.dump("Listening for "+thisTL.success_event);
 	sc.helpers.listen(thisTL.event_target, thisTL.success_event, thisTL.onSuccess);
 	sc.helpers.listen(thisTL.event_target, thisTL.failure_event, thisTL.onFailure);
 };
@@ -147,7 +148,9 @@ SpazTimeline.prototype.stopListening = function() {
 
 SpazTimeline.prototype.startRefresher = function() {
 	this.stopRefresher();
-	this.refresher = setInterval(this.refresh, this.refresh_time);
+	if (this.refresh_time > 1000) { // the minimum refresh is 1000ms. Otherwise we don't auto-refresh
+		this.refresher = setInterval(this.refresh, this.refresh_time);
+	}
 };
 
 
