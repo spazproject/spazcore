@@ -226,7 +226,7 @@ sc.helpers.autolinkTwitterHashtag = function(str, tpl) {
 
 
 
-sc.helpers.makeClickable = function(str) {
+sc.helpers.makeClickable = function(str, opts) {
 	str = sc.helpers.autolink(str);
 	str = sc.helpers.autolinkTwitterScreenname(str);
 	str = sc.helpers.autolinkTwitterHashtag(str);
@@ -263,6 +263,44 @@ sc.helpers.fromHTMLSpecialChars = function(str) {
 	sc.helpers.dump(str);
 	return str;
 };
+
+
+sc.helpers.escape_html = function(string) {
+	return sc.helpers.htmlspecialchars(string, 'ENT_QUOTES');
+};
+
+
+sc.helpers.htmlspecialchars = function(string, quote_style) {
+    // http://kevin.vanzonneveld.net
+    // +   original by: Mirek Slugen
+    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // +   bugfixed by: Nathan
+    // +   bugfixed by: Arno
+    // +    revised by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // -    depends on: get_html_translation_table
+    // *     example 1: htmlspecialchars("<a href='test'>Test</a>", 'ENT_QUOTES');
+    // *     returns 1: '&lt;a href=&#039;test&#039;&gt;Test&lt;/a&gt;'
+
+    var histogram = {}, symbol = '', tmp_str = '', i = 0;
+    tmp_str = string.toString();
+
+    if (false === (histogram = sc.helpers._get_html_translation_table('HTML_SPECIALCHARS', quote_style))) {
+        return false;
+    }
+
+	// first, do &amp;
+	tmp_str = tmp_str.split('&').join(histogram['&']);
+	
+	// then do the rest
+    for (symbol in histogram) {
+		if (symbol != '&') {
+			entity = histogram[symbol];
+	        tmp_str = tmp_str.split(symbol).join(entity);
+		}
+    }
+
+    return tmp_str;
+}
 
 
 
