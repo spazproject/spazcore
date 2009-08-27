@@ -22,6 +22,18 @@ var SPAZCORE_PLATFORM_WEBOS		= 'webOS';
 var SPAZCORE_PLATFORM_TITANIUM	= 'Titanium';
 var SPAZCORE_PLATFORM_UNKNOWN		= '__UNKNOWN';
 
+/**
+ * error reporting levels 
+ */
+var SPAZCORE_DUMPLEVEL_DEBUG   = 4;
+var SPAZCORE_DUMPLEVEL_NOTICE  = 3;
+var SPAZCORE_DUMPLEVEL_WARNING = 2;
+var SPAZCORE_DUMPLEVEL_ERROR   = 1;
+var SPAZCORE_DUMPLEVEL_NONE    = 0; // this means "never ever dump anything!"
+
+
+
+
 
 /**
 * Returns a string identifier for the platform.
@@ -75,10 +87,39 @@ sc.helpers.isTitanium = function() {
 
 
 /**
+ * Helper to send a debug dump 
+ */
+sc.helpers.debug = function(obj) {
+	sc.helpers.dump(obj, SPAZCORE_DUMPLEVEL_DEBUG);
+};
+
+/**
+ * helper to send a notice dump 
+ */
+sc.helpers.note = function(obj) {
+	sc.helpers.dump(obj, SPAZCORE_DUMPLEVEL_NOTICE);
+};
+
+/**
+ * helper to send a warn dump 
+ */
+sc.helpers.warn = function(obj) {
+	sc.helpers.dump(obj, SPAZCORE_DUMPLEVEL_WARN);
+};
+
+/**
+ * helper to send an error dump 
+ */
+sc.helpers.error = function(obj) {
+	sc.helpers.dump(obj, SPAZCORE_DUMPLEVEL_ERROR);
+};
+
+
+/**
  * A simple logging function
  * @platformstub
  */
-sc.helpers.dump = function(obj) {
+sc.helpers.dump = function(obj, level) {
 	// stub
 };
 
