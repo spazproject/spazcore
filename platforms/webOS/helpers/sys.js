@@ -16,11 +16,16 @@ var sc, Mojo, use_palmhost_proxy;
  */
 
 /**
- * @TODO this seems crappy and should probably be rewritten
  * dump an object's first level to console
  */
-sc.helpers.dump = function(obj) {
+sc.helpers.dump = function(obj, level) {
 	var dumper;
+	
+	if (!level) { level = SPAZCORE_DUMPLEVEL_DEBUG; }
+	
+	if (sc.dumplevel < level ) {
+		return;
+	}
 	
 	if (sc.helpers.isString(obj) || sc.helpers.isNumber(obj) || !obj) {
 		dumper = Mojo.Log.info;

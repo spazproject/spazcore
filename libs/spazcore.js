@@ -79,6 +79,18 @@ sc.app = {};
 sc.helpers = {};
 
 /**
+ * dump level for limiting what gets dumped to console 
+ */
+sc.dumplevel = 1;
+
+/**
+ * method to set dump level 
+ */
+sc.setDumpLevel = function(level) {
+	sc.dumplevel = parseInt(level, 10);
+};
+
+/**
  * @namespace helper shortcuts 
  * this lets us write "sch.method" instead of "sc.helpers.method"
  * 
@@ -87,6 +99,8 @@ var sch = sc.helpers;
 
 
 sc.events = {};
+
+
 
 
 
