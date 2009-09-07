@@ -1,6 +1,11 @@
 #!/bin/bash
 # run this from the base dir of SpazCore
 
+BUILD_FILE='spazcore-titanium.js'
+BUILD_DATE=`date "+%Y-%m-%d %H:%M:%S %Z"`
+
+echo "/*********** Built ${BUILD_DATE} ***********/" > $BUILD_FILE
+
 cat libs/spazcore.js \
 	vendors/date.js \
 	vendors/json2.js \
@@ -23,4 +28,4 @@ cat libs/spazcore.js \
 	libs/spaztwit.js \
 	platforms/Titanium/helpers/sys.js \
 	platforms/Titanium/libs/spazprefs.js \
-	> spazcore-titanium.js
+	>> $BUILD_FILE
