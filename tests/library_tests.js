@@ -33,8 +33,8 @@ $(document).ready(function() {
 	
 	test("removeDuplicates", function() {
 		var nodupes = tdata.twit.removeDuplicates(tdata.combined_data);
-		console.log(tdata.combined_data.length);
-		console.log(nodupes.length);
+		// console.log(tdata.combined_data.length);
+		// console.log(nodupes.length);
 		
 	});
 	

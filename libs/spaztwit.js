@@ -25,6 +25,7 @@ var sc, jQuery, window, Mojo, use_palmhost_proxy;
  * various constant definitions
  */
 var SPAZCORE_SECTION_FRIENDS = 'friends';
+var SPAZCORE_SECTION_HOME = 'home';
 var SPAZCORE_SECTION_REPLIES = 'replies';
 var SPAZCORE_SECTION_DMS = 'dms';
 var SPAZCORE_SECTION_FAVORITES = 'favorites';
@@ -105,6 +106,7 @@ function SpazTwit(username, password, opts) {
 	this.opts            = opts || {};
 	this.opts.event_mode = this.opts.event_mode || 'DOM';
 	this.opts.event_target = this.opts.event_target || document;
+	this.opts.timeout    = this.opts.timeout || 1000*60; // 60 seconds default
 	
 	this.setSource('SpazCore');
 	
@@ -124,14 +126,6 @@ function SpazTwit(username, password, opts) {
 	
 
 	this.setBaseURL(SPAZCORE_SERVICEURL_TWITTER);
-
-	/*
-		apply defaults for ajax calls
-	*/
-	jQuery.ajaxSetup( {
-        timeout:1000*45, // 45 seconds
-        async:true
-    });
 
 	/**
 	 * remap dump calls as appropriate 
@@ -155,7 +149,7 @@ SpazTwit.prototype.getPassword = function() {
 
 /**
  * retrieves the last status id retrieved for a given section
- * @param {string} section  use one of the defined constants (ex. SPAZCORE_SECTION_FRIENDS)
+ * @param {string} section  use one of the defined constants (ex. SPAZCORE_SECTION_HOME)
  * @return {integer} the last id retrieved for this section
  */
 SpazTwit.prototype.getLastId   = function(section) {
@@ -164,7 +158,7 @@ SpazTwit.prototype.getLastId   = function(section) {
 
 /**
  * sets the last status id retrieved for a given section
- * @param {string} section  use one of the defined constants (ex. SPAZCORE_SECTION_FRIENDS)
+ * @param {string} section  use one of the defined constants (ex. SPAZCORE_SECTION_HOME)
  * @param {integer} id  the new last id retrieved for this section
  */
 SpazTwit.prototype.setLastId   = function(section, id) {
@@ -177,6 +171,13 @@ SpazTwit.prototype.initializeData = function() {
 		this is where we store timeline data and settings for persistence
 	*/
 	this.data = {};
+	this.data[SPAZCORE_SECTION_HOME] = {
+		'lastid':   1,
+		'items':   [],
+		'newitems':[],
+		'max':200,
+		'min_age':5*60
+	};
 	this.data[SPAZCORE_SECTION_FRIENDS] = {
 		'lastid':   1,
 		'items':   [],
@@ -240,7 +241,7 @@ SpazTwit.prototype.initializeData = function() {
  */
 SpazTwit.prototype.initializeCombinedTracker = function() {
 	this.combined_finished = {};
-	this.combined_finished[SPAZCORE_SECTION_FRIENDS] = false;
+	this.combined_finished[SPAZCORE_SECTION_HOME] = false;
 	this.combined_finished[SPAZCORE_SECTION_REPLIES] = false;
 	this.combined_finished[SPAZCORE_SECTION_DMS] = false;
 	
@@ -349,6 +350,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     // Timeline URLs
     urls.public_timeline    = "statuses/public_timeline.json";
     urls.friends_timeline   = "statuses/friends_timeline.json";
+    urls.home_timeline		= "statuses/home_timeline.json";
     urls.user_timeline      = "statuses/user_timeline.json";
     urls.replies_timeline   = "statuses/replies.json";
     urls.show				= "statuses/show/{{ID}}.json";
@@ -490,6 +492,62 @@ SpazTwit.prototype.getPublicTimeline = function() {
 		'success_event_type': 'new_public_timeline_data'
 	});
 };
+
+
+/**
+ * Initiates retrieval of the home timeline (all the people you are following)
+ * 
+ * @param {integer} since_id default is 1
+ * @param {integer} count default is 200 
+ * @param {integer} page default is null (ignored if null)
+ */
+SpazTwit.prototype.getHomeTimeline = function(since_id, count, page, processing_opts) {
+	
+	if (!page) { page = null;}
+	if (!count) { count = 50;}
+	if (!since_id) {
+		if (this.data[SPAZCORE_SECTION_HOME].lastid && this.data[SPAZCORE_SECTION_HOME].lastid > 1) {
+			since_id = this.data[SPAZCORE_SECTION_HOME].lastid;
+		} else {
+			since_id = 1;
+		}
+	}
+	
+	if (!processing_opts) {
+		processing_opts = {};
+	}
+	
+	if (processing_opts.combined) {
+		processing_opts.section = SPAZCORE_SECTION_HOME;
+	}
+	
+	var data = {};
+	data['since_id'] = since_id;
+	data['count']	 = count;
+	if (page) {
+		data['page'] = page;
+	}
+	
+	
+	var url = this.getAPIURL('home_timeline', data);
+	this._getTimeline({
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'process_callback'	: this._processHomeTimeline,
+		'success_event_type': 'new_home_timeline_data',
+		'failure_event_type': 'error_home_timeline_data',
+		'processing_opts':processing_opts
+	});
+};
+
+/**
+ * @private
+ */
+SpazTwit.prototype._processHomeTimeline = function(ret_items, finished_event, processing_opts) {
+	this._processTimeline(SPAZCORE_SECTION_HOME, ret_items, finished_event, processing_opts);
+};
+
 
 
 /**
@@ -1004,6 +1062,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
 	var stwit = this;
 	
 	var xhr = jQuery.ajax({
+		'timeout' :this.opts.timeout,
         'complete':function(xhr, msg){
             sc.helpers.dump(opts.url + ' complete:'+msg);
 			if (msg === 'timeout') {
@@ -1388,6 +1447,7 @@ SpazTwit.prototype._callMethod = function(opts) {
 	}
 	
 	var xhr = jQuery.ajax({
+		'timeout' :this.opts.timeout,
 	    'complete':function(xhr, msg){
 	        sc.helpers.dump(opts.url + ' complete:'+msg);
 	    },
@@ -1697,9 +1757,10 @@ SpazTwit.prototype.update = function(status, source, in_reply_to_status_id) {
 SpazTwit.prototype._processUpdateReturn = function(data, finished_event) {
 	
 	/*
-		this item needs to be added to the friends timeline
+		this item needs to be added to the friends + home timeline
 		so we can avoid dupes
 	*/
+	this._processTimeline(SPAZCORE_SECTION_HOME, [data], finished_event);
 	this._processTimeline(SPAZCORE_SECTION_FRIENDS, [data], finished_event);
 };
 
