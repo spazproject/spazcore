@@ -794,7 +794,7 @@ SpazTwit.prototype._processUserTimeline = function(ret_items, finished_event, pr
  * 
  */
 SpazTwit.prototype.getCombinedTimeline = function(com_opts) {
-	var friends_count, replies_count, dm_count, friends_since, dm_since, replies_since = null;
+	var home_count, friends_count, replies_count, dm_count, home_since, friends_since, dm_since, replies_since = null;
 
 	var opts = {
 		'combined':true
@@ -804,11 +804,17 @@ SpazTwit.prototype.getCombinedTimeline = function(com_opts) {
 		if (com_opts.friends_count) {
 			friends_count = com_opts.friends_count;
 		}
+		if (com_opts.home_count) {
+			home_count = com_opts.home_count;
+		}
 		if (com_opts.replies_count) {
 			replies_count = com_opts.replies_count; // this is not used yet
 		}
 		if (com_opts.dm_count) {
 			dm_count = com_opts.dm_count; // this is not used yet
+		}
+		if (com_opts.home_since) {
+			home_since = com_opts.home_since;
 		}
 		if (com_opts.friends_since) {
 			friends_since = com_opts.friend_since;
@@ -820,13 +826,18 @@ SpazTwit.prototype.getCombinedTimeline = function(com_opts) {
 			dm_since = com_opts.dm_since;
 		}
 		
+		/*
+			we might still only pass in friends_* opts, so we translate those to home_*
+		*/
+		if (!home_count) { home_count = friends_count; }
+		if (!home_since) { home_since = friends_since; }
 		
 		if (com_opts.force) {
 			opts.force = true;
 		}
 	}
 	
-	this.getFriendsTimeline(friends_since, friends_count, null, opts);
+	this.getHomeTimeline(home_since, home_count, null, opts);
 	this.getReplies(replies_since, replies_count, null, opts);
 	this.getDirectMessages(dm_since, dm_count, null, opts);
 };

@@ -14,7 +14,7 @@ function SpazImageURL(args) {
  */
 SpazImageURL.prototype.initAPIs = function() {
 	this.addAPI('twitpic', {
-		'url_regex'       : /http:\/\/twitpic.com\/([a-zA-Z0-9]+)/gi,
+		'url_regex'       : new RegExp("http://twitpic.com/([a-zA-Z0-9]+)", "gi"),
 		'getThumbnailUrl' : function(id) {
 			var url = 'http://twitpic.com/show/thumb/'+id;
 			return url;
@@ -26,7 +26,7 @@ SpazImageURL.prototype.initAPIs = function() {
 
 
 	this.addAPI('yfrog', {
-		'url_regex'       : /http:\/\/yfrog.com\/([a-zA-Z0-9]+)/gi,
+		'url_regex'       : new RegExp("http://yfrog.(?:com|us)/([a-zA-Z0-9]+)", "gim"),
 		'getThumbnailUrl' : function(id) {
 			var url = 'http://yfrog.com/'+id+'.th.jpg';
 			return url;
@@ -139,15 +139,14 @@ SpazImageURL.prototype.addAPI = function(service_name, opts) {
  */
 SpazImageURL.prototype.findServiceUrlsInString = function(str) {
 	
-	var matches = {}, num_matches = 0, urls = [], key;
+	var matches = {}, num_matches = 0, re_matches, key, thisapi;
 	
 	for (key in this.apis) {
 		
-		var thisapi = this.getAPI(key);
+		thisapi = this.getAPI(key);
 		
-		urls = thisapi.url_regex.exec(str);
-		if (urls && urls.length > 0) {
-			matches[key] = urls;
+		while( (re_matches = thisapi.url_regex.exec(sch.trim(str))) != null) {
+			matches[key] = re_matches;
 			num_matches++;
 		}
 	}

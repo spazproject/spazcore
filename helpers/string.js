@@ -225,11 +225,51 @@ sc.helpers.autolinkTwitterHashtag = function(str, tpl) {
 
 
 
-
+/**
+ * Applies autolink, autolinkTwitterScreenname, autolinkTwitterHashtag
+ * 
+ * @param {string} str
+ * @param {oobject} opts
+ * 
+ * Opts structure:
+ *  {
+ *  	'autolink': {
+ *  		'type'      :'both', (email, url, or both)
+ *  		'extra_code':'',
+ *  		'maxlen'    :20
+ *  	},
+ *  	'screenname': {
+ *  		'tpl':'' // should contain macro '#username#'
+ *  	},
+ *  	'hashtag': {
+ *  		'tpl':'' // should contain macros '#hashtag#' and '#hashtag_enc#'
+ *  	}
+ *  }
+ */
 sc.helpers.makeClickable = function(str, opts) {
-	str = sc.helpers.autolink(str);
-	str = sc.helpers.autolinkTwitterScreenname(str);
-	str = sc.helpers.autolinkTwitterHashtag(str);
+	var autolink_type, autolink_extra_code, autolink_maxlen, screenname_tpl, hashtag_tpl;
+	
+	if (!opts) {
+		opts = {};
+	}
+	
+	if (opts.autolink) {
+		var autolink_type       = opts.autolink.type || null;
+		var autolink_extra_code = opts.autolink.extra_code || null;
+		var autolink_maxlen     = opts.autolink.maxlen || null;
+	}
+	
+	if (opts.screenname) {
+		var screenname_tpl      = opts.screenname.tpl || null;
+	}
+	
+	if (opts.hashtag) {
+		var hashtag_tpl         = opts.hashtag.tpl || null;
+	}
+	
+	str = sc.helpers.autolink(str, autolink_type, autolink_extra_code, autolink_maxlen);
+	str = sc.helpers.autolinkTwitterScreenname(str, screenname_tpl);
+	str = sc.helpers.autolinkTwitterHashtag(str, hashtag_tpl);
 	return str;
 };
 
