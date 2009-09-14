@@ -196,6 +196,10 @@ $(document).ready(function() {
 		var output= 'foo,<a href="http://twitter.com/user_name">@user_name</a>!';
 		equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
 
+		var input = ".@user_name, foo!";
+		var output= '.<a href="http://twitter.com/user_name">@user_name</a>, foo!';
+		equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
+
 		var input = "(@user_name)";
 		var output= '(<a href="http://twitter.com/user_name">@user_name</a>)';
 		equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
