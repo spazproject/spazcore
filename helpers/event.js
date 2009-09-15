@@ -26,6 +26,10 @@ var SPAZCORE_EVENTDATA_ATTRIBUTE = 'sc_data';
  */
 sc.helpers.addListener = function(target, event_type, handler, scope, use_capture) {
 
+	sch.dump('listening for '+event_type);
+	sch.dump('on target nodeName:'+target.nodeName);
+
+
 	function scope_perserver(e) {
 		handler.call(scope, e);
 	}
@@ -77,12 +81,15 @@ sc.helpers.removeListener = function(target, event_type, handler, scope, use_cap
  * This triggers a custom event using document.createEvent('Events') and target.dispatchEvent()
  * 
  * @param {string}  event_type
- * @param {target}  target   the target for the event (element, window, etc)
+ * @param {DOMElement}  target   the target for the event (element, window, etc)
  * @param {object}  data     data to pass with event
  * @param {boolean} bubble   whether the event should bubble or not. defaults to true
  * @function
  */
 sc.helpers.triggerCustomEvent = function(event_type, target, data, bubble) {
+	
+	sch.dump('triggering '+event_type);
+	sch.dump('target nodeName:'+target.nodeName);
 	
 	if (bubble !== false) {
 		bubble = true;
