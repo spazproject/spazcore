@@ -96,6 +96,7 @@ SpazTimeline.prototype._init = function(opts) {
 		throw new Error ("data_success is required");
 	}
 
+	this.container = jQuery(this.timeline_container_selector).get(0);
 
 
 };

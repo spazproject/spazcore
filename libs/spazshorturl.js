@@ -20,6 +20,25 @@ var SPAZCORE_SHORTURL_SERVICE_SHORTIE = 'short.ie';
 var SPAZCORE_SHORTURL_SERVICE_ISGD	= 'is.gd';
 var SPAZCORE_SHORTURL_SERVICE_BITLY	= 'bit.ly';
 
+var SPAZCORE_EXPANDABLE_DOMAINS = [
+	'ad.vu',
+	'bit.ly',
+	'cli.gs',
+	'ff.im',
+	'is.gd',
+	'ow.ly',
+	'poprl.com',
+	'short.ie',
+	'sn.im',
+	'snipr.com',
+	'tinyurl.com',
+	'tr.im',
+	'twurl.nl',
+	'urlzen.com',
+	'xrl.us',
+	'zi.ma'
+];
+
 
 /**
  * events raised here 
@@ -27,8 +46,8 @@ var SPAZCORE_SHORTURL_SERVICE_BITLY	= 'bit.ly';
 if (!sc.events) { sc.events = {}; }
 sc.events.newShortURLSuccess	= 'newShortURLSuccess';
 sc.events.newShortURLFailure	= 'newShortURLFailure';
-sc.events.newExpandURLSuccess = 'recoverLongURLSuccess';
-sc.events.newExpandURLFailure = 'recoverLongURLFailure';
+sc.events.newExpandURLSuccess   = 'recoverLongURLSuccess';
+sc.events.newExpandURLFailure   = 'recoverLongURLFailure';
 
 
 /**
@@ -38,6 +57,9 @@ sc.events.newExpandURLFailure = 'recoverLongURLFailure';
 function SpazShortURL(service) {
 	
 	this.api = this.getAPIObj(service);
+	
+	
+	this.expanded_cache = {};
 	
 }
 
@@ -184,7 +206,30 @@ SpazShortURL.prototype._onShortenResponseFailure = function(errobj, target) {
 SpazShortURL.prototype.expand = function(shorturl, opts) {
 	
 	var shortener = this;
+	var longurl;
 	
+	if (!opts) {
+		opts = {}
+	}
+	
+	opts.event_target = opts.event_target || document;
+	
+	/*
+		Do a lookup in the cache first
+	*/
+	if ( (longurl = this.getExpandedURLFromCache()) ) {
+		shortener._onExpandResponseSuccess({
+				'shorturl':shorturl,
+				'longurl' :longurl
+			},
+			opts.event_target
+		);
+		return;
+	}
+	
+	/*
+		if not cached, do query to look it up
+	*/
 	var xhr = jQuery.ajax({
 		complete:function(xhr, rstr) {
 		},
@@ -206,6 +251,12 @@ SpazShortURL.prototype.expand = function(shorturl, opts) {
 			// var shorturl = trim(data);
 			data = sc.helpers.deJSON(data);
 			var longurl = data[shorturl];
+			
+			/*
+				save it to cache
+			*/
+			shortener.saveExpandedURLToCache(shorturl, longurl);
+			
 			shortener._onExpandResponseSuccess({
 					'shorturl':shorturl,
 					'longurl' :longurl
@@ -232,4 +283,72 @@ SpazShortURL.prototype._onExpandResponseSuccess = function(data, target) {
  */
 SpazShortURL.prototype._onExpandResponseFailure = function(errobj, target) {
 	sc.helpers.triggerCustomEvent(sc.events.newExpandURLFailure, target, errobj);
+};
+
+
+SpazShortURL.prototype.findExpandableURLs = function(str) {
+	var x, i, matches = [], re_matches, key, thisdomain, thisregex, regexes = [];
+	
+	for (var i=0; i < SPAZCORE_EXPANDABLE_DOMAINS.length; i++) {
+		thisdomain = SPAZCORE_EXPANDABLE_DOMAINS[i];
+		if (thisdomain == 'ff.im') {
+			regexes.push(new RegExp("http://"+thisdomain+"/(-?[a-zA-Z0-9]+)", "gi"));
+		} else {
+			regexes.push(new RegExp("http://"+thisdomain+"/([a-zA-Z0-9]+)", "gi"));
+		}
+		
+	};
+	
+	for (var i=0; i < regexes.length; i++) {
+		thisregex = regexes[i];
+		sch.dump("looking for "+thisregex+ " in '"+str+"'");
+		while( (re_matches = thisregex.exec(sch.trim(str))) != null) {
+			matches.push(re_matches[0]);
+		}		
+	};
+	
+	sch.dump(matches);
+	
+	if (matches.length > 0) {
+		return matches;
+	} else {
+		return null;
+	}
+
+};
+
+
+SpazShortURL.prototype.expandURLs = function(urls, target) {
+	for (var i=0; i < urls.length; i++) {
+		var thisurl = urls[i];
+		sch.dump('expanding '+thisurl);
+		this.expand(thisurl, { 'event_target':target });
+	};
+};
+
+
+
+/**
+ * @param {string} str  the string to replace the URLs in
+ * @param {string} shorturl 
+ * @param {string} longurl 
+ */
+SpazShortURL.prototype.replaceExpandableURL = function(str, shorturl, longurl) {
+	str = str.replace(shorturl, longurl, 'gi');
+	/*
+		we also expand the non-http://-prefixed versions. Wonder if this is a bad idea, though -- seems
+		possible we could have unexpected consqeuences with this
+	*/
+	str = str.replace(shorturl.replace('http://', ''), longurl.replace('http://', ''), 'gi');
+	return str;
+};
+
+
+
+SpazShortURL.prototype.getExpandedURLFromCache = function(shortURL) {
+	return this.expanded_cache[shortURL];
+};
+
+SpazShortURL.prototype.saveExpandedURLToCache  = function(shortURL, longURL) {
+	this.expanded_cache[shortURL] = longURL;
 };

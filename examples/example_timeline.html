@@ -48,14 +48,17 @@
 			return html;
 		});
 		
-
-		
-
-				
+		function expandURL(e) {
+			var tl_el = document.getElementById('public-timeline');
+			var data = sch.getEventData(e);
+			console.log(data);
+			tl_el.innerHTML = tl_el.innerHTML.replace(data.shorturl, data.longurl);
+		}
 		
 		$().ready(function() {
 			
-
+			var tl_el = document.getElementById('public-timeline');
+			sch.listen(tl_el, sc.events.newExpandURLSuccess, expandURL);
 			
 			/*
 				instantiate a twitter API object
@@ -63,8 +66,10 @@
 				event_target, the dame as our timeline div
 			*/
 			var twit = new SpazTwit(null, null, {
-				'event_target':document.getElementById('public-timeline')
+				'event_target':tl_el
 			});
+			
+			var shurl = new SpazShortURL();
 			
 			/*
 				By default, the timeline will listen for success and failure events
@@ -84,8 +89,25 @@
 					twit.getPublicTimeline();
 				},
 				'data_success': function(e, data) { // what to do on success
+					var exp_urls = [], urls = [];
+					
 					tl.addItems(data);
+					
+					for (var i=0; i < data.length; i++) {
+						urls = shurl.findExpandableURLs(data[i].text);
+						if (urls) {
+							exp_urls = exp_urls.concat(urls);
+						}
+					};
+					
+					for (var i=0; i < exp_urls.length; i++) {
+						var thisurl = exp_urls[i];
+						shurl.expand(thisurl, { 'event_target':tl_el });
+					};
+					
 					sc.helpers.updateRelativeTimes('#public-timeline div.timeline-entry span.date', 'data-created_at');
+					
+					
 				},
 				'data_failure': function(e, data) { // what to do on failure
 
