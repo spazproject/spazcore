@@ -26,6 +26,7 @@ var SPAZCORE_EXPANDABLE_DOMAINS = [
 	'cli.gs',
 	'ff.im',
 	'is.gd',
+	'j.mp',
 	'ow.ly',
 	'poprl.com',
 	'short.ie',
