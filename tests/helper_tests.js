@@ -350,6 +350,12 @@ $(document).ready(function() {
 		var expect = "&lt;script src=&quot;../helpers/xml.js&quot; type=&quot;text/javascript&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;";
 		equals(result, expect);
 	});
+	test("escape_html", function() {
+		var input  = "http://www.youtube.com/watch?v=tGsq9CFgP9E&feature=related";
+		var result = sc.helpers.escape_html(input);
+		var expect = "http://www.youtube.com/watch?v=tGsq9CFgP9E&amp;feature=related";
+		equals(result, expect);
+	});
 	test("utf8.encode", missing);
 	test("utf8.decode", missing);
 	test("trim", function() {
