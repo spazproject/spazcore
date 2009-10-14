@@ -1007,7 +1007,8 @@ SpazTwit.prototype._processSearchItem = function(item, section_name) {
 	*/
 	item.user = {
 		'profile_image_url':item.profile_image_url,
-		'screen_name':item.from_user
+		'screen_name':item.from_user,
+		'id':item.from_user_id
 	};
 	
 	/*
