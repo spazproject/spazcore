@@ -1,5 +1,4 @@
 .DS_Store
-SpazCore.kpf
+*.kpf
 docs
 spazcore-*.js
-

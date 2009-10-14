@@ -61,10 +61,29 @@ SpazFileUploader.prototype.getAPIs = function() {
 	var thisSFU = this;
 
 	var apis = {
+		'pikchur' : {
+		    'upload_url' : 'http://api.pikchur.com/simple/upload',
+			'api_key_field': 'api_key', // setting this to non-empty means we MUST set an api key
+			'processResult': function(event, apiobj) {
+				var loader = event.target;
+
+				var parser=new DOMParser();
+				var xmldoc = parser.parseFromString(loader.data,"text/xml");
+
+				var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
+				if (rspAttr.getNamedItem("stat").nodeValue === 'ok')
+				{
+					var mediaurl = jQuery(xmldoc).find('mediaurl').text();
+				} 
+				else
+				{
+					var errAttributes = xmldoc.getElementsByTagName("err")[0].attributes;
+					var errMsg = errAttributes.getNamedItem("msg").nodeValue;
+				}
+			}
+		},
 		'yfrog' : {
 		    'upload_url' : 'http://yfrog.com/api/upload',
-			'gethumb_url': '',
-			'getfull_url': '',
 			'processResult': function(event, apiobj) {
 				var loader = event.target;
 
@@ -85,8 +104,6 @@ SpazFileUploader.prototype.getAPIs = function() {
 		},
 	    'twitpic' : {
 			'upload_url' : 'http://twitpic.com/api/upload',
-			'gethumb_url': '',
-			'getfull_url': '',
 			'processResult': function(event, apiobj) {
 				var loader = event.target;
 
@@ -107,8 +124,6 @@ SpazFileUploader.prototype.getAPIs = function() {
 		},
 		'twitgoo' : {
 			'upload_url' : 'http://twitgoo.com/api/upload',
-			'gethumb_url': '',
-			'getfull_url': '',
 			'processResult': function(event, apiobj) {
 				var loader = event.target;
 
@@ -126,7 +141,34 @@ SpazFileUploader.prototype.getAPIs = function() {
 					var errMsg = errAttributes.getNamedItem("msg").nodeValue;
 				}
 			}
-		}
+		}//,
+		/*
+			Not sure if we should continue to support tweetphoto; API is complex
+		*/
+		// 'tweetphoto': {
+		// 	'upload_url' : 'http://tweetphotoapi.com/api/tpapi.svc/upload2',
+		// 	'api_key_field': 'TPAPIKEY', // this means we need to set the api key
+		// 	'onBeforeSend' : function(extraParams, api.upload_url, file_url) {
+		// 	
+		// 	},
+		// 	'processResult': function(event, apiobj) {
+		// 		var loader = event.target;
+		// 
+		// 		var parser=new DOMParser();
+		// 		var xmldoc = parser.parseFromString(loader.data,"text/xml");
+		// 
+		// 		if (jQuery(xmldoc).find('Status').text().toLowerCase() === 'ok')
+		// 		{
+		// 			var mediaurl = jQuery(xmldoc).find('MediaUrl').text();
+		// 		} 
+		// 		else
+		// 		{
+		// 			sch.error('There was an error uploading to TweetPhoto')
+		// 			var errAttributes = xmldoc.getElementsByTagName("err")[0].attributes;
+		// 			var errMsg = errAttributes.getNamedItem("msg").nodeValue;
+		// 		}
+		// 	}	
+		// }
 		
 	};
 
@@ -143,6 +185,30 @@ SpazFileUploader.prototype.setAPI = function(apilabel) {
 };
 
 /**
+ * some services require an api key or app identifier. This sets that.
+ * @param {string} api_key
+ */
+SpazFileUploader.prototype.setAPIkey = function(api_key) {
+	if (this.api) {
+		this.api.api_key = api_key;
+	} else {
+		sch.error('Must set the API before setting API key');
+	}
+};
+
+/**
+ * some services require an api key or app identifier. This sets that.
+ * @param {string} api_key
+ */
+SpazFileUploader.prototype.getAPIkey = function() {
+	if (this.api) {
+		return this.api.api_key;
+	} else {
+		sch.error('Must set the API before getting API key');
+	}
+};
+
+/**
  * opts = {
  *   'api':'', // use if not set already
  *   'username':'xxx',
@@ -156,14 +222,17 @@ SpazFileUploader.prototype.setAPI = function(apilabel) {
  */
 SpazFileUploader.prototype.upload = function(file_url, opts) {
 
-	var api;
+	var api, api_key;
 
 	var thisSFU = this;
 
 	if (opts.api) {
 		api = this.apis.api;
-	} else {
+	} else if (this.api) {
 		api = this.api;
+	} else {
+		sch.error('Must set the API before uploading');
+		return;
 	}
 	
 	var username = opts.username || null;
@@ -173,20 +242,35 @@ SpazFileUploader.prototype.upload = function(file_url, opts) {
 
 	var onStart = opts.onStart || null;
 
+	var extraParams = {
+		"username": username,
+		"password": password,
+		"source":   source,
+		"message":  message
+	};
+	
+	/**
+	 * if we have an API key field, then we need the api key 
+	 */
+	if ( (api.api_key_field) ) {
+		extraParams[api.api_key_field] = api.getAPIkey();
+	}
 
-
+	/*
+		A callback in case we need to massage the data before upload
+	*/
+	if (api.onBeforeSend) {
+		api.onBeforeSend.call(api, extraParams, api.upload_url, file_url);
+	}
+	
+	
 	// upload the file
-	sc.helpers.uploadFile({
-		'extra'  :{
-			"username": username,
-			"password": password,
-			"source":   source,
-			"message":  message
-		},
+	sc.helpers.HTTPUploadFile({
+		'extra'  :extraParams,
 		'url'    :api.upload_url,
 		'file_url':file_url,
-		'onStart' : function(event) {},
-		'onComplete': function(event) {
+		'onSuccess' : function(event) {},
+		'onFailure': function(event) {
 			api.processResult.call(thisSFU, event, api);
 		}
 	});
