@@ -418,7 +418,19 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 		}
 		
 	}
-	
+
+    // Token replacement for user lists
+    if (urls[key].indexOf('{{USER}}') > - 1) {
+        if (urldata && typeof(urldata) === 'object') {
+            urls[key] = urls[key].replace('{{USER}}', urldata.user);
+        }
+    }
+
+    if (urls[key].indexOf('{{SLUG}}') > -1) {
+        if (urldata && typeof(urldata) === 'object') {
+            urls[key] = urls[key].replace('{{SLUG}}', urldata.slug);
+        }
+    }
 
     if (urls[key]) {
 	
@@ -2141,6 +2153,39 @@ SpazTwit.prototype.triggerEvent = function(type, data) {
 		sc.helpers.trigger(type, target, data);	
 	}
 	
+};
+
+
+/**
+ * Retrieves a user's lists
+ *
+ * @param {String} user The username of the user whose lists we're retrieving
+ */
+SpazTwit.prototype.getUserLists = function(user) {
+	if (!user) {
+		return false;
+	}
+
+	var data = {};
+	data['user']  = user;
+
+	var url = this.getAPIURL('lists', data);
+
+	this._getTimeline({
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'process_callback'	: this._processUserLists,
+		'success_event_type': 'new_user_lists_data',
+		'failure_event_type': 'error_user_lists_data'
+	});
+};
+
+/**
+ * @private
+ */
+SpazTwit.prototype._processUserLists = function(ret_items, finished_event, processing_opts) {
+
 };
 
 
