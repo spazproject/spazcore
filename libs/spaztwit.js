@@ -35,6 +35,7 @@ var SPAZCORE_SECTION_SEARCH = 'search';
 var SPAZCORE_SECTION_USER = 'user-timeline';
 var SPAZCORE_SECTION_FRIENDLIST = 'friendslist';
 var SPAZCORE_SECTION_FOLLOWERSLIST = 'followerslist';
+var SPAZCORE_SECTION_USERLISTS = 'userlists';
 
 var SPAZCORE_SERVICE_TWITTER = 'twitter';
 var SPAZCORE_SERVICE_IDENTICA = 'identi.ca';
@@ -232,6 +233,9 @@ SpazTwit.prototype.initializeData = function() {
 		'max':200,
 		'min_age':30
 	};
+    this.data[SPAZCORE_SECTION_USERLISTS] = {
+
+    };
 	// this.data.byid = {};
 };
 
@@ -379,6 +383,16 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.verify_credentials = "account/verify_credentials.json";
     urls.ratelimit_status   = "account/rate_limit_status.json";
 	urls.update_profile		= "account/update_profile.json";
+
+    // User lists URLs
+    urls.lists              = "{{USER}}/lists.json";
+    urls.lists_list         = "{{USER}}/lists/{{SLUG}}.json";
+    urls.lists_memberships  = "{{USER}}/lists/memberships.json";
+    urls.lists_timeline     = "{{USER}}/lists/{{SLUG}}/statuses.json";
+    urls.lists_members      = "{{USER}}/{{SLUG}}/members.json";
+    urls.lists_check_member = "{{USER}}/{{SLUG}}/{{ID}}.json";
+    urls.lists_subscribers  = "{{USER}}/{{SLUG}}/subscribers.json";
+    urls.lists_check_subscriber = "{{USER}}/{{SLUG}}/subscribers/{{ID}}.json";
 
 	// search
 	if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER) {
