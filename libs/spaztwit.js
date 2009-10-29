@@ -2114,6 +2114,53 @@ SpazTwit.prototype.removeSavedSearch = function(search_id) {
 
 
 
+
+/**
+ * retrieves the list of lists 
+ */
+SpazTwit.prototype.getLists = function() {};
+
+/**
+ * retrieves a given list timeline
+ * @param {string} list 
+ */
+SpazTwit.prototype.getList = function(list) {};
+
+/**
+ * retrieves a given list's members
+ * @param {string} list 
+ */
+SpazTwit.prototype.getListMembers = function(list) {};
+
+/**
+ * create a new list
+ * @param {string} list  The list name
+ * @param {string} visibility   "public" or "private"
+ */
+SpazTwit.prototype.addList = function(list, visibility) {};
+
+/**
+ * delete a list
+ * @param {string} list  The list name 
+ */
+SpazTwit.prototype.removeList = function(list) {};
+
+/**
+ * add a user to a list
+ */
+SpazTwit.prototype.addUserToList = function(user, list) {};
+
+/**
+ * delete a user from a list 
+ */
+SpazTwit.prototype.removeUserFromList = function(user, list) {};
+
+
+
+
+/**
+ *  
+ */
 SpazTwit.prototype.triggerEvent = function(type, data) {
 	var target = this.opts.event_target || document;
 	data   = data || null;
