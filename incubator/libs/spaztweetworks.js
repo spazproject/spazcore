@@ -69,37 +69,37 @@ SpazTweetWorks.prototype.getAPIURL = function(key, urldata) {
 	/*
 		write stuff
 	*/
-    urls.add                = "posts/add.xml";
+    urls.add                = "posts/add.json";
 
 	/*
 		read stuff
 	*/
-	urls.newest             = "posts/index/newest.xml";
-    urls.group_newest       = "posts/group/{{group-name}}/newest.xml";
-	urls.view_discussion	= "posts/view/{{id}}.xml"
+	urls.newest             = "posts/index/newest.json";
+    urls.group_newest       = "posts/group/{{group-name}}/newest.json";
+	urls.view_discussion	= "posts/view/{{id}}.json"
 
 	/*
 		user info
 		must be authenticated
 	*/
-	urls.my_group_posts             = "posts/joined_groups/{{user-name}}/newest.xml";
-	urls.my_contributed_discussions = "posts/contributed/{{user-name}}/updated.xml";
+	urls.my_group_posts             = "posts/joined_groups/{{user-name}}/newest.json";
+	urls.my_contributed_discussions = "posts/contributed/{{user-name}}/updated.json";
 	
 	
 	/*
 		Group info
 	*/
-	urls.groups             = "groups/index.xml";
-	urls.join_group         = "groups/join/{{group-name}}.xml";
-	urls.joined_groups      = "groups/joined/{{user-name}}.xml"
-	urls.search_groups      = "groups/search.xml";
-	urls.group_users        = "users/group/{{group-name}}.xml";	
+	urls.groups             = "groups/index.json";
+	urls.join_group         = "groups/join/{{group-name}}.json";
+	urls.joined_groups      = "groups/joined/{{user-name}}.json"
+	urls.search_groups      = "groups/search.json";
+	urls.group_users        = "users/group/{{group-name}}.json";	
 	
 	/*
 		User info
 	*/
-	urls.users              = "users/index.xml";
-	urls.search_users       = "users/search.xml";
+	urls.users              = "users/index.json";
+	urls.search_users       = "users/search.json";
 
 	if (urls[key]) {
 		var thisurl = urls[key];
