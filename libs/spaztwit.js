@@ -2144,7 +2144,18 @@ SpazTwit.prototype.removeSavedSearch = function(search_id) {
 /**
  * retrieves the list of lists 
  */
-SpazTwit.prototype.getLists = function() {};
+SpazTwit.prototype.getLists = function(user) {
+	if (!user) {
+		return false;
+	}
+
+	var data = {};
+	data['user']  = user;
+
+	var url = this.getAPIURL('lists', data);
+
+    // get the lists for the given user
+};
 
 /**
  * retrieves a given list timeline
@@ -2201,40 +2212,6 @@ SpazTwit.prototype.triggerEvent = function(type, data) {
 	}
 	
 };
-
-
-/**
- * Retrieves a user's lists
- *
- * @param {String} user The username of the user whose lists we're retrieving
- */
-SpazTwit.prototype.getUserLists = function(user) {
-	if (!user) {
-		return false;
-	}
-
-	var data = {};
-	data['user']  = user;
-
-	var url = this.getAPIURL('lists', data);
-
-	this._getTimeline({
-		'url':url,
-		'username':this.username,
-		'password':this.password,
-		'process_callback'	: this._processUserLists,
-		'success_event_type': 'new_user_lists_data',
-		'failure_event_type': 'error_user_lists_data'
-	});
-};
-
-/**
- * @private
- */
-SpazTwit.prototype._processUserLists = function(ret_items, finished_event, processing_opts) {
-
-};
-
 
 /**
  * shortcut for SpazTwit if the SpazCore libraries are being used
