@@ -233,9 +233,6 @@ SpazTwit.prototype.initializeData = function() {
 		'max':200,
 		'min_age':30
 	};
-    this.data[SPAZCORE_SECTION_USERLISTS] = {
-
-    };
 	// this.data.byid = {};
 };
 
@@ -2155,6 +2152,7 @@ SpazTwit.prototype.getLists = function(user) {
 	var url = this.getAPIURL('lists', data);
 
     // get the lists for the given user
+    alert(url);
 };
 
 /**
