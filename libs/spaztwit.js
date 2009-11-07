@@ -40,7 +40,7 @@ var SPAZCORE_SECTION_USERLISTS = 'userlists';
 var SPAZCORE_SERVICE_TWITTER = 'twitter';
 var SPAZCORE_SERVICE_IDENTICA = 'identi.ca';
 var SPAZCORE_SERVICE_CUSTOM = 'custom';
-var SPAZCORE_SERVICEURL_TWITTER = 'https://twitter.com/';
+var SPAZCORE_SERVICEURL_TWITTER = 'https://api.twitter.com/1/';
 var SPAZCORE_SERVICEURL_IDENTICA = 'https://identi.ca/api/';
 
 /**
