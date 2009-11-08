@@ -1769,11 +1769,9 @@ SpazTwit.prototype.update = function(status, source, in_reply_to_status_id) {
 SpazTwit.prototype._processUpdateReturn = function(data, finished_event) {
 	
 	/*
-		this item needs to be added to the friends + home timeline
-		so we can avoid dupes
-	*/
+		Add this to the HOME section and fire off the event when done
+	*/	
 	this._processTimeline(SPAZCORE_SECTION_HOME, [data], finished_event);
-	this._processTimeline(SPAZCORE_SECTION_FRIENDS, [data], finished_event);
 };
 
 SpazTwit.prototype.destroy = function(id) {};
