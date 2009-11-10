@@ -380,15 +380,15 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.ratelimit_status   = "account/rate_limit_status.json";
 	urls.update_profile		= "account/update_profile.json";
 
+	urls.saved_searches		= "saved_searches.json";
+	
 	// search
 	if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER) {
 		urls.search				= "http://search.twitter.com/search.json";
 		urls.trends				= "http://search.twitter.com/trends.json";
-		urls.saved_searches		= "http://search.twitter.com/saved_searches.json";
 	} else {
 		urls.search				= "search.json";
 		urls.trends				= "trends.json";
-		urls.saved_searches		= "saved_searches.json";
 	}
 
     // misc
