@@ -16,7 +16,7 @@ var sc, Titanium;
 /**
  * dump an object's first level to console
  */
-sc.helpers.dump = function(obj, lebel) {
+sc.helpers.dump = function(obj, level) {
 	var dumper;
 	
 	if (!level) { level = SPAZCORE_DUMPLEVEL_DEBUG; }
