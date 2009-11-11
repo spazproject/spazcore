@@ -2100,8 +2100,12 @@ SpazTwit.prototype.removeSavedSearch = function(search_id) {
 		'password':this.password,
 		'success_event_type':'destroy_saved_search_succeeded',
 		'failure_event_type':'destroy_saved_search_failed',
+		'data':{'id':search_id},
 		'method':'POST'
 	};
+	
+	sch.debug('opts for removeSavedSearch');
+	sch.debug(opts);
 
 	/*
 		Perform a request and get true or false back
