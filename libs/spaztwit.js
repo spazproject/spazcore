@@ -380,6 +380,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.verify_credentials = "account/verify_credentials.json";
     urls.ratelimit_status   = "account/rate_limit_status.json";
 	urls.update_profile		= "account/update_profile.json";
+	urls.saved_searches		= "saved_searches.json";
 
     // User lists URLs
     urls.lists              = "{{USER}}/lists.json";
@@ -395,11 +396,9 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 	if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER) {
 		urls.search				= "http://search.twitter.com/search.json";
 		urls.trends				= "http://search.twitter.com/trends.json";
-		urls.saved_searches		= "http://search.twitter.com/saved_searches.json";
 	} else {
 		urls.search				= "search.json";
 		urls.trends				= "trends.json";
-		urls.saved_searches		= "saved_searches.json";
 	}
 
     // misc
@@ -1792,11 +1791,9 @@ SpazTwit.prototype.update = function(status, source, in_reply_to_status_id) {
 SpazTwit.prototype._processUpdateReturn = function(data, finished_event) {
 	
 	/*
-		this item needs to be added to the friends + home timeline
-		so we can avoid dupes
-	*/
+		Add this to the HOME section and fire off the event when done
+	*/	
 	this._processTimeline(SPAZCORE_SECTION_HOME, [data], finished_event);
-	this._processTimeline(SPAZCORE_SECTION_FRIENDS, [data], finished_event);
 };
 
 SpazTwit.prototype.destroy = function(id) {};
