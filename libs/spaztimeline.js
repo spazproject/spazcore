@@ -32,6 +32,7 @@ var SpazTimeline = function(opts) {
 	 * @function
 	 */
 	this.refresh = function() {
+		sch.debug('Refreshing timeline');
 		thisTL.requestData.call(thisTL);
 	};
 	
@@ -40,6 +41,7 @@ var SpazTimeline = function(opts) {
 	 * Again, due to scope issues, we define this here to take advantage of the closure 
 	 */
 	this.onSuccess = function(e) {
+		sch.debug('onSuccess timeline');
 		var data = sc.helpers.getEventData(e);
 		thisTL.data_success.call(thisTL, e, data);
 		thisTL.startRefresher();	
@@ -49,6 +51,7 @@ var SpazTimeline = function(opts) {
 	 * Again, due to scope issues, we define this here to take advantage of the closure 
 	 */
 	this.onFailure = function(e) {
+		sch.debug('onFailure timeline');
 		var data = sc.helpers.getEventData(e);
 		thisTL.data_failure.call(thisTL, e, data);
 		thisTL.startRefresher();	
@@ -105,6 +108,7 @@ SpazTimeline.prototype._init = function(opts) {
  * call this after initialization 
  */
 SpazTimeline.prototype.start = function() {
+	sch.debug('Starting timeline');
 	this.requestData();
 };
 
@@ -112,6 +116,7 @@ SpazTimeline.prototype.start = function() {
  * right now this does the same as start(), but could change in the future 
  */
 SpazTimeline.prototype.refresh = function() {
+	sch.debug('Refreshing timeline (prototype)');
 	this.requestData();
 };
 
@@ -122,6 +127,7 @@ SpazTimeline.prototype.refresh = function() {
  * @todo needs to be written to handle async call
  */
 SpazTimeline.prototype.requestData = function() {
+	sch.debug('Requesting data timeline');
 	this.stopRefresher();
 	
 	this.stopListening();
@@ -176,6 +182,7 @@ SpazTimeline.prototype.stopRefresher = function() {
  * removing event listeners an stopping the refresher 
  */
 SpazTimeline.prototype.cleanup = function() {
+	sch.debug('Cleaning up timeline');
 	this.stopListening();
 	this.stopRefresher();
 };
@@ -185,6 +192,8 @@ SpazTimeline.prototype.cleanup = function() {
  * @param {array} items
  */
 SpazTimeline.prototype.addItems = function(items) {
+	sch.debug('Adding items to timeline');
+	
 	var items_html    = [];
 	var timeline_html = '';
 	
@@ -207,6 +216,7 @@ SpazTimeline.prototype.addItems = function(items) {
 
 
 SpazTimeline.prototype.renderItem = function(item, templatefunc) {
+	sch.debug('Rendering item in timeline');
 	
 	var html = templatefunc(item);
 	
@@ -216,6 +226,8 @@ SpazTimeline.prototype.renderItem = function(item, templatefunc) {
 
 
 SpazTimeline.prototype.removeExtraItems = function() {
+	
+	sch.debug('Removing extra items in timeline');
 	
 	if (this.add_method === 'append') {
 		var remove_from_top = true;
@@ -237,6 +249,9 @@ SpazTimeline.prototype.removeItem = function(selector) {};
  * @return {boolean} 
  */
 SpazTimeline.prototype.itemExists = function(selector) {
+	
+	sch.debug('Checking it item ('+selector+') exists in timeline');
+	
 	var items = this.select(selector);
 	if (items.length>0) {
 		return true;
@@ -248,11 +263,15 @@ SpazTimeline.prototype.itemExists = function(selector) {
 
 
 SpazTimeline.prototype.hideItems = function(selector) {
+	sch.debug('Hiding items in timeline');
+	
 	this.filterItems(selector, 'blacklist');
 };
 
 
 SpazTimeline.prototype.showItems = function(selector) {
+	sch.debug('Showing items in timeline');
+	
 	this.filterItems(selector, 'whitelist');
 };
 
@@ -268,6 +287,9 @@ SpazTimeline.prototype.filterItems = function(selector, type) {};
  * sorts the elements in the timeline according to the sorting function 
  */
 SpazTimeline.prototype.sortItems = function(selector, sortfunc) {
+	
+	sch.debug('Sorting items in timeline');
+	
 	var items = this.select(selector);
 	items.sort(sortfunc);
 };
