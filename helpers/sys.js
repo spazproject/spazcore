@@ -104,7 +104,7 @@ sc.helpers.note = function(obj) {
  * helper to send a warn dump 
  */
 sc.helpers.warn = function(obj) {
-	sc.helpers.dump(obj, SPAZCORE_DUMPLEVEL_WARN);
+	sc.helpers.dump(obj, SPAZCORE_DUMPLEVEL_WARNING);
 };
 
 /**
