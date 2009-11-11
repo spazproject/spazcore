@@ -35,6 +35,7 @@ var SPAZCORE_SECTION_SEARCH = 'search';
 var SPAZCORE_SECTION_USER = 'user-timeline';
 var SPAZCORE_SECTION_FRIENDLIST = 'friendslist';
 var SPAZCORE_SECTION_FOLLOWERSLIST = 'followerslist';
+var SPAZCORE_SECTION_USERLISTS = 'userlists';
 
 var SPAZCORE_SERVICE_TWITTER = 'twitter';
 var SPAZCORE_SERVICE_IDENTICA = 'identi.ca';
@@ -379,9 +380,18 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.verify_credentials = "account/verify_credentials.json";
     urls.ratelimit_status   = "account/rate_limit_status.json";
 	urls.update_profile		= "account/update_profile.json";
-
 	urls.saved_searches		= "saved_searches.json";
-	
+
+    // User lists URLs
+    urls.lists              = "{{USER}}/lists.json";
+    urls.lists_list         = "{{USER}}/lists/{{SLUG}}.json";
+    urls.lists_memberships  = "{{USER}}/lists/memberships.json";
+    urls.lists_timeline     = "{{USER}}/lists/{{SLUG}}/statuses.json";
+    urls.lists_members      = "{{USER}}/{{SLUG}}/members.json";
+    urls.lists_check_member = "{{USER}}/{{SLUG}}/{{ID}}.json";
+    urls.lists_subscribers  = "{{USER}}/{{SLUG}}/subscribers.json";
+    urls.lists_check_subscriber = "{{USER}}/{{SLUG}}/subscribers/{{ID}}.json";
+
 	// search
 	if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER) {
 		urls.search				= "http://search.twitter.com/search.json";
@@ -404,7 +414,19 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 		}
 		
 	}
-	
+
+    // Token replacement for user lists
+    if (urls[key].indexOf('{{USER}}') > - 1) {
+        if (urldata && typeof(urldata) === 'object') {
+            urls[key] = urls[key].replace('{{USER}}', urldata.user);
+        }
+    }
+
+    if (urls[key].indexOf('{{SLUG}}') > -1) {
+        if (urldata && typeof(urldata) === 'object') {
+            urls[key] = urls[key].replace('{{SLUG}}', urldata.slug);
+        }
+    }
 
     if (urls[key]) {
 	
@@ -2120,7 +2142,19 @@ SpazTwit.prototype.removeSavedSearch = function(search_id) {
 /**
  * retrieves the list of lists 
  */
-SpazTwit.prototype.getLists = function() {};
+SpazTwit.prototype.getLists = function(user) {
+	if (!user) {
+		return false;
+	}
+
+	var data = {};
+	data['user']  = user;
+
+	var url = this.getAPIURL('lists', data);
+
+    // get the lists for the given user
+    alert(url);
+};
 
 /**
  * retrieves a given list timeline
@@ -2177,7 +2211,6 @@ SpazTwit.prototype.triggerEvent = function(type, data) {
 	}
 	
 };
-
 
 /**
  * shortcut for SpazTwit if the SpazCore libraries are being used
