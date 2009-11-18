@@ -1361,6 +1361,13 @@ SpazTwit.prototype._processItem = function(item, section_name) {
 	}
 	
 	/*
+		is an official API retweet? then add .SC_is_retweet
+	*/
+	if ( item.retweet_status ) {
+		item.SC_is_retweet = true;
+	}
+	
+	/*
 		If it comes from the replies timeline, it's a reply (aka a mention)
 	*/
 	if (section_name === SPAZCORE_SECTION_REPLIES) {
