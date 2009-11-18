@@ -2143,8 +2143,10 @@ SpazTwit.prototype.removeSavedSearch = function(search_id) {
  * retrieves the list of lists 
  */
 SpazTwit.prototype.getLists = function(user) {
-	if (!user) {
+	if (!user && !this.username) {
 		return false;
+	} else if (!user) {
+	    user = this.username;
 	}
 
 	var data = {};
@@ -2153,7 +2155,11 @@ SpazTwit.prototype.getLists = function(user) {
 	var url = this.getAPIURL('lists', data);
 
     // get the lists for the given user
-    alert(url);
+    var xhr = this._getTimeline({
+        'url':url,
+    });
+    
+    alert(xhr);
 };
 
 /**
