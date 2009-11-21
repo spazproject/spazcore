@@ -27,7 +27,9 @@ var sc, DOMParser, jQuery;
  * } 
  */
 function SpazFileUploader(opts) {
-	
+
+	if (!opts) { opts = {}; }
+		
 	if (opts.api) {
 		this.setAPI(opts.api);
 	}
