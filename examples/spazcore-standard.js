@@ -8536,6 +8536,8 @@ SpazTwit.prototype._callMethod = function(opts) {
 		method = 'POST';
 	}
 	
+	// alert('METHOD:'+method);
+	
 	var xhr = jQuery.ajax({
 		'timeout' :this.opts.timeout,
 	    'complete':function(xhr, msg){
