@@ -22,6 +22,28 @@ $(document).ready(function() {
 		string : '{"following":null,"profile_link_color":"0000ff"}'
 	};
 	tdata.json['object'] = JSON.parse(tdata.json.string);
+	
+	/*
+		We have to build the base test path dynamically
+		based on our platform
+	*/
+	if (sch.isAIR()) {
+		tdata.basefilepath = air.File.applicationDirectory.resolvePath('./tests/filetestdata/').url;
+		tdata.basefilewritepath = air.File.applicationStorageDirectory.url;
+		tdata.appdir = air.File.applicationDirectory.url;
+		tdata.appstoragedir = air.File.applicationStorageDirectory.url;
+	}
+	if (sch.isTitanium()) {
+		tdata.basefilepath = Titanium.Filesystem.getApplicationDirectory().resolve('./tests/filetestdata/').toString();
+		tdata.basefilewritepath = air.File.getApplicationStorageDirectory().toString();
+		tdata.appdir = air.File.getApplicationDirectory().toString();
+		tdata.appstoragedir = air.File.getApplicationStorageDirectory().toString();
+	}
+	
+	
+	
+
+
 
 	var missing = function() {
 		ok(false, "missing test - untested code is broken code");
@@ -77,6 +99,148 @@ $(document).ready(function() {
 	test("removeListener", missing);
 	test("triggerCustomEvent", missing);
 	test("getEventData", missing);
+	
+	
+	
+	/*
+		File
+	*/
+	module('Helpers:File');
+	
+	test("File.getFileContents", function() {
+		var result = sc.helpers.getFileContents(tdata.basefilepath+'/readme.txt');
+		var expect = 'This is some hot data';
+		equals(result, expect);
+	});
+	test("File.setFileContents", function() {
+		var furl = sc.helpers.createTempFile();
+		var new_contents = 'These are some new contents';
+		sc.helpers.setFileContents(furl, new_contents);
+		var result = sc.helpers.getFileContents(furl);
+		var expect = new_contents;
+		equals(result, expect, "New contents are as expected");
+		sc.helpers.deleteFile(furl);
+		var result = sc.helpers.fileExists(furl);
+		var expect = false;
+		equals(result, expect, "exists after deletion");
+	});
+	test("File.fileExists", function() {
+		var result = sc.helpers.fileExists(tdata.basefilepath+'/readme.txt');
+		var expect = true;
+		equals(result, expect);
+		var result = sc.helpers.fileExists(tdata.basefilepath+'/f2934fh24g8hp92rth.txt');
+		var expect = false;
+		equals(result, expect);
+	});
+	test("File.isFile", function() {
+		var result = sc.helpers.isFile(tdata.basefilepath+'/readme.txt');
+		var expect = true;
+		equals(result, expect);
+		var result = sc.helpers.isFile(tdata.basefilepath+'/a_directory');
+		var expect = false;
+		equals(result, expect);
+	});
+	test("File.isDirectory", function() {
+		var result = sc.helpers.isDirectory(tdata.basefilepath+'/readme.txt');
+		var expect = false;
+		equals(result, expect);
+		var result = sc.helpers.isDirectory(tdata.basefilepath+'/a_directory');
+		var expect = true;
+		equals(result, expect);
+	});
+	test("File.resolvePath", function() {
+		var result = sc.helpers.resolvePath(tdata.basefilepath, 'readme.txt');
+		var expect = tdata.basefilepath+'/readme.txt';
+		equals(result, expect);
+		var result = sc.helpers.resolvePath(tdata.basefilepath, 'a_directory/foo');
+		var expect = tdata.basefilepath+'/a_directory/foo';
+		equals(result, expect);
+	});
+	test("File.getFileObject", missing);
+	test("File.copyFile", function() {
+		var origin = sc.helpers.resolvePath(tdata.basefilepath, 'readme.txt');
+		var destination = sc.helpers.resolvePath(tdata.basefilewritepath, 'readme2.txt');
+		sc.helpers.copyFile(origin, destination);
+		var result = sc.helpers.fileExists(destination);		
+		var expect = true;
+		equals(result, expect);
+	});
+	test("File.moveFile", function() {
+		var origin = sc.helpers.resolvePath(tdata.basefilewritepath, 'readme2.txt');
+		var destination = sc.helpers.resolvePath(tdata.basefilewritepath, 'readme3.txt');
+		sc.helpers.moveFile(origin, destination);
+		var result = sc.helpers.fileExists(destination);		
+		var expect = true;
+		equals(result, expect);
+	});
+	test("File.deleteFile", function() {
+		var furl = sc.helpers.resolvePath(tdata.basefilewritepath, 'readme3.txt');
+		sc.helpers.deleteFile(furl);
+		var result = sc.helpers.fileExists(furl);		
+		var expect = false;
+		equals(result, expect);
+	});
+	test("File.createDirectory", function() {
+		var furl = sc.helpers.resolvePath(tdata.basefilewritepath, 'a_new_directory');
+		sc.helpers.createDirectory(furl);
+		var result = sc.helpers.fileExists(furl);		
+		var expect = true;
+		equals(result, expect, "exists");
+		var result = sc.helpers.isDirectory(furl);		
+		var expect = true;
+		equals(result, expect, "is a directory");
+		sc.helpers.deleteDirectory(furl);
+		var result = sc.helpers.fileExists(furl);		
+		var expect = false;
+		equals(result, expect, "exists after deletion");
+	});
+	test("File.initFile", function() {
+		var furl = sc.helpers.resolvePath(tdata.basefilewritepath, 'initfile.txt');
+		sc.helpers.initFile(furl);
+		var result = sc.helpers.fileExists(furl);		
+		var expect = true;
+		equals(result, expect, "exists");
+		var result = sc.helpers.getFileContents(furl);		
+		var expect = '';
+		equals(result, expect, "contents empty");
+		sc.helpers.deleteFile(furl);
+		var result = sc.helpers.fileExists(furl);		
+		var expect = false;
+		equals(result, expect, "exists after deletion");
+	});
+	test("File.getAppDir", function() {
+		var result = sc.helpers.getAppDir();
+		var expect = tdata.appdir;
+		equals(result, expect);
+	});
+	test("File.getAppStorageDir", function() {
+		var result = sc.helpers.getAppStorageDir();
+		var expect = tdata.appstoragedir;
+		equals(result, expect);
+	});
+	test('File.createTempFile', function() {
+		var furl = sc.helpers.createTempFile();
+		var result = sc.helpers.fileExists(furl);
+		var expect = true;
+		equals(result, expect, "exists");
+		sc.helpers.deleteFile(furl);
+		var result = sc.helpers.fileExists(furl);
+		var expect = false;
+		equals(result, expect, "exists after deletion");
+	});
+	test('File.createTempDirectory', function() {
+		var furl = sc.helpers.createTempDirectory();
+		var result = sc.helpers.fileExists(furl);
+		var expect = true;
+		equals(result, expect, "exists");
+		var result = sc.helpers.isDirectory(furl);
+		var expect = true;
+		equals(result, expect, "is a directory");
+		sc.helpers.deleteDirectory(furl);
+		var result = sc.helpers.fileExists(furl);
+		var expect = false;
+		equals(result, expect, "exists after deletion");
+	});
 	
 
 	/*
@@ -414,7 +578,7 @@ $(document).ready(function() {
 		}
 	});
 	test("isTitanium", function() {
-		var result = sc.helpers.isAIR();
+		var result = sc.helpers.isTitanium();
 		if (window.Titanium) {
 			equals(result, true, 'this is Titanium');
 		} else {
@@ -434,7 +598,7 @@ $(document).ready(function() {
 		test("getClipboardText", missing);
 		test("setClipboardText", missing);
 		test("getEncryptedValue", missing);
-		test("setEncyrptedValue", missing);
+		test("setEncryptedValue", missing);
 		test("getAppStoreDir", missing);
 		test("getPreferencesFile", missing);
 		test("init_file", missing);

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<application 
+	xmlns="http://ns.adobe.com/air/application/2.0beta"
+	minimumPatchLevel="0">
+<!-- AIR Application Descriptor File. See http://www.adobe.com/go/learn_air_1.0_application_descriptor_en. -->
+	<id>com.funkatron.app.spazcore-testrunner-air</id>
+	<name>SpazCore Testrunner</name>
+	<version>0.1.0</version>
+	<filename>SpazCoreTestrunner</filename>
+	<description>
+		<text xml:lang="en">Testrunner app</text>
+	</description>
+	<copyright>Copyright Funkatron Productions</copyright>
+	<initialWindow>
+		<content>testrunner-air.html</content>
+		<title>SpazCore Testrunner</title>
+		<!-- <systemChrome>default</systemChrome> -->
+		<transparent>false</transparent>
+		<visible>true</visible>
+		<minimizable>true</minimizable>
+		<maximizable>true</maximizable>
+		<resizable>true</resizable>
+		<width>800</width>
+		<height>600</height>
+		<x>50</x>
+		<y>50</y>
+		
+	</initialWindow>
+	<programMenuFolder>SpazCore</programMenuFolder>
+	<!-- <icon>
+		<image128x128>images/spaz-icon-alpha.png</image128x128>
+		<image48x48>images/spaz-icon-alpha_48.png</image48x48>
+		<image32x32>images/spaz-icon-alpha_32.png</image32x32>
+		<image16x16>images/spaz-icon-alpha_16.png</image16x16>
+	</icon> -->
+	<customUpdateUI>false</customUpdateUI>
+	<allowBrowserInvocation>false</allowBrowserInvocation>
+	<supportedProfiles>extendedDesktop</supportedProfiles>
+	<!-- <fileTypes>
+		<fileType>
+			<name>com.example</name>
+			<extension>xmpl</extension>
+			<description>Example file</description>
+			<contentType>example/x-data-type</contentType>
+			<icon>
+				<image16x16>icons/AIRApp_16.png</image16x16>      
+				<image32x32>icons/AIRApp_32.png</image32x32>      
+				<image48x48>icons/AIRApp_48.png</image48x48>     
+				<image128x128>icons/AIRApp_128.png</image128x128>
+
+			</icon>
+		</fileType>
+	</fileTypes> -->
+</application>

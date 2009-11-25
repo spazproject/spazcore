@@ -13,8 +13,7 @@ var SpazAccounts = function(prefsObj) {
 	/*
 		load existing accounts
 	*/
-	this._accounts = this.prefs.get(this.prefskey);
-	
+	this.load();
 
 };
 

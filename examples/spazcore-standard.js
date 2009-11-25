@@ -4972,7 +4972,7 @@ sc.helpers.getEncryptedValue = function(key) {
  * Sets a value in the EncryptedLocalStore of AIR
  * @platformstub
  */
-sc.helpers.setEncyrptedValue = function(key, val) {
+sc.helpers.setEncryptedValue = function(key, val) {
 	// stub
 };
 

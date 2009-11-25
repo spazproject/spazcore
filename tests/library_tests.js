@@ -66,7 +66,7 @@ $(document).ready(function() {
 	/*
 		SpazImageURL
 	*/
-	module('Incubator:SpazImageURL');
+	module('Libraries:SpazImageURL');
 	
 	test('findServiceUrlsInString', function() {
 		var siu, foo, expect, result;
@@ -86,7 +86,7 @@ $(document).ready(function() {
 						"http://twitpic.com/gr2p5"     : "http://twitpic.com/show/thumb/gr2p5",
 						"http://yfrog.com/12obqj"      : "http://yfrog.com/12obqj.th.jpg",
 						"http://twitgoo.com/36cg2"     : "http://twitgoo.com/show/thumb/36cg2",
-						"http://pikchur.com/Gp0"       : "http://img.pikchur.com/pic_Gp0_t.jpg",
+						"http://pikchur.com/Gp0"       : "http://img.pikchur.com/pic_Gp0_m.jpg",
 						"http://tweetphoto.com/1de714" : "http://TweetPhotoAPI.com/api/TPAPI.svc/imagefromurl?size=thumbnail&url=http://tweetphoto.com/1de714",
 						"http://pic.gd/b4b8eb"         : "http://TweetPhotoAPI.com/api/TPAPI.svc/imagefromurl?size=thumbnail&url=http://pic.gd/b4b8eb"
 		};
