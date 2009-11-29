@@ -168,6 +168,7 @@ SpazImageURL.prototype.findServiceUrlsInString = function(str) {
  * find the image service URLs that work with our defined APIs in a given string
  * @param {object} matches
  * @return {object|null} fullurl:thumburl key:val pairs
+ * 
  */
 SpazImageURL.prototype.getThumbsForMatches = function(matches) {
 	var x, service, api, thumburl, thumburls = {}, num_urls = 0;
@@ -206,6 +207,20 @@ SpazImageURL.prototype.getThumbsForUrls = function(str) {
 		return null;
 	}
 	
+};
+
+/**
+ * given a single image hosting service URL, this returns a URL to the thumbnail image itself
+ * @param {string} url
+ * @return {string|null}
+ */
+SpazImageURL.prototype.getThumbForUrl = function(url) {
+	var urls = this.getThumbsForUrls(url);
+	if (urls) {
+		return urls[url];
+	} else {
+		return null;
+	}
 };
 
 

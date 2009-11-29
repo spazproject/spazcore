@@ -19,5 +19,6 @@ var sc;
  *  url:'',
  * 	extra:{...}
  * } 
+ * @platformstub
  */
 sc.helpers.HTTPUploadFile = function(opts) {};

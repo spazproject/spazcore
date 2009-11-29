@@ -8,7 +8,12 @@ white: false,
 onevar: false 
  */
 var sc, DOMParser;
- 
+
+/**
+ * Given a string, this returns an XMLDocument
+ * @param {string} string
+ * @return {XMLDocument}
+ */
 sc.helpers.createXMLFromString = function (string) {
 	var xmlParser, xmlDocument;
 	try {

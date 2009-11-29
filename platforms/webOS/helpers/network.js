@@ -48,6 +48,8 @@ sc.helpers.HTTPUploadFile = function(opts, onSuccess, onFailure) {
 	
 	sch.debug('OPTS =============');
 	sch.debug(opts);
+	sch.debug('OPTS.EXTRA =============');
+	sch.debug(opts.extra);
 	sch.debug('ONSUCCESS =============');
 	sch.debug(onSuccess);
 	sch.debug('ONFAILURE =============');
