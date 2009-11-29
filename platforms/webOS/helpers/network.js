@@ -15,16 +15,21 @@ var sc, Mojo, use_palmhost_proxy;
  *  field_name:'', //optional, default to 'media;
  *  file_url:'',
  *  url:'', // REQ
- *  sceneAssistant:{} // REQ; the sceneAssistant we're firing the service req from
+ *  platform: {
+ * 		sceneAssistant:{} // REQ; the sceneAssistant we're firing the service req from
+ *  }
  * 	extra:{...} // extra post fields (text/plain only atm)
  * } 
  * @param Function onSuccess 
  */
 sc.helpers.HTTPUploadFile = function(opts, onSuccess, onFailure) {
+	
+	sch.debug('in HTTPUploadFile ================!!!!!!!!!!!!!!');
+	
 	var key, val, postparams = [];
 	var file_url   = opts.file_url || null;
 	var url        = opts.url      || null;
-	var field_name = opts.file_url || 'media';
+	var field_name = opts.field_name || 'media';
 	var content_type = opts.content_type || 'img';
 	
 	if (opts.extra) {
@@ -34,10 +39,26 @@ sc.helpers.HTTPUploadFile = function(opts, onSuccess, onFailure) {
 		}
 	}
 	
+	if (opts.platform) {
+		var sceneAssistant = opts.platform.sceneAssistant;
+	} else {
+		sch.error('You must pass the opts.platform.sceneAssistant argument to upload on webOS');
+		return;
+	}
+	
+	sch.debug('OPTS =============');
+	sch.debug(opts);
+	sch.debug('ONSUCCESS =============');
+	sch.debug(onSuccess);
+	sch.debug('ONFAILURE =============');
+	sch.debug(onFailure);
+	sch.debug('POSTPARAMS =============');
 	sch.debug(postparams);
+	sch.debug('sceneAssistant =============');
+	sch.debug(sceneAssistant);
 
 	
-	opts.sceneAssistant.controller.serviceRequest('palm://com.palm.downloadmanager/', {
+	sceneAssistant.controller.serviceRequest('palm://com.palm.downloadmanager/', {
 		method: 'upload', 
 		parameters: {
 			'url'        : url,

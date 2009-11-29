@@ -14,6 +14,12 @@ var sc, DOMParser, jQuery;
  * A file uploader class for SpazCore 
  */
 
+if (!sc.events) { sc.events = {}; }
+sc.events.fileUploadStart	= 'fileUploadStart';
+sc.events.fileUploadSuccess	= 'fileUploadSuccess';
+sc.events.fileUploadFailure	= 'fileUploadFailure';
+
+
 
 /**
  * Constructor
@@ -33,10 +39,10 @@ function SpazFileUploader(opts) {
 	if (opts.api) {
 		this.setAPI(opts.api);
 	}
-	this.startEvent   = opts.startEvent   || null;
-	this.successEvent = opts.successEvent || null;
-	this.failureEvent = opts.failureEvent || null;
-	this.eventTarget  = opts.eventTarget  || null;
+	this.startEvent   = opts.startEvent   || sc.events.fileUploadStart;
+	this.successEvent = opts.successEvent || sc.events.fileUploadSuccess;
+	this.failureEvent = opts.failureEvent || sc.events.fileUploadFailure;
+	this.eventTarget  = opts.eventTarget  || document;
 	
 	this.apis = this.getAPIs();
 
@@ -68,6 +74,8 @@ SpazFileUploader.prototype.getAPIs = function() {
 			'api_key_field': 'api_key', // setting this to non-empty means we MUST set an api key
 			'processResult': function(event, apiobj) {
 				var loader = event.target;
+				
+				var returnobj = {}
 
 				var parser=new DOMParser();
 				var xmldoc = parser.parseFromString(loader.data,"text/xml");
@@ -75,13 +83,15 @@ SpazFileUploader.prototype.getAPIs = function() {
 				var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
 				if (rspAttr.getNamedItem("stat").nodeValue === 'ok')
 				{
-					var mediaurl = jQuery(xmldoc).find('mediaurl').text();
+					returnobj['mediaurl'] = jQuery(xmldoc).find('mediaurl').text();
 				} 
 				else
 				{
-					var errAttributes = xmldoc.getElementsByTagName("err")[0].attributes;
-					var errMsg = errAttributes.getNamedItem("msg").nodeValue;
+					returnobj['errAttributes'] = xmldoc.getElementsByTagName("err")[0].attributes;
+					returnobj['errMsg'] = errAttributes.getNamedItem("msg").nodeValue;
 				}
+				sch.debug(returnobj);
+				return returnobj;
 			}
 		},
 		'yfrog' : {
@@ -95,33 +105,40 @@ SpazFileUploader.prototype.getAPIs = function() {
 				var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
 				if (rspAttr.getNamedItem("stat").nodeValue === 'ok')
 				{
-					var mediaurl = jQuery(xmldoc).find('mediaurl').text();
+					returnobj['mediaurl'] = jQuery(xmldoc).find('mediaurl').text();
 				} 
 				else
 				{
-					var errAttributes = xmldoc.getElementsByTagName("err")[0].attributes;
-					var errMsg = errAttributes.getNamedItem("msg").nodeValue;
+					returnobj['errAttributes'] = xmldoc.getElementsByTagName("err")[0].attributes;
+					returnobj['errMsg'] = errAttributes.getNamedItem("msg").nodeValue;
 				}
+				sch.debug(returnobj);
+				return returnobj;
 			}
 		},
 	    'twitpic' : {
 			'upload_url' : 'http://twitpic.com/api/upload',
 			'processResult': function(event, apiobj) {
 				var loader = event.target;
+				
+				sch.debug('PROCESSING: EVENT');
+				sch.debug(event);
 
 				var parser=new DOMParser();
-				var xmldoc = parser.parseFromString(loader.data,"text/xml");
+				var xmldoc = parser.parseFromString(event.data,"text/xml");
 
 				var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
 				if (rspAttr.getNamedItem("stat").nodeValue === 'ok')
 				{
-					var mediaurl = jQuery(xmldoc).find('mediaurl').text();
+					returnobj['mediaurl'] = jQuery(xmldoc).find('mediaurl').text();
 				} 
 				else
 				{
-					var errAttributes = xmldoc.getElementsByTagName("err")[0].attributes;
-					var errMsg = errAttributes.getNamedItem("msg").nodeValue;
+					returnobj['errAttributes'] = xmldoc.getElementsByTagName("err")[0].attributes;
+					returnobj['errMsg'] = errAttributes.getNamedItem("msg").nodeValue;
 				}
+				sch.debug(returnobj);
+				return returnobj;
 			}
 		},
 		'twitgoo' : {
@@ -135,13 +152,15 @@ SpazFileUploader.prototype.getAPIs = function() {
 				var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
 				if (rspAttr.getNamedItem("stat").nodeValue === 'ok')
 				{
-					var mediaurl = jQuery(xmldoc).find('mediaurl').text();
+					returnobj['mediaurl'] = jQuery(xmldoc).find('mediaurl').text();
 				} 
 				else
 				{
-					var errAttributes = xmldoc.getElementsByTagName("err")[0].attributes;
-					var errMsg = errAttributes.getNamedItem("msg").nodeValue;
+					returnobj['errAttributes'] = xmldoc.getElementsByTagName("err")[0].attributes;
+					returnobj['errMsg'] = errAttributes.getNamedItem("msg").nodeValue;
 				}
+				sch.debug(returnobj);
+				return returnobj;
 			}
 		}//,
 		/*
@@ -216,8 +235,6 @@ SpazFileUploader.prototype.getAPIkey = function() {
  *   'username':'xxx',
  *   'password':'xxx',
  *   'source':'xxx',
- *   'onSuccessEvent':function(){},
- *   'onFailureEvent':function(){},
  *   'message':''
  *   
  * } 
@@ -241,6 +258,7 @@ SpazFileUploader.prototype.upload = function(file_url, opts) {
 	var password = opts.password || null;
 	var source   = opts.source   || null;
 	var message  = opts.message  || null;
+	var platformOpts = opts.platform || null;
 
 	var onStart = opts.onStart || null;
 
@@ -265,16 +283,33 @@ SpazFileUploader.prototype.upload = function(file_url, opts) {
 		api.onBeforeSend.call(api, extraParams, api.upload_url, file_url);
 	}
 	
+	/*
+		trigger upload start event
+	*/
+	sc.helpers.triggerCustomEvent(thisSFU.startEvent, thisSFU.eventTarget);
+	
+	sch.debug("HELP ME HERE");
 	
 	// upload the file
 	sc.helpers.HTTPUploadFile({
-		'extra'  :extraParams,
-		'url'    :api.upload_url,
-		'file_url':file_url,
-		'onSuccess' : function(event) {},
-		'onFailure': function(event) {
-			api.processResult.call(thisSFU, event, api);
+			'extra'  :extraParams,
+			'url'    :api.upload_url,
+			'file_url':file_url,
+			'platform':platformOpts
+		},
+		function(event) {
+			sch.debug('UPLOAD SUCCESS, PROCESSING');
+			// var data = api.processResult.call(thisSFU, event, api);
+			// sch.debug(data);
+			sc.helpers.triggerCustomEvent(thisSFU.successEvent, thisSFU.eventTarget, event);
+		},
+		function(event) {
+			sch.debug('UPLOAD FAILURE, PROCESSING');
+			// var data = api.processResult.call(thisSFU, event, api);
+			// sch.debug(data);
+			sc.helpers.triggerCustomEvent(thisSFU.failureEvent, thisSFU.eventTarget, event);
 		}
-	});
+	);
+	sch.debug('WHAT DO YOU THINK?');
 
 };

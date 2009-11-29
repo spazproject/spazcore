@@ -61,6 +61,10 @@ sc.helpers.addListener = function(target, event_type, handler, scope, use_captur
  */
 sc.helpers.removeListener = function(target, event_type, handler, scope, use_capture) {
 
+	sch.dump('removing listener for '+event_type);
+	sch.dump('on target nodeName:'+target.nodeName);
+
+
 	function scope_perserver(e) {
 		handler.call(scope, e);
 	}
@@ -89,7 +93,7 @@ sc.helpers.removeListener = function(target, event_type, handler, scope, use_cap
 sc.helpers.triggerCustomEvent = function(event_type, target, data, bubble) {
 	
 	sch.dump('triggering '+event_type);
-	sch.dump('target nodeName:'+target.nodeName);
+	sch.dump('on target nodeName:'+target.nodeName);
 	
 	if (bubble !== false) {
 		bubble = true;
