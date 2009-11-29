@@ -21,6 +21,7 @@ cat libs/spazcore.js \
 	helpers/view.js \
 	helpers/xml.js \
 	libs/spazimageurl.js \
+	libs/spazfileuploader.js \
 	libs/spazphotomailer.js \
 	libs/spazprefs.js \
 	libs/spazshorttext.js \
@@ -28,6 +29,7 @@ cat libs/spazcore.js \
 	libs/spaztemplate.js \
 	libs/spaztimeline.js \
 	libs/spaztwit.js \
+	platforms/webOS/helpers/network.js \
 	platforms/webOS/helpers/sys.js \
 	platforms/webOS/libs/spazprefs.js \
 	>> $BUILD_FILE
