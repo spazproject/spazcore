@@ -28,6 +28,7 @@ cat libs/spazcore.js \
 	libs/spazshorturl.js \
 	libs/spaztemplate.js \
 	libs/spaztimeline.js \
+	libs/spaztmdb.js \
 	libs/spaztwit.js \
 	platforms/webOS/helpers/network.js \
 	platforms/webOS/helpers/sys.js \

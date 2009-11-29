@@ -1,4 +1,4 @@
-/*********** Built 2009-09-14 17:09:36 EDT ***********/
+/*********** Built 2009-11-29 17:24:00 EST ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -2889,6 +2889,10 @@ var SPAZCORE_EVENTDATA_ATTRIBUTE = 'sc_data';
  */
 sc.helpers.addListener = function(target, event_type, handler, scope, use_capture) {
 
+	sch.dump('listening for '+event_type);
+	sch.dump('on target nodeName:'+target.nodeName);
+
+
 	function scope_perserver(e) {
 		handler.call(scope, e);
 	}
@@ -2920,6 +2924,10 @@ sc.helpers.addListener = function(target, event_type, handler, scope, use_captur
  */
 sc.helpers.removeListener = function(target, event_type, handler, scope, use_capture) {
 
+	sch.dump('removing listener for '+event_type);
+	sch.dump('on target nodeName:'+target.nodeName);
+
+
 	function scope_perserver(e) {
 		handler.call(scope, e);
 	}
@@ -2940,12 +2948,15 @@ sc.helpers.removeListener = function(target, event_type, handler, scope, use_cap
  * This triggers a custom event using document.createEvent('Events') and target.dispatchEvent()
  * 
  * @param {string}  event_type
- * @param {target}  target   the target for the event (element, window, etc)
+ * @param {DOMElement}  target   the target for the event (element, window, etc)
  * @param {object}  data     data to pass with event
  * @param {boolean} bubble   whether the event should bubble or not. defaults to true
  * @function
  */
 sc.helpers.triggerCustomEvent = function(event_type, target, data, bubble) {
+	
+	sch.dump('triggering '+event_type);
+	sch.dump('on target nodeName:'+target.nodeName);
 	
 	if (bubble !== false) {
 		bubble = true;
@@ -3871,6 +3882,9 @@ sc.helpers.clone = function(oldObj) {
 	return jQuery.extend({}/* clone */, oldObj);
 };
 
+/**
+ * @todo 
+ */
 sc.helpers.each = function(arr, f) {
 	
 };
@@ -3888,7 +3902,27 @@ sc.helpers.extend = function(child, supertype)
 {
    child.prototype.__proto__ = supertype.prototype;
 };
-/*jslint 
+
+/**
+ * Designed to fill in default values for an options argument passed to a
+ * function. Merges the provided defaults with the passed object, using items
+ * from defaults if they don't exist in passed 
+ * 
+ * @param {object} defaults the default key/val pairs
+ * @param {object} passed   the values provided to the calling method
+ * @returns {object} a set of key/vals that have defaults filled-in
+ */
+sc.helpers.defaults = function(defaults, passed) {
+	
+	var args = defaults;
+	
+	/* override the defaults if necessary */
+	for (var key in passed) {
+		args[key] = passed[key];
+	}
+	
+	return args;
+}/*jslint 
 browser: true,
 nomen: false,
 debug: true,
@@ -4125,8 +4159,9 @@ var sc;
 
 /**
  * Stub 
+ * @platformstub
  */
-function getCurrentLocation() {
+sc.helpers.getCurrentLocation = function() {
 	
 }/*jslint 
 bitwise: false,
@@ -4873,7 +4908,7 @@ sc.helpers.note = function(obj) {
  * helper to send a warn dump 
  */
 sc.helpers.warn = function(obj) {
-	sc.helpers.dump(obj, SPAZCORE_DUMPLEVEL_WARN);
+	sc.helpers.dump(obj, SPAZCORE_DUMPLEVEL_WARNING);
 };
 
 /**
@@ -5003,7 +5038,19 @@ sc.helpers.getPreferencesFile = function(name, create) {
 sc.helpers.init_file = function(path, overwrite) {
 	// stub
 };
-/*jslint 
+/**
+ * Takes a key/val pair object and returns a query string 
+ */
+sc.helpers.objectToQueryString = function(object) {
+	var query_string, key, val, pieces = [];
+	
+	for(key in object) {
+		val = object[key];
+		pieces.push(encodeURIComponent(key)+'='+encodeURIComponent(val));
+	}
+	query_string = pieces.join('&');
+	return query_string;
+};/*jslint 
 browser: true,
 nomen: false,
 debug: true,
@@ -5110,7 +5157,12 @@ white: false,
 onevar: false 
  */
 var sc, DOMParser;
- 
+
+/**
+ * Given a string, this returns an XMLDocument
+ * @param {string} string
+ * @return {XMLDocument}
+ */
 sc.helpers.createXMLFromString = function (string) {
 	var xmlParser, xmlDocument;
 	try {
@@ -5146,7 +5198,8 @@ SpazImageURL.prototype.initAPIs = function() {
 			return url;
 		},
 		'getImageUrl'     : function(id) {
-			return null;
+			var url = 'http://twitpic.com/show/large/'+id;
+			return url;
 		}
 	});
 
@@ -5158,7 +5211,8 @@ SpazImageURL.prototype.initAPIs = function() {
 			return url;
 		},
 		'getImageUrl'     : function(id) {
-			return null;
+			var url = 'http://yfrog.com/'+id+':iphone';
+			return url;
 		}
 	});
 	
@@ -5178,10 +5232,10 @@ SpazImageURL.prototype.initAPIs = function() {
 	
 	
 	this.addAPI('pikchur', {
-		'url_regex'       : /http:\/\/pikchur.com\/([a-zA-Z0-9]+)/gi,
+		'url_regex'       : /http:\/\/(?:pikchur\.com|pk\.gd)\/([a-zA-Z0-9]+)/gi,
 		'getThumbnailUrl' : function(id) {
 			// http://img.pikchur.com/pic_GPT_t.jpg
-			var url = 'http://img.pikchur.com/pic_'+id+'_t.jpg';
+			var url = 'http://img.pikchur.com/pic_'+id+'_m.jpg';
 			return url;
 		},
 		'getImageUrl'     : function(id) {
@@ -5270,13 +5324,16 @@ SpazImageURL.prototype.findServiceUrlsInString = function(str) {
 	for (key in this.apis) {
 		
 		thisapi = this.getAPI(key);
-		
+		sch.dump(key);
+		sch.dump(thisapi.url_regex);
 		while( (re_matches = thisapi.url_regex.exec(sch.trim(str))) != null) {
+			sch.dump(re_matches);
 			matches[key] = re_matches;
 			num_matches++;
 		}
 	}
-	
+	sch.dump('num_matches:'+num_matches);
+	sch.dump(matches);	
 	if (num_matches > 0) {
 		return matches;
 	} else {
@@ -5289,17 +5346,22 @@ SpazImageURL.prototype.findServiceUrlsInString = function(str) {
  * find the image service URLs that work with our defined APIs in a given string
  * @param {object} matches
  * @return {object|null} fullurl:thumburl key:val pairs
+ * 
  */
 SpazImageURL.prototype.getThumbsForMatches = function(matches) {
 	var x, service, api, thumburl, thumburls = {}, num_urls = 0;
 	
 	for (service in matches) {
+		sch.dump('SERVICE:'+service);
 		api = this.getAPI(service);
 		urls = matches[service]; // an array
-		
+		sch.dump("URLS:"+urls);
 		thumburls[urls[0]] = api.getThumbnailUrl(urls[1]);
 		num_urls++;
 	}
+
+	sch.dump('num_urls:'+num_urls);
+	sch.dump(thumburls);	
 	
 	if (num_urls > 0) {
 		return thumburls;
@@ -5323,7 +5385,82 @@ SpazImageURL.prototype.getThumbsForUrls = function(str) {
 		return null;
 	}
 	
-};/*jslint 
+};
+
+/**
+ * given a single image hosting service URL, this returns a URL to the thumbnail image itself
+ * @param {string} url
+ * @return {string|null}
+ */
+SpazImageURL.prototype.getThumbForUrl = function(url) {
+	var urls = this.getThumbsForUrls(url);
+	if (urls) {
+		return urls[url];
+	} else {
+		return null;
+	}
+};
+
+
+
+/**
+ * find the image service URLs that work with our defined APIs in a given string
+ * @param {object} matches
+ * @return {object|null} fullurl:thumburl key:val pairs
+ */
+SpazImageURL.prototype.getImagesForMatches = function(matches) {
+	var x, service, api, imageurl, imageurls = {}, num_urls = 0;
+	
+	for (service in matches) {
+		sch.dump('SERVICE:'+service);
+		api = this.getAPI(service);
+		urls = matches[service]; // an array
+		sch.dump("URLS:"+urls);
+		imageurls[urls[0]] = api.getImageUrl(urls[1]);
+		num_urls++;
+	}
+
+	sch.dump('num_urls:'+num_urls);
+	sch.dump(imageurls);	
+	
+	if (num_urls > 0) {
+		return imageurls;
+	} else {
+		return null;
+	}
+};
+
+
+/**
+ * given a string, this returns a set of key:val pairs of main url:image url
+ * for image hosting services for urls within the string
+ * @param {string} str
+ * @return {object|null} fullurl:imageurl key:val pairs
+ */
+SpazImageURL.prototype.getImagesForUrls = function(str) {
+	var matches = this.findServiceUrlsInString(str);
+	if (matches) {
+		return this.getImagesForMatches(matches);
+	} else {
+		return null;
+	}
+};
+
+
+/**
+ * given a single image hosting service URL, this returns a URL to the image itself
+ * @param {string} url
+ * @return {string|null}
+ */
+SpazImageURL.prototype.getImageForUrl = function(url) {
+	var urls = this.getImagesForUrls(url);
+	if (urls) {
+		return urls[url];
+	} else {
+		return null;
+	}
+};
+/*jslint 
 browser: true,
 nomen: false,
 debug: true,
@@ -6440,7 +6577,10 @@ var SPAZCORE_EXPANDABLE_DOMAINS = [
 	'ad.vu',
 	'bit.ly',
 	'cli.gs',
+	'ff.im',
 	'is.gd',
+	'j.mp',
+	'ow.ly',
 	'poprl.com',
 	'short.ie',
 	'sn.im',
@@ -6622,6 +6762,12 @@ SpazShortURL.prototype.expand = function(shorturl, opts) {
 	var shortener = this;
 	var longurl;
 	
+	if (!opts) {
+		opts = {}
+	}
+	
+	opts.event_target = opts.event_target || document;
+	
 	/*
 		Do a lookup in the cache first
 	*/
@@ -6699,18 +6845,23 @@ SpazShortURL.prototype.findExpandableURLs = function(str) {
 	
 	for (var i=0; i < SPAZCORE_EXPANDABLE_DOMAINS.length; i++) {
 		thisdomain = SPAZCORE_EXPANDABLE_DOMAINS[i];
-		regexes.push(new RegExp("http://"+thisdomain+"/([a-zA-Z0-9]+)", "gi"));
+		if (thisdomain == 'ff.im') {
+			regexes.push(new RegExp("http://"+thisdomain+"/(-?[a-zA-Z0-9]+)", "gi"));
+		} else {
+			regexes.push(new RegExp("http://"+thisdomain+"/([a-zA-Z0-9]+)", "gi"));
+		}
+		
 	};
 	
 	for (var i=0; i < regexes.length; i++) {
 		thisregex = regexes[i];
+		sch.dump("looking for "+thisregex+ " in '"+str+"'");
 		while( (re_matches = thisregex.exec(sch.trim(str))) != null) {
 			matches.push(re_matches[0]);
 		}		
 	};
 	
-	console.log('DONE SEARCHING '+str);
-	console.log(matches);
+	sch.dump(matches);
 	
 	if (matches.length > 0) {
 		return matches;
@@ -6718,6 +6869,32 @@ SpazShortURL.prototype.findExpandableURLs = function(str) {
 		return null;
 	}
 
+};
+
+
+SpazShortURL.prototype.expandURLs = function(urls, target) {
+	for (var i=0; i < urls.length; i++) {
+		var thisurl = urls[i];
+		sch.dump('expanding '+thisurl);
+		this.expand(thisurl, { 'event_target':target });
+	};
+};
+
+
+
+/**
+ * @param {string} str  the string to replace the URLs in
+ * @param {string} shorturl 
+ * @param {string} longurl 
+ */
+SpazShortURL.prototype.replaceExpandableURL = function(str, shorturl, longurl) {
+	str = str.replace(shorturl, longurl, 'gi');
+	/*
+		we also expand the non-http://-prefixed versions. Wonder if this is a bad idea, though -- seems
+		possible we could have unexpected consqeuences with this
+	*/
+	str = str.replace(shorturl.replace('http://', ''), longurl.replace('http://', ''), 'gi');
+	return str;
 };
 
 
@@ -6817,6 +6994,7 @@ var SpazTimeline = function(opts) {
 	 * @function
 	 */
 	this.refresh = function() {
+		sch.debug('Refreshing timeline');
 		thisTL.requestData.call(thisTL);
 	};
 	
@@ -6825,6 +7003,7 @@ var SpazTimeline = function(opts) {
 	 * Again, due to scope issues, we define this here to take advantage of the closure 
 	 */
 	this.onSuccess = function(e) {
+		sch.debug('onSuccess timeline');
 		var data = sc.helpers.getEventData(e);
 		thisTL.data_success.call(thisTL, e, data);
 		thisTL.startRefresher();	
@@ -6834,6 +7013,7 @@ var SpazTimeline = function(opts) {
 	 * Again, due to scope issues, we define this here to take advantage of the closure 
 	 */
 	this.onFailure = function(e) {
+		sch.debug('onFailure timeline');
 		var data = sc.helpers.getEventData(e);
 		thisTL.data_failure.call(thisTL, e, data);
 		thisTL.startRefresher();	
@@ -6881,6 +7061,7 @@ SpazTimeline.prototype._init = function(opts) {
 		throw new Error ("data_success is required");
 	}
 
+	this.container = jQuery(this.timeline_container_selector).get(0);
 
 
 };
@@ -6889,6 +7070,7 @@ SpazTimeline.prototype._init = function(opts) {
  * call this after initialization 
  */
 SpazTimeline.prototype.start = function() {
+	sch.debug('Starting timeline');
 	this.requestData();
 };
 
@@ -6896,6 +7078,7 @@ SpazTimeline.prototype.start = function() {
  * right now this does the same as start(), but could change in the future 
  */
 SpazTimeline.prototype.refresh = function() {
+	sch.debug('Refreshing timeline (prototype)');
 	this.requestData();
 };
 
@@ -6906,6 +7089,7 @@ SpazTimeline.prototype.refresh = function() {
  * @todo needs to be written to handle async call
  */
 SpazTimeline.prototype.requestData = function() {
+	sch.debug('Requesting data timeline');
 	this.stopRefresher();
 	
 	this.stopListening();
@@ -6919,7 +7103,7 @@ SpazTimeline.prototype.requestData = function() {
 
 SpazTimeline.prototype.startListening = function() {
 	var thisTL = this;
-	sch.dump("Listening for "+thisTL.success_event);
+	sc.helpers.debug("Listening for "+thisTL.success_event);
 	sc.helpers.listen(thisTL.event_target, thisTL.success_event, thisTL.onSuccess);
 	sc.helpers.listen(thisTL.event_target, thisTL.failure_event, thisTL.onFailure);
 };
@@ -6927,19 +7111,26 @@ SpazTimeline.prototype.startListening = function() {
 
 SpazTimeline.prototype.stopListening = function() {
 	var thisTL = this;
+	sc.helpers.debug("Stopping listening for "+thisTL.success_event);
 	sc.helpers.unlisten(thisTL.event_target, thisTL.success_event, thisTL.onSuccess);
 	sc.helpers.unlisten(thisTL.event_target, thisTL.failure_event, thisTL.onFailure);
 };
 
 SpazTimeline.prototype.startRefresher = function() {
 	this.stopRefresher();
+	
+	sc.helpers.debug('Starting refresher');
 	if (this.refresh_time > 1000) { // the minimum refresh is 1000ms. Otherwise we don't auto-refresh
+		sc.helpers.debug('Refresh time is '+this.refresh_time+'ms');
 		this.refresher = setInterval(this.refresh, this.refresh_time);
+	} else {
+		sc.helpers.debug('Not starting refresher; refresh time is '+this.refresh_time+'ms');
 	}
 };
 
 
 SpazTimeline.prototype.stopRefresher = function() {
+	sc.helpers.debug('Stopping refresher');
 	clearInterval(this.refresher);
 };
 
@@ -6953,6 +7144,7 @@ SpazTimeline.prototype.stopRefresher = function() {
  * removing event listeners an stopping the refresher 
  */
 SpazTimeline.prototype.cleanup = function() {
+	sch.debug('Cleaning up timeline');
 	this.stopListening();
 	this.stopRefresher();
 };
@@ -6962,6 +7154,8 @@ SpazTimeline.prototype.cleanup = function() {
  * @param {array} items
  */
 SpazTimeline.prototype.addItems = function(items) {
+	sch.debug('Adding items to timeline');
+	
 	var items_html    = [];
 	var timeline_html = '';
 	
@@ -6984,6 +7178,7 @@ SpazTimeline.prototype.addItems = function(items) {
 
 
 SpazTimeline.prototype.renderItem = function(item, templatefunc) {
+	sch.debug('Rendering item in timeline');
 	
 	var html = templatefunc(item);
 	
@@ -6993,6 +7188,8 @@ SpazTimeline.prototype.renderItem = function(item, templatefunc) {
 
 
 SpazTimeline.prototype.removeExtraItems = function() {
+	
+	sch.debug('Removing extra items in timeline');
 	
 	if (this.add_method === 'append') {
 		var remove_from_top = true;
@@ -7014,6 +7211,9 @@ SpazTimeline.prototype.removeItem = function(selector) {};
  * @return {boolean} 
  */
 SpazTimeline.prototype.itemExists = function(selector) {
+	
+	sch.debug('Checking it item ('+selector+') exists in timeline');
+	
 	var items = this.select(selector);
 	if (items.length>0) {
 		return true;
@@ -7025,11 +7225,15 @@ SpazTimeline.prototype.itemExists = function(selector) {
 
 
 SpazTimeline.prototype.hideItems = function(selector) {
+	sch.debug('Hiding items in timeline');
+	
 	this.filterItems(selector, 'blacklist');
 };
 
 
 SpazTimeline.prototype.showItems = function(selector) {
+	sch.debug('Showing items in timeline');
+	
 	this.filterItems(selector, 'whitelist');
 };
 
@@ -7045,6 +7249,9 @@ SpazTimeline.prototype.filterItems = function(selector, type) {};
  * sorts the elements in the timeline according to the sorting function 
  */
 SpazTimeline.prototype.sortItems = function(selector, sortfunc) {
+	
+	sch.debug('Sorting items in timeline');
+	
 	var items = this.select(selector);
 	items.sort(sortfunc);
 };
@@ -7077,6 +7284,600 @@ SpazTimeline.prototype.append = function(htmlitem) {
 SpazTimeline.prototype.getEntrySelector = function() {
 	return this.timeline_container_selector + ' ' + this.timeline_item_selector;
 };
+/**
+ * This is a library to handle custom filtering of Twitter timelines based on
+ * usernames and message content
+ * 
+ */
+SpazTimelineFilter = function(opts) {
+	
+	if (!opts) { opts = {} };
+	
+	if (opts.type !== 'whitelist') { opts.type = 'blacklist' };
+	
+	this.settings = {
+		name : opts.name || 'unnamed',
+		type : opts.type,
+		usernames_show : opts.usernames_show   || [],
+		usernames_hide : opts.usernames_hide   || [],
+		content_show   : opts.content_show     || [],
+		content_hide   : opts.content_hide     || [],
+		filter_class_prefix: opts.filter_class_prefix || 'customfilter-',
+		timeline_selector: opts.timeline_selector || 'div.timeline',
+		entry_selector : opts.entry_selector   || 'div.timeline-entry',
+		username_attr  : opts.username_attr    || 'data-user-screen_name',
+		content_selector:opts.content_selector || 'div.timeline-entry status-text',
+		style_selector : opts.style_selector   || 'style[title="custom-timeline-filters"]'
+	}
+	// this.settings = {
+	// 	name : 'php-people',
+	// 	type : 'whitelist', // whitelist | blacklist
+	// 	usernames_show : [],
+	// 	usernames_hide : [],
+	// 	content_show : [],
+	// 	content_hide : [],
+	// 	filter_class_prefix: 'customfilter-',
+	// 	timeline_selector: 'div.timeline',
+	// 	entry_selector : 'div.timeline-entry',
+	// 	username_attr  : 'data-user-screen_name',
+	// 	content_selector:'div.timeline-entry status-text',
+	// 	style_selector : 'style[title="custom-timeline-filters"]'
+	// }
+	
+}
+
+
+
+/**
+ * this generates the base selector for timeline entries based on 
+ * the opts given to the constructor 
+ * @return {string}
+ */
+SpazTimelineFilter.prototype.getBaseSelector = function() {
+	var base_sel = this.settings.timeline_selector+
+		    "."+this.getTimelineClass()+
+		    " "+this.settings.entry_selector;
+	return base_sel;
+};
+
+/**
+ * this returns the timeline class we'll apply to the timeline container 
+ */
+SpazTimelineFilter.prototype.getTimelineClass = function() {
+	return this.settings.filter_class_prefix+this.settings.name;
+};
+
+/**
+ * This generates the user-filtering CSS rules
+ * @return {array} 
+ */
+SpazTimelineFilter.prototype.getUserCSS = function() {
+	var base_sel = '', rule = '', rules = [], thisuser;
+	
+	base_sel = this.getBaseSelector();
+	
+	/*
+		start with white or black
+	*/
+	if (this.settings.type === 'whitelist') {
+		rule = base_sel+" { display:none; }";
+		rules.push(rule);
+	}
+	else if (this.settings.type === 'blacklist') {
+		rule = base_sel+" { display:block; }";
+		rules.push(rule);
+	} else {
+		return null;
+	}
+	
+	/*
+		add usernames to show
+	*/
+	for (var i=0; i < this.settings.usernames_show.length; i++) {
+		thisuser = this.settings.usernames_show[i];
+		rule = base_sel+"["+this.settings.username_attr+"='"+thisuser+"'] { display:block; }";
+		rules.push(rule);
+	};
+
+	/*
+		add usernames to hide
+	*/
+	for (var i=0; i < this.settings.usernames_hide.length; i++) {
+		thisuser = this.settings.usernames_show[i];
+		rule = base_sel+"["+this.settings.username_attr+"='"+thisuser+"'] { display:none; }";
+		rules.push(rule);
+	};
+
+	return rules.join("\n");
+}
+
+
+/**
+ * This takes a string of comma-delimited usernames and "hide" OR "show" and 
+ * parses it into the arrays used in this.settings
+ * @param {string} str  string of usernames, separated by commas
+ * @param {string} hide_or_show  'hide' or 'show'. defaults to 'show' 
+ */
+SpazTimelineFilter.prototype.parseUsersFromString = function(str, hide_or_show) {
+	
+	if (hide_or_show !== 'hide') { hide_or_show = 'show'; }
+	var users = str.split(',');
+	for (var i=0; i < users.length; i++) {
+		users[i] = sch.trim(users[i]);
+	};
+	
+	this.parseUsersFromArray(users, hide_or_show);
+};
+
+/**
+ * This takes an array of usernames and "hide" OR "show" and 
+ * parses it into the arrays used in this.settings
+ * @param {array} user_arr  array of usernames
+ * @param {string} hide_or_show  'hide' or 'show'. defaults to 'show' 
+ */
+SpazTimelineFilter.prototype.parseUsersFromArray = function(user_arr, hide_or_show) {
+
+	if (hide_or_show !== 'hide') { hide_or_show = 'show'; }
+
+	if (hide_or_show === 'hide') {
+		this.usernames_hide = user_arr;
+	} else {
+		this.usernames_show = user_arr;
+	}
+};
+
+
+/**
+ * This takes a username and "hide" or "show" and adds it to the appropriate
+ * array in this.settings
+ * @param {string} str  the username
+ * @param {string} hide_or_show  'hide' or 'show'. defaults to 'show' 
+ */
+SpazTimelineFilter.prototype.addUser = function(str, hide_or_show) {
+	
+	if (hide_or_show !== 'hide') { hide_or_show = 'show'; }
+	
+	var username = sch.trim(str);
+	
+	if (hide_or_show === 'hide') {
+		this.usernames_hide.push(username);
+	} else {
+		this.usernames_show.push(username);
+	}
+	
+};
+
+/**
+ * This takes a string of comma-delimited strings and "hide" OR "show" and 
+ * parses it into the content string filter arrays used in this.settings
+ * @param {string} str  string of strings, separated by commas
+ * @param {string} hide_or_show  'hide' or 'show'. defaults to 'show' 
+ */
+SpazTimelineFilter.prototype.parseContentStringsFromString = function(str, hide_or_show) {
+	if (hide_or_show !== 'hide') { hide_or_show = 'show'; }
+	var contentstrings = str.split(',');
+	for (var i=0; i < contentstrings.length; i++) {
+		contentstrings[i] = sch.trim(contentstrings[i]);
+	};
+	
+	this.parseContentStringsFromArray(contentstrings, hide_or_show);
+};
+
+/**
+ * This takes an array of comma-delimited strings and "hide" OR "show" and 
+ * parses it into the content string filter arrays used in this.settings
+ * @param {array} str_arr  array of strings
+ * @param {string} hide_or_show  'hide' or 'show'. defaults to 'show' 
+ */
+SpazTimelineFilter.prototype.parseContentStringsFromArray = function(str_arr, hide_or_show) {
+	
+	if (hide_or_show !== 'hide') { hide_or_show = 'show'; }
+
+	if (hide_or_show === 'hide') {
+		this.content_hide = str_arr;
+	} else {
+		this.content_show = str_arr;
+	}
+	
+};
+
+/**
+ * This takes a string and "hide" or "show" and adds it to the appropriate
+ * content string filter array in this.settings
+ * @param {string} str  the string
+ * @param {string} hide_or_show  'hide' or 'show'. defaults to 'show' 
+ */
+SpazTimelineFilter.prototype.addContentString = function(str, hide_or_show) {
+	if (hide_or_show !== 'hide') { hide_or_show = 'show'; }
+	
+	var contentstring = sch.trim(str);
+	
+	if (hide_or_show === 'hide') {
+		this.content_hide.push(contentstring);
+	} else {
+		this.content_show.push(contentstring);
+	}
+};
+
+/**
+ * returns the current this.settings object as JSON. Mainly this is for
+ * saving the settings to some permanent data store
+ */
+SpazTimelineFilter.prototype.settingsToJSON = function() {
+	
+	return sch.enJSON(this.settings);
+	
+};
+
+/**
+ * takes JSON, decodes it, and assigns it to this.settings. Mainly this is 
+ * for loading the settings from a file or DB
+ * @param {string} json 
+ */
+SpazTimelineFilter.prototype.settingsFromJSON = function(json) {
+	
+	this.settings = sch.deJSON(json);
+	
+};
+
+/**
+ * This applies the user filtering CSS by inserting it into the <style>
+ * tag designated by this.settings.style_selector 
+ */
+SpazTimelineFilter.prototype.applyUserCSS = function() {
+	jQuery(this.settings.style_selector).text( this.getUserCSS() );
+};
+
+/**
+ * this clears the CSS code inside the <style> tag 
+ */
+SpazTimelineFilter.prototype.disableUserCSS = function() {
+	jQuery(this.settings.style_selector).text('');
+};
+
+/**
+ * This applies the content filters by hiding and showing elements via jQuery
+ */
+SpazTimelineFilter.prototype.applyContentFilters = function() {
+	var thiscontent;
+	
+	var contentfilters = this.buildContentFilterSelectors();
+	var jq_entries = jQuery(this.getBaseSelector());
+	
+	for (var i=0; i < contentfilters.hide.length; i++) {
+		jq_entries.filter(contentfilters.hide[i]).hide();
+	}
+	for (var i=0; i < contentfilters.show.length; i++) {
+		jq_entries.filter(contentfilters.show[i]).show();
+	}
+};
+
+/**
+ * This disables the content filters by showing *everything* 
+ */
+SpazTimelineFilter.prototype.disableContentFilters = function() {
+	var jq_entries = jQuery(this.getBaseSelector());
+	jq_entries.filter().show();
+}
+
+/**
+ * this builds the content filtering selectors used by jQuery to hide and 
+ * show elements based on content 
+ */
+SpazTimelineFilter.prototype.buildContentFilterSelectors = function() {
+	
+	var contentfilters = {
+		'hide':[],
+		'show':[]
+	}
+	
+	for (var i=0; i < this.settings.content_hide.length; i++) {
+		thiscontent = this.settings.content_hide[i];
+		contentfilters.hide.push(':contains("'+thiscontent+'")');
+	}
+	for (var i=0; i < this.settings.content_show.length; i++) {
+		thiscontent = this.settings.content_show[i];
+		contentfilters.show.push(':contains("'+thiscontent+'")');
+	}
+	return contentfilters;
+};
+
+/**
+ * Apply user and content filtering 
+ */
+SpazTimelineFilter.prototype.apply = function() {
+	this.applyUserCSS();
+	this.applyContentFilters();
+};
+
+/**
+ * Disable user and content filtering 
+ */
+SpazTimelineFilter.prototype.disable = function() {
+	this.disableUserCSS();
+	this.disableContentFilters();
+};
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, DOMParser, jQuery, sch;
+ 
+/**
+ * A library to interact with the API for theMovieDB.org 
+ * @see <a href="http://api.themoviedb.org/2.1/">The API docs</a>
+ */
+
+/**
+ * events raised here 
+ */
+if (!sc.events) { sc.events = {}; }
+sc.events.tmdbMethodSuccess		= 'tmdbMethodSuccess';
+sc.events.tmdbMethodFailure		= 'tmdbMethodFailure';
+sc.events.tmdbMovieSearchSuccess		= 'tmdbMovieSearchSuccess';
+sc.events.tmdbMovieSearchFailure		= 'tmdbMovieSearchFailure';
+sc.events.tmdbMovieIMDBLookupSuccess	= 'tmdbMovieIMDBLookupSuccess';
+sc.events.tmdbMovieIMDBLookupFailure	= 'tmdbMovieIMDBLookupFailure';
+sc.events.tmdbMovieGetInfoSuccess		= 'tmdbMovieGetInfoSuccess';
+sc.events.tmdbMovieGetInfoFailure		= 'tmdbMovieGetInfoFailure';
+sc.events.tmdbMovieGetImagesSuccess		= 'tmdbMovieGetImagesSuccess';
+sc.events.tmdbMovieGetImagesFailure		= 'tmdbMovieGetImagesFailure';
+sc.events.tmdbPersonSearchSuccess		= 'tmdbPersonSearchSuccess';
+sc.events.tmdbPersonSearchFailure		= 'tmdbPersonSearchFailure';
+sc.events.tmdbPersonGetInfoSuccess		= 'tmdbPersonGetInfoSuccess';
+sc.events.tmdbPersonGetInfoFailure		= 'tmdbPersonGetInfoFailure';
+sc.events.tmdbHashGetInfoSuccess		= 'tmdbHashGetInfoSuccess';
+sc.events.tmdbHashGetInfoFailure		= 'tmdbHashGetInfoFailure';
+
+
+
+/**
+ * @constructor
+ * @param {Object} opts
+ * @param {string} opts.apikey the api key
+ * @param {string} [opts.lang] a language code. default is 'en'
+ * @param {string} [opts.format] the data format to return. default is 'json'
+ * @param {DOMElement} [opts.eventTarget] what to target triggered events with. default is the document element
+ */
+function SpazTMDB(opts) {
+	
+	/*
+		set defaults
+	*/
+	opts = sch.defaults({
+		'apikey':null,
+		'lang'  :'en',
+		'format':'json',
+		'eventTarget':document
+	}, opts);
+	
+	this.apikey = opts.apikey;
+	this.lang   = opts.lang;
+	this.format = opts.format;
+	this.eventTarget = opts.eventTarget;
+	
+	this.baseURL = 'http://api.themoviedb.org/2.1/';
+		
+}
+
+/**
+ * Sets the API key
+ * @param {string} apikey the api key used to access the API 
+ */
+SpazTMDB.prototype.setAPIKey = function(apikey) {
+	this.apikey = apikey;
+};
+
+/**
+ * Gets the API key
+ * @returns {string} the api key that was previously set 
+ */
+SpazTMDB.prototype.getAPIKey = function() {
+	return this.apikey;
+};
+
+/**
+ * Search for movies by title
+ * @param {string} value the value passed to the search method
+ * @param {function} [onSuccess] a callback 
+ * @param {function} [onFailure] a callback 
+ */
+SpazTMDB.prototype.movieSearch = function(value, onSuccess, onFailure) {
+	this.callMethod({
+		'method':'Movie.search',
+		'value' :value,
+		'successEvent':sc.events.tmdbMovieSearchSuccess,
+		'failureEvent':sc.events.tmdbMovieSearchFailure,
+		'onSuccess':onSuccess,
+		'onFailure':onFailure
+ 	});
+};
+
+
+
+/**
+ * Get info for a movie
+ * @param {string|number} id The id of the movie (numeric)
+ * @param {function} [onSuccess] a callback 
+ * @param {function} [onFailure] a callback 
+ */
+SpazTMDB.prototype.movieInfo = function(id, onSuccess, onFailure) {
+	this.callMethod({
+		'method':'Movie.getInfo',
+		'value' :id,
+		'successEvent':sc.events.tmdbMovieGetInfoSuccess,
+		'failureEvent':sc.events.tmdbMovieGetInfoFailure,
+		'onSuccess':onSuccess,
+		'onFailure':onFailure
+ 	});
+};
+
+
+
+/**
+ * Get images for a movie
+ * @param {string|number} id The id of the movie (numeric)
+ * @param {function} [onSuccess] a callback 
+ * @param {function} [onFailure] a callback 
+ */
+SpazTMDB.prototype.movieImages = function(id, onSuccess, onFailure) {
+	this.callMethod({
+		'method':'Movie.getImages',
+		'value' :id,
+		'successEvent':sc.events.tmdbMovieGetInfoSuccess,
+		'failureEvent':sc.events.tmdbMovieGetInfoFailure,
+		'onSuccess':onSuccess,
+		'onFailure':onFailure
+ 	});
+};
+
+
+
+/**
+ * Lookup a movie by IMDB id
+ * @param {string} id The IMDB id of the movie. ex "tt0137523"
+ * @param {function} [onSuccess] a callback 
+ * @param {function} [onFailure] a callback 
+ */
+SpazTMDB.prototype.movieInfoIMDB = function(id, onSuccess, onFailure) {
+	this.callMethod({
+		'method':'Movie.imdbLookup',
+		'value' :id,
+		'successEvent':sc.events.tmdbMovieIMDBLookupSuccess,
+		'failureEvent':sc.events.tmdbMovieIMDBLookupFailure,
+		'onSuccess':onSuccess,
+		'onFailure':onFailure
+ 	});
+};
+
+
+
+/**
+ * Search for a person
+ * @param {string|number} id The id of the person (numeric)
+ * @param {function} [onSuccess] a callback 
+ * @param {function} [onFailure] a callback 
+ */
+SpazTMDB.prototype.personInfo = function(id, onSuccess, onFailure) {
+	this.callMethod({
+		'method':'Person.getInfo',
+		'value' :id,
+		'successEvent':sc.events.tmdbPersonGetInfoSuccess,
+		'failureEvent':sc.events.tmdbPersonGetInfoFailure,
+		'onSuccess':onSuccess,
+		'onFailure':onFailure
+ 	});
+};
+
+
+
+/**
+ * Search for a person
+ * @param {string} name The name to search for
+ * @param {function} [onSuccess] a callback 
+ * @param {function} [onFailure] a callback 
+ */
+SpazTMDB.prototype.personSearch = function(name, onSuccess, onFailure) {
+	this.callMethod({
+		'method':'Person.search',
+		'value' :name,
+		'successEvent':sc.events.tmdbPersonSearchSuccess,
+		'failureEvent':sc.events.tmdbPersonSearchFailure,
+		'onSuccess':onSuccess,
+		'onFailure':onFailure
+ 	});
+};
+
+
+
+
+/**
+ * Get movie info by file hash
+ * @param {string} hash The hash corresponding to the movie
+ * @param {function} [onSuccess] a callback 
+ * @param {function} [onFailure] a callback 
+ * @see <a href="http://trac.opensubtitles.org/projects/opensubtitles/wiki/HashSourceCodes">Hash Source Codes</a>
+ */
+SpazTMDB.prototype.movieInfoHash = function(hash, onSuccess, onFailure) {
+	this.callMethod({
+		'method':'Hash.getInfo',
+		'value' :hash,
+		'successEvent':sc.events.tmdbHashGetInfoSuccess,
+		'failureEvent':sc.events.tmdbHashGetInfoFailure,
+		'onSuccess':onSuccess,
+		'onFailure':onFailure
+ 	});
+};
+
+
+
+
+
+
+/**
+ * Method to construct an API URL from the passed method and value strings
+ * @param {string} method the string for this parameter. See API docs for list
+ * @param {string} value the value we're passing to the API method. This will be encoded using encodeURIComponent() 
+ * @returns {string} the URL string
+ */
+SpazTMDB.prototype.getURL = function(method, value) {
+	var url  = this.baseURL + method + "/" + this.lang + "/" + this.format + "/" + this.apikey + "/" + encodeURIComponent(value);
+	return url;
+};
+
+
+
+
+/**
+ * a general purpose method for calling API methods via ajax and raising
+ * events on success/failure. callbacks can optionally be set for success
+ * or failure as well
+ * @param {Object} opts options for the method call
+ * @param {string} opts.method the method to call
+ * @param {string} opts.value value passed to method
+ * @param {string} [opts.successEvent] the type of event to raise on success. default is {@link sc.events.tmdbMethodSuccess}
+ * @param {string} [opts.failureEvent] the type of event to raise on failure. default is {@link sc.events.tmdbMethodFailure}
+ * @param {function} [opts.onSuccess] a callback function called on success. takes args data, textStatus
+ * @param {function} [opts.onFailure] a callback function called on failure. takes args xhr, msg, exc
+ * 
+ */
+SpazTMDB.prototype.callMethod = function(opts) {
+	var that = this;
+	
+	opts = sch.defaults({
+		'method'      :'Movie.search',
+		'value'       :'Road House',
+		'successEvent':sc.events.tmdbMethodSuccess,
+		'failureEvent':sc.events.tmdbMethodFailure,
+		'onSuccess'   :null, // callback on success
+		'onFailure'   :null  // callback on failure
+	}, opts);
+	
+	var url = this.getURL(opts.method, opts.value);
+	
+	jQuery.ajax({
+		'url' :url,
+		'type':'GET',
+		'success':function(data, textStatus) {
+			if (opts.onSuccess) {
+				opts.onSuccess.call(that, data, textStatus);
+			}
+			sch.trigger(opts.successEvent, that.eventTarget, data);
+		},
+		'error':function(xhr, msg, exc) {
+			if (opts.onFailure) {
+				opts.onFailure.call(that, xhr, msg, exc);
+			}
+			sch.trigger(opts.failure, that.eventTarget, {'url':url, 'xhr':xhr, 'msg':msg});
+		}
+	});
+};
+
 /*jslint 
 browser: true,
 nomen: false,
@@ -7114,11 +7915,12 @@ var SPAZCORE_SECTION_SEARCH = 'search';
 var SPAZCORE_SECTION_USER = 'user-timeline';
 var SPAZCORE_SECTION_FRIENDLIST = 'friendslist';
 var SPAZCORE_SECTION_FOLLOWERSLIST = 'followerslist';
+var SPAZCORE_SECTION_USERLISTS = 'userlists';
 
 var SPAZCORE_SERVICE_TWITTER = 'twitter';
 var SPAZCORE_SERVICE_IDENTICA = 'identi.ca';
 var SPAZCORE_SERVICE_CUSTOM = 'custom';
-var SPAZCORE_SERVICEURL_TWITTER = 'https://twitter.com/';
+var SPAZCORE_SERVICEURL_TWITTER = 'https://api.twitter.com/1/';
 var SPAZCORE_SERVICEURL_IDENTICA = 'https://identi.ca/api/';
 
 /**
@@ -7458,16 +8260,25 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.verify_credentials = "account/verify_credentials.json";
     urls.ratelimit_status   = "account/rate_limit_status.json";
 	urls.update_profile		= "account/update_profile.json";
+	urls.saved_searches		= "saved_searches.json";
+
+    // User lists URLs
+    urls.lists              = "{{USER}}/lists.json";
+    urls.lists_list         = "{{USER}}/lists/{{SLUG}}.json";
+    urls.lists_memberships  = "{{USER}}/lists/memberships.json";
+    urls.lists_timeline     = "{{USER}}/lists/{{SLUG}}/statuses.json";
+    urls.lists_members      = "{{USER}}/{{SLUG}}/members.json";
+    urls.lists_check_member = "{{USER}}/{{SLUG}}/{{ID}}.json";
+    urls.lists_subscribers  = "{{USER}}/{{SLUG}}/subscribers.json";
+    urls.lists_check_subscriber = "{{USER}}/{{SLUG}}/subscribers/{{ID}}.json";
 
 	// search
 	if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER) {
 		urls.search				= "http://search.twitter.com/search.json";
 		urls.trends				= "http://search.twitter.com/trends.json";
-		urls.saved_searches		= "http://search.twitter.com/saved_searches.json";
 	} else {
 		urls.search				= "search.json";
 		urls.trends				= "trends.json";
-		urls.saved_searches		= "saved_searches.json";
 	}
 
     // misc
@@ -7483,7 +8294,19 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 		}
 		
 	}
-	
+
+    // Token replacement for user lists
+    if (urls[key].indexOf('{{USER}}') > - 1) {
+        if (urldata && typeof(urldata) === 'object') {
+            urls[key] = urls[key].replace('{{USER}}', urldata.user);
+        }
+    }
+
+    if (urls[key].indexOf('{{SLUG}}') > -1) {
+        if (urldata && typeof(urldata) === 'object') {
+            urls[key] = urls[key].replace('{{SLUG}}', urldata.slug);
+        }
+    }
 
     if (urls[key]) {
 	
@@ -8086,7 +8909,8 @@ SpazTwit.prototype._processSearchItem = function(item, section_name) {
 	*/
 	item.user = {
 		'profile_image_url':item.profile_image_url,
-		'screen_name':item.from_user
+		'screen_name':item.from_user,
+		'id':item.from_user_id
 	};
 	
 	/*
@@ -8417,6 +9241,13 @@ SpazTwit.prototype._processItem = function(item, section_name) {
 	}
 	
 	/*
+		is an official API retweet? then add .SC_is_retweet
+	*/
+	if ( item.retweet_status ) {
+		item.SC_is_retweet = true;
+	}
+	
+	/*
 		If it comes from the replies timeline, it's a reply (aka a mention)
 	*/
 	if (section_name === SPAZCORE_SECTION_REPLIES) {
@@ -8535,8 +9366,6 @@ SpazTwit.prototype._callMethod = function(opts) {
 	} else {
 		method = 'POST';
 	}
-	
-	// alert('METHOD:'+method);
 	
 	var xhr = jQuery.ajax({
 		'timeout' :this.opts.timeout,
@@ -8849,11 +9678,9 @@ SpazTwit.prototype.update = function(status, source, in_reply_to_status_id) {
 SpazTwit.prototype._processUpdateReturn = function(data, finished_event) {
 	
 	/*
-		this item needs to be added to the friends + home timeline
-		so we can avoid dupes
-	*/
+		Add this to the HOME section and fire off the event when done
+	*/	
 	this._processTimeline(SPAZCORE_SECTION_HOME, [data], finished_event);
-	this._processTimeline(SPAZCORE_SECTION_FRIENDS, [data], finished_event);
 };
 
 SpazTwit.prototype.destroy = function(id) {};
@@ -9182,8 +10009,12 @@ SpazTwit.prototype.removeSavedSearch = function(search_id) {
 		'password':this.password,
 		'success_event_type':'destroy_saved_search_succeeded',
 		'failure_event_type':'destroy_saved_search_failed',
+		'data':{'id':search_id},
 		'method':'POST'
 	};
+	
+	sch.debug('opts for removeSavedSearch');
+	sch.debug(opts);
 
 	/*
 		Perform a request and get true or false back
@@ -9194,6 +10025,65 @@ SpazTwit.prototype.removeSavedSearch = function(search_id) {
 
 
 
+
+/**
+ * retrieves the list of lists 
+ */
+SpazTwit.prototype.getLists = function(user) {
+	if (!user) {
+		return false;
+	}
+
+	var data = {};
+	data['user']  = user;
+
+	var url = this.getAPIURL('lists', data);
+
+    // get the lists for the given user
+    alert(url);
+};
+
+/**
+ * retrieves a given list timeline
+ * @param {string} list 
+ */
+SpazTwit.prototype.getList = function(list) {};
+
+/**
+ * retrieves a given list's members
+ * @param {string} list 
+ */
+SpazTwit.prototype.getListMembers = function(list) {};
+
+/**
+ * create a new list
+ * @param {string} list  The list name
+ * @param {string} visibility   "public" or "private"
+ */
+SpazTwit.prototype.addList = function(list, visibility) {};
+
+/**
+ * delete a list
+ * @param {string} list  The list name 
+ */
+SpazTwit.prototype.removeList = function(list) {};
+
+/**
+ * add a user to a list
+ */
+SpazTwit.prototype.addUserToList = function(user, list) {};
+
+/**
+ * delete a user from a list 
+ */
+SpazTwit.prototype.removeUserFromList = function(user, list) {};
+
+
+
+
+/**
+ *  
+ */
 SpazTwit.prototype.triggerEvent = function(type, data) {
 	var target = this.opts.event_target || document;
 	data   = data || null;
@@ -9208,7 +10098,6 @@ SpazTwit.prototype.triggerEvent = function(type, data) {
 	}
 	
 };
-
 
 /**
  * shortcut for SpazTwit if the SpazCore libraries are being used

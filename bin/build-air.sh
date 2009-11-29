@@ -27,6 +27,7 @@ cat libs/spazcore.js \
 	libs/spazshorturl.js \
 	libs/spaztemplate.js \
 	libs/spaztimeline.js \
+	libs/spaztmdb.js \
 	libs/spaztwit.js \
 	platforms/AIR/helpers/file.js \
 	platforms/AIR/helpers/sys.js \

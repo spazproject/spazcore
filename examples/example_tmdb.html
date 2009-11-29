@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>SpazCore Example Shell</title>
+	
+	<!-- Load required vendor libs -->
+	<script src="../vendors/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore base lib -->
+	<script src="spazcore-standard.js"></script>
+	
+	<script src="../incubator/libs/spaztmdb.js" type="text/javascript" charset="utf-8"></script>
+	
+	<script type="text/javascript" charset="utf-8">
+		$().ready(function() {
+			var tmdb = new SpazTMDB({
+				'apikey':'REDACTED'
+			});
+			
+			$("#search").click(function(){
+				var search_for = $('#search_for').val();
+				var search_for_type = $('#search_for_type').val();
+				
+				switch (search_for_type) {
+					case 'movie':
+						tmdb.movieSearch(
+							search_for,
+							function(data, textStatus) {
+								$('#response').text(data);
+							},
+							function(xhr, errorStr, exc) {
+								$('#response').text(errorStr);								
+							}
+						);
+						break;
+					case 'person':
+						tmdb.personSearch(
+							search_for,
+							function(data, textStatus) {
+								$('#response').text(data);
+							},
+							function(xhr, errorStr, exc) {
+								$('#response').text(errorStr);								
+							}
+						);
+						break;
+				}
+				
+			});
+			
+			
+		});
+	</script>
+	
+</head>
+
+<body>
+	<form onsubmit="javascript:$('#search').trigger('click'); return false;">
+		<label for="search_for">Search For</label>
+		<input type="text" name="search_for" value="Road House" id="search_for">
+		<select name="search_for_type" id="search_for_type" size="1">
+			<option value="movie" selected>movie</option>
+			<option value="person">person</option>
+		</select>
+		<input type="button" name="search" value="Search" id="search">
+		
+	</form>
+
+
+	<div id="response">
+		
+	</div>
+
+</body>
+</html>
