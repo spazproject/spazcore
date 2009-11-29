@@ -51,6 +51,9 @@ sc.helpers.clone = function(oldObj) {
 	return jQuery.extend({}/* clone */, oldObj);
 };
 
+/**
+ * @todo 
+ */
 sc.helpers.each = function(arr, f) {
 	
 };
@@ -68,3 +71,24 @@ sc.helpers.extend = function(child, supertype)
 {
    child.prototype.__proto__ = supertype.prototype;
 };
+
+/**
+ * Designed to fill in default values for an options argument passed to a
+ * function. Merges the provided defaults with the passed object, using items
+ * from defaults if they don't exist in passed 
+ * 
+ * @param {object} defaults the default key/val pairs
+ * @param {object} passed   the values provided to the calling method
+ * @returns {object} a set of key/vals that have defaults filled-in
+ */
+sc.helpers.defaults = function(defaults, passed) {
+	
+	var args = defaults;
+	
+	/* override the defaults if necessary */
+	for (var key in passed) {
+		args[key] = passed[key];
+	}
+	
+	return args;
+}
