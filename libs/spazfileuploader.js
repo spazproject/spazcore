@@ -14,6 +14,9 @@ var sc, DOMParser, jQuery;
  * A file uploader class for SpazCore 
  */
 
+/**
+ * Events used by this library 
+ */
 if (!sc.events) { sc.events = {}; }
 sc.events.fileUploadStart	= 'fileUploadStart';
 sc.events.fileUploadSuccess	= 'fileUploadSuccess';
@@ -71,6 +74,7 @@ SpazFileUploader.prototype.getAPIs = function() {
 	var apis = {
 		'pikchur' : {
 		    'upload_url' : 'http://api.pikchur.com/simple/upload',
+		    'post_url' : 'http://api.pikchur.com/simple/uploadAndPost',
 			'api_key_field': 'api_key', // setting this to non-empty means we MUST set an api key
 			'processResult': function(event, apiobj) {
 				var loader = event.target;
@@ -96,6 +100,7 @@ SpazFileUploader.prototype.getAPIs = function() {
 		},
 		'yfrog' : {
 		    'upload_url' : 'http://yfrog.com/api/upload',
+		    'post_url' : 'http://yfrog.com/api/uploadAndPost',
 			'processResult': function(event, apiobj) {
 				var loader = event.target;
 
@@ -118,6 +123,7 @@ SpazFileUploader.prototype.getAPIs = function() {
 		},
 	    'twitpic' : {
 			'upload_url' : 'http://twitpic.com/api/upload',
+		    'post_url'   : 'http://twitpic.com/api/uploadAndPost',
 			'processResult': function(event, apiobj) {
 				var loader = event.target;
 				
@@ -143,6 +149,7 @@ SpazFileUploader.prototype.getAPIs = function() {
 		},
 		'twitgoo' : {
 			'upload_url' : 'http://twitgoo.com/api/upload',
+			'post_url'   : 'http://twitgoo.com/api/uploadAndPost',
 			'processResult': function(event, apiobj) {
 				var loader = event.target;
 
@@ -209,7 +216,7 @@ SpazFileUploader.prototype.setAPI = function(apilabel) {
  * some services require an api key or app identifier. This sets that.
  * @param {string} api_key
  */
-SpazFileUploader.prototype.setAPIkey = function(api_key) {
+SpazFileUploader.prototype.setAPIKey = function(api_key) {
 	if (this.api) {
 		this.api.api_key = api_key;
 	} else {
@@ -221,7 +228,7 @@ SpazFileUploader.prototype.setAPIkey = function(api_key) {
  * some services require an api key or app identifier. This sets that.
  * @param {string} api_key
  */
-SpazFileUploader.prototype.getAPIkey = function() {
+SpazFileUploader.prototype.getAPIKey = function() {
 	if (this.api) {
 		return this.api.api_key;
 	} else {
@@ -238,8 +245,21 @@ SpazFileUploader.prototype.getAPIkey = function() {
  *   'message':''
  *   
  * } 
+ * 
+ * This uploads a file located at the given file_url. It uses the
+ * sc.helpers.HTTPUploadFile as defined for your given platform.  Events are
+ * raised as set in the constructor on start, success and failure.
+ * 
+ * Note that in the webOS implementation, success events are raised every time
+ * progress is reported, NOT just when completion happens. Check for the
+ * "completed" boolean property in the response object. This may change in the
+ * future.
+ * 
+ * @param {string} post_url  the url we're uploading the file to
+ * @param {string} file_url  the local url of the file we're uploading
+ * @param {object} opts  a set of key/val pairs
  */
-SpazFileUploader.prototype.upload = function(file_url, opts) {
+SpazFileUploader.prototype.uploadFile = function(post_url, file_url, opts) {
 
 	var api, api_key;
 
@@ -258,6 +278,12 @@ SpazFileUploader.prototype.upload = function(file_url, opts) {
 	var password = opts.password || null;
 	var source   = opts.source   || null;
 	var message  = opts.message  || null;
+	
+	/*
+		platform opts are for platform-specific options. For now we're using
+		this because webOS requires the scene controller to call the service
+		request, so we pass a reference to the scene assistant
+	*/
 	var platformOpts = opts.platform || null;
 
 	var onStart = opts.onStart || null;
@@ -273,7 +299,7 @@ SpazFileUploader.prototype.upload = function(file_url, opts) {
 	 * if we have an API key field, then we need the api key 
 	 */
 	if ( (api.api_key_field) ) {
-		extraParams[api.api_key_field] = api.getAPIkey();
+		extraParams[api.api_key_field] = this.getAPIKey();
 	}
 
 	/*
@@ -288,28 +314,76 @@ SpazFileUploader.prototype.upload = function(file_url, opts) {
 	*/
 	sc.helpers.triggerCustomEvent(thisSFU.startEvent, thisSFU.eventTarget);
 	
-	sch.debug("HELP ME HERE");
-	
 	// upload the file
 	sc.helpers.HTTPUploadFile({
-			'extra'  :extraParams,
-			'url'    :api.upload_url,
-			'file_url':file_url,
-			'platform':platformOpts
+			'extra'   : extraParams,
+			'url'     : post_url,
+			'file_url': file_url,
+			'platform': platformOpts
 		},
 		function(event) {
 			sch.debug('UPLOAD SUCCESS, PROCESSING');
+			/*
+				For now we're not using the processResult methods, as the 
+				implementation can vary by platform. For now, process response
+				externally.
+			*/
 			// var data = api.processResult.call(thisSFU, event, api);
 			// sch.debug(data);
 			sc.helpers.triggerCustomEvent(thisSFU.successEvent, thisSFU.eventTarget, event);
 		},
 		function(event) {
 			sch.debug('UPLOAD FAILURE, PROCESSING');
+			/*
+				For now we're not using the processResult methods, as the 
+				implementation can vary by platform. For now, process response
+				externally.
+			*/
 			// var data = api.processResult.call(thisSFU, event, api);
 			// sch.debug(data);
 			sc.helpers.triggerCustomEvent(thisSFU.failureEvent, thisSFU.eventTarget, event);
 		}
 	);
-	sch.debug('WHAT DO YOU THINK?');
-
 };
+
+
+
+/**
+ * a wrapper for uploadFile that uses the post_url from the API definition 
+ */
+SpazFileUploader.prototype.uploadAndPost = function(file_url, opts) {
+	var api;
+	
+	if (opts.api) {
+		api = this.apis.api;
+	} else if (this.api) {
+		api = this.api;
+	} else {
+		sch.error('Must set the API before uploading');
+		return;
+	}
+	
+	this.uploadFile(api.post_url, file_url, opts);
+	
+};
+
+/**
+ * a wrapper for uploadFile that uses the upload_url from the API definition 
+ */
+SpazFileUploader.prototype.upload = function(file_url, opts) {
+	
+	var api;
+	
+	if (opts.api) {
+		api = this.apis.api;
+	} else if (this.api) {
+		api = this.api;
+	} else {
+		sch.error('Must set the API before uploading');
+		return;
+	}
+	
+	this.uploadFile(api.upload_url, file_url, opts);
+	
+};
+

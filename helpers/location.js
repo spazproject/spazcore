@@ -12,7 +12,8 @@ var sc;
 
 /**
  * Stub 
+ * @platformstub
  */
-function getCurrentLocation() {
+sc.helpers.getCurrentLocation = function() {
 	
 }

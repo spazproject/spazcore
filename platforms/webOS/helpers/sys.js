@@ -12,7 +12,7 @@ var sc, Mojo, use_palmhost_proxy;
  
  
 /**
- * This should contain definitions for all methods from helpers/sys.js tagged @platformsub 
+ * This should contain definitions for all methods from helpers/sys.js tagged @platformstub 
  */
 
 /**
@@ -54,6 +54,9 @@ sc.helpers.dump = function(obj, level) {
  */
 sc.helpers.getMojoURL = function(url) {
 	if (typeof Mojo !== "undefined") { // we're in webOS		
+		/*
+			I would like to apologize for using a global here. ick.
+		*/
 		if (use_palmhost_proxy) { // we are not on an emu or device, so proxy calls
 			var re = /https?:\/\/.[^\/:]*(?::[0-9]+)?/;
 			var match = url.match(re);
