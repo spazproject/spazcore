@@ -236,6 +236,12 @@ SpazTwit.prototype.initializeData = function() {
 		'max':200,
 		'min_age':30
 	};
+	this.data[SPAZCORE_SECTION_USERLISTS] = {
+		'items':   [],
+		'newitems':[],
+		'max':500,
+		'min_age':5*60
+	};
 	// this.data.byid = {};
 };
 
@@ -2209,18 +2215,93 @@ SpazTwit.prototype.removeSavedSearch = function(search_id) {
  * retrieves the list of lists 
  */
 SpazTwit.prototype.getLists = function(user) {
-	if (!user) {
+	if (!user && !this.username) {
 		return false;
+	} else if (!user) {
+	    user = this.username;
 	}
 
-	var data = {};
-	data['user']  = user;
+	var url = this.getAPIURL('lists', {
+	    'user':user,
+	});
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'process_callback': this._processLists,
+		'success_event_type':'get_lists_succeeded',
+		'failure_event_type':'get_lists_failed',
+		'method':'GET'
+	};
 
-	var url = this.getAPIURL('lists', data);
-
-    // get the lists for the given user
-    alert(url);
+	var xhr = this._getTimeline(opts);
+	
+	alert(xhr.statusText);
 };
+/**
+ * @private
+ */
+SpazTwit.prototype._processLists = function(ret_items, finished_event, processing_opts) {
+	this._processUserLists(SPAZCORE_SECTION_USERLISTS, ret_items, finished_event, processing_opts);
+};
+
+/**
+ * general processor for user lists data
+ * @private
+ */
+SpazTwit.prototype._processUserLists = function(section_name, ret_items, finished_event, processing_opts) {
+  
+    if (!processing_opts) { processing_opts = {}; }
+
+	if (ret_items.length > 0){
+		/*
+			we process each item, adding some attributes and generally making it cool
+		*/
+		for (var k=0; k<ret_items.length; k++) {
+			ret_items[k] = this._processList(ret_items[k], section_name);
+			sch.dump(ret_items[k]);
+		}
+
+		/*
+			sort items
+		*/
+		ret_items.sort(this._sortItemsAscending);
+
+		// set lastid
+		var lastid = ret_items[ret_items.length-1].id;
+		this.data[section_name].lastid = lastid;
+		sc.helpers.dump('this.data['+section_name+'].lastid:'+this.data[section_name].lastid);
+
+		// add new items to data.newitems array
+		this.data[section_name].newitems = ret_items;
+
+		this._addToSectionItems(section_name, this.data[section_name].newitems);
+		
+		this.triggerEvent(finished_event,this.data[section_name].newitems );
+
+	} else { // no new items, but we should fire off success anyway
+		this.triggerEvent(finished_event);
+	}
+};
+
+/**
+ * This modifies a Twitter user list, adding some properties. All new properties are
+ * prepended with "SC_"
+ * 
+ * this executes within the jQuery.each scope, so this === the item 
+ */
+SpazTwit.prototype._processList = function(item, section_name) {	
+	/*
+		add .SC_retrieved_unixtime
+	*/
+	if (!item.SC_retrieved_unixtime) {
+		item.SC_retrieved_unixtime = sc.helpers.getTimeAsInt();
+	}
+	
+	return item;
+};
+
 
 /**
  * retrieves a given list timeline
