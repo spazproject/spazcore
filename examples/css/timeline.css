@@ -1,0 +1,137 @@
+
+/*************************************************
+	Timeline entries are... entries in the timelines
+*/
+
+
+
+div.timeline {
+	-khtml-border-radius:10px;
+}
+
+div.timeline-entry {
+	padding: 2px 6px 6px;
+	margin-bottom:5px;
+	-khtml-border-radius: 10px;
+/*	border-bottom: 1px solid #222;*/
+	clear:both;
+	overflow:hidden;
+	min-height:64px;
+	color:#FFF;
+	position:relative;
+	background-image: url('../images/dreadnaught/entry-gradient-bg_short.png');
+	background-repeat: repeat-x;
+	background-color:#101010;
+	background-position: 0px -3px;
+}
+
+	div.timeline-entry.new {
+		color:#FFFF88;
+	}
+
+
+	/*
+		Entries that are replies directed at the user
+	*/
+	div.timeline-entry.reply {
+		background-color: #2B3235;
+	}
+	/*
+		Entries that are direct messages to the user
+	*/
+	div.timeline-entry.dm {
+		background-color: #301616;
+	}
+
+	div.timeline-entry.reply:active,
+	div.timeline-entry.dm:active,
+	div.timeline-entry:active {	
+		background-color:#222222;
+		color:#FFFFCC;
+	}
+	
+
+	
+
+
+		
+
+	div.timeline-entry .user {
+		float:left;
+		text-align:center;
+		width:48px;
+		height:48px;
+		margin-top:10px;
+		margin-left:3px;
+
+	}
+		div.timeline-entry .user .user-img, div.timeline-entry .user img {
+			width:48px;
+			height:48px;
+		}
+	
+	div.timeline-entry .status {
+		margin-left:64px;
+		margin-top:0px;
+	}
+	
+		div.timeline-entry .status .meta-wrapper {
+			overflow:hidden;
+			margin-top:5px;
+			height:15pt;
+		}
+		div.timeline-entry .status .screen-name {
+			float:left;
+			font-size:11pt;
+/*			font-weight:bold;*/
+			color:#CCCCFF;
+			text-transform: uppercase;
+			font-family:"Coconut-CondensedMedium";
+			position:relative;
+			text-shadow: 0px 1px 4px #000;
+		}
+		div.timeline-entry .status .text {
+			font-size:11pt;
+			line-height:15pt;
+		}
+		.status .text a:link,
+		.status .text a:visited,
+		.status .text a:active,
+		.status .text .clickable {
+/*			color:#3333CC;
+			text-decoration:underline;
+*/		}
+			.status .text a:active,
+			.status .text .clickable:active {
+/*				-webkit-border-image: url(../images/dreadnaught/text-link-bg-active.png) 0 7 0 7;*/
+			}
+
+	div.timeline-entry .status .meta {
+		float:right;
+		position:relative;
+		height:20px;
+		padding:1px 0px;
+		font-size:	10pt;
+/*		font-weight:bold;*/
+		text-transform:uppercase;
+		font-family:"Coconut-CondensedMedium";
+		text-align:	right;
+		color:#CCCCFF;
+		background-position: right center;
+		border-width: 0 7px 0 7px;
+/*		-webkit-border-image: url(../images/dreadnaught/meta-link-bg.png) 0 7 0 7;*/
+	}
+
+			div.timeline-entry:active .status .meta,
+			div.timeline-entry .status .meta:active {
+				color:#FFFFCC;
+			}
+	
+	div.timeline-entry div.protected-icon {
+		height:12px;
+		width: 11px;
+		display:inline-block;
+		margin-left:5px;
+		background-image: url(../images/dreadnaught/tiny-lock-icon.png);
+		background-repeat: no-repeat;
+	}
