@@ -1,0 +1,25 @@
+@import url('timeline.css');
+
+body {
+	font-family: Arial, "MS Trebuchet", sans-serif;
+}
+
+#response {
+	font-family: Monospace;
+	font-size:   10pt;
+	padding:     10px;
+	background-color: rgba(192,192,192,.7);
+	overflow:    auto;
+	position:	fixed;
+	top:		0px;
+	right:		0px;
+	height:		100px;
+	width:		300px;
+}
+
+.clickable {
+	color:#660000;
+	text-decoration: underline;
+	cursor: pointer;
+}
+

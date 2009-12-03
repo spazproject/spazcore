@@ -120,7 +120,7 @@ sc.helpers.error = function(obj) {
  * @platformstub
  */
 sc.helpers.dump = function(obj, level) {
-	// stub
+	console.log(obj);
 };
 
 /**
