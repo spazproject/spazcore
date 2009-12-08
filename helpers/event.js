@@ -21,6 +21,7 @@ var SPAZCORE_EVENTDATA_ATTRIBUTE = 'sc_data';
  * @param {object} target
  * @param {string} event_type
  * @param {function} handler  a method that will take the event as a param, and "this" refers to target
+ * @param {Object} scope the scope to execute the handler within (what "this" refers to)
  * @param {boolean} use_capture  defaults to false
  * @function
  */
@@ -56,6 +57,7 @@ sc.helpers.addListener = function(target, event_type, handler, scope, use_captur
  * @param {object} target
  * @param {string} event_type
  * @param {function} handler  a method that will take the event as a param, and "this" refers to target
+ * @param {Object} scope the scope to execute the handler
  * @param {boolean} use_capture  defaults to false
  * @function
  */
@@ -80,6 +82,29 @@ sc.helpers.removeListener = function(target, event_type, handler, scope, use_cap
 	}
 };
 
+/**
+ * @param {DOMElement} base_target The base target where the delegated listener will be set-up
+ * @param {string} selector The CSS Selector that will be used to match incoming events. Matching is done with jQuery
+ * @param {string} event_type The event type 
+ * @param {Function} handler a method that will take the event as a param, and "this" refers to target
+ * @param {Object} [scope] the scope to execute the handler
+ * @param {Boolean} [use_capture] Describe this parameter
+ */
+sc.helpers.addDelegatedListener = function(base_target, selector, event_type, handler, scope, use_capture) {
+	
+};
+
+/**
+ * @param {DOMElement} base_target The base target where the delegated listener will be set-up
+ * @param {string} selector The CSS Selector that will be used to match incoming events. Matching is done with jQuery
+ * @param {string} event_type The event type 
+ * @param {Function} handler a method that will take the event as a param, and "this" refers to target
+ * @param {Object} [scope] the scope to execute the handler
+ * @param {Boolean} [use_capture] Describe this parameter
+ */
+sc.helpers.removeDelegatedListener = function(base_target, selector, event_type, handler, scope, use_capture) {
+	
+};
 
 /**
  * This triggers a custom event using document.createEvent('Events') and target.dispatchEvent()
@@ -128,6 +153,19 @@ sc.helpers.listen = sc.helpers.addListener;
  * @function
  */
 sc.helpers.unlisten = sc.helpers.removeListener;
+
+/**
+ * Alias for sc.helpers.addDelegatedListener
+ * @function 
+ */
+sc.helpers.live = sc.helpers.addDelegatedListener;
+
+/**
+ * Alias for sc.helpers.removeDelegatedListener
+ * @function 
+ */
+sc.helpers.die = sc.helpers.removeDelegatedListener;
+
 
 /**
  * Alias for sc.helpers.triggerCustomEvent 
