@@ -577,7 +577,7 @@ SpazTwit.prototype.getHomeTimeline = function(since_id, count, page, processing_
  * @private
  */
 SpazTwit.prototype._processHomeTimeline = function(ret_items, opts, processing_opts) {
-	this._processTimeline(SPAZCORE_SECTION_HOME, ret_items, opts.success_event_type, processing_opts);
+	this._processTimeline(SPAZCORE_SECTION_HOME, ret_items, opts, processing_opts);
 };
 
 
@@ -633,7 +633,7 @@ SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page, processi
  * @private
  */
 SpazTwit.prototype._processFriendsTimeline = function(ret_items, opts, processing_opts) {
-	this._processTimeline(SPAZCORE_SECTION_FRIENDS, ret_items, opts.success_event_type, processing_opts);
+	this._processTimeline(SPAZCORE_SECTION_FRIENDS, ret_items, opts, processing_opts);
 };
 
 
@@ -688,7 +688,7 @@ SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts)
  */
 SpazTwit.prototype._processRepliesTimeline = function(ret_items, opts, processing_opts) {
 	sc.helpers.dump('Processing '+ret_items.length+' items returned from replies method');
-	this._processTimeline(SPAZCORE_SECTION_REPLIES, ret_items, opts.success_event_type, processing_opts);
+	this._processTimeline(SPAZCORE_SECTION_REPLIES, ret_items, opts, processing_opts);
 };
 
 /**
@@ -740,7 +740,7 @@ SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processin
  */
 SpazTwit.prototype._processDMTimeline = function(ret_items, opts, processing_opts) {
 	sc.helpers.dump('Processing '+ret_items.length+' items returned from DM method');
-	this._processTimeline(SPAZCORE_SECTION_DMS, ret_items, opts.success_event_type, processing_opts);
+	this._processTimeline(SPAZCORE_SECTION_DMS, ret_items, opts, processing_opts);
 };
 
 /**
@@ -774,7 +774,7 @@ SpazTwit.prototype.getFavorites = function(page, processing_opts) {
  * @private
  */
 SpazTwit.prototype._processFavoritesTimeline = function(ret_items, opts, processing_opts) {
-	this._processTimeline(SPAZCORE_SECTION_FAVORITES, ret_items, opts.success_event_type, processing_opts);
+	this._processTimeline(SPAZCORE_SECTION_FAVORITES, ret_items, opts, processing_opts);
 };
 
 
@@ -814,7 +814,7 @@ SpazTwit.prototype.getUserTimeline = function(id, count, page) {
  * @private
  */
 SpazTwit.prototype._processUserTimeline = function(ret_items, opts, processing_opts) {
-	this._processTimeline(SPAZCORE_SECTION_USER, ret_items, opts.success_event_type, processing_opts);
+	this._processTimeline(SPAZCORE_SECTION_USER, ret_items, opts, processing_opts);
 };
 
 
@@ -980,13 +980,11 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, opts, proces
 			'page'             : search_result.page,
 			'query'            : search_result.query
 		};
-		// jQuery().trigger(finished_event, [this.data[SPAZCORE_SECTION_SEARCH].newitems, search_info]);
 		this.triggerEvent(opts.success_event_type, [this.data[SPAZCORE_SECTION_SEARCH].newitems, search_info]);
 		
 
 
 	} else { // no new items, but we should fire off success anyway
-		// jQuery().trigger(finished_event, [[]]);
 		this.triggerEvent(opts.success_event_type, []);
 	}
 	
@@ -1228,6 +1226,8 @@ SpazTwit.prototype._getTimeline = function(opts) {
  */
 SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, processing_opts) {
 	
+	sch.debug(opts);
+	
 	if (!processing_opts) { processing_opts = {}; }
 
 	if (!section_name === SPAZCORE_SECTION_USER) { // the user timeline section isn't persistent
@@ -1282,7 +1282,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 				Fire off the new section data event
 			*/
 			if (!processing_opts.combined) {
-				this.triggerEvent(finished_event, this.data[section_name].items);
+				this.triggerEvent(opts.success_event_type, this.data[section_name].items);
 			} else {
 				this.combined_finished[section_name] = true;
 				sc.helpers.dump("this.combined_finished["+section_name+"]:"+this.combined_finished[section_name]);
@@ -1301,7 +1301,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 	} else { // no new items, but we should fire off success anyway
 		if (!processing_opts.combined) {
 			// jQuery().trigger(finished_event, []);
-			this.triggerEvent(finished_event);
+			this.triggerEvent(opts.success_event_type);
 			
 		} else {
 			this.combined_finished[section_name] = true;
@@ -1864,14 +1864,14 @@ SpazTwit.prototype._processUpdateReturn = function(data, opts) {
 	/*
 		Add this to the HOME section and fire off the event when done
 	*/	
-	this._processTimeline(SPAZCORE_SECTION_HOME, [data], opts.success_event_type);
+	this._processTimeline(SPAZCORE_SECTION_HOME, [data], opts);
 };
 
 SpazTwit.prototype.destroy = function(id) {};
 SpazTwit.prototype.destroyDirectMessage = function(id) {};
 
 
-SpazTwit.prototype.getOne = function(id) {
+SpazTwit.prototype.getOne = function(id, onSuccess) {
 	var data = {};
 	data['id'] = id;
 	
@@ -1883,6 +1883,7 @@ SpazTwit.prototype.getOne = function(id) {
 		'password':this.password,
 		'process_callback': this._processOneItem,
 		'success_event_type':'get_one_status_succeeded',
+		'success_callback':onSuccess,
 		'failure_event_type':'get_one_status_failed',
 		'method':'GET'
 	};
@@ -1901,7 +1902,9 @@ SpazTwit.prototype._processOneItem = function(data, opts) {
 		so we can avoid dupes
 	*/
 	data = this._processItem(data);
-	// jQuery().trigger(finished_event, [data]);
+	if (opts.success_callback) {
+		opts.success_callback(data);
+	}
 	this.triggerEvent(opts.success_event_type, data);
 	
 };
