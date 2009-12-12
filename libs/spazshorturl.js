@@ -17,8 +17,9 @@ var sc, jQuery;
  * Constants to refer to services 
  */
 var SPAZCORE_SHORTURL_SERVICE_SHORTIE = 'short.ie';
-var SPAZCORE_SHORTURL_SERVICE_ISGD	= 'is.gd';
-var SPAZCORE_SHORTURL_SERVICE_BITLY	= 'bit.ly';
+var SPAZCORE_SHORTURL_SERVICE_ISGD	  = 'is.gd';
+var SPAZCORE_SHORTURL_SERVICE_BITLY	  = 'bit.ly';
+var SPAZCORE_SHORTURL_SERVICE_JMP     = 'j.mp';
 
 var SPAZCORE_EXPANDABLE_DOMAINS = [
 	'ad.vu',
@@ -87,6 +88,38 @@ SpazShortURL.prototype.getAPIObj = function(service) {
 		},
 		'processResult' : function(data) {
 			if (apis[SPAZCORE_SHORTURL_SERVICE_BITLY].processing_multiple === true) {
+				var result = sc.helpers.deJSON(data);
+				var rs = {};
+				for (var i in result.results) {
+					rs[i] = result.results[i].shortUrl;
+				}
+				return rs;
+			} else {
+				return data;
+			}
+		}
+		
+	};
+		
+	apis[SPAZCORE_SHORTURL_SERVICE_JMP] = {
+		'url'	  : 'http://j.mp/api',
+		'getData' : function(longurl, opts){
+			
+			/*
+				use the api if we're doing multiple URLs
+			*/
+			if (sc.helpers.isArray(longurl)) {
+				apis[SPAZCORE_SHORTURL_SERVICE_JMP].processing_multiple = true;
+				apis[SPAZCORE_SHORTURL_SERVICE_JMP].url = 'http://api.j.mp/shorten';
+				opts.longUrl = longurl;
+				return opts;
+			} else {
+				apis[SPAZCORE_SHORTURL_SERVICE_JMP].processing_multiple = false;
+				return { 'url':longurl };				
+			}
+		},
+		'processResult' : function(data) {
+			if (apis[SPAZCORE_SHORTURL_SERVICE_JMP].processing_multiple === true) {
 				var result = sc.helpers.deJSON(data);
 				var rs = {};
 				for (var i in result.results) {

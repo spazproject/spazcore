@@ -1,7 +1,7 @@
 #!/bin/bash
 # run this from the base dir of SpazCore
 
-BUILD_FILE='spazcore-air.js'
+BUILD_FILE='builds/spazcore-air.js'
 BUILD_DATE=`date "+%Y-%m-%d %H:%M:%S %Z"`
 
 echo "/*********** Built ${BUILD_DATE} ***********/" > $BUILD_FILE
