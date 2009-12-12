@@ -1110,9 +1110,6 @@ SpazTwit.prototype._getTimeline = function(opts) {
 		'success_callback':null,
 		'failure_callback':null
 	}, opts);
-
-	sch.debug(opts.data);
-
 	
 	/*
 		for closure references
@@ -1199,6 +1196,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
 				opts.process_callback.call(stwit, data, opts, opts.processing_opts);
 			} else {
 				if (opts.success_callback) {
+					sch.error('CALLING SUCCESS CALLBACK');
 					opts.success_callback(data);
 				}
 				// jQuery().trigger(opts.success_event_type, [data]);
@@ -2216,7 +2214,7 @@ SpazTwit.prototype.removeSavedSearch = function(search_id) {
 /**
  * retrieves the list of lists 
  */
-SpazTwit.prototype.getLists = function(user) {
+SpazTwit.prototype.getLists = function(user, onSuccess, onFailure) {
 	if (!user && !this.username) {
 		return false;
 	} else if (!user) {
@@ -2233,6 +2231,8 @@ SpazTwit.prototype.getLists = function(user) {
 		'password':this.password,
 		'success_event_type':'get_lists_succeeded',
 		'failure_event_type':'get_lists_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'method':'GET'
 	};
 
@@ -2332,8 +2332,11 @@ SpazTwit.prototype.getListInfo = function(list, user) {
 /**
  * retrieves a given list timeline
  * @param {string} list 
+ * @param {string} user the user who owns this list
+ * @param {function} [onSuccess] function to call on success
+ * @param {function} [onFailure] function to call on failure
  */
-SpazTwit.prototype.getListTimeline = function(list, user) {
+SpazTwit.prototype.getListTimeline = function(list, user, onSuccess, onFailure) {
 	if (!user && !this.username) {
 		sch.error('must pass a username or have one set to get list');
 		return false;
@@ -2352,6 +2355,8 @@ SpazTwit.prototype.getListTimeline = function(list, user) {
 		'password':this.password,
 		'success_event_type':'get_list_timeline_succeeded',
 		'failure_event_type':'get_list_timeline_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'method':'GET',
 		'process_callback':this._processListTimeline,
 		'processing_opts': {

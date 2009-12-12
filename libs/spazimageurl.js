@@ -57,7 +57,7 @@ SpazImageURL.prototype.initAPIs = function() {
 		'url_regex'       : /http:\/\/(?:pikchur\.com|pk\.gd)\/([a-zA-Z0-9]+)/gi,
 		'getThumbnailUrl' : function(id) {
 			// http://img.pikchur.com/pic_GPT_t.jpg
-			var url = 'http://img.pikchur.com/pic_'+id+'_m.jpg';
+			var url = 'http://img.pikchur.com/pic_'+id+'_s.jpg';
 			return url;
 		},
 		'getImageUrl'     : function(id) {

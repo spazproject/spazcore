@@ -77,13 +77,49 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 		type = 'both';
 	}
 
+	var re_nohttpurl = /((^|\s)(www\.)?([a-zA-Z_\-]+\.)(com|net|org)($|\s))/gi;
+
 	var re_noemail = /(^|\s|\(|:)((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
 	var re_nourl   = /(^|\s|\()([a-zA-Z0-9_\.\-\+]+)@([a-zA-Z0-9\-]+)\.([a-zA-Z0-9\-\.]*)([^\s\)<]+)/gi;
 	
 	var x, ms, period = '';
 
 	if (type !== 'email')
-	{
+	{	
+		while ((ms = re_nohttpurl.exec(str))) { // look for URLs without a preceding "http://"
+			// if ( /\.$/.test(ms[4]) ) {
+			// 	period = '.';
+			//	ms[5] = ms[5].slice(0, -1);
+			// }
+			
+			/*
+				sometimes we can end up with a null instead of a blank string,
+				so we need to force the issue in javascript.
+			*/
+			for (x=0; x<ms.length; x++) {
+				if (!ms[x]) {
+					ms[x] = '';
+				}
+			}
+
+			if (extra_code) {
+				extra_code = ' '+extra_code;
+			} else {
+				extra_code = '';
+			}
+			
+			var desc = ms[3]+ms[4]+ms[5];
+
+			if (maxlen && maxlen > 0 && desc.length > maxlen) {
+				desc = desc.substr(0, maxlen)+'...';
+			}
+
+			var newstr = ms[2]+'<a href="http://'+ms[3]+ms[4]+ms[5]+'"'+extra_code+'>'+desc+'</a>'+ms[6];
+			sch.error(newstr);
+			str = str.replace(ms[0], newstr);
+		}
+		
+		
 		while ((ms = re_noemail.exec(str))) {
 
 			if ( /\.$/.test(ms[6]) ) {
