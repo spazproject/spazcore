@@ -105,6 +105,16 @@ SpazTimeline.prototype._init = function(opts) {
 };
 
 /**
+ * the timeline 
+ */
+SpazTimeline.prototype.last_id = -1;
+
+/**
+ * an array of data items that are represented in the timeline 
+ */
+SpazTimeline.prototype.model = [];
+
+/**
  * call this after initialization 
  */
 SpazTimeline.prototype.start = function() {

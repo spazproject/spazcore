@@ -493,6 +493,17 @@ $(document).ready(function() {
 		output  = 'There will be some extra code in this <a href="http://funkatron.com" '+extra+'>funkatron.com<\/a>';
 		equals(sc.helpers.autolink(input, null, extra), output);
 
+		input   = 'emyller.net down for maintenance. migrating for a new server.';
+		output  = '<a href="http://emyller.net">emyller.net</a> down for maintenance. migrating for a new server.';
+		equals(sc.helpers.autolink(input), output);
+
+		input   = 'www.emyller.net down for maintenance. migrating for a new server.';
+		output  = '<a href="http://www.emyller.net">www.emyller.net</a> down for maintenance. migrating for a new server.';
+		equals(sc.helpers.autolink(input), output);
+		
+		input   = 'aww man, don\'t say that...hastigerbanged.com is available. must. resist. htb.com/mywife => "probably" (for every url) gmail.com www.gmail.com http://foo.bar.com/ bit.ly/qrewof RT @ax0n: http://sysadvent.blogspot.com <-- An advent calendar for UNIX nerds';
+		output  = "aww man, don't say that...hastigerbanged.com is available. must. resist. htb.com/mywife => \"probably\" (for every url) <a href=\"http://gmail.com\">gmail.com</a> <a href=\"http://www.gmail.com\">www.gmail.com</a> <a href=\"http://foo.bar.com/\">foo.bar.com/</a> bit.ly/qrewof RT @ax0n: <a href=\"http://sysadvent.blogspot.com\">sysadvent.blogspot.com</a> <-- An advent calendar for UNIX nerds";
+		equals(sc.helpers.autolink(input), output);
 
 	});
 	
