@@ -1,4 +1,4 @@
-/*********** Built 2009-12-02 10:50:59 EST ***********/
+/*********** Built 2009-12-18 00:42:24 EST ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -2780,6 +2780,1665 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
         };
     }
 })();
+/*!
+ * Sizzle CSS Selector Engine - v1.0
+ *  Copyright 2009, The Dojo Foundation
+ *  Released under the MIT, BSD, and GPL Licenses.
+ *  More information: http://sizzlejs.com/
+ */
+(function(){
+
+var chunker = /((?:\((?:\([^()]+\)|[^()]+)+\)|\[(?:\[[^[\]]*\]|['"][^'"]*['"]|[^[\]'"]+)+\]|\\.|[^ >+~,(\[\\]+)+|[>+~])(\s*,\s*)?((?:.|\r|\n)*)/g,
+	done = 0,
+	toString = Object.prototype.toString,
+	hasDuplicate = false,
+	baseHasDuplicate = true;
+
+// Here we check if the JavaScript engine is using some sort of
+// optimization where it does not always call our comparision
+// function. If that is the case, discard the hasDuplicate value.
+//   Thus far that includes Google Chrome.
+[0, 0].sort(function(){
+	baseHasDuplicate = false;
+	return 0;
+});
+
+var Sizzle = function(selector, context, results, seed) {
+	results = results || [];
+	var origContext = context = context || document;
+
+	if ( context.nodeType !== 1 && context.nodeType !== 9 ) {
+		return [];
+	}
+	
+	if ( !selector || typeof selector !== "string" ) {
+		return results;
+	}
+
+	var parts = [], m, set, checkSet, extra, prune = true, contextXML = isXML(context),
+		soFar = selector;
+	
+	// Reset the position of the chunker regexp (start from head)
+	while ( (chunker.exec(""), m = chunker.exec(soFar)) !== null ) {
+		soFar = m[3];
+		
+		parts.push( m[1] );
+		
+		if ( m[2] ) {
+			extra = m[3];
+			break;
+		}
+	}
+
+	if ( parts.length > 1 && origPOS.exec( selector ) ) {
+		if ( parts.length === 2 && Expr.relative[ parts[0] ] ) {
+			set = posProcess( parts[0] + parts[1], context );
+		} else {
+			set = Expr.relative[ parts[0] ] ?
+				[ context ] :
+				Sizzle( parts.shift(), context );
+
+			while ( parts.length ) {
+				selector = parts.shift();
+
+				if ( Expr.relative[ selector ] ) {
+					selector += parts.shift();
+				}
+				
+				set = posProcess( selector, set );
+			}
+		}
+	} else {
+		// Take a shortcut and set the context if the root selector is an ID
+		// (but not if it'll be faster if the inner selector is an ID)
+		if ( !seed && parts.length > 1 && context.nodeType === 9 && !contextXML &&
+				Expr.match.ID.test(parts[0]) && !Expr.match.ID.test(parts[parts.length - 1]) ) {
+			var ret = Sizzle.find( parts.shift(), context, contextXML );
+			context = ret.expr ? Sizzle.filter( ret.expr, ret.set )[0] : ret.set[0];
+		}
+
+		if ( context ) {
+			var ret = seed ?
+				{ expr: parts.pop(), set: makeArray(seed) } :
+				Sizzle.find( parts.pop(), parts.length === 1 && (parts[0] === "~" || parts[0] === "+") && context.parentNode ? context.parentNode : context, contextXML );
+			set = ret.expr ? Sizzle.filter( ret.expr, ret.set ) : ret.set;
+
+			if ( parts.length > 0 ) {
+				checkSet = makeArray(set);
+			} else {
+				prune = false;
+			}
+
+			while ( parts.length ) {
+				var cur = parts.pop(), pop = cur;
+
+				if ( !Expr.relative[ cur ] ) {
+					cur = "";
+				} else {
+					pop = parts.pop();
+				}
+
+				if ( pop == null ) {
+					pop = context;
+				}
+
+				Expr.relative[ cur ]( checkSet, pop, contextXML );
+			}
+		} else {
+			checkSet = parts = [];
+		}
+	}
+
+	if ( !checkSet ) {
+		checkSet = set;
+	}
+
+	if ( !checkSet ) {
+		throw "Syntax error, unrecognized expression: " + (cur || selector);
+	}
+
+	if ( toString.call(checkSet) === "[object Array]" ) {
+		if ( !prune ) {
+			results.push.apply( results, checkSet );
+		} else if ( context && context.nodeType === 1 ) {
+			for ( var i = 0; checkSet[i] != null; i++ ) {
+				if ( checkSet[i] && (checkSet[i] === true || checkSet[i].nodeType === 1 && contains(context, checkSet[i])) ) {
+					results.push( set[i] );
+				}
+			}
+		} else {
+			for ( var i = 0; checkSet[i] != null; i++ ) {
+				if ( checkSet[i] && checkSet[i].nodeType === 1 ) {
+					results.push( set[i] );
+				}
+			}
+		}
+	} else {
+		makeArray( checkSet, results );
+	}
+
+	if ( extra ) {
+		Sizzle( extra, origContext, results, seed );
+		Sizzle.uniqueSort( results );
+	}
+
+	return results;
+};
+
+Sizzle.uniqueSort = function(results){
+	if ( sortOrder ) {
+		hasDuplicate = baseHasDuplicate;
+		results.sort(sortOrder);
+
+		if ( hasDuplicate ) {
+			for ( var i = 1; i < results.length; i++ ) {
+				if ( results[i] === results[i-1] ) {
+					results.splice(i--, 1);
+				}
+			}
+		}
+	}
+
+	return results;
+};
+
+Sizzle.matches = function(expr, set){
+	return Sizzle(expr, null, null, set);
+};
+
+Sizzle.find = function(expr, context, isXML){
+	var set, match;
+
+	if ( !expr ) {
+		return [];
+	}
+
+	for ( var i = 0, l = Expr.order.length; i < l; i++ ) {
+		var type = Expr.order[i], match;
+		
+		if ( (match = Expr.leftMatch[ type ].exec( expr )) ) {
+			var left = match[1];
+			match.splice(1,1);
+
+			if ( left.substr( left.length - 1 ) !== "\\" ) {
+				match[1] = (match[1] || "").replace(/\\/g, "");
+				set = Expr.find[ type ]( match, context, isXML );
+				if ( set != null ) {
+					expr = expr.replace( Expr.match[ type ], "" );
+					break;
+				}
+			}
+		}
+	}
+
+	if ( !set ) {
+		set = context.getElementsByTagName("*");
+	}
+
+	return {set: set, expr: expr};
+};
+
+Sizzle.filter = function(expr, set, inplace, not){
+	var old = expr, result = [], curLoop = set, match, anyFound,
+		isXMLFilter = set && set[0] && isXML(set[0]);
+
+	while ( expr && set.length ) {
+		for ( var type in Expr.filter ) {
+			if ( (match = Expr.match[ type ].exec( expr )) != null ) {
+				var filter = Expr.filter[ type ], found, item;
+				anyFound = false;
+
+				if ( curLoop == result ) {
+					result = [];
+				}
+
+				if ( Expr.preFilter[ type ] ) {
+					match = Expr.preFilter[ type ]( match, curLoop, inplace, result, not, isXMLFilter );
+
+					if ( !match ) {
+						anyFound = found = true;
+					} else if ( match === true ) {
+						continue;
+					}
+				}
+
+				if ( match ) {
+					for ( var i = 0; (item = curLoop[i]) != null; i++ ) {
+						if ( item ) {
+							found = filter( item, match, i, curLoop );
+							var pass = not ^ !!found;
+
+							if ( inplace && found != null ) {
+								if ( pass ) {
+									anyFound = true;
+								} else {
+									curLoop[i] = false;
+								}
+							} else if ( pass ) {
+								result.push( item );
+								anyFound = true;
+							}
+						}
+					}
+				}
+
+				if ( found !== undefined ) {
+					if ( !inplace ) {
+						curLoop = result;
+					}
+
+					expr = expr.replace( Expr.match[ type ], "" );
+
+					if ( !anyFound ) {
+						return [];
+					}
+
+					break;
+				}
+			}
+		}
+
+		// Improper expression
+		if ( expr == old ) {
+			if ( anyFound == null ) {
+				throw "Syntax error, unrecognized expression: " + expr;
+			} else {
+				break;
+			}
+		}
+
+		old = expr;
+	}
+
+	return curLoop;
+};
+
+var Expr = Sizzle.selectors = {
+	order: [ "ID", "NAME", "TAG" ],
+	match: {
+		ID: /#((?:[\w\u00c0-\uFFFF-]|\\.)+)/,
+		CLASS: /\.((?:[\w\u00c0-\uFFFF-]|\\.)+)/,
+		NAME: /\[name=['"]*((?:[\w\u00c0-\uFFFF-]|\\.)+)['"]*\]/,
+		ATTR: /\[\s*((?:[\w\u00c0-\uFFFF-]|\\.)+)\s*(?:(\S?=)\s*(['"]*)(.*?)\3|)\s*\]/,
+		TAG: /^((?:[\w\u00c0-\uFFFF\*-]|\\.)+)/,
+		CHILD: /:(only|nth|last|first)-child(?:\((even|odd|[\dn+-]*)\))?/,
+		POS: /:(nth|eq|gt|lt|first|last|even|odd)(?:\((\d*)\))?(?=[^-]|$)/,
+		PSEUDO: /:((?:[\w\u00c0-\uFFFF-]|\\.)+)(?:\((['"]*)((?:\([^\)]+\)|[^\2\(\)]*)+)\2\))?/
+	},
+	leftMatch: {},
+	attrMap: {
+		"class": "className",
+		"for": "htmlFor"
+	},
+	attrHandle: {
+		href: function(elem){
+			return elem.getAttribute("href");
+		}
+	},
+	relative: {
+		"+": function(checkSet, part){
+			var isPartStr = typeof part === "string",
+				isTag = isPartStr && !/\W/.test(part),
+				isPartStrNotTag = isPartStr && !isTag;
+
+			if ( isTag ) {
+				part = part.toLowerCase();
+			}
+
+			for ( var i = 0, l = checkSet.length, elem; i < l; i++ ) {
+				if ( (elem = checkSet[i]) ) {
+					while ( (elem = elem.previousSibling) && elem.nodeType !== 1 ) {}
+
+					checkSet[i] = isPartStrNotTag || elem && elem.nodeName.toLowerCase() === part ?
+						elem || false :
+						elem === part;
+				}
+			}
+
+			if ( isPartStrNotTag ) {
+				Sizzle.filter( part, checkSet, true );
+			}
+		},
+		">": function(checkSet, part){
+			var isPartStr = typeof part === "string";
+
+			if ( isPartStr && !/\W/.test(part) ) {
+				part = part.toLowerCase();
+
+				for ( var i = 0, l = checkSet.length; i < l; i++ ) {
+					var elem = checkSet[i];
+					if ( elem ) {
+						var parent = elem.parentNode;
+						checkSet[i] = parent.nodeName.toLowerCase() === part ? parent : false;
+					}
+				}
+			} else {
+				for ( var i = 0, l = checkSet.length; i < l; i++ ) {
+					var elem = checkSet[i];
+					if ( elem ) {
+						checkSet[i] = isPartStr ?
+							elem.parentNode :
+							elem.parentNode === part;
+					}
+				}
+
+				if ( isPartStr ) {
+					Sizzle.filter( part, checkSet, true );
+				}
+			}
+		},
+		"": function(checkSet, part){
+			var doneName = done++, checkFn = dirCheck;
+
+			if ( !/\W/.test(part) ) {
+				var nodeCheck = part = part.toLowerCase();
+				checkFn = dirNodeCheck;
+			}
+
+			checkFn("parentNode", part, doneName, checkSet, nodeCheck, isXML);
+		},
+		"~": function(checkSet, part){
+			var doneName = done++, checkFn = dirCheck;
+
+			if ( typeof part === "string" && !/\W/.test(part) ) {
+				var nodeCheck = part = part.toLowerCase();
+				checkFn = dirNodeCheck;
+			}
+
+			checkFn("previousSibling", part, doneName, checkSet, nodeCheck, isXML);
+		}
+	},
+	find: {
+		ID: function(match, context, isXML){
+			if ( typeof context.getElementById !== "undefined" && !isXML ) {
+				var m = context.getElementById(match[1]);
+				return m ? [m] : [];
+			}
+		},
+		NAME: function(match, context){
+			if ( typeof context.getElementsByName !== "undefined" ) {
+				var ret = [], results = context.getElementsByName(match[1]);
+
+				for ( var i = 0, l = results.length; i < l; i++ ) {
+					if ( results[i].getAttribute("name") === match[1] ) {
+						ret.push( results[i] );
+					}
+				}
+
+				return ret.length === 0 ? null : ret;
+			}
+		},
+		TAG: function(match, context){
+			return context.getElementsByTagName(match[1]);
+		}
+	},
+	preFilter: {
+		CLASS: function(match, curLoop, inplace, result, not, isXML){
+			match = " " + match[1].replace(/\\/g, "") + " ";
+
+			if ( isXML ) {
+				return match;
+			}
+
+			for ( var i = 0, elem; (elem = curLoop[i]) != null; i++ ) {
+				if ( elem ) {
+					if ( not ^ (elem.className && (" " + elem.className + " ").replace(/[\t\n]/g, " ").indexOf(match) >= 0) ) {
+						if ( !inplace ) {
+							result.push( elem );
+						}
+					} else if ( inplace ) {
+						curLoop[i] = false;
+					}
+				}
+			}
+
+			return false;
+		},
+		ID: function(match){
+			return match[1].replace(/\\/g, "");
+		},
+		TAG: function(match, curLoop){
+			return match[1].toLowerCase();
+		},
+		CHILD: function(match){
+			if ( match[1] == "nth" ) {
+				// parse equations like 'even', 'odd', '5', '2n', '3n+2', '4n-1', '-n+6'
+				var test = /(-?)(\d*)n((?:\+|-)?\d*)/.exec(
+					match[2] == "even" && "2n" || match[2] == "odd" && "2n+1" ||
+					!/\D/.test( match[2] ) && "0n+" + match[2] || match[2]);
+
+				// calculate the numbers (first)n+(last) including if they are negative
+				match[2] = (test[1] + (test[2] || 1)) - 0;
+				match[3] = test[3] - 0;
+			}
+
+			// TODO: Move to normal caching system
+			match[0] = done++;
+
+			return match;
+		},
+		ATTR: function(match, curLoop, inplace, result, not, isXML){
+			var name = match[1].replace(/\\/g, "");
+			
+			if ( !isXML && Expr.attrMap[name] ) {
+				match[1] = Expr.attrMap[name];
+			}
+
+			if ( match[2] === "~=" ) {
+				match[4] = " " + match[4] + " ";
+			}
+
+			return match;
+		},
+		PSEUDO: function(match, curLoop, inplace, result, not){
+			if ( match[1] === "not" ) {
+				// If we're dealing with a complex expression, or a simple one
+				if ( ( chunker.exec(match[3]) || "" ).length > 1 || /^\w/.test(match[3]) ) {
+					match[3] = Sizzle(match[3], null, null, curLoop);
+				} else {
+					var ret = Sizzle.filter(match[3], curLoop, inplace, true ^ not);
+					if ( !inplace ) {
+						result.push.apply( result, ret );
+					}
+					return false;
+				}
+			} else if ( Expr.match.POS.test( match[0] ) || Expr.match.CHILD.test( match[0] ) ) {
+				return true;
+			}
+			
+			return match;
+		},
+		POS: function(match){
+			match.unshift( true );
+			return match;
+		}
+	},
+	filters: {
+		enabled: function(elem){
+			return elem.disabled === false && elem.type !== "hidden";
+		},
+		disabled: function(elem){
+			return elem.disabled === true;
+		},
+		checked: function(elem){
+			return elem.checked === true;
+		},
+		selected: function(elem){
+			// Accessing this property makes selected-by-default
+			// options in Safari work properly
+			elem.parentNode.selectedIndex;
+			return elem.selected === true;
+		},
+		parent: function(elem){
+			return !!elem.firstChild;
+		},
+		empty: function(elem){
+			return !elem.firstChild;
+		},
+		has: function(elem, i, match){
+			return !!Sizzle( match[3], elem ).length;
+		},
+		header: function(elem){
+			return /h\d/i.test( elem.nodeName );
+		},
+		text: function(elem){
+			return "text" === elem.type;
+		},
+		radio: function(elem){
+			return "radio" === elem.type;
+		},
+		checkbox: function(elem){
+			return "checkbox" === elem.type;
+		},
+		file: function(elem){
+			return "file" === elem.type;
+		},
+		password: function(elem){
+			return "password" === elem.type;
+		},
+		submit: function(elem){
+			return "submit" === elem.type;
+		},
+		image: function(elem){
+			return "image" === elem.type;
+		},
+		reset: function(elem){
+			return "reset" === elem.type;
+		},
+		button: function(elem){
+			return "button" === elem.type || elem.nodeName.toLowerCase() === "button";
+		},
+		input: function(elem){
+			return /input|select|textarea|button/i.test(elem.nodeName);
+		}
+	},
+	setFilters: {
+		first: function(elem, i){
+			return i === 0;
+		},
+		last: function(elem, i, match, array){
+			return i === array.length - 1;
+		},
+		even: function(elem, i){
+			return i % 2 === 0;
+		},
+		odd: function(elem, i){
+			return i % 2 === 1;
+		},
+		lt: function(elem, i, match){
+			return i < match[3] - 0;
+		},
+		gt: function(elem, i, match){
+			return i > match[3] - 0;
+		},
+		nth: function(elem, i, match){
+			return match[3] - 0 == i;
+		},
+		eq: function(elem, i, match){
+			return match[3] - 0 == i;
+		}
+	},
+	filter: {
+		PSEUDO: function(elem, match, i, array){
+			var name = match[1], filter = Expr.filters[ name ];
+
+			if ( filter ) {
+				return filter( elem, i, match, array );
+			} else if ( name === "contains" ) {
+				return (elem.textContent || elem.innerText || getText([ elem ]) || "").indexOf(match[3]) >= 0;
+			} else if ( name === "not" ) {
+				var not = match[3];
+
+				for ( var i = 0, l = not.length; i < l; i++ ) {
+					if ( not[i] === elem ) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+		},
+		CHILD: function(elem, match){
+			var type = match[1], node = elem;
+			switch (type) {
+				case 'only':
+				case 'first':
+					while ( (node = node.previousSibling) )	 {
+						if ( node.nodeType === 1 ) { 
+							return false; 
+						}
+					}
+					if ( type == 'first') { 
+						return true; 
+					}
+					node = elem;
+				case 'last':
+					while ( (node = node.nextSibling) )	 {
+						if ( node.nodeType === 1 ) { 
+							return false; 
+						}
+					}
+					return true;
+				case 'nth':
+					var first = match[2], last = match[3];
+
+					if ( first == 1 && last == 0 ) {
+						return true;
+					}
+					
+					var doneName = match[0],
+						parent = elem.parentNode;
+	
+					if ( parent && (parent.sizcache !== doneName || !elem.nodeIndex) ) {
+						var count = 0;
+						for ( node = parent.firstChild; node; node = node.nextSibling ) {
+							if ( node.nodeType === 1 ) {
+								node.nodeIndex = ++count;
+							}
+						} 
+						parent.sizcache = doneName;
+					}
+					
+					var diff = elem.nodeIndex - last;
+					if ( first == 0 ) {
+						return diff == 0;
+					} else {
+						return ( diff % first == 0 && diff / first >= 0 );
+					}
+			}
+		},
+		ID: function(elem, match){
+			return elem.nodeType === 1 && elem.getAttribute("id") === match;
+		},
+		TAG: function(elem, match){
+			return (match === "*" && elem.nodeType === 1) || elem.nodeName.toLowerCase() === match;
+		},
+		CLASS: function(elem, match){
+			return (" " + (elem.className || elem.getAttribute("class")) + " ")
+				.indexOf( match ) > -1;
+		},
+		ATTR: function(elem, match){
+			var name = match[1],
+				result = Expr.attrHandle[ name ] ?
+					Expr.attrHandle[ name ]( elem ) :
+					elem[ name ] != null ?
+						elem[ name ] :
+						elem.getAttribute( name ),
+				value = result + "",
+				type = match[2],
+				check = match[4];
+
+			return result == null ?
+				type === "!=" :
+				type === "=" ?
+				value === check :
+				type === "*=" ?
+				value.indexOf(check) >= 0 :
+				type === "~=" ?
+				(" " + value + " ").indexOf(check) >= 0 :
+				!check ?
+				value && result !== false :
+				type === "!=" ?
+				value != check :
+				type === "^=" ?
+				value.indexOf(check) === 0 :
+				type === "$=" ?
+				value.substr(value.length - check.length) === check :
+				type === "|=" ?
+				value === check || value.substr(0, check.length + 1) === check + "-" :
+				false;
+		},
+		POS: function(elem, match, i, array){
+			var name = match[2], filter = Expr.setFilters[ name ];
+
+			if ( filter ) {
+				return filter( elem, i, match, array );
+			}
+		}
+	}
+};
+
+var origPOS = Expr.match.POS;
+
+for ( var type in Expr.match ) {
+	Expr.match[ type ] = new RegExp( Expr.match[ type ].source + /(?![^\[]*\])(?![^\(]*\))/.source );
+	Expr.leftMatch[ type ] = new RegExp( /(^(?:.|\r|\n)*?)/.source + Expr.match[ type ].source );
+}
+
+var makeArray = function(array, results) {
+	array = Array.prototype.slice.call( array, 0 );
+
+	if ( results ) {
+		results.push.apply( results, array );
+		return results;
+	}
+	
+	return array;
+};
+
+// Perform a simple check to determine if the browser is capable of
+// converting a NodeList to an array using builtin methods.
+try {
+	Array.prototype.slice.call( document.documentElement.childNodes, 0 );
+
+// Provide a fallback method if it does not work
+} catch(e){
+	makeArray = function(array, results) {
+		var ret = results || [];
+
+		if ( toString.call(array) === "[object Array]" ) {
+			Array.prototype.push.apply( ret, array );
+		} else {
+			if ( typeof array.length === "number" ) {
+				for ( var i = 0, l = array.length; i < l; i++ ) {
+					ret.push( array[i] );
+				}
+			} else {
+				for ( var i = 0; array[i]; i++ ) {
+					ret.push( array[i] );
+				}
+			}
+		}
+
+		return ret;
+	};
+}
+
+var sortOrder;
+
+if ( document.documentElement.compareDocumentPosition ) {
+	sortOrder = function( a, b ) {
+		if ( !a.compareDocumentPosition || !b.compareDocumentPosition ) {
+			if ( a == b ) {
+				hasDuplicate = true;
+			}
+			return a.compareDocumentPosition ? -1 : 1;
+		}
+
+		var ret = a.compareDocumentPosition(b) & 4 ? -1 : a === b ? 0 : 1;
+		if ( ret === 0 ) {
+			hasDuplicate = true;
+		}
+		return ret;
+	};
+} else if ( "sourceIndex" in document.documentElement ) {
+	sortOrder = function( a, b ) {
+		if ( !a.sourceIndex || !b.sourceIndex ) {
+			if ( a == b ) {
+				hasDuplicate = true;
+			}
+			return a.sourceIndex ? -1 : 1;
+		}
+
+		var ret = a.sourceIndex - b.sourceIndex;
+		if ( ret === 0 ) {
+			hasDuplicate = true;
+		}
+		return ret;
+	};
+} else if ( document.createRange ) {
+	sortOrder = function( a, b ) {
+		if ( !a.ownerDocument || !b.ownerDocument ) {
+			if ( a == b ) {
+				hasDuplicate = true;
+			}
+			return a.ownerDocument ? -1 : 1;
+		}
+
+		var aRange = a.ownerDocument.createRange(), bRange = b.ownerDocument.createRange();
+		aRange.setStart(a, 0);
+		aRange.setEnd(a, 0);
+		bRange.setStart(b, 0);
+		bRange.setEnd(b, 0);
+		var ret = aRange.compareBoundaryPoints(Range.START_TO_END, bRange);
+		if ( ret === 0 ) {
+			hasDuplicate = true;
+		}
+		return ret;
+	};
+}
+
+// Utility function for retreiving the text value of an array of DOM nodes
+function getText( elems ) {
+	var ret = "", elem;
+
+	for ( var i = 0; elems[i]; i++ ) {
+		elem = elems[i];
+
+		// Get the text from text nodes and CDATA nodes
+		if ( elem.nodeType === 3 || elem.nodeType === 4 ) {
+			ret += elem.nodeValue;
+
+		// Traverse everything else, except comment nodes
+		} else if ( elem.nodeType !== 8 ) {
+			ret += getText( elem.childNodes );
+		}
+	}
+
+	return ret;
+}
+
+// Check to see if the browser returns elements by name when
+// querying by getElementById (and provide a workaround)
+(function(){
+	// We're going to inject a fake input element with a specified name
+	var form = document.createElement("div"),
+		id = "script" + (new Date).getTime();
+	form.innerHTML = "<a name='" + id + "'/>";
+
+	// Inject it into the root element, check its status, and remove it quickly
+	var root = document.documentElement;
+	root.insertBefore( form, root.firstChild );
+
+	// The workaround has to do additional checks after a getElementById
+	// Which slows things down for other browsers (hence the branching)
+	if ( document.getElementById( id ) ) {
+		Expr.find.ID = function(match, context, isXML){
+			if ( typeof context.getElementById !== "undefined" && !isXML ) {
+				var m = context.getElementById(match[1]);
+				return m ? m.id === match[1] || typeof m.getAttributeNode !== "undefined" && m.getAttributeNode("id").nodeValue === match[1] ? [m] : undefined : [];
+			}
+		};
+
+		Expr.filter.ID = function(elem, match){
+			var node = typeof elem.getAttributeNode !== "undefined" && elem.getAttributeNode("id");
+			return elem.nodeType === 1 && node && node.nodeValue === match;
+		};
+	}
+
+	root.removeChild( form );
+	root = form = null; // release memory in IE
+})();
+
+(function(){
+	// Check to see if the browser returns only elements
+	// when doing getElementsByTagName("*")
+
+	// Create a fake element
+	var div = document.createElement("div");
+	div.appendChild( document.createComment("") );
+
+	// Make sure no comments are found
+	if ( div.getElementsByTagName("*").length > 0 ) {
+		Expr.find.TAG = function(match, context){
+			var results = context.getElementsByTagName(match[1]);
+
+			// Filter out possible comments
+			if ( match[1] === "*" ) {
+				var tmp = [];
+
+				for ( var i = 0; results[i]; i++ ) {
+					if ( results[i].nodeType === 1 ) {
+						tmp.push( results[i] );
+					}
+				}
+
+				results = tmp;
+			}
+
+			return results;
+		};
+	}
+
+	// Check to see if an attribute returns normalized href attributes
+	div.innerHTML = "<a href='#'></a>";
+	if ( div.firstChild && typeof div.firstChild.getAttribute !== "undefined" &&
+			div.firstChild.getAttribute("href") !== "#" ) {
+		Expr.attrHandle.href = function(elem){
+			return elem.getAttribute("href", 2);
+		};
+	}
+
+	div = null; // release memory in IE
+})();
+
+if ( document.querySelectorAll ) {
+	(function(){
+		var oldSizzle = Sizzle, div = document.createElement("div");
+		div.innerHTML = "<p class='TEST'></p>";
+
+		// Safari can't handle uppercase or unicode characters when
+		// in quirks mode.
+		if ( div.querySelectorAll && div.querySelectorAll(".TEST").length === 0 ) {
+			return;
+		}
+	
+		Sizzle = function(query, context, extra, seed){
+			context = context || document;
+
+			// Only use querySelectorAll on non-XML documents
+			// (ID selectors don't work in non-HTML documents)
+			if ( !seed && context.nodeType === 9 && !isXML(context) ) {
+				try {
+					return makeArray( context.querySelectorAll(query), extra );
+				} catch(e){}
+			}
+		
+			return oldSizzle(query, context, extra, seed);
+		};
+
+		for ( var prop in oldSizzle ) {
+			Sizzle[ prop ] = oldSizzle[ prop ];
+		}
+
+		div = null; // release memory in IE
+	})();
+}
+
+(function(){
+	var div = document.createElement("div");
+
+	div.innerHTML = "<div class='test e'></div><div class='test'></div>";
+
+	// Opera can't find a second classname (in 9.6)
+	// Also, make sure that getElementsByClassName actually exists
+	if ( !div.getElementsByClassName || div.getElementsByClassName("e").length === 0 ) {
+		return;
+	}
+
+	// Safari caches class attributes, doesn't catch changes (in 3.2)
+	div.lastChild.className = "e";
+
+	if ( div.getElementsByClassName("e").length === 1 ) {
+		return;
+	}
+	
+	Expr.order.splice(1, 0, "CLASS");
+	Expr.find.CLASS = function(match, context, isXML) {
+		if ( typeof context.getElementsByClassName !== "undefined" && !isXML ) {
+			return context.getElementsByClassName(match[1]);
+		}
+	};
+
+	div = null; // release memory in IE
+})();
+
+function dirNodeCheck( dir, cur, doneName, checkSet, nodeCheck, isXML ) {
+	var sibDir = dir == "previousSibling" && !isXML;
+	for ( var i = 0, l = checkSet.length; i < l; i++ ) {
+		var elem = checkSet[i];
+		if ( elem ) {
+			if ( sibDir && elem.nodeType === 1 ){
+				elem.sizcache = doneName;
+				elem.sizset = i;
+			}
+			elem = elem[dir];
+			var match = false;
+
+			while ( elem ) {
+				if ( elem.sizcache === doneName ) {
+					match = checkSet[elem.sizset];
+					break;
+				}
+
+				if ( elem.nodeType === 1 && !isXML ){
+					elem.sizcache = doneName;
+					elem.sizset = i;
+				}
+
+				if ( elem.nodeName.toLowerCase() === cur ) {
+					match = elem;
+					break;
+				}
+
+				elem = elem[dir];
+			}
+
+			checkSet[i] = match;
+		}
+	}
+}
+
+function dirCheck( dir, cur, doneName, checkSet, nodeCheck, isXML ) {
+	var sibDir = dir == "previousSibling" && !isXML;
+	for ( var i = 0, l = checkSet.length; i < l; i++ ) {
+		var elem = checkSet[i];
+		if ( elem ) {
+			if ( sibDir && elem.nodeType === 1 ) {
+				elem.sizcache = doneName;
+				elem.sizset = i;
+			}
+			elem = elem[dir];
+			var match = false;
+
+			while ( elem ) {
+				if ( elem.sizcache === doneName ) {
+					match = checkSet[elem.sizset];
+					break;
+				}
+
+				if ( elem.nodeType === 1 ) {
+					if ( !isXML ) {
+						elem.sizcache = doneName;
+						elem.sizset = i;
+					}
+					if ( typeof cur !== "string" ) {
+						if ( elem === cur ) {
+							match = true;
+							break;
+						}
+
+					} else if ( Sizzle.filter( cur, [elem] ).length > 0 ) {
+						match = elem;
+						break;
+					}
+				}
+
+				elem = elem[dir];
+			}
+
+			checkSet[i] = match;
+		}
+	}
+}
+
+var contains = document.compareDocumentPosition ? function(a, b){
+	return a.compareDocumentPosition(b) & 16;
+} : function(a, b){
+	return a !== b && (a.contains ? a.contains(b) : true);
+};
+
+var isXML = function(elem){
+	// documentElement is verified for cases where it doesn't yet exist
+	// (such as loading iframes in IE - #4833) 
+	var documentElement = (elem ? elem.ownerDocument || elem : 0).documentElement;
+	return documentElement ? documentElement.nodeName !== "HTML" : false;
+};
+
+var posProcess = function(selector, context){
+	var tmpSet = [], later = "", match,
+		root = context.nodeType ? [context] : context;
+
+	// Position selectors must be done after the filter
+	// And so must :not(positional) so we move all PSEUDOs to the end
+	while ( (match = Expr.match.PSEUDO.exec( selector )) ) {
+		later += match[0];
+		selector = selector.replace( Expr.match.PSEUDO, "" );
+	}
+
+	selector = Expr.relative[selector] ? selector + "*" : selector;
+
+	for ( var i = 0, l = root.length; i < l; i++ ) {
+		Sizzle( selector, root[i], tmpSet );
+	}
+
+	return Sizzle.filter( later, tmpSet );
+};
+
+// EXPOSE
+
+window.Sizzle = Sizzle;
+
+})();
+// Underscore.js
+// (c) 2009 Jeremy Ashkenas, DocumentCloud Inc.
+// Underscore is freely distributable under the terms of the MIT license.
+// Portions of Underscore are inspired by or borrowed from Prototype.js,
+// Oliver Steele's Functional, and John Resig's Micro-Templating.
+// For all details and documentation:
+// http://documentcloud.github.com/underscore/
+
+(function() {
+
+  /*------------------------- Baseline setup ---------------------------------*/
+
+  // Establish the root object, "window" in the browser, or "global" on the server.
+  var root = this;
+
+  // Save the previous value of the "_" variable.
+  var previousUnderscore = root._;
+
+  // If Underscore is called as a function, it returns a wrapped object that
+  // can be used OO-style. This wrapper holds altered versions of all the
+  // underscore functions. Wrapped objects may be chained.
+  var wrapper = function(obj) { this._wrapped = obj; };
+
+  // Establish the object that gets thrown to break out of a loop iteration.
+  var breaker = typeof StopIteration !== 'undefined' ? StopIteration : '__break__';
+
+  // Create a safe reference to the Underscore object for reference below.
+  var _ = root._ = function(obj) { return new wrapper(obj); };
+
+  // Export the Underscore object for CommonJS.
+  if (typeof exports !== 'undefined') exports._ = _;
+
+  // Create quick reference variables for speed access to core prototypes.
+  var slice                 = Array.prototype.slice,
+      unshift               = Array.prototype.unshift,
+      toString              = Object.prototype.toString,
+      hasOwnProperty        = Object.prototype.hasOwnProperty,
+      propertyIsEnumerable  = Object.prototype.propertyIsEnumerable;
+
+  // Current version.
+  _.VERSION = '0.5.1';
+
+  /*------------------------ Collection Functions: ---------------------------*/
+
+  // The cornerstone, an each implementation.
+  // Handles objects implementing forEach, arrays, and raw objects.
+  _.each = function(obj, iterator, context) {
+    var index = 0;
+    try {
+      if (obj.forEach) {
+        obj.forEach(iterator, context);
+      } else if (_.isArray(obj) || _.isArguments(obj)) {
+        for (var i=0, l=obj.length; i<l; i++) iterator.call(context, obj[i], i, obj);
+      } else {
+        var keys = _.keys(obj), l = keys.length;
+        for (var i=0; i<l; i++) iterator.call(context, obj[keys[i]], keys[i], obj);
+      }
+    } catch(e) {
+      if (e != breaker) throw e;
+    }
+    return obj;
+  };
+
+  // Return the results of applying the iterator to each element. Use JavaScript
+  // 1.6's version of map, if possible.
+  _.map = function(obj, iterator, context) {
+    if (obj && _.isFunction(obj.map)) return obj.map(iterator, context);
+    var results = [];
+    _.each(obj, function(value, index, list) {
+      results.push(iterator.call(context, value, index, list));
+    });
+    return results;
+  };
+
+  // Reduce builds up a single result from a list of values. Also known as
+  // inject, or foldl. Uses JavaScript 1.8's version of reduce, if possible.
+  _.reduce = function(obj, memo, iterator, context) {
+    if (obj && _.isFunction(obj.reduce)) return obj.reduce(_.bind(iterator, context), memo);
+    _.each(obj, function(value, index, list) {
+      memo = iterator.call(context, memo, value, index, list);
+    });
+    return memo;
+  };
+
+  // The right-associative version of reduce, also known as foldr. Uses
+  // JavaScript 1.8's version of reduceRight, if available.
+  _.reduceRight = function(obj, memo, iterator, context) {
+    if (obj && _.isFunction(obj.reduceRight)) return obj.reduceRight(_.bind(iterator, context), memo);
+    var reversed = _.clone(_.toArray(obj)).reverse();
+    _.each(reversed, function(value, index) {
+      memo = iterator.call(context, memo, value, index, obj);
+    });
+    return memo;
+  };
+
+  // Return the first value which passes a truth test.
+  _.detect = function(obj, iterator, context) {
+    var result;
+    _.each(obj, function(value, index, list) {
+      if (iterator.call(context, value, index, list)) {
+        result = value;
+        _.breakLoop();
+      }
+    });
+    return result;
+  };
+
+  // Return all the elements that pass a truth test. Use JavaScript 1.6's
+  // filter(), if it exists.
+  _.select = function(obj, iterator, context) {
+    if (obj && _.isFunction(obj.filter)) return obj.filter(iterator, context);
+    var results = [];
+    _.each(obj, function(value, index, list) {
+      iterator.call(context, value, index, list) && results.push(value);
+    });
+    return results;
+  };
+
+  // Return all the elements for which a truth test fails.
+  _.reject = function(obj, iterator, context) {
+    var results = [];
+    _.each(obj, function(value, index, list) {
+      !iterator.call(context, value, index, list) && results.push(value);
+    });
+    return results;
+  };
+
+  // Determine whether all of the elements match a truth test. Delegate to
+  // JavaScript 1.6's every(), if it is present.
+  _.all = function(obj, iterator, context) {
+    iterator = iterator || _.identity;
+    if (obj && _.isFunction(obj.every)) return obj.every(iterator, context);
+    var result = true;
+    _.each(obj, function(value, index, list) {
+      if (!(result = result && iterator.call(context, value, index, list))) _.breakLoop();
+    });
+    return result;
+  };
+
+  // Determine if at least one element in the object matches a truth test. Use
+  // JavaScript 1.6's some(), if it exists.
+  _.any = function(obj, iterator, context) {
+    iterator = iterator || _.identity;
+    if (obj && _.isFunction(obj.some)) return obj.some(iterator, context);
+    var result = false;
+    _.each(obj, function(value, index, list) {
+      if (result = iterator.call(context, value, index, list)) _.breakLoop();
+    });
+    return result;
+  };
+
+  // Determine if a given value is included in the array or object,
+  // based on '==='.
+  _.include = function(obj, target) {
+    if (_.isArray(obj)) return _.indexOf(obj, target) != -1;
+    var found = false;
+    _.each(obj, function(value) {
+      if (found = value === target) _.breakLoop();
+    });
+    return found;
+  };
+
+  // Invoke a method with arguments on every item in a collection.
+  _.invoke = function(obj, method) {
+    var args = _.rest(arguments, 2);
+    return _.map(obj, function(value) {
+      return (method ? value[method] : value).apply(value, args);
+    });
+  };
+
+  // Convenience version of a common use case of map: fetching a property.
+  _.pluck = function(obj, key) {
+    return _.map(obj, function(value){ return value[key]; });
+  };
+
+  // Return the maximum item or (item-based computation).
+  _.max = function(obj, iterator, context) {
+    if (!iterator && _.isArray(obj)) return Math.max.apply(Math, obj);
+    var result = {computed : -Infinity};
+    _.each(obj, function(value, index, list) {
+      var computed = iterator ? iterator.call(context, value, index, list) : value;
+      computed >= result.computed && (result = {value : value, computed : computed});
+    });
+    return result.value;
+  };
+
+  // Return the minimum element (or element-based computation).
+  _.min = function(obj, iterator, context) {
+    if (!iterator && _.isArray(obj)) return Math.min.apply(Math, obj);
+    var result = {computed : Infinity};
+    _.each(obj, function(value, index, list) {
+      var computed = iterator ? iterator.call(context, value, index, list) : value;
+      computed < result.computed && (result = {value : value, computed : computed});
+    });
+    return result.value;
+  };
+
+  // Sort the object's values by a criteria produced by an iterator.
+  _.sortBy = function(obj, iterator, context) {
+    return _.pluck(_.map(obj, function(value, index, list) {
+      return {
+        value : value,
+        criteria : iterator.call(context, value, index, list)
+      };
+    }).sort(function(left, right) {
+      var a = left.criteria, b = right.criteria;
+      return a < b ? -1 : a > b ? 1 : 0;
+    }), 'value');
+  };
+
+  // Use a comparator function to figure out at what index an object should
+  // be inserted so as to maintain order. Uses binary search.
+  _.sortedIndex = function(array, obj, iterator) {
+    iterator = iterator || _.identity;
+    var low = 0, high = array.length;
+    while (low < high) {
+      var mid = (low + high) >> 1;
+      iterator(array[mid]) < iterator(obj) ? low = mid + 1 : high = mid;
+    }
+    return low;
+  };
+
+  // Convert anything iterable into a real, live array.
+  _.toArray = function(iterable) {
+    if (!iterable)                return [];
+    if (iterable.toArray)         return iterable.toArray();
+    if (_.isArray(iterable))      return iterable;
+    if (_.isArguments(iterable))  return slice.call(iterable);
+    return _.map(iterable, function(val){ return val; });
+  };
+
+  // Return the number of elements in an object.
+  _.size = function(obj) {
+    return _.toArray(obj).length;
+  };
+
+  /*-------------------------- Array Functions: ------------------------------*/
+
+  // Get the first element of an array. Passing "n" will return the first N
+  // values in the array. Aliased as "head". The "guard" check allows it to work
+  // with _.map.
+  _.first = function(array, n, guard) {
+    return n && !guard ? slice.call(array, 0, n) : array[0];
+  };
+
+  // Returns everything but the first entry of the array. Aliased as "tail".
+  // Especially useful on the arguments object. Passing an "index" will return
+  // the rest of the values in the array from that index onward. The "guard"
+   //check allows it to work with _.map.
+  _.rest = function(array, index, guard) {
+    return slice.call(array, _.isUndefined(index) || guard ? 1 : index);
+  };
+
+  // Get the last element of an array.
+  _.last = function(array) {
+    return array[array.length - 1];
+  };
+
+  // Trim out all falsy values from an array.
+  _.compact = function(array) {
+    return _.select(array, function(value){ return !!value; });
+  };
+
+  // Return a completely flattened version of an array.
+  _.flatten = function(array) {
+    return _.reduce(array, [], function(memo, value) {
+      if (_.isArray(value)) return memo.concat(_.flatten(value));
+      memo.push(value);
+      return memo;
+    });
+  };
+
+  // Return a version of the array that does not contain the specified value(s).
+  _.without = function(array) {
+    var values = _.rest(arguments);
+    return _.select(array, function(value){ return !_.include(values, value); });
+  };
+
+  // Produce a duplicate-free version of the array. If the array has already
+  // been sorted, you have the option of using a faster algorithm.
+  _.uniq = function(array, isSorted) {
+    return _.reduce(array, [], function(memo, el, i) {
+      if (0 == i || (isSorted === true ? _.last(memo) != el : !_.include(memo, el))) memo.push(el);
+      return memo;
+    });
+  };
+
+  // Produce an array that contains every item shared between all the
+  // passed-in arrays.
+  _.intersect = function(array) {
+    var rest = _.rest(arguments);
+    return _.select(_.uniq(array), function(item) {
+      return _.all(rest, function(other) {
+        return _.indexOf(other, item) >= 0;
+      });
+    });
+  };
+
+  // Zip together multiple lists into a single array -- elements that share
+  // an index go together.
+  _.zip = function() {
+    var args = _.toArray(arguments);
+    var length = _.max(_.pluck(args, 'length'));
+    var results = new Array(length);
+    for (var i=0; i<length; i++) results[i] = _.pluck(args, String(i));
+    return results;
+  };
+
+  // If the browser doesn't supply us with indexOf (I'm looking at you, MSIE),
+  // we need this function. Return the position of the first occurence of an
+  // item in an array, or -1 if the item is not included in the array.
+  _.indexOf = function(array, item) {
+    if (array.indexOf) return array.indexOf(item);
+    for (var i=0, l=array.length; i<l; i++) if (array[i] === item) return i;
+    return -1;
+  };
+
+  // Provide JavaScript 1.6's lastIndexOf, delegating to the native function,
+  // if possible.
+  _.lastIndexOf = function(array, item) {
+    if (array.lastIndexOf) return array.lastIndexOf(item);
+    var i = array.length;
+    while (i--) if (array[i] === item) return i;
+    return -1;
+  };
+
+  // Generate an integer Array containing an arithmetic progression. A port of
+  // the native Python range() function. See:
+  // http://docs.python.org/library/functions.html#range
+  _.range = function(start, stop, step) {
+    var a     = _.toArray(arguments);
+    var solo  = a.length <= 1;
+    var start = solo ? 0 : a[0], stop = solo ? a[0] : a[1], step = a[2] || 1;
+    var len   = Math.ceil((stop - start) / step);
+    if (len <= 0) return [];
+    var range = new Array(len);
+    for (var i = start, idx = 0; true; i += step) {
+      if ((step > 0 ? i - stop : stop - i) >= 0) return range;
+      range[idx++] = i;
+    }
+  };
+
+  /* ----------------------- Function Functions: -----------------------------*/
+
+  // Create a function bound to a given object (assigning 'this', and arguments,
+  // optionally). Binding with arguments is also known as 'curry'.
+  _.bind = function(func, obj) {
+    var args = _.rest(arguments, 2);
+    return function() {
+      return func.apply(obj || root, args.concat(_.toArray(arguments)));
+    };
+  };
+
+  // Bind all of an object's methods to that object. Useful for ensuring that
+  // all callbacks defined on an object belong to it.
+  _.bindAll = function(obj) {
+    var funcs = _.rest(arguments);
+    if (funcs.length == 0) funcs = _.functions(obj);
+    _.each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
+    return obj;
+  };
+
+  // Delays a function for the given number of milliseconds, and then calls
+  // it with the arguments supplied.
+  _.delay = function(func, wait) {
+    var args = _.rest(arguments, 2);
+    return setTimeout(function(){ return func.apply(func, args); }, wait);
+  };
+
+  // Defers a function, scheduling it to run after the current call stack has
+  // cleared.
+  _.defer = function(func) {
+    return _.delay.apply(_, [func, 1].concat(_.rest(arguments)));
+  };
+
+  // Returns the first function passed as an argument to the second,
+  // allowing you to adjust arguments, run code before and after, and
+  // conditionally execute the original function.
+  _.wrap = function(func, wrapper) {
+    return function() {
+      var args = [func].concat(_.toArray(arguments));
+      return wrapper.apply(wrapper, args);
+    };
+  };
+
+  // Returns a function that is the composition of a list of functions, each
+  // consuming the return value of the function that follows.
+  _.compose = function() {
+    var funcs = _.toArray(arguments);
+    return function() {
+      var args = _.toArray(arguments);
+      for (var i=funcs.length-1; i >= 0; i--) {
+        args = [funcs[i].apply(this, args)];
+      }
+      return args[0];
+    };
+  };
+
+  /* ------------------------- Object Functions: ---------------------------- */
+
+  // Retrieve the names of an object's properties.
+  _.keys = function(obj) {
+    if(_.isArray(obj)) return _.range(0, obj.length);
+    var keys = [];
+    for (var key in obj) if (hasOwnProperty.call(obj, key)) keys.push(key);
+    return keys;
+  };
+
+  // Retrieve the values of an object's properties.
+  _.values = function(obj) {
+    return _.map(obj, _.identity);
+  };
+
+  // Return a sorted list of the function names available in Underscore.
+  _.functions = function(obj) {
+    return _.select(_.keys(obj), function(key){ return _.isFunction(obj[key]); }).sort();
+  };
+
+  // Extend a given object with all of the properties in a source object.
+  _.extend = function(destination, source) {
+    for (var property in source) destination[property] = source[property];
+    return destination;
+  };
+
+  // Create a (shallow-cloned) duplicate of an object.
+  _.clone = function(obj) {
+    if (_.isArray(obj)) return obj.slice(0);
+    return _.extend({}, obj);
+  };
+
+  // Perform a deep comparison to check if two objects are equal.
+  _.isEqual = function(a, b) {
+    // Check object identity.
+    if (a === b) return true;
+    // Different types?
+    var atype = typeof(a), btype = typeof(b);
+    if (atype != btype) return false;
+    // Basic equality test (watch out for coercions).
+    if (a == b) return true;
+    // One is falsy and the other truthy.
+    if ((!a && b) || (a && !b)) return false;
+    // One of them implements an isEqual()?
+    if (a.isEqual) return a.isEqual(b);
+    // Check dates' integer values.
+    if (_.isDate(a) && _.isDate(b)) return a.getTime() === b.getTime();
+    // Both are NaN?
+    if (_.isNaN(a) && _.isNaN(b)) return true;
+    // Compare regular expressions.
+    if (_.isRegExp(a) && _.isRegExp(b))
+      return a.source     === b.source &&
+             a.global     === b.global &&
+             a.ignoreCase === b.ignoreCase &&
+             a.multiline  === b.multiline;
+    // If a is not an object by this point, we can't handle it.
+    if (atype !== 'object') return false;
+    // Check for different array lengths before comparing contents.
+    if (a.length && (a.length !== b.length)) return false;
+    // Nothing else worked, deep compare the contents.
+    var aKeys = _.keys(a), bKeys = _.keys(b);
+    // Different object sizes?
+    if (aKeys.length != bKeys.length) return false;
+    // Recursive comparison of contents.
+    for (var key in a) if (!_.isEqual(a[key], b[key])) return false;
+    return true;
+  };
+
+  // Is a given array or object empty?
+  _.isEmpty = function(obj) {
+    return _.keys(obj).length == 0;
+  };
+
+  // Is a given value a DOM element?
+  _.isElement = function(obj) {
+    return !!(obj && obj.nodeType == 1);
+  };
+
+  // Is a given variable an arguments object?
+  _.isArguments = function(obj) {
+    return obj && _.isNumber(obj.length) && !_.isArray(obj) && !propertyIsEnumerable.call(obj, 'length');
+  };
+
+  // Is the given value NaN -- this one is interesting. NaN != NaN, and
+  // isNaN(undefined) == true, so we make sure it's a number first.
+  _.isNaN = function(obj) {
+    return _.isNumber(obj) && isNaN(obj);
+  };
+
+  // Is a given value equal to null?
+  _.isNull = function(obj) {
+    return obj === null;
+  };
+
+  // Is a given variable undefined?
+  _.isUndefined = function(obj) {
+    return typeof obj == 'undefined';
+  };
+
+  // Define the isArray, isDate, isFunction, isNumber, isRegExp, and isString
+  // functions based on their toString identifiers.
+  var types = ['Array', 'Date', 'Function', 'Number', 'RegExp', 'String'];
+  for (var i=0, l=types.length; i<l; i++) {
+    (function() {
+      var identifier = '[object ' + types[i] + ']';
+      _['is' + types[i]] = function(obj) { return toString.call(obj) == identifier; };
+    })();
+  }
+
+  /* -------------------------- Utility Functions: -------------------------- */
+
+  // Run Underscore.js in noConflict mode, returning the '_' variable to its
+  // previous owner. Returns a reference to the Underscore object.
+  _.noConflict = function() {
+    root._ = previousUnderscore;
+    return this;
+  };
+
+  // Keep the identity function around for default iterators.
+  _.identity = function(value) {
+    return value;
+  };
+
+  // Break out of the middle of an iteration.
+  _.breakLoop = function() {
+    throw breaker;
+  };
+
+  // Generate a unique integer id (unique within the entire client session).
+  // Useful for temporary DOM ids.
+  var idCounter = 0;
+  _.uniqueId = function(prefix) {
+    var id = idCounter++;
+    return prefix ? prefix + id : id;
+  };
+
+  // JavaScript templating a-la ERB, pilfered from John Resig's
+  // "Secrets of the JavaScript Ninja", page 83.
+  _.template = function(str, data) {
+    var fn = new Function('obj',
+      'var p=[],print=function(){p.push.apply(p,arguments);};' +
+      'with(obj){p.push(\'' +
+      str
+        .replace(/[\r\t\n]/g, " ")
+        .split("<%").join("\t")
+        .replace(/((^|%>)[^\t]*)'/g, "$1\r")
+        .replace(/\t=(.*?)%>/g, "',$1,'")
+        .split("\t").join("');")
+        .split("%>").join("p.push('")
+        .split("\r").join("\\'")
+    + "');}return p.join('');");
+    return data ? fn(data) : fn;
+  };
+
+  /*------------------------------- Aliases ----------------------------------*/
+
+  _.forEach  = _.each;
+  _.foldl    = _.inject       = _.reduce;
+  _.foldr    = _.reduceRight;
+  _.filter   = _.select;
+  _.every    = _.all;
+  _.some     = _.any;
+  _.head     = _.first;
+  _.tail     = _.rest;
+  _.methods  = _.functions;
+
+  /*------------------------ Setup the OOP Wrapper: --------------------------*/
+
+  // Helper function to continue chaining intermediate results.
+  var result = function(obj, chain) {
+    return chain ? _(obj).chain() : obj;
+  };
+
+  // Add all of the Underscore functions to the wrapper object.
+  _.each(_.functions(_), function(name) {
+    var method = _[name];
+    wrapper.prototype[name] = function() {
+      unshift.call(arguments, this._wrapped);
+      return result(method.apply(_, arguments), this._chain);
+    };
+  });
+
+  // Add all mutator Array functions to the wrapper.
+  _.each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
+    var method = Array.prototype[name];
+    wrapper.prototype[name] = function() {
+      method.apply(this._wrapped, arguments);
+      return result(this._wrapped, this._chain);
+    };
+  });
+
+  // Add all accessor Array functions to the wrapper.
+  _.each(['concat', 'join', 'slice'], function(name) {
+    var method = Array.prototype[name];
+    wrapper.prototype[name] = function() {
+      return result(method.apply(this._wrapped, arguments), this._chain);
+    };
+  });
+
+  // Start chaining a wrapped Underscore object.
+  wrapper.prototype.chain = function() {
+    this._chain = true;
+    return this;
+  };
+
+  // Extracts the result from a wrapped and chained object.
+  wrapper.prototype.value = function() {
+    return this._wrapped;
+  };
+
+})();
 /*jslint 
 browser: true,
 nomen: false,
@@ -2798,8 +4457,24 @@ var sc;
 * 
 * This requires date.js
 * http://www.datejs.com/
+* @param {string} time_value a string to convert into relative time
+* @param {object} [labels] labels for text portions of time descriptions
+* @param {boolean} [use_dateparse] Whether or not to use the Date.parse method to parse the time_value. Default is FALSE
 */
-sc.helpers.getRelativeTime = function(time_value, use_dateparse) {	
+sc.helpers.getRelativeTime = function(time_value, labels, use_dateparse) {	
+	
+	var default_labels = {
+		'now':'Just now',
+		'seconds':'sec ago',
+		'minute':'min ago',
+		'minutes':'min ago',
+		'hour':'hr ago',
+		'hours':'hr ago',
+		'day':'day ago',
+		'days':'days ago'	
+	};
+	
+	labels = sch.defaults(default_labels, labels);
 	
 	var parsed_date;
 	
@@ -2813,25 +4488,25 @@ sc.helpers.getRelativeTime = function(time_value, use_dateparse) {
 	var delta = parseInt( (now.getTime() - parsed_date.getTime()) / 1000, 10);
 	
 	if (delta < 10) {
-		return 'Just now';
+		return labels.now;
 	} else if(delta < 60) {
-		return delta.toString() +' sec ago';
+		return delta.toString() +' '+labels.seconds;
 	} else if(delta < 120) {
-		return '1 min ago';
+		return '1 '+labels.minute;
 	} else if(delta < (45*60)) {
-		return Math.round(parseInt(delta / 60, 10)).toString() + ' min ago';
+		return Math.round(parseInt(delta / 60, 10)).toString() + ' ' +labels.minutes;
 	} else if(delta < (90*60)) {
-		return '1 hr ago';
+		return '1 ' +labels.hour;
 	} else if(delta < (24*60*60)) {
 		if (Math.round(delta / 3600) === 1) {
-			return '2 hr ago';
+			return '2 '+labels.hours;
 		} else {
-			return Math.round(delta / 3600).toString() + ' hr ago';
+			return Math.round(delta / 3600).toString() + ' '+labels.hours;
 		}
 	} else if(delta < (48*60*60)) {
-		return '1 day ago';
+		return '1 '+labels.day;
 	} else {
-		return Math.round(delta / 86400).toString() + ' days ago';
+		return Math.round(delta / 86400).toString() + ' '+labels.days;
 	}
 };
 
@@ -2884,27 +4559,33 @@ var SPAZCORE_EVENTDATA_ATTRIBUTE = 'sc_data';
  * @param {object} target
  * @param {string} event_type
  * @param {function} handler  a method that will take the event as a param, and "this" refers to target
- * @param {boolean} use_capture  defaults to false
+ * @param {Object} [scope] the scope to execute the handler within (what "this" refers to)
+ * @param {boolean} [use_capture]  defaults to false
+ * @returns {function} the handler that was passed -- or created, if we passed a scope. You can use this to remove the listener later on
  * @function
  */
 sc.helpers.addListener = function(target, event_type, handler, scope, use_capture) {
 
 	sch.dump('listening for '+event_type);
 	sch.dump('on target nodeName:'+target.nodeName);
-
-
-	function scope_perserver(e) {
-		handler.call(scope, e);
-	}
 	
 	if (use_capture !== true) {
 		use_capture = false;
 	}
 	
+	
+	
 	if (scope) {
-		target.addEventListener(event_type, scope_perserver, use_capture);
+		
+		var __handler = _.bind(handler, scope);
+		target.addEventListener(event_type, __handler, use_capture);
+		return __handler;
+		
 	} else {
+		
 		target.addEventListener(event_type, handler, use_capture);
+		return handler;
+
 	}
 	
 	
@@ -2919,30 +4600,68 @@ sc.helpers.addListener = function(target, event_type, handler, scope, use_captur
  * @param {object} target
  * @param {string} event_type
  * @param {function} handler  a method that will take the event as a param, and "this" refers to target
+ * @param {Object} scope the scope to execute the handler
  * @param {boolean} use_capture  defaults to false
  * @function
  */
-sc.helpers.removeListener = function(target, event_type, handler, scope, use_capture) {
+sc.helpers.removeListener = function(target, event_type, handler, use_capture) {
 
 	sch.dump('removing listener for '+event_type);
 	sch.dump('on target nodeName:'+target.nodeName);
-
-
-	function scope_perserver(e) {
-		handler.call(scope, e);
-	}
 
 	if (use_capture !== true) {
 		use_capture = false;
 	}
 	
-	if (scope) {
-		target.removeEventListener(event_type, scope_perserver, use_capture);
-	} else {
-		target.removeEventListener(event_type, handler, use_capture);
-	}
+	target.removeEventListener(event_type, handler, use_capture);
 };
 
+/**
+ * @param {DOMElement} base_target The base target where the delegated listener will be set-up
+ * @param {string} selector The CSS Selector that will be used to match incoming events. Matching is done with jQuery
+ * @param {string} event_type The event type 
+ * @param {Function} handler a method that will take the event as a param, and "this" refers to target
+ * @param {Object} [scope] the scope to execute the handler
+ * @param {Boolean} [use_capture] Describe this parameter
+ */
+sc.helpers.addDelegatedListener = function(base_target, selector, event_type, handler, scope) {
+	
+	sch.dump('listening for '+event_type);
+	sch.dump('on target nodeName:'+target.nodeName);
+	sch.dump('for selector:'+selector);
+	
+	if (use_capture !== true) {
+		use_capture = false;
+	}
+	
+	
+	
+	if (scope) {
+		
+		var __handler = _.bind(handler, scope);
+		target.addEventListener(event_type, __handler, use_capture);
+		return __handler;
+		
+	} else {
+		
+		target.addEventListener(event_type, handler, use_capture);
+		return handler;
+
+	}
+	
+};
+
+/**
+ * @param {DOMElement} base_target The base target where the delegated listener will be set-up
+ * @param {string} selector The CSS Selector that will be used to match incoming events. Matching is done with jQuery
+ * @param {string} event_type The event type 
+ * @param {Function} handler a method that will take the event as a param, and "this" refers to target
+ * @param {Object} [scope] the scope to execute the handler
+ * @param {Boolean} [use_capture] Describe this parameter
+ */
+sc.helpers.removeDelegatedListener = function(base_target, selector, event_type, handler, scope, use_capture) {
+	
+};
 
 /**
  * This triggers a custom event using document.createEvent('Events') and target.dispatchEvent()
@@ -2991,6 +4710,19 @@ sc.helpers.listen = sc.helpers.addListener;
  * @function
  */
 sc.helpers.unlisten = sc.helpers.removeListener;
+
+/**
+ * Alias for sc.helpers.addDelegatedListener
+ * @function 
+ */
+sc.helpers.live = sc.helpers.addDelegatedListener;
+
+/**
+ * Alias for sc.helpers.removeDelegatedListener
+ * @function 
+ */
+sc.helpers.die = sc.helpers.removeDelegatedListener;
+
 
 /**
  * Alias for sc.helpers.triggerCustomEvent 
@@ -3876,10 +5608,10 @@ sc.helpers.isArray = function(obj) {
 };
 
 /*
-	Returns a copy of the object using the jQuery.extend() method
+	Returns a copy of the object using the _.extend() method
 */
 sc.helpers.clone = function(oldObj) {
-	return jQuery.extend({}/* clone */, oldObj);
+	return _.extend({}/* clone */, oldObj);
 };
 
 /**
@@ -4242,13 +5974,49 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 		type = 'both';
 	}
 
+	var re_nohttpurl = /((^|\s)(www\.)?([a-zA-Z_\-]+\.)(com|net|org)($|\s))/gi;
+
 	var re_noemail = /(^|\s|\(|:)((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
 	var re_nourl   = /(^|\s|\()([a-zA-Z0-9_\.\-\+]+)@([a-zA-Z0-9\-]+)\.([a-zA-Z0-9\-\.]*)([^\s\)<]+)/gi;
 	
 	var x, ms, period = '';
 
 	if (type !== 'email')
-	{
+	{	
+		while ((ms = re_nohttpurl.exec(str))) { // look for URLs without a preceding "http://"
+			// if ( /\.$/.test(ms[4]) ) {
+			// 	period = '.';
+			//	ms[5] = ms[5].slice(0, -1);
+			// }
+			
+			/*
+				sometimes we can end up with a null instead of a blank string,
+				so we need to force the issue in javascript.
+			*/
+			for (x=0; x<ms.length; x++) {
+				if (!ms[x]) {
+					ms[x] = '';
+				}
+			}
+
+			if (extra_code) {
+				extra_code = ' '+extra_code;
+			} else {
+				extra_code = '';
+			}
+			
+			var desc = ms[3]+ms[4]+ms[5];
+
+			if (maxlen && maxlen > 0 && desc.length > maxlen) {
+				desc = desc.substr(0, maxlen)+'...';
+			}
+
+			var newstr = ms[2]+'<a href="http://'+ms[3]+ms[4]+ms[5]+'"'+extra_code+'>'+desc+'</a>'+ms[6];
+			sch.error(newstr);
+			str = str.replace(ms[0], newstr);
+		}
+		
+		
 		while ((ms = re_noemail.exec(str))) {
 
 			if ( /\.$/.test(ms[6]) ) {
@@ -5235,7 +7003,7 @@ SpazImageURL.prototype.initAPIs = function() {
 		'url_regex'       : /http:\/\/(?:pikchur\.com|pk\.gd)\/([a-zA-Z0-9]+)/gi,
 		'getThumbnailUrl' : function(id) {
 			// http://img.pikchur.com/pic_GPT_t.jpg
-			var url = 'http://img.pikchur.com/pic_'+id+'_m.jpg';
+			var url = 'http://img.pikchur.com/pic_'+id+'_s.jpg';
 			return url;
 		},
 		'getImageUrl'     : function(id) {
@@ -6570,8 +8338,9 @@ var sc, jQuery;
  * Constants to refer to services 
  */
 var SPAZCORE_SHORTURL_SERVICE_SHORTIE = 'short.ie';
-var SPAZCORE_SHORTURL_SERVICE_ISGD	= 'is.gd';
-var SPAZCORE_SHORTURL_SERVICE_BITLY	= 'bit.ly';
+var SPAZCORE_SHORTURL_SERVICE_ISGD	  = 'is.gd';
+var SPAZCORE_SHORTURL_SERVICE_BITLY	  = 'bit.ly';
+var SPAZCORE_SHORTURL_SERVICE_JMP     = 'j.mp';
 
 var SPAZCORE_EXPANDABLE_DOMAINS = [
 	'ad.vu',
@@ -6640,6 +8409,38 @@ SpazShortURL.prototype.getAPIObj = function(service) {
 		},
 		'processResult' : function(data) {
 			if (apis[SPAZCORE_SHORTURL_SERVICE_BITLY].processing_multiple === true) {
+				var result = sc.helpers.deJSON(data);
+				var rs = {};
+				for (var i in result.results) {
+					rs[i] = result.results[i].shortUrl;
+				}
+				return rs;
+			} else {
+				return data;
+			}
+		}
+		
+	};
+		
+	apis[SPAZCORE_SHORTURL_SERVICE_JMP] = {
+		'url'	  : 'http://j.mp/api',
+		'getData' : function(longurl, opts){
+			
+			/*
+				use the api if we're doing multiple URLs
+			*/
+			if (sc.helpers.isArray(longurl)) {
+				apis[SPAZCORE_SHORTURL_SERVICE_JMP].processing_multiple = true;
+				apis[SPAZCORE_SHORTURL_SERVICE_JMP].url = 'http://api.j.mp/shorten';
+				opts.longUrl = longurl;
+				return opts;
+			} else {
+				apis[SPAZCORE_SHORTURL_SERVICE_JMP].processing_multiple = false;
+				return { 'url':longurl };				
+			}
+		},
+		'processResult' : function(data) {
+			if (apis[SPAZCORE_SHORTURL_SERVICE_JMP].processing_multiple === true) {
 				var result = sc.helpers.deJSON(data);
 				var rs = {};
 				for (var i in result.results) {
@@ -7065,6 +8866,16 @@ SpazTimeline.prototype._init = function(opts) {
 
 
 };
+
+/**
+ * the timeline 
+ */
+SpazTimeline.prototype.last_id = -1;
+
+/**
+ * an array of data items that are represented in the timeline 
+ */
+SpazTimeline.prototype.model = [];
 
 /**
  * call this after initialization 
@@ -7919,16 +9730,16 @@ var SPAZCORE_SECTION_USERLISTS = 'userlists';
 
 var SPAZCORE_SERVICE_TWITTER = 'twitter';
 var SPAZCORE_SERVICE_IDENTICA = 'identi.ca';
+var SPAZCORE_SERVICE_WORDPRESS_TWITTER = 'wordpress-twitter';
 var SPAZCORE_SERVICE_CUSTOM = 'custom';
-var SPAZCORE_SERVICEURL_TWITTER = 'https://api.twitter.com/1/';
+var SPAZCORE_SERVICEURL_TWITTER = 'https://api.twitter.com/';
 var SPAZCORE_SERVICEURL_IDENTICA = 'https://identi.ca/api/';
+var SPAZCORE_SERVICEURL_WORDPRESS_TWITTER = 'https://twitter-api.wordpress.com/';
 
 
 
 /**
  * A Twitter API library for Javascript
- * 
- * This requires jQuery. Tested with 1.2.6
  * 
  * 
  * jQuery events raised by this library
@@ -8197,6 +10008,9 @@ SpazTwit.prototype.setBaseURLByService= function(service) {
 		case SPAZCORE_SERVICE_IDENTICA:
 			baseurl = SPAZCORE_SERVICEURL_IDENTICA;
 			break;
+		case SPAZCORE_SERVICE_WORDPRESS_TWITTER:
+			baseurl = SPAZCORE_SERVICEURL_WORDPRESS_TWITTER;
+			break;
 		default:
 			baseurl = SPAZCORE_SERVICEURL_TWITTER;
 			break;
@@ -8457,7 +10271,7 @@ SpazTwit.prototype.getHomeTimeline = function(since_id, count, page, processing_
  * @private
  */
 SpazTwit.prototype._processHomeTimeline = function(ret_items, opts, processing_opts) {
-	this._processTimeline(SPAZCORE_SECTION_HOME, ret_items, opts.success_event_type, processing_opts);
+	this._processTimeline(SPAZCORE_SECTION_HOME, ret_items, opts, processing_opts);
 };
 
 
@@ -8513,7 +10327,7 @@ SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page, processi
  * @private
  */
 SpazTwit.prototype._processFriendsTimeline = function(ret_items, opts, processing_opts) {
-	this._processTimeline(SPAZCORE_SECTION_FRIENDS, ret_items, opts.success_event_type, processing_opts);
+	this._processTimeline(SPAZCORE_SECTION_FRIENDS, ret_items, opts, processing_opts);
 };
 
 
@@ -8568,7 +10382,7 @@ SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts)
  */
 SpazTwit.prototype._processRepliesTimeline = function(ret_items, opts, processing_opts) {
 	sc.helpers.dump('Processing '+ret_items.length+' items returned from replies method');
-	this._processTimeline(SPAZCORE_SECTION_REPLIES, ret_items, opts.success_event_type, processing_opts);
+	this._processTimeline(SPAZCORE_SECTION_REPLIES, ret_items, opts, processing_opts);
 };
 
 /**
@@ -8620,7 +10434,7 @@ SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processin
  */
 SpazTwit.prototype._processDMTimeline = function(ret_items, opts, processing_opts) {
 	sc.helpers.dump('Processing '+ret_items.length+' items returned from DM method');
-	this._processTimeline(SPAZCORE_SECTION_DMS, ret_items, opts.success_event_type, processing_opts);
+	this._processTimeline(SPAZCORE_SECTION_DMS, ret_items, opts, processing_opts);
 };
 
 /**
@@ -8654,7 +10468,7 @@ SpazTwit.prototype.getFavorites = function(page, processing_opts) {
  * @private
  */
 SpazTwit.prototype._processFavoritesTimeline = function(ret_items, opts, processing_opts) {
-	this._processTimeline(SPAZCORE_SECTION_FAVORITES, ret_items, opts.success_event_type, processing_opts);
+	this._processTimeline(SPAZCORE_SECTION_FAVORITES, ret_items, opts, processing_opts);
 };
 
 
@@ -8694,7 +10508,7 @@ SpazTwit.prototype.getUserTimeline = function(id, count, page) {
  * @private
  */
 SpazTwit.prototype._processUserTimeline = function(ret_items, opts, processing_opts) {
-	this._processTimeline(SPAZCORE_SECTION_USER, ret_items, opts.success_event_type, processing_opts);
+	this._processTimeline(SPAZCORE_SECTION_USER, ret_items, opts, processing_opts);
 };
 
 
@@ -8860,13 +10674,11 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, opts, proces
 			'page'             : search_result.page,
 			'query'            : search_result.query
 		};
-		// jQuery().trigger(finished_event, [this.data[SPAZCORE_SECTION_SEARCH].newitems, search_info]);
 		this.triggerEvent(opts.success_event_type, [this.data[SPAZCORE_SECTION_SEARCH].newitems, search_info]);
 		
 
 
 	} else { // no new items, but we should fire off success anyway
-		// jQuery().trigger(finished_event, [[]]);
 		this.triggerEvent(opts.success_event_type, []);
 	}
 	
@@ -8992,9 +10804,6 @@ SpazTwit.prototype._getTimeline = function(opts) {
 		'success_callback':null,
 		'failure_callback':null
 	}, opts);
-
-	sch.debug(opts.data);
-
 	
 	/*
 		for closure references
@@ -9081,6 +10890,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
 				opts.process_callback.call(stwit, data, opts, opts.processing_opts);
 			} else {
 				if (opts.success_callback) {
+					sch.error('CALLING SUCCESS CALLBACK');
 					opts.success_callback(data);
 				}
 				// jQuery().trigger(opts.success_event_type, [data]);
@@ -9107,6 +10917,8 @@ SpazTwit.prototype._getTimeline = function(opts) {
  * @private
  */
 SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, processing_opts) {
+	
+	sch.debug(opts);
 	
 	if (!processing_opts) { processing_opts = {}; }
 
@@ -9162,7 +10974,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 				Fire off the new section data event
 			*/
 			if (!processing_opts.combined) {
-				this.triggerEvent(finished_event, this.data[section_name].items);
+				this.triggerEvent(opts.success_event_type, this.data[section_name].items);
 			} else {
 				this.combined_finished[section_name] = true;
 				sc.helpers.dump("this.combined_finished["+section_name+"]:"+this.combined_finished[section_name]);
@@ -9181,7 +10993,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 	} else { // no new items, but we should fire off success anyway
 		if (!processing_opts.combined) {
 			// jQuery().trigger(finished_event, []);
-			this.triggerEvent(finished_event);
+			this.triggerEvent(opts.success_event_type);
 			
 		} else {
 			this.combined_finished[section_name] = true;
@@ -9744,14 +11556,14 @@ SpazTwit.prototype._processUpdateReturn = function(data, opts) {
 	/*
 		Add this to the HOME section and fire off the event when done
 	*/	
-	this._processTimeline(SPAZCORE_SECTION_HOME, [data], opts.success_event_type);
+	this._processTimeline(SPAZCORE_SECTION_HOME, [data], opts);
 };
 
 SpazTwit.prototype.destroy = function(id) {};
 SpazTwit.prototype.destroyDirectMessage = function(id) {};
 
 
-SpazTwit.prototype.getOne = function(id) {
+SpazTwit.prototype.getOne = function(id, onSuccess) {
 	var data = {};
 	data['id'] = id;
 	
@@ -9763,6 +11575,7 @@ SpazTwit.prototype.getOne = function(id) {
 		'password':this.password,
 		'process_callback': this._processOneItem,
 		'success_event_type':'get_one_status_succeeded',
+		'success_callback':onSuccess,
 		'failure_event_type':'get_one_status_failed',
 		'method':'GET'
 	};
@@ -9781,7 +11594,9 @@ SpazTwit.prototype._processOneItem = function(data, opts) {
 		so we can avoid dupes
 	*/
 	data = this._processItem(data);
-	// jQuery().trigger(finished_event, [data]);
+	if (opts.success_callback) {
+		opts.success_callback(data);
+	}
 	this.triggerEvent(opts.success_event_type, data);
 	
 };
@@ -10093,7 +11908,7 @@ SpazTwit.prototype.removeSavedSearch = function(search_id) {
 /**
  * retrieves the list of lists 
  */
-SpazTwit.prototype.getLists = function(user) {
+SpazTwit.prototype.getLists = function(user, onSuccess, onFailure) {
 	if (!user && !this.username) {
 		return false;
 	} else if (!user) {
@@ -10110,6 +11925,8 @@ SpazTwit.prototype.getLists = function(user) {
 		'password':this.password,
 		'success_event_type':'get_lists_succeeded',
 		'failure_event_type':'get_lists_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'method':'GET'
 	};
 
@@ -10209,8 +12026,11 @@ SpazTwit.prototype.getListInfo = function(list, user) {
 /**
  * retrieves a given list timeline
  * @param {string} list 
+ * @param {string} user the user who owns this list
+ * @param {function} [onSuccess] function to call on success
+ * @param {function} [onFailure] function to call on failure
  */
-SpazTwit.prototype.getListTimeline = function(list, user) {
+SpazTwit.prototype.getListTimeline = function(list, user, onSuccess, onFailure) {
 	if (!user && !this.username) {
 		sch.error('must pass a username or have one set to get list');
 		return false;
@@ -10229,6 +12049,8 @@ SpazTwit.prototype.getListTimeline = function(list, user) {
 		'password':this.password,
 		'success_event_type':'get_list_timeline_succeeded',
 		'failure_event_type':'get_list_timeline_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'method':'GET',
 		'process_callback':this._processListTimeline,
 		'processing_opts': {
@@ -10264,30 +12086,61 @@ SpazTwit.prototype._processListTimeline = function(data, opts, processing_opts) 
  * retrieves a given list's members
  * @param {string} list 
  */
-SpazTwit.prototype.getListMembers = function(list) {};
+SpazTwit.prototype.getListMembers = function(list, user) {
+	if (!user && !this.username) {
+		sch.error('must pass a username or have one set to get list');
+		return false;
+	}
+	
+	user = user || this.username;
+
+	var url = this.getAPIURL('lists_members', {
+	    'user':user,
+		'slug':list
+	});
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'get_list_members_succeeded',
+		'failure_event_type':'get_list_members_failed',
+		'method':'GET',
+		'process_callback':this._processListTimeline,
+		'processing_opts': {
+			'user':user,
+			'slug':list
+		}
+	};
+
+	var xhr = this._getTimeline(opts);
+};
 
 /**
- * create a new list
+ * create a new list for the authenticated user
  * @param {string} list  The list name
  * @param {string} visibility   "public" or "private"
+ * @param {string} [description]  The list description
  */
-SpazTwit.prototype.addList = function(list, visibility) {};
+SpazTwit.prototype.addList = function(list, visibility, description) {
+	
+};
 
 /**
  * delete a list
  * @param {string} list  The list name 
  */
-SpazTwit.prototype.removeList = function(list) {};
+SpazTwit.prototype.removeList = function(list, user) {};
 
 /**
  * add a user to a list
  */
-SpazTwit.prototype.addUserToList = function(user, list) {};
+SpazTwit.prototype.addUserToList = function(user, list, list_user) {};
 
 /**
  * delete a user from a list 
  */
-SpazTwit.prototype.removeUserFromList = function(user, list) {};
+SpazTwit.prototype.removeUserFromList = function(user, list, list_user) {};
 
 
 

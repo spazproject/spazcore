@@ -98,6 +98,7 @@
 			var twit = new SpazTwit(null,null,{
 				'event_target':tl_el
 			});
+			twit.setBaseURLByService(SPAZCORE_SERVICE_WORDPRESS_TWITTER);
 
 			var tl   = new SpazTimeline({
 				'timeline_container_selector' :tl_sl,
@@ -171,7 +172,7 @@
 	<h1 id="twitter_db_example_for_titanium_desktop">Twitter DB example for Titanium Desktop</h1>
 	
 	
-	<label for="username">Username</label><input type="text" name="username" value="spaztest2" id="username">
+	<label for="username">Username</label><input type="text" name="username" value="spaztest" id="username">
 	<label for="password">Password</label><input type="password" name="password" value="booboo" id="password">
 	<!-- <input type="button" name="login" value="Login" id="login"> -->
 	

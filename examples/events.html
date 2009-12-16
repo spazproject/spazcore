@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>SpazCore Example Shell</title>
+	
+	<!-- Load required vendor libs -->
+	<script src="../vendors/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore base lib -->
+	<script src="spazcore-standard.js"></script>
+	
+	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	
+	
+	<style type="text/css" media="screen">
+		#mouseover-test {
+			width: 300px;
+			height:200px;
+			background-color:#CCCCFF;
+		}
+	</style>
+	
+	
+	<script type="text/javascript" charset="utf-8">
+	
+	$().ready(function() {
+		
+		var testScopeObj = {
+			'label':"This is the testScopeObj label!"
+		};
+
+		/**
+		 * this function's scope is bound to testScopeObj, so "this" will refer to testScopeObj 
+		 */
+		var scopedFunc = _.bind(function(){
+			alert(this.label)
+		}, testScopeObj);
+
+		
+		var button = document.getElementById('bindStuff');
+		
+		function bindStuff() {
+			sch.unlisten(button, 'click', bindStuff);
+			sch.listen(button, 'click', unBindStuff);
+			button.setAttribute('value', "UNbind OnMouseOver Stuff");
+			sch.listen(document.getElementById('mouseover-test'), 'mouseover', scopedFunc);
+		}
+
+		function unBindStuff() {
+			sch.unlisten(button, 'click', unBindStuff);
+			sch.listen(button, 'click', bindStuff);
+			button.setAttribute('value', "Bind OnMouseOver Stuff");
+			sch.unlisten(document.getElementById('mouseover-test'), 'mouseover', scopedFunc);
+		}
+
+
+		sch.listen(button, 'click', bindStuff);
+		
+	});
+	
+	
+	</script>
+	
+	
+</head>
+
+<body>
+	<form>
+		<input type="button" name="bindStuff" value="Bind OnMouseOver Stuff" id="bindStuff">
+	</form>
+	
+	<div id="mouseover-test">When bound, you will fire and event on mouseover</div>
+	
+</body>
+</html>

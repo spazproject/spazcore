@@ -3,10 +3,17 @@
 <head>
 	<title>QUnit SpazCore</title>    
 
+	<!-- <script src="testrunner.js" type="text/javascript" charset="utf-8"></script>
+	<link rel="stylesheet" href="testsuite.css" type="text/css" media="screen" title="no title" charset="utf-8"> -->
+	<script src ="qunit.js"   type="text/javascript" charset="utf-8"></script>
+	<link   href="qunit.css" rel="stylesheet" type="text/css" media="screen" title="no title" charset="utf-8">
+
+
 	<!-- Load required vendor libs -->
 	<script src="../vendors/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script>
 	<script src="../vendors/json2.js" type="text/javascript" charset="utf-8"></script>
 	<script src="../vendors/date.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../vendors/underscore.js" type="text/javascript" charset="utf-8"></script>
 	
 
 	<!-- Load SpazCore base lib -->
@@ -46,25 +53,19 @@
 	
 	
 
-	<script src="testrunner.js" type="text/javascript" charset="utf-8"></script>
-	<link rel="stylesheet" href="testsuite.css" type="text/css" media="screen" title="no title" charset="utf-8">
 
-
+	
 	<script src="helper_tests.js" type="text/javascript" charset="utf-8"></script>
 	<script src="library_tests.js" type="text/javascript" charset="utf-8"></script>
 	<script src="incubator_tests.js" type="text/javascript" charset="utf-8"></script>
 
 </head>
 <body>
-
- <h1>QUnit SpazCore</h1>
- <h2 id="banner"></h2>
- <h2 id="userAgent"></h2>
-
- <ol id="tests"></ol>
-
- <div id="main"></div>
-
+		<h1 id="qunit-header">SpazCore QUnit Test Suite</h1>
+		<h2 id="qunit-banner"></h2>
+		<div id="qunit-testrunner-toolbar"></div>
+		<h2 id="qunit-userAgent"></h2>
+		<ol id="qunit-tests"></ol>
 
 
 </body>

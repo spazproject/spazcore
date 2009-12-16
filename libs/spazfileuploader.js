@@ -147,6 +147,32 @@ SpazFileUploader.prototype.getAPIs = function() {
 				return returnobj;
 			}
 		},
+	    'posterous' : {
+			'upload_url' : 'http://posterous.com/api/upload',
+		    'post_url'   : 'http://posterous.com/api/uploadAndPost',
+			'processResult': function(event, apiobj) {
+				var loader = event.target;
+				
+				sch.debug('PROCESSING: EVENT');
+				sch.debug(event);
+
+				var parser=new DOMParser();
+				var xmldoc = parser.parseFromString(event.data,"text/xml");
+
+				var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
+				if (rspAttr.getNamedItem("stat").nodeValue === 'ok')
+				{
+					returnobj['mediaurl'] = jQuery(xmldoc).find('mediaurl').text();
+				} 
+				else
+				{
+					returnobj['errAttributes'] = xmldoc.getElementsByTagName("err")[0].attributes;
+					returnobj['errMsg'] = errAttributes.getNamedItem("msg").nodeValue;
+				}
+				sch.debug(returnobj);
+				return returnobj;
+			}
+		},
 		'twitgoo' : {
 			'upload_url' : 'http://twitgoo.com/api/upload',
 			'post_url'   : 'http://twitgoo.com/api/uploadAndPost',

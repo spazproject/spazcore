@@ -674,3 +674,17 @@ sc.helpers.rtrim = function (str, chars) {
 	chars = chars || "\\s";
 	return str.replace(new RegExp("[" + chars + "]+$", "g"), "");
 };
+
+
+/**
+ * @param {string} str the string in which we're converting linebreaks
+ * @param {string} [breaktag] the tag used to break up lines. defaults to <br>
+ * @returns {string} the string with linebreaks converted to breaktags
+ */
+sc.helpers.nl2br = function(str, breaktag) {
+	
+	breaktag = breaktag || '<br>';
+	
+	str = str.replace(/(\r\n|\n\r|\r|\n)/g, breaktag+'$1');
+	return str;
+};

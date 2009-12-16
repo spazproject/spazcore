@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$().ready(function() {
 	/*
 		Some data n shit to test with
 	*/
@@ -8,7 +8,6 @@ $(document).ready(function() {
 	var missing = function() {
 		ok(false, "missing test - untested code is broken code");
 	};
-
 
 	/*
 		Datetime
@@ -39,7 +38,4 @@ $(document).ready(function() {
 		
 	});
 	
-	
-	
-
 });

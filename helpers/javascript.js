@@ -45,10 +45,10 @@ sc.helpers.isArray = function(obj) {
 };
 
 /*
-	Returns a copy of the object using the jQuery.extend() method
+	Returns a copy of the object using the _.extend() method
 */
 sc.helpers.clone = function(oldObj) {
-	return jQuery.extend({}/* clone */, oldObj);
+	return _.extend({}/* clone */, oldObj);
 };
 
 /**

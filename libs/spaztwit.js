@@ -39,16 +39,16 @@ var SPAZCORE_SECTION_USERLISTS = 'userlists';
 
 var SPAZCORE_SERVICE_TWITTER = 'twitter';
 var SPAZCORE_SERVICE_IDENTICA = 'identi.ca';
+var SPAZCORE_SERVICE_WORDPRESS_TWITTER = 'wordpress-twitter';
 var SPAZCORE_SERVICE_CUSTOM = 'custom';
 var SPAZCORE_SERVICEURL_TWITTER = 'https://api.twitter.com/1/';
 var SPAZCORE_SERVICEURL_IDENTICA = 'https://identi.ca/api/';
+var SPAZCORE_SERVICEURL_WORDPRESS_TWITTER = 'https://twitter-api.wordpress.com/';
 
 
 
 /**
  * A Twitter API library for Javascript
- * 
- * This requires jQuery. Tested with 1.2.6
  * 
  * 
  * jQuery events raised by this library
@@ -316,6 +316,9 @@ SpazTwit.prototype.setBaseURLByService= function(service) {
 			break;
 		case SPAZCORE_SERVICE_IDENTICA:
 			baseurl = SPAZCORE_SERVICEURL_IDENTICA;
+			break;
+		case SPAZCORE_SERVICE_WORDPRESS_TWITTER:
+			baseurl = SPAZCORE_SERVICEURL_WORDPRESS_TWITTER;
 			break;
 		default:
 			baseurl = SPAZCORE_SERVICEURL_TWITTER;
