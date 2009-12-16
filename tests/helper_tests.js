@@ -1,4 +1,5 @@
-$(document).ready(function() {
+// $().ready(function() {
+
 	/*
 		Some data n shit to test with
 	*/
@@ -42,54 +43,54 @@ $(document).ready(function() {
 	
 	
 	
-
-
-
+	
+	
+	
 	var missing = function() {
 		ok(false, "missing test - untested code is broken code");
 	};
-
-
+	
+	
 	/*
 		Datetime
 	*/
 	module('Helpers:Datetime');
 	
-
+	
 	
 	test("getRelativeTime", function() {
 		var result = sc.helpers.getRelativeTime(tdata.dates['30secsago'].toString());
 		var expect = '30 sec ago';
 		equals(result, expect);
-
+	
 		var result = sc.helpers.getRelativeTime(tdata.dates['30minago'].toString());
 		var expect = '30 min ago';                        
 		equals(result, expect);                           
-                                                          
+	                                                       
 		var result = sc.helpers.getRelativeTime(tdata.dates['1hourago'].toString());
 		var expect = '1 hr ago';                          
 		equals(result, expect);                           
-                                                          
+	                                                       
 		var result = sc.helpers.getRelativeTime(tdata.dates['2daysago'].toString());
 		var expect = '2 days ago';
 		equals(result, expect);
 	});
 	test("httpTimeToInt", function() {
-		
+	
 		var result = sc.helpers.httpTimeToInt('Sun Aug 09 00:29:30 +0000 2009');
 		var expect = 1249777770000; // ms!
 		equals(result, expect);
-		
+	
 	});
 	test("getTimeAsInt", function() {
-		
+	
 		var result = sc.helpers.getTimeAsInt();
 		var expect = new Date().getTime(); // ms!
 		equals(result, expect);
-		
+	
 	});
-
-
+	
+	
 	/*
 		Event
 	*/
@@ -105,144 +106,147 @@ $(document).ready(function() {
 	/*
 		File
 	*/
-	module('Helpers:File');
+	if (sch.isAIR() || sch.isTitanium() || sch.iswebOS()) {
+		
+		module('Helpers:File');
 	
-	test("File.getFileContents", function() {
-		var result = sc.helpers.getFileContents(tdata.basefilepath+'/readme.txt');
-		var expect = 'This is some hot data';
-		equals(result, expect);
-	});
-	test("File.setFileContents", function() {
-		var furl = sc.helpers.createTempFile();
-		var new_contents = 'These are some new contents';
-		sc.helpers.setFileContents(furl, new_contents);
-		var result = sc.helpers.getFileContents(furl);
-		var expect = new_contents;
-		equals(result, expect, "New contents are as expected");
-		sc.helpers.deleteFile(furl);
-		var result = sc.helpers.fileExists(furl);
-		var expect = false;
-		equals(result, expect, "exists after deletion");
-	});
-	test("File.fileExists", function() {
-		var result = sc.helpers.fileExists(tdata.basefilepath+'/readme.txt');
-		var expect = true;
-		equals(result, expect);
-		var result = sc.helpers.fileExists(tdata.basefilepath+'/f2934fh24g8hp92rth.txt');
-		var expect = false;
-		equals(result, expect);
-	});
-	test("File.isFile", function() {
-		var result = sc.helpers.isFile(tdata.basefilepath+'/readme.txt');
-		var expect = true;
-		equals(result, expect);
-		var result = sc.helpers.isFile(tdata.basefilepath+'/a_directory');
-		var expect = false;
-		equals(result, expect);
-	});
-	test("File.isDirectory", function() {
-		var result = sc.helpers.isDirectory(tdata.basefilepath+'/readme.txt');
-		var expect = false;
-		equals(result, expect);
-		var result = sc.helpers.isDirectory(tdata.basefilepath+'/a_directory');
-		var expect = true;
-		equals(result, expect);
-	});
-	test("File.resolvePath", function() {
-		var result = sc.helpers.resolvePath(tdata.basefilepath, 'readme.txt');
-		var expect = tdata.basefilepath+'/readme.txt';
-		equals(result, expect);
-		var result = sc.helpers.resolvePath(tdata.basefilepath, 'a_directory/foo');
-		var expect = tdata.basefilepath+'/a_directory/foo';
-		equals(result, expect);
-	});
-	test("File.getFileObject", missing);
-	test("File.copyFile", function() {
-		var origin = sc.helpers.resolvePath(tdata.basefilepath, 'readme.txt');
-		var destination = sc.helpers.resolvePath(tdata.basefilewritepath, 'readme2.txt');
-		sc.helpers.copyFile(origin, destination);
-		var result = sc.helpers.fileExists(destination);		
-		var expect = true;
-		equals(result, expect);
-	});
-	test("File.moveFile", function() {
-		var origin = sc.helpers.resolvePath(tdata.basefilewritepath, 'readme2.txt');
-		var destination = sc.helpers.resolvePath(tdata.basefilewritepath, 'readme3.txt');
-		sc.helpers.moveFile(origin, destination);
-		var result = sc.helpers.fileExists(destination);		
-		var expect = true;
-		equals(result, expect);
-	});
-	test("File.deleteFile", function() {
-		var furl = sc.helpers.resolvePath(tdata.basefilewritepath, 'readme3.txt');
-		sc.helpers.deleteFile(furl);
-		var result = sc.helpers.fileExists(furl);		
-		var expect = false;
-		equals(result, expect);
-	});
-	test("File.createDirectory", function() {
-		var furl = sc.helpers.resolvePath(tdata.basefilewritepath, 'a_new_directory');
-		sc.helpers.createDirectory(furl);
-		var result = sc.helpers.fileExists(furl);		
-		var expect = true;
-		equals(result, expect, "exists");
-		var result = sc.helpers.isDirectory(furl);		
-		var expect = true;
-		equals(result, expect, "is a directory");
-		sc.helpers.deleteDirectory(furl);
-		var result = sc.helpers.fileExists(furl);		
-		var expect = false;
-		equals(result, expect, "exists after deletion");
-	});
-	test("File.initFile", function() {
-		var furl = sc.helpers.resolvePath(tdata.basefilewritepath, 'initfile.txt');
-		sc.helpers.initFile(furl);
-		var result = sc.helpers.fileExists(furl);		
-		var expect = true;
-		equals(result, expect, "exists");
-		var result = sc.helpers.getFileContents(furl);		
-		var expect = '';
-		equals(result, expect, "contents empty");
-		sc.helpers.deleteFile(furl);
-		var result = sc.helpers.fileExists(furl);		
-		var expect = false;
-		equals(result, expect, "exists after deletion");
-	});
-	test("File.getAppDir", function() {
-		var result = sc.helpers.getAppDir();
-		var expect = tdata.appdir;
-		equals(result, expect);
-	});
-	test("File.getAppStorageDir", function() {
-		var result = sc.helpers.getAppStorageDir();
-		var expect = tdata.appstoragedir;
-		equals(result, expect);
-	});
-	test('File.createTempFile', function() {
-		var furl = sc.helpers.createTempFile();
-		var result = sc.helpers.fileExists(furl);
-		var expect = true;
-		equals(result, expect, "exists");
-		sc.helpers.deleteFile(furl);
-		var result = sc.helpers.fileExists(furl);
-		var expect = false;
-		equals(result, expect, "exists after deletion");
-	});
-	test('File.createTempDirectory', function() {
-		var furl = sc.helpers.createTempDirectory();
-		var result = sc.helpers.fileExists(furl);
-		var expect = true;
-		equals(result, expect, "exists");
-		var result = sc.helpers.isDirectory(furl);
-		var expect = true;
-		equals(result, expect, "is a directory");
-		sc.helpers.deleteDirectory(furl);
-		var result = sc.helpers.fileExists(furl);
-		var expect = false;
-		equals(result, expect, "exists after deletion");
-	});
+		test("File.getFileContents", function() {
+			var result = sc.helpers.getFileContents(tdata.basefilepath+'/readme.txt');
+			var expect = 'This is some hot data';
+			equals(result, expect);
+		});
+		test("File.setFileContents", function() {
+			var furl = sc.helpers.createTempFile();
+			var new_contents = 'These are some new contents';
+			sc.helpers.setFileContents(furl, new_contents);
+			var result = sc.helpers.getFileContents(furl);
+			var expect = new_contents;
+			equals(result, expect, "New contents are as expected");
+			sc.helpers.deleteFile(furl);
+			var result = sc.helpers.fileExists(furl);
+			var expect = false;
+			equals(result, expect, "exists after deletion");
+		});
+		test("File.fileExists", function() {
+			var result = sc.helpers.fileExists(tdata.basefilepath+'/readme.txt');
+			var expect = true;
+			equals(result, expect);
+			var result = sc.helpers.fileExists(tdata.basefilepath+'/f2934fh24g8hp92rth.txt');
+			var expect = false;
+			equals(result, expect);
+		});
+		test("File.isFile", function() {
+			var result = sc.helpers.isFile(tdata.basefilepath+'/readme.txt');
+			var expect = true;
+			equals(result, expect);
+			var result = sc.helpers.isFile(tdata.basefilepath+'/a_directory');
+			var expect = false;
+			equals(result, expect);
+		});
+		test("File.isDirectory", function() {
+			var result = sc.helpers.isDirectory(tdata.basefilepath+'/readme.txt');
+			var expect = false;
+			equals(result, expect);
+			var result = sc.helpers.isDirectory(tdata.basefilepath+'/a_directory');
+			var expect = true;
+			equals(result, expect);
+		});
+		test("File.resolvePath", function() {
+			var result = sc.helpers.resolvePath(tdata.basefilepath, 'readme.txt');
+			var expect = tdata.basefilepath+'/readme.txt';
+			equals(result, expect);
+			var result = sc.helpers.resolvePath(tdata.basefilepath, 'a_directory/foo');
+			var expect = tdata.basefilepath+'/a_directory/foo';
+			equals(result, expect);
+		});
+		test("File.getFileObject", missing);
+		test("File.copyFile", function() {
+			var origin = sc.helpers.resolvePath(tdata.basefilepath, 'readme.txt');
+			var destination = sc.helpers.resolvePath(tdata.basefilewritepath, 'readme2.txt');
+			sc.helpers.copyFile(origin, destination);
+			var result = sc.helpers.fileExists(destination);		
+			var expect = true;
+			equals(result, expect);
+		});
+		test("File.moveFile", function() {
+			var origin = sc.helpers.resolvePath(tdata.basefilewritepath, 'readme2.txt');
+			var destination = sc.helpers.resolvePath(tdata.basefilewritepath, 'readme3.txt');
+			sc.helpers.moveFile(origin, destination);
+			var result = sc.helpers.fileExists(destination);		
+			var expect = true;
+			equals(result, expect);
+		});
+		test("File.deleteFile", function() {
+			var furl = sc.helpers.resolvePath(tdata.basefilewritepath, 'readme3.txt');
+			sc.helpers.deleteFile(furl);
+			var result = sc.helpers.fileExists(furl);		
+			var expect = false;
+			equals(result, expect);
+		});
+		test("File.createDirectory", function() {
+			var furl = sc.helpers.resolvePath(tdata.basefilewritepath, 'a_new_directory');
+			sc.helpers.createDirectory(furl);
+			var result = sc.helpers.fileExists(furl);		
+			var expect = true;
+			equals(result, expect, "exists");
+			var result = sc.helpers.isDirectory(furl);		
+			var expect = true;
+			equals(result, expect, "is a directory");
+			sc.helpers.deleteDirectory(furl);
+			var result = sc.helpers.fileExists(furl);		
+			var expect = false;
+			equals(result, expect, "exists after deletion");
+		});
+		test("File.initFile", function() {
+			var furl = sc.helpers.resolvePath(tdata.basefilewritepath, 'initfile.txt');
+			sc.helpers.initFile(furl);
+			var result = sc.helpers.fileExists(furl);		
+			var expect = true;
+			equals(result, expect, "exists");
+			var result = sc.helpers.getFileContents(furl);		
+			var expect = '';
+			equals(result, expect, "contents empty");
+			sc.helpers.deleteFile(furl);
+			var result = sc.helpers.fileExists(furl);		
+			var expect = false;
+			equals(result, expect, "exists after deletion");
+		});
+		test("File.getAppDir", function() {
+			var result = sc.helpers.getAppDir();
+			var expect = tdata.appdir;
+			equals(result, expect);
+		});
+		test("File.getAppStorageDir", function() {
+			var result = sc.helpers.getAppStorageDir();
+			var expect = tdata.appstoragedir;
+			equals(result, expect);
+		});
+		test('File.createTempFile', function() {
+			var furl = sc.helpers.createTempFile();
+			var result = sc.helpers.fileExists(furl);
+			var expect = true;
+			equals(result, expect, "exists");
+			sc.helpers.deleteFile(furl);
+			var result = sc.helpers.fileExists(furl);
+			var expect = false;
+			equals(result, expect, "exists after deletion");
+		});
+		test('File.createTempDirectory', function() {
+			var furl = sc.helpers.createTempDirectory();
+			var result = sc.helpers.fileExists(furl);
+			var expect = true;
+			equals(result, expect, "exists");
+			var result = sc.helpers.isDirectory(furl);
+			var expect = true;
+			equals(result, expect, "is a directory");
+			sc.helpers.deleteDirectory(furl);
+			var result = sc.helpers.fileExists(furl);
+			var expect = false;
+			equals(result, expect, "exists after deletion");
+		});
+	}
 	
-
+	
 	/*
 		Hash
 	*/
@@ -251,7 +255,7 @@ $(document).ready(function() {
 		var result = sc.helpers.Base64.encode('!@)$(FJ OQWENoierhvdaseklfh)');
 		var expect = 'IUApJChGSiBPUVdFTm9pZXJodmRhc2VrbGZoKQ==';
 		equals(result, expect);
-		
+	
 	});
 	test("Base64.decode", function() {
 		var result = sc.helpers.Base64.decode('IUApJChGSiBPUVdFTm9pZXJodmRhc2VrbGZoKQ==');
@@ -340,122 +344,122 @@ $(document).ready(function() {
 		String
 	*/
 	module('Helpers:String');
-
+	
 	test("striptags", function() {
 		var input = "<strong>Funky</strong>";
 		var output= "Funky";
 		equals(sc.helpers.stripTags(input), output, "Strip <strong> tags");
-
+	
 		var input = "<script src=\"..\/helpers\/xml.js\" type=\"text\/javascript\" charset=\"utf-8\"><\/script>";
 		var output= "";
 		equals(sc.helpers.stripTags(input), output, "Strip "+input+" tags");
 	});
 	
-
+	
 	test("autolinkTwitterScreenname", function() {
-
+	
 		var tpl   = '<a href="http://twitter.com/#username#">@#username#</a>';
-		
+	
 		var input = "foo,@user_name!";
 		var output= 'foo,<a href="http://twitter.com/user_name">@user_name</a>!';
 		equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
-
+	
 		var input = ".@user_name, foo!";
 		var output= '.<a href="http://twitter.com/user_name">@user_name</a>, foo!';
 		equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
-
+	
 		var input = "(@user_name)";
 		var output= '(<a href="http://twitter.com/user_name">@user_name</a>)';
 		equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
-
+	
 		var input = "@a";
 		var output= '<a href="http://twitter.com/a">@a</a>';
 		equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
-
+	
 		var input = "@_a";
 		var output= '<a href="http://twitter.com/_a">@_a</a>';
 		equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
-
+	
 		var input = "@_";
 		var output= '<a href="http://twitter.com/_">@_</a>';
 		equals(sc.helpers.autolinkTwitterScreenname(input, tpl), output);
-
-		
+	
+	
 	});
 	
 	test("autolinkTwitterHashtag", function() {
-		
+	
 		var tpl = '<a href="http://search.twitter.com/search?q=#hashtag_enc#">##hashtag#</a>';
-		
+	
 		var input  = 'Happy Earth Hour! #fb';
 		var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=fb">#fb</a>';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
-		
+	
 		var input  = 'hashtags inside (#parentheses) should work too';
 		var output = 'hashtags inside (<a href="http://search.twitter.com/search?q=parentheses">#parentheses</a>) should work too';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
-		
+	
 		var input  = 'Happy Earth Hour! #downtown';
 		var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
-		
+	
 		var input  = 'Happy Earth Hour! #downtown?';
 		var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>?';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
-		
+	
 		var input  = 'Happy Earth Hour! #downtown.';
 		var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>.';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
-		
+	
 		var input  = 'Happy Earth Hour! #downtown]';
 		var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>]';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
-
+	
 		var input  = 'Happy Earth Hour! #downtown}';
 		var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>}';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
-		
+	
 		var input  = 'Happy Earth Hour! #downtown)';
 		var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>)';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
-		
+	
 		var input  = 'Happy Earth Hour! #downtown,';
 		var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>,';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
-		
+	
 		var input  = 'Happy Earth Hour! #downtown;';
 		var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>;';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
-		
+	
 		var input  = 'Happy Earth Hour! #downtown\'';
 		var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>\'';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
-		
+	
 		var input  = 'Happy Earth Hour! #downtown\'s';
 		var output = 'Happy Earth Hour! <a href="http://search.twitter.com/search?q=downtown">#downtown</a>\'s';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
-		
+	
 		var input = 'foo #downtown_';
 		var output ='foo <a href="http://search.twitter.com/search?q=downtown_">#downtown_</a>';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
-		
+	
 		var input = 'foo #down+town';
 		var output ='foo <a href="http://search.twitter.com/search?q=down%2Btown">#down+town</a>';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
-		
+	
 		var input = 'foo #down_town';
 		var output ='foo <a href="http://search.twitter.com/search?q=down_town">#down_town</a>';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
-		
+	
 		var input = 'foo #down-town';
 		var output ='foo <a href="http://search.twitter.com/search?q=down-town">#down-town</a>';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
-		
-		
+	
+	
 		var input = 'foo #www.downtown.com';
 		var output ='foo <a href="http://search.twitter.com/search?q=www.downtown.com">#www.downtown.com</a>';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
-		
+	
 		var input = 'foo #www.downtown.com.';
 		var output ='foo <a href="http://search.twitter.com/search?q=www.downtown.com">#www.downtown.com</a>.';
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
@@ -466,45 +470,45 @@ $(document).ready(function() {
 		input   = 'I think @n8han is fast becoming my favorite programming blog stylist. Read http://technically.us/code/ and enjoy.';
 		output  = 'I think @n8han is fast becoming my favorite programming blog stylist. Read <a href="http://technically.us/code/">technically.us/code/</a> and enjoy.';
 		equals(sc.helpers.autolink(input), output);
-
+	
 		input   = '(I did one for my site; see the logo:http://bit.ly/1LkKk1)';
 		output  = '(I did one for my site; see the logo:<a href="http://bit.ly/1LkKk1">bit.ly/1LkKk1</a>)';
 		equals(sc.helpers.autolink(input), output);
-
+	
 		input   = '(Testing for length limits; see the logo:http://bit.ly/1LkKk1)';
 		output  = '(Testing for length limits; see the logo:<a href="http://bit.ly/1LkKk1">bit.ly/1LkKk1</a>)';
 		equals(sc.helpers.autolink(input, null, null, 20), output);
-
+	
 		input   = '(I did one for my site; see the logo:https://www.deadspin.com/5227676/stafford-welcomed-to-detroit-with-warm-prickly-arms)';
 		output  = '(I did one for my site; see the logo:<a href="https://www.deadspin.com/5227676/stafford-welcomed-to-detroit-with-warm-prickly-arms">www.deadspin.com/522...</a>)';
 		equals(sc.helpers.autolink(input, null, null, 20), output);
-
-
+	
+	
 		input   = '(http://bit.ly/1LkKk1?[foo]=bar,32&500;xyz)';
 		output  = '(<a href="http://bit.ly/1LkKk1?[foo]=bar,32&500;xyz">bit.ly/1LkKk1?[foo]=bar,32&500;xyz</a>)';
 		equals(sc.helpers.autolink(input), output);
-		
+	
 		input   = '@mynameiszanders you should get ande.rs, so you can have z@ande.rs';
 		output  = '@mynameiszanders you should get ande.rs, so you can have <a href="mailto:z@ande.rs">z@ande.rs<\/a>';
 		equals(sc.helpers.autolink(input), output);
-
+	
 		var extra   = "target='_blank'";
 		input   = 'There will be some extra code in this http://funkatron.com';
 		output  = 'There will be some extra code in this <a href="http://funkatron.com" '+extra+'>funkatron.com<\/a>';
 		equals(sc.helpers.autolink(input, null, extra), output);
-
+	
 		input   = 'emyller.net down for maintenance. migrating for a new server.';
 		output  = '<a href="http://emyller.net">emyller.net</a> down for maintenance. migrating for a new server.';
 		equals(sc.helpers.autolink(input), output);
-
+	
 		input   = 'www.emyller.net down for maintenance. migrating for a new server.';
 		output  = '<a href="http://www.emyller.net">www.emyller.net</a> down for maintenance. migrating for a new server.';
 		equals(sc.helpers.autolink(input), output);
-		
+	
 		input   = 'aww man, don\'t say that...hastigerbanged.com is available. must. resist. htb.com/mywife => "probably" (for every url) gmail.com www.gmail.com http://foo.bar.com/ bit.ly/qrewof RT @ax0n: http://sysadvent.blogspot.com <-- An advent calendar for UNIX nerds';
 		output  = "aww man, don't say that...hastigerbanged.com is available. must. resist. htb.com/mywife => \"probably\" (for every url) <a href=\"http://gmail.com\">gmail.com</a> <a href=\"http://www.gmail.com\">www.gmail.com</a> <a href=\"http://foo.bar.com/\">foo.bar.com/</a> bit.ly/qrewof RT @ax0n: <a href=\"http://sysadvent.blogspot.com\">sysadvent.blogspot.com</a> <-- An advent calendar for UNIX nerds";
 		equals(sc.helpers.autolink(input), output);
-
+	
 	});
 	
 	test("makeClickable", function() {
@@ -578,7 +582,7 @@ $(document).ready(function() {
 		} else {
 			equals(result, false, 'this is not AIR');
 		}
-		
+	
 	});
 	test("iswebOS", function() {
 		var result = sc.helpers.iswebOS();
@@ -625,7 +629,7 @@ $(document).ready(function() {
 	test("removeDuplicateElements", missing);
 	test("updateRelativeTimes", missing);
 	test("markAllAsRead", missing);
-
+	
 	
 	/*
 		XML
@@ -639,4 +643,4 @@ $(document).ready(function() {
 	});
 
 
-});
+// });

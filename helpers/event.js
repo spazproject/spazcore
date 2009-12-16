@@ -21,28 +21,33 @@ var SPAZCORE_EVENTDATA_ATTRIBUTE = 'sc_data';
  * @param {object} target
  * @param {string} event_type
  * @param {function} handler  a method that will take the event as a param, and "this" refers to target
- * @param {Object} scope the scope to execute the handler within (what "this" refers to)
- * @param {boolean} use_capture  defaults to false
+ * @param {Object} [scope] the scope to execute the handler within (what "this" refers to)
+ * @param {boolean} [use_capture]  defaults to false
+ * @returns {function} the handler that was passed -- or created, if we passed a scope. You can use this to remove the listener later on
  * @function
  */
 sc.helpers.addListener = function(target, event_type, handler, scope, use_capture) {
 
 	sch.dump('listening for '+event_type);
 	sch.dump('on target nodeName:'+target.nodeName);
-
-
-	function scope_perserver(e) {
-		handler.call(scope, e);
-	}
 	
 	if (use_capture !== true) {
 		use_capture = false;
 	}
 	
+	
+	
 	if (scope) {
-		target.addEventListener(event_type, scope_perserver, use_capture);
+		
+		var __handler = _.bind(handler, scope);
+		target.addEventListener(event_type, __handler, use_capture);
+		return __handler;
+		
 	} else {
+		
 		target.addEventListener(event_type, handler, use_capture);
+		return handler;
+
 	}
 	
 	
@@ -61,25 +66,16 @@ sc.helpers.addListener = function(target, event_type, handler, scope, use_captur
  * @param {boolean} use_capture  defaults to false
  * @function
  */
-sc.helpers.removeListener = function(target, event_type, handler, scope, use_capture) {
+sc.helpers.removeListener = function(target, event_type, handler, use_capture) {
 
 	sch.dump('removing listener for '+event_type);
 	sch.dump('on target nodeName:'+target.nodeName);
-
-
-	function scope_perserver(e) {
-		handler.call(scope, e);
-	}
 
 	if (use_capture !== true) {
 		use_capture = false;
 	}
 	
-	if (scope) {
-		target.removeEventListener(event_type, scope_perserver, use_capture);
-	} else {
-		target.removeEventListener(event_type, handler, use_capture);
-	}
+	target.removeEventListener(event_type, handler, use_capture);
 };
 
 /**
@@ -90,7 +86,30 @@ sc.helpers.removeListener = function(target, event_type, handler, scope, use_cap
  * @param {Object} [scope] the scope to execute the handler
  * @param {Boolean} [use_capture] Describe this parameter
  */
-sc.helpers.addDelegatedListener = function(base_target, selector, event_type, handler, scope, use_capture) {
+sc.helpers.addDelegatedListener = function(base_target, selector, event_type, handler, scope) {
+	
+	sch.dump('listening for '+event_type);
+	sch.dump('on target nodeName:'+target.nodeName);
+	sch.dump('for selector:'+selector);
+	
+	if (use_capture !== true) {
+		use_capture = false;
+	}
+	
+	
+	
+	if (scope) {
+		
+		var __handler = _.bind(handler, scope);
+		target.addEventListener(event_type, __handler, use_capture);
+		return __handler;
+		
+	} else {
+		
+		target.addEventListener(event_type, handler, use_capture);
+		return handler;
+
+	}
 	
 };
 

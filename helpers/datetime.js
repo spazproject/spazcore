@@ -16,8 +16,24 @@ var sc;
 * 
 * This requires date.js
 * http://www.datejs.com/
+* @param {string} time_value a string to convert into relative time
+* @param {object} [labels] labels for text portions of time descriptions
+* @param {boolean} [use_dateparse] Whether or not to use the Date.parse method to parse the time_value. Default is FALSE
 */
-sc.helpers.getRelativeTime = function(time_value, use_dateparse) {	
+sc.helpers.getRelativeTime = function(time_value, labels, use_dateparse) {	
+	
+	var default_labels = {
+		'now':'Just now',
+		'seconds':'sec ago',
+		'minute':'min ago',
+		'minutes':'min ago',
+		'hour':'hr ago',
+		'hours':'hr ago',
+		'day':'day ago',
+		'days':'days ago'	
+	};
+	
+	labels = sch.defaults(default_labels, labels);
 	
 	var parsed_date;
 	
@@ -31,25 +47,25 @@ sc.helpers.getRelativeTime = function(time_value, use_dateparse) {
 	var delta = parseInt( (now.getTime() - parsed_date.getTime()) / 1000, 10);
 	
 	if (delta < 10) {
-		return 'Just now';
+		return labels.now;
 	} else if(delta < 60) {
-		return delta.toString() +' sec ago';
+		return delta.toString() +' '+labels.seconds;
 	} else if(delta < 120) {
-		return '1 min ago';
+		return '1 '+labels.minute;
 	} else if(delta < (45*60)) {
-		return Math.round(parseInt(delta / 60, 10)).toString() + ' min ago';
+		return Math.round(parseInt(delta / 60, 10)).toString() + ' ' +labels.minutes;
 	} else if(delta < (90*60)) {
-		return '1 hr ago';
+		return '1 ' +labels.hour;
 	} else if(delta < (24*60*60)) {
 		if (Math.round(delta / 3600) === 1) {
-			return '2 hr ago';
+			return '2 '+labels.hours;
 		} else {
-			return Math.round(delta / 3600).toString() + ' hr ago';
+			return Math.round(delta / 3600).toString() + ' '+labels.hours;
 		}
 	} else if(delta < (48*60*60)) {
-		return '1 day ago';
+		return '1 '+labels.day;
 	} else {
-		return Math.round(delta / 86400).toString() + ' days ago';
+		return Math.round(delta / 86400).toString() + ' '+labels.days;
 	}
 };
 

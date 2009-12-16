@@ -10,6 +10,8 @@ echo "/*********** Built ${BUILD_DATE} ***********/" > $BUILD_FILE
 cat libs/spazcore.js \
 	vendors/date.js \
 	vendors/json2.js \
+	vendors/sizzle.js \
+	vendors/underscore.js \
 	helpers/datetime.js \
 	helpers/event.js \
 	helpers/hash.js \
