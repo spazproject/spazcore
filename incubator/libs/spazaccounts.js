@@ -40,7 +40,7 @@ SpazAccounts.prototype.prefskey = 'users';
  * loads the accounts array from the prefs object 
  */
 SpazAccounts.prototype.load	= function() { 
-	this._accounts = this.prefs.get(this.prefskey);
+	this._accounts = this.prefs.get(this.prefskey) || [];
 };
 
 /**
@@ -75,6 +75,25 @@ SpazAccounts.prototype.setAll = function(accounts_array) {
 	};
 };
 
+/**
+ * @param {string} id the UUID to update
+ * @param {object} acctobj
+ * @param {string} [acctobj.username] a new username
+ * @param {string} [acctobj.password] a new password
+ * @param {string} [acctobj.type] a new account type
+ * @param {object} [acctobj.meta] the hash of metadata; you should probably use SpazAccounts.setMeta() instead
+ */
+SpazAccounts.prototype.update = function(id, acctobj) {
+	var orig = this.get(id);
+	if (orig) {
+		var modified = sch.defaults(orig, acctobj);
+		return this.get(id);
+	} else {
+		sch.error('No account with id "'+id+'" exists');
+	}
+}
+
+
 
 /**
  * wipes the accounts array and saves it
@@ -89,7 +108,7 @@ SpazAccounts.prototype.initAccounts	= function() {
  * @param {string} username the username
  * @param {string} password the password
  * @param {type} type the type of account
- * @returns {string} the UUID of the new account
+ * @returns {object} the account object just added
  */
 SpazAccounts.prototype.add = function(username, password, type) {
 	
@@ -100,18 +119,36 @@ SpazAccounts.prototype.add = function(username, password, type) {
 	
 	var username = username.toLowerCase();
 	var id = this.generateID();
-	this._accounts.push = {
+	this._accounts.push({
 		'id':id,
 		'username':username,
 		'password':password,
 		'type':type,
 		'meta':{}
-	};
+	});
 	this.save();
 	
 	sch.debug("Added new user:"+id);
 	
-	return id;
+	return this.get(id);
+};
+
+
+/**
+ * @param {string} id the UUID of the account to delete 
+ */
+SpazAccounts.prototype.remove = function(id) {
+	sch.debug("Deleting '"+id+"'…");
+	
+	var index = this._findUserIndex(id);
+	if (index !== false) {
+		var deleted = this._accounts.splice(index, 1);
+		sch.debug("Deleted account '"+deleted[0].id+"'");
+		return deleted[0];
+	} else {
+		sch.error("Could not find this id to delete: '"+id+"'");
+		return false;
+	}
 };
 
 
@@ -131,11 +168,16 @@ SpazAccounts.prototype.getByType = function(type) {
 	return matches;
 };
 
-
+/**
+ * @todo 
+ */
 SpazAccounts.prototype.getByUsername = function(username) {
 	
 };
 
+/**
+ * @todo 
+ */
 SpazAccounts.prototype.getByUsernameAndType = function(username, type) {
 	
 };

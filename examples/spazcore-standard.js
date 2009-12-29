@@ -1,4 +1,4 @@
-/*********** Built 2009-12-18 00:42:24 EST ***********/
+/*********** Built 2009-12-28 14:45:52 EST ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -6570,6 +6570,20 @@ sc.helpers.ltrim = function (str, chars) {
 sc.helpers.rtrim = function (str, chars) {
 	chars = chars || "\\s";
 	return str.replace(new RegExp("[" + chars + "]+$", "g"), "");
+};
+
+
+/**
+ * @param {string} str the string in which we're converting linebreaks
+ * @param {string} [breaktag] the tag used to break up lines. defaults to <br>
+ * @returns {string} the string with linebreaks converted to breaktags
+ */
+sc.helpers.nl2br = function(str, breaktag) {
+	
+	breaktag = breaktag || '<br>';
+	
+	str = str.replace(/(\r\n|\n\r|\r|\n)/g, breaktag+'$1');
+	return str;
 };/*jslint 
 browser: true,
 nomen: false,
@@ -9732,7 +9746,7 @@ var SPAZCORE_SERVICE_TWITTER = 'twitter';
 var SPAZCORE_SERVICE_IDENTICA = 'identi.ca';
 var SPAZCORE_SERVICE_WORDPRESS_TWITTER = 'wordpress-twitter';
 var SPAZCORE_SERVICE_CUSTOM = 'custom';
-var SPAZCORE_SERVICEURL_TWITTER = 'https://api.twitter.com/';
+var SPAZCORE_SERVICEURL_TWITTER = 'https://api.twitter.com/1/';
 var SPAZCORE_SERVICEURL_IDENTICA = 'https://identi.ca/api/';
 var SPAZCORE_SERVICEURL_WORDPRESS_TWITTER = 'https://twitter-api.wordpress.com/';
 
