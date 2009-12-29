@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>SpazCore Accounts Example</title>
+	
+	<!-- Load required vendor libs -->
+	<script src="../vendors/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore base lib -->
+	<script src="spazcore-standard.js"></script>
+	<script src="../incubator/libs/spazaccounts.js" type="text/javascript" charset="utf-8"></script>
+	
+	<!-- used for modals -->
+	<script src="js/jquery.DOMWindow.js" type="text/javascript" charset="utf-8"></script>
+	
+	
+	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	
+	<script type="text/javascript" charset="utf-8">
+	
+		var spaz_acc = new SpazAccounts();
+		
+		
+		function add_account(username, password, type) {
+			var newacct = spaz_acc.add(username, password, type);
+			console.debug(newacct);
+			var html = "<option value='"+newacct.id+"'>"+newacct.username+"@"+newacct.type+"</option>";
+			$('#accounts').append(html);
+		}
+
+		function edit_account(id, acctobj) {
+			var savedacct = spaz_acc.update(id, acctobj);
+			console.debug(savedacct);
+			$('option[value="'+savedacct.id+'"]').html(savedacct.username+"@"+savedacct.type);
+		}
+
+		
+		function ui_getSelectedElement() {
+			var jqel = $("#accounts option:selected");
+			if (jqel && jqel.length > 0) {
+				return jqel.get(0);
+			} else {
+				return false;
+			}
+		}
+
+		function ui_getSelectedId() {
+			var jqel = $("#accounts option:selected");
+			if (jqel && jqel.length > 0) {
+				return jqel.attr('value');
+			} else {
+				return false;
+			}
+		}
+		
+		/*
+			initialize bindings on DOMReady
+		*/
+		$().ready( function() {
+				
+			/*
+				bind [+] button to popup
+			*/
+			$('#add_button').click(function() {
+				$.openDOMWindow({ 
+			        windowSourceID:'#addForm' 
+			    }); 
+			
+				/*
+					bind add button
+				*/
+				$('#add_new').click(function() {
+					add_account(
+						$('#username_new').val(),
+						$('#password_new').val(),
+						$('#type_new').val()
+					);
+					
+					$.closeDOMWindow({
+						windowSourceID:'#addForm'
+					});
+				});
+			
+				/*
+					bind cancel button
+				*/
+				$('#cancel_new').click(function() {
+					$.closeDOMWindow({
+						windowSourceID:'#addForm'
+					});
+				});
+			});
+			
+			/*
+				bind the [-] button
+			*/
+			$('#del_button').click(function() {
+				var id = ui_getSelectedId();
+				if (id) {
+					var deleted = spaz_acc.remove(id);
+					$('option[value="'+id+'"]').remove();
+				} else {
+					sch.error('Nothing selected to delete');
+				}
+			});
+			
+			
+			/*
+				bind the [edit] button to modal
+			*/
+			$('#edit_button').click(function() {
+				
+				var id = ui_getSelectedId();
+				if (id) {
+					var editing = spaz_acc.get(id);
+
+					$.openDOMWindow({ 
+				        windowSourceID:'#editForm' 
+				    }); 				
+
+					/*
+						populate form
+					*/
+					$('#id_edit').val(editing.id);
+					$('#username_edit').val(editing.username);
+					$('#password_edit').val(editing.password);
+					$('#type_edit').val(editing.type);
+
+					/*
+						bind save button
+					*/
+					$('#save_edit').click(function() {
+						edit_account(
+							$('#id_edit').val(),
+							{
+								'username':$('#username_edit').val(),
+								'password':$('#password_edit').val(),
+								'type':$('#type_edit').val()
+							}
+						);
+
+						$.closeDOMWindow({
+							windowSourceID:'#editForm'
+						});
+					});
+
+					/*
+						bind cancel button
+					*/
+					$('#cancel_edit').click(function() {
+						$.closeDOMWindow({
+							windowSourceID:'#editForm'
+						});
+					});
+					
+
+				} else {
+					sch.error('Nothing selected to edit');
+				}
+				
+				
+			});
+
+			
+			/*
+				initalize with some data
+			*/
+			add_account('testuser', 'fakepassword', SPAZCORE_ACCOUNT_TWITTER);
+			add_account('testuser', 'fakepassword', SPAZCORE_ACCOUNT_IDENTICA);
+			add_account('blammo', 'fakepassword', SPAZCORE_ACCOUNT_FLICKR);
+		});
+		
+		
+	</script>
+</head>
+
+<body>
+	<h1>Accounts Management Example</h1>
+	
+	<form onsubmit="return false;">
+		<div>
+			<select name="accounts" id="accounts" size="8">
+			</select>
+		</div>
+		<input type="button" name="add_button" value="+" id="add_button">
+		<input type="button" name="del_button" value="-" id="del_button">
+		<input type="button" name="edit_button" value="edit" id="edit_button">
+	</form>
+
+	
+	<!--
+		the add form modal
+	-->
+	<div id="addForm" style="display:none">
+		<div>
+			<label for="username">Username</label>
+			<input type="text/submit/hidden/button" name="username" value="" id="username_new">
+		</div>
+		
+		<div>
+			<label for="password">Password</label>
+			<input type="password" name="password" value="" id="password_new">
+		</div>
+		
+		<div>
+			<select name="type_new" id="type_new" size="1">
+				<option value="twitter">Twitter</option>
+				<option value="identi.ca">Identi.ca</option>
+				<option value="flickr">Flickr</option>
+				<option value="other">Other</option>
+			</select>
+		</div>
+		
+		<input type="button" name="add_new" value="Add new account" id="add_new">
+		<input type="button" name="cancel_new" value="Cancel" id="cancel_new">
+	</div>
+
+
+	<!--
+		the edit form modal
+	-->
+	<div id="editForm" style="display:none">
+		<input type="hidden" name="id_edit" value="" id="id_edit">
+		
+		<div>
+			<label for="username">Username</label>
+			<input type="text" name="username" value="" id="username_edit">
+		</div>
+		
+		<div>
+			<label for="password">Password</label>
+			<input type="password" name="password" value="" id="password_edit">
+		</div>
+		
+		<div>
+			<select name="type_edit" id="type_edit" size="1">
+				<option value="twitter">Twitter</option>
+				<option value="identi.ca">Identi.ca</option>
+				<option value="flickr">Flickr</option>
+				<option value="other">Other</option>
+			</select>
+		</div>
+		
+		<input type="button" name="save_edit" value="Save changes" id="save_edit">
+		<input type="button" name="cancel_edit" value="Cancel" id="cancel_edit">
+	</div>
+
+
+</body>
+</html>
