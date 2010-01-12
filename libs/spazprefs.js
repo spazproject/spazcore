@@ -296,7 +296,7 @@ SpazPrefs.prototype.migrateFromMojoDepot = function() {
  * saves the current preferences
  * @todo
  */
-SpazPrefs.prototype.save = function(name) {
+SpazPrefs.prototype.save = function() {
 
 	if (sc.helpers.iswebOS()) {
 		if (!this.mojoCookie) {

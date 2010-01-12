@@ -1,3 +1,47 @@
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, Mojo;
+
+
 /**
+ * WEBOS
  * platform-specific definitions for prefs lib 
  */
+
+SpazPrefs.prototype.load = function() {
+	
+}
+
+SpazPrefs.prototype.save = function() {
+
+};
+
+
+SpazPrefs.prototype.getEncrypted = function(key) {
+
+};
+
+
+SpazPrefs.prototype.setEncrypted = function(key, val) {
+
+};
+
+
+
+SpazPrefs.prototype.saveWindowState = function() {
+	sch.error('saveWindowState not available');
+	return undefined;
+};
+
+
+SpazPrefs.prototype.loadWindowState = function() {
+	sch.error('loadWindowState not available');
+	return undefined;
+};

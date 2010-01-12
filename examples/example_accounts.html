@@ -30,12 +30,18 @@
 			console.debug(newacct);
 			var html = "<option value='"+newacct.id+"'>"+newacct.username+"@"+newacct.type+"</option>";
 			$('#accounts').append(html);
+			sch.debug("Added:");
+			sch.debug(newacct);
+			return newacct;
 		}
 
 		function edit_account(id, acctobj) {
 			var savedacct = spaz_acc.update(id, acctobj);
 			console.debug(savedacct);
 			$('option[value="'+savedacct.id+'"]').html(savedacct.username+"@"+savedacct.type);
+			sch.debug("Edited:");
+			sch.debug(savedacct);
+			return savedacct;
 		}
 
 		
@@ -74,11 +80,14 @@
 					bind add button
 				*/
 				$('#add_new').click(function() {
-					add_account(
+					var newaccid = add_account(
 						$('#username_new').val(),
 						$('#password_new').val(),
 						$('#type_new').val()
-					);
+					).id;
+					spaz_acc.setMeta(newaccid, 'metadata_1', $('#metadata_1_new').val());
+					spaz_acc.setMeta(newaccid, 'metadata_2', $('#metadata_2_new').val());
+					spaz_acc.setMeta(newaccid, 'metadata_3', $('#metadata_3_new').val());
 					
 					$.closeDOMWindow({
 						windowSourceID:'#addForm'
@@ -129,19 +138,27 @@
 					$('#username_edit').val(editing.username);
 					$('#password_edit').val(editing.password);
 					$('#type_edit').val(editing.type);
+					
+					$('#metadata_1_edit').val(spaz_acc.getMeta(editing.id, 'metadata_1'));
+					$('#metadata_2_edit').val(spaz_acc.getMeta(editing.id, 'metadata_2'));
+					$('#metadata_3_edit').val(spaz_acc.getMeta(editing.id, 'metadata_3'));
 
 					/*
 						bind save button
 					*/
 					$('#save_edit').click(function() {
-						edit_account(
+						var editedaccid = edit_account(
 							$('#id_edit').val(),
 							{
 								'username':$('#username_edit').val(),
 								'password':$('#password_edit').val(),
 								'type':$('#type_edit').val()
 							}
-						);
+						).id;
+						spaz_acc.setMeta(editedaccid, 'metadata_1', $('#metadata_1_edit').val());
+						spaz_acc.setMeta(editedaccid, 'metadata_2', $('#metadata_2_edit').val());
+						spaz_acc.setMeta(editedaccid, 'metadata_3', $('#metadata_3_edit').val());
+						
 
 						$.closeDOMWindow({
 							windowSourceID:'#editForm'
@@ -169,9 +186,21 @@
 			/*
 				initalize with some data
 			*/
-			add_account('testuser', 'fakepassword', SPAZCORE_ACCOUNT_TWITTER);
-			add_account('testuser', 'fakepassword', SPAZCORE_ACCOUNT_IDENTICA);
-			add_account('blammo', 'fakepassword', SPAZCORE_ACCOUNT_FLICKR);
+			var accobj = add_account('testuser', 'fakepassword', SPAZCORE_ACCOUNT_TWITTER);
+			spaz_acc.setMeta(accobj.id, 'metadata_1', 'some metadata');
+			spaz_acc.setMeta(accobj.id, 'metadata_2', 'a second set');
+			spaz_acc.setMeta(accobj.id, 'metadata_3', 'third thing');
+
+			accobj = add_account('testuser', 'fakepassword', SPAZCORE_ACCOUNT_IDENTICA);
+			spaz_acc.setMeta(accobj.id, 'metadata_1', 'atadatem emos');
+			spaz_acc.setMeta(accobj.id, 'metadata_2', 'tes dnoces a');
+			spaz_acc.setMeta(accobj.id, 'metadata_3', 'gniht driht');
+
+			accobj = add_account('blammo', 'fakepassword', SPAZCORE_ACCOUNT_FLICKR);
+			spaz_acc.setMeta(accobj.id, 'metadata_1', '!@*G(!#UHG$$)');
+			spaz_acc.setMeta(accobj.id, 'metadata_2', 'FOVWUVOWE');
+			spaz_acc.setMeta(accobj.id, 'metadata_3', 'bang');
+
 		});
 		
 		
@@ -214,6 +243,22 @@
 				<option value="other">Other</option>
 			</select>
 		</div>
+	
+		<div>
+			<label for="metadata_1_new">metadata 1</label>
+			<input type="text" name="metadata_1_new" value="" id="metadata_1_new">			
+		</div>
+		
+		<div>
+			<label for="metadata_2_new">metadata 2</label>
+			<input type="text" name="metadata_2_new" value="" id="metadata_2_new">			
+		</div>
+		
+		<div>
+			<label for="metadata_3_new">metadata 3</label>
+			<input type="text" name="metadata_3_new" value="" id="metadata_3_new">			
+		</div>
+
 		
 		<input type="button" name="add_new" value="Add new account" id="add_new">
 		<input type="button" name="cancel_new" value="Cancel" id="cancel_new">
@@ -243,6 +288,21 @@
 				<option value="flickr">Flickr</option>
 				<option value="other">Other</option>
 			</select>
+		</div>
+		
+		<div>
+			<label for="metadata_1_edit">metadata 1</label>
+			<input type="text" name="metadata_1_edit" value="" id="metadata_1_edit">			
+		</div>
+		
+		<div>
+			<label for="metadata_2_edit">metadata 2</label>
+			<input type="text" name="metadata_2_edit" value="" id="metadata_2_edit">			
+		</div>
+		
+		<div>
+			<label for="metadata_3_edit">metadata 3</label>
+			<input type="text" name="metadata_3_edit" value="" id="metadata_3_edit">			
 		</div>
 		
 		<input type="button" name="save_edit" value="Save changes" id="save_edit">
