@@ -48,6 +48,23 @@ sc.helpers.dump = function(obj, level) {
 };
 
 
+/*
+	Open a URL in the default system web browser
+*/
+sc.helpers.openInBrowser = function(url) {
+	var c = Mojo.Controller.getAppController();
+	c.serviceRequest('palm://com.palm.applicationManager', {
+		method: 'open',
+		parameters: {
+			id: 'com.palm.app.browser',
+			params: {
+				target: url
+			}
+		}
+	});
+};
+
+
 /**
  * this is specific to webOS, for retrieving the proper URL prefixed with the Palm Host proxy if needed 
  * @param {string} url

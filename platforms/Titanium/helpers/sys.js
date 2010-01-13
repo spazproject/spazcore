@@ -47,3 +47,14 @@ sc.helpers.dump = function(obj, level) {
 		dumper(obj);
 	}
 };
+
+
+/*
+	Open a URL in the default system web browser
+*/
+sc.helpers.openInBrowser = function(url) {
+	// This works on Titanium Desktop only
+	Titanium.Desktop.openURL(url);
+};
+
+
