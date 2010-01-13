@@ -128,7 +128,7 @@ sc.helpers.dump = function(obj, level) {
  * @platformstub
  */
 sc.helpers.openInBrowser = function(url) {
-	// stub
+	window.open(url);
 };
 
 /**
