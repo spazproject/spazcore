@@ -21,7 +21,29 @@
 			this.setPrefsObj(prefsObj);
 			this.loadSettings(settings);
 			this.processSettings();
+			
+			var that = this;
+			/**
+			 * defined here so we can use "that" closure
+			 */
+			this.onChange = function(e) {
+				var key, val, jqel;
+
+				sch.debug(e);
+
+				jqel = jQuery(e.target);
+				key  = jqel.attr('data-spazprefsui-key', key);
+				val  = that.getUIValue(key);
+
+				that._prefs.set(key, val);
+			};
+			
+			/*
+				add listeners automatically
+			*/
 			this.addListeners();
+
+
 		};
 		
 		
@@ -86,7 +108,13 @@
 		/**
 		 * get the values from the form fields 
 		 */
-		SpazPrefsUI.prototype.getFromUI = function() {};
+		SpazPrefsUI.prototype.getFromUI = function() {
+			var val, key, opts;
+			for(key in this._settings) {
+				val = this.getUIValue(key)
+				this._prefs.set(key, val);
+			}
+		};
 
 		/**
 		 * sets the form element selector for the given key 
@@ -108,7 +136,7 @@
 		SpazPrefsUI.prototype.setUIValue = function(key, value) {
 			var value = this.filterValue(key, value);
 			var selector = this._settings[key].selector;
-			var jqel = $(selector);
+			var jqel = jQuery(selector);
 			
 			if (jqel.length > 0) {
 
@@ -126,7 +154,7 @@
 		SpazPrefsUI.prototype.getUIValue = function(key) {
 			var value;
 			var selector = this._settings[key].selector;
-			var jqel = $(selector);
+			var jqel = jQuery(selector);
 			
 			if (jqel.length > 0) {
 
@@ -210,7 +238,14 @@
 		 */
 		SpazPrefsUI.prototype.addListener = function(key) {
 			var that = this;
-			var el = $(this._settings[key].selector).get(0);
+			var jqel = jQuery(this._settings[key].selector);
+			var el   = jqel.get(0);
+			
+			/*
+				set this custom attribute so we can ID this more easily when change fires
+			*/
+			jqel.attr('data-spazprefsui-key', key);
+			
 			sch.listen(el, 'change', this.onChange);
 		};
 		
@@ -230,22 +265,23 @@
 		 */
 		SpazPrefsUI.prototype.removeListener = function(key) {
 			var that = this;
-			var el = $(this._settings[key].selector).get(0);
+			var el = jQuery(this._settings[key].selector).get(0);
 			sch.unlisten(el, 'change', this.onChange);
 		};
 		
 		
-		SpazPrefsUI.prototype.onChange = function(e) {
-			sch.debug('Triggered onChange from #'+$(e.target).attr('id'));
-			sch.debug(e);
-		};
+
 		
 	</script>
 	
 	
 	<script type="text/javascript" charset="utf-8">
 	
-		$(document).ready( function() {
+		jQuery(document).ready( function() {
+			
+			sc.setDumpLevel(5);
+			
+			
 			var prefs = new SpazPrefs({
 				'enable_it':true,
 				'type_it':'Poop',
@@ -265,13 +301,14 @@
 				}
 			};
 
-			var prefsUI = new SpazPrefsUI(prefs, prefsUIopts);	
+			var prefsUI = new SpazPrefsUI(prefs, prefsUIopts);
+
 			
 			
-			$('#clear').click(function() {
+			jQuery('#clear').click(function() {
 				prefsUI.removeListeners()
 			});	
-			$('#rebind').click(function() {
+			jQuery('#rebind').click(function() {
 				prefsUI.addListeners()
 			});	
 		});
