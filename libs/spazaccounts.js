@@ -40,18 +40,47 @@ SpazAccounts.prototype.prefskey = 'users';
  * loads the accounts array from the prefs object 
  */
 SpazAccounts.prototype.load	= function() { 
-	this._accounts = this.prefs.get(this.prefskey) || [];
+	var accjson = this.prefs.get(this.prefskey);
+	
+	sch.debug("accjson:'"+accjson+"'");
+	
+	try {
+		this._accounts = sch.deJSON(this.prefs.get(this.prefskey));
+	} catch(e) {
+		sch.error(e.message);
+		this._accounts = [];
+	}		
+
+	/*
+		sanity check
+	*/
+	if (!sch.isArray(this._accounts)) {
+		this._accounts = [];
+	}
+	
+	sch.debug("this._accounts:'"+this._accounts+"'")
+	
 };
 
 /**
  * saves the accounts array to the prefs obj 
  */
 SpazAccounts.prototype.save	= function() {
-	this.prefs.set(this.prefskey, this._accounts);
+	
+	
+	this.prefs.set(this.prefskey, sch.enJSON(this._accounts));
 	sch.debug('saved users to "'+this.prefskey+'" pref');
 	for (var x in this._accounts) {
 		sch.debug(this._accounts[x].id);
 	};
+	
+	sch.debug('THE ACCOUNTS:')
+	sch.debug(sch.enJSON(this._accounts));
+
+	sch.debug('ALL PREFS:')
+	sch.debug(sch.enJSON(this.prefs._prefs));
+
+	
 };
 
 /**
@@ -90,6 +119,7 @@ SpazAccounts.prototype.update = function(id, acctobj) {
 		return this.get(id);
 	} else {
 		sch.error('No account with id "'+id+'" exists');
+		return null;
 	}
 }
 
@@ -169,16 +199,36 @@ SpazAccounts.prototype.getByType = function(type) {
 };
 
 /**
- * @todo 
+ * @param {string} username the username to search for
+ * @returns {array} an array of matching accounts
  */
 SpazAccounts.prototype.getByUsername = function(username) {
+	var matches = [];
+
+	for (var i=0; i < this._accounts.length; i++) {
+		if (this._accounts[i].username === username) {
+			matches.push(this._accounts[i])
+		}
+	};
 	
+	return matches;
 };
 
 /**
- * @todo 
+ * @param {string} username the username to search for
+ * @param {string} type the type to search for
+ * @returns {array} an array of matching accounts
  */
 SpazAccounts.prototype.getByUsernameAndType = function(username, type) {
+	var matches = [];
+
+	for (var i=0; i < this._accounts.length; i++) {
+		if (this._accounts[i].username === username && this._accounts[i].type === type) {
+			matches.push(this._accounts[i])
+		}
+	};
+	
+	return matches;
 	
 };
 

@@ -21,6 +21,7 @@ cat libs/spazcore.js \
 	helpers/sys.js \
 	helpers/view.js \
 	helpers/xml.js \
+	libs/spazaccounts.js \
 	libs/spazimageurl.js \
 	libs/spazphotomailer.js \
 	libs/spazprefs.js \
@@ -30,6 +31,7 @@ cat libs/spazcore.js \
 	libs/spaztimeline.js \
 	libs/spaztmdb.js \
 	libs/spaztwit.js \
+	platforms/Titanium/helpers/file.js \
 	platforms/Titanium/helpers/sys.js \
 	platforms/Titanium/libs/spazprefs.js \
 	>> $BUILD_FILE
