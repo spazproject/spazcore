@@ -22,6 +22,7 @@ cat libs/spazcore.js \
 	helpers/sys.js \
 	helpers/view.js \
 	helpers/xml.js \
+	libs/spazaccounts.js \
 	libs/spazimageurl.js \
 	libs/spazfileuploader.js \
 	libs/spazphotomailer.js \
@@ -32,6 +33,7 @@ cat libs/spazcore.js \
 	libs/spaztimeline.js \
 	libs/spaztmdb.js \
 	libs/spaztwit.js \
+	platforms/webOS/helpers/location.js \
 	platforms/webOS/helpers/network.js \
 	platforms/webOS/helpers/sys.js \
 	platforms/webOS/libs/spazprefs.js \

@@ -21,6 +21,7 @@ cat libs/spazcore.js \
 	helpers/sys.js \
 	helpers/view.js \
 	helpers/xml.js \
+	libs/spazaccounts.js \
 	libs/spazfileuploader.js \
 	libs/spazimageurl.js \
 	libs/spazphotomailer.js \
