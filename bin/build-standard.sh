@@ -23,6 +23,7 @@ cat libs/spazcore.js \
 	helpers/url.js \
 	helpers/view.js \
 	helpers/xml.js \
+	libs/spazaccounts.js \
 	libs/spazimageurl.js \
 	libs/spazphotomailer.js \
 	libs/spazprefs.js \

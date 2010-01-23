@@ -1,0 +1,376 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>example_textcompletion</title>
+	
+	<!-- Load required vendor libs -->
+	<script src="../vendors/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore base lib -->
+	<script src="spazcore-standard.js"></script>
+
+	<script src="../incubator/libs/spazwordtree.js" type="text/javascript" charset="utf-8"></script>
+
+	
+	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	
+	
+	
+	<script type="text/javascript" charset="utf-8">
+		/*
+			EXAMPLE:
+			var uc = new usernameCompleter( {
+				'usernames':usernames,
+				'displayDiv':'#matches',
+				'textarea':'#messagebox',
+				'maxMatches':50
+			});
+		*/
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		function usernameCompleter(opts) {
+			
+			// sch.debug(opts);
+			
+			this.usernames		= opts.usernames || [];
+			this.hashtags		= opts.hashtags  || [];
+			
+			this.usernameTree	= new SpazWordTree();
+			this.usernameTree.insertWords(this.usernames);
+			
+			this.hashtagTree	= new SpazWordTree();
+			this.hashtagTree.insertWords(this.hashtags);
+			
+			this.displayDiv		= opts.displayDiv;
+			this.textarea 		= opts.textarea;
+			this.maxMatches		= opts.maxMatches;
+
+			this.topMatch		= null;
+			this.currentStub	= null;
+			this.matches    	= null;
+			this.curpos			= 0;
+			this.before_cursor	= null;
+
+
+			this.setUsernames = function(usernames) {
+				this.usernames = usernames || [];
+			}
+
+			this.setHashtags = function(hashtags) {
+				this.hashtags = hashtags || [];
+			}
+
+
+			this.init = function() {
+				// sch.debug(this.displayDiv);
+
+				$(this.displayDiv).hide();
+
+				$(this.textarea).bind('keyup', {'thisuc':this }, function(e) {
+					
+					clearTimeout(this.searchTimeout);
+					
+					function search() {
+						// sch.debug('Searching');
+						var thisuc = e.data.thisuc;	// point back to the caller obj
+
+						var $target  = $(e.target);
+						var curpos   = $target[0].selectionStart;
+						var contents = $target.val();
+
+						/*
+							Init matches
+						*/
+						$(thisuc.displayDiv).empty().hide();
+						thisuc.curpos	   = curpos;
+						thisuc.before_cursor = contents.substr(0,thisuc.curpos);
+
+
+						if ( !thisuc.matchAgainst("((@)([a-z0-9_]+))$", 'username') // replies
+							 && !thisuc.matchAgainst("^((d )([a-z0-9_]+))$", 'username') // dms
+							 && !thisuc.matchAgainst("((#)([a-z0-9_]+))$", 'hashtag') ) { // hashtags
+							thisuc.topMatch = null;
+						}						
+					}
+					
+					/*
+						valid keycodes that should trigger a search include:
+						- 48-90 "0-9 and a-z"
+						- 189 "_ or -"
+						
+					*/
+					var key = e.charCode || e.keyCode || 0;
+					// sch.debug(key);
+					this.searchTimeout = setTimeout(search, 150);
+					
+				});
+
+				/*
+					capture tab
+				*/
+				$(this.textarea).bind('keydown', {'thisuc':this}, function(e) {
+					
+					
+					var thisuc = e.data.thisuc;	
+
+					var key = e.charCode || e.keyCode || 0;
+					// sch.debug(thisuc);
+
+					if (key == 9) { // TAB 
+						if (thisuc.topMatch) {
+							// sch.debug('topmatch! is '+thisuc.topMatch);
+							thisuc.insertMatch(thisuc.topMatch);
+							return false;	
+						}
+					}
+					return true;
+				});
+			}
+
+			this.init();
+
+
+			/**
+			 * @param {string} regstr a regular expression to match against
+			 * @param {string} [mode] 'username' or 'hashtag' 
+			 */
+			this.matchAgainst = function(regstr, mode) {
+				var tree, match;
+
+				// sch.debug(regstr);
+				// sch.debug(mode);
+				
+				if (mode !== 'hashtag') { mode = 'username' };
+
+				// sch.debug("mode:"+mode);
+				// sch.debug("regstr:"+regstr);
+
+				switch (mode) {
+					case 'username':
+						tree = this.usernameTree;
+						break;
+					case 'hashtag' :
+						tree = this.hashtagTree;
+						break;
+					default:
+						tree = this.usernameTree;
+				}
+
+				// sch.debug(tree);
+
+				// sch.debug('possibilities:');
+				// sch.debug(possibilities);
+
+				// sch.debug(this.before_cursor);
+
+
+
+				// if (possibilities.length < 1) {
+				// 	return false;
+				// }
+
+				var dmrgx = new RegExp(regstr, "gim");
+				var reg_matches = dmrgx.exec(this.before_cursor);
+				if ( reg_matches ) {
+					match = reg_matches[3];
+					this.currentStub = match;
+					// sch.debug('Looks like message to '+match);
+
+					var matching_results = tree.searchWord(match);
+					if (matching_results.length > 0 && matching_results.length < this.maxMatches) {
+						// sch.debug('matching_results '+matching_results.toString());
+
+						this.topMatch = matching_results[0];
+
+						var thisuc = this; // help with scoping
+						$.each(matching_results, function() {
+							$(thisuc.displayDiv).append('<div title="'+this+'" class="autocomplete-match">'+this+'</div>');
+						});
+						$(this.displayDiv+' .autocomplete-match').one('click', function() {
+							var thismatch = $(this).attr('title');
+							thisuc.insertMatch(thismatch);
+						});
+
+						var bottom = $('BODY').outerHeight() - $(this.textarea).offset().top;
+
+						$(this.displayDiv).css('bottom', bottom);
+						$(this.displayDiv).show();
+						return true;
+					}
+				} else {
+					return false;
+				}
+			};
+
+			/**
+			 * @param {string} match the match to insert 
+			 */
+			this.insertMatch = function(match) {
+				// remove stub from match
+				var stubRE = new RegExp(this.currentStub, 'i')
+				match = match.replace(stubRE, '') + ' ';
+				var oldtext = $(this.textarea).val();
+				newtext = oldtext.substr(0,this.curpos) + match + oldtext.substr(this.curpos);
+				$(this.textarea).val(newtext);
+				$(this.displayDiv).empty().hide();
+				$(this.textarea).focus();
+			}
+		}
+	</script>
+	
+	<script type="text/javascript" charset="utf-8">
+		var usernames = [
+			"Paulo_Menoti",
+			"rgbboy",
+			"quiesha2011",
+			"PiinkOkochii",
+			"dstevenwhite",
+			"free4u2day",
+			"Jud37",
+			"slembke74",
+			"BittyJr",
+			"Egypt_coach5",
+			"DNYC361",
+			"isabellemusic",
+			"LeahChannas",
+			"rendhy_acellya",
+			"fdokuz",
+			"gigizinha16",
+			"netty879",
+			"Vermersky",
+			"Bridzella",
+			"InternetsMagic",
+			"kamran170",
+			"traviesofeemac",
+			"tOtTy",
+			"jakay05",
+			"smak9120",
+			"raeracquel",
+			"laure66",
+			"jones_girl215",
+			"classifiedsadd",
+			"JosephineBond",
+			"DirtRoad5888",
+			"Sweathart22",
+			"ritahenr",
+			"sarahkovac",
+			"red20073",
+			"mollylove7717",
+			"komando506",
+			"Serez123",
+			"madhudeva",
+			"executive_sport",
+			"Gunj79",
+			"maryannehitt",
+			"DBBradway",
+			"EasternStarr",
+			"SenhouseDesigns",
+			"Tonibrat09",
+			"MARINERS79",
+			"Danielcezar",
+			"einkaufenhagen",
+			"hoskanece",
+			"Gjergji_9",
+			"becky_elizabeth",
+			"daidaix13",
+			"CHATURVEDIRQIIT",
+			"AFann0",
+			"Mimi1027",
+			"kia108",
+			"dyerjimmy",
+			"ADNANXCENTYBOYZ",
+			"nonnapineta",
+			"classifiedskc",
+			"Panek420",
+			"MusicJagat",
+			"jorgearayabrito",
+			"master2075",
+			"CBFPT",
+			"suehiroso",
+			"browneyescom",
+			"nikigb",
+			"trouville2OOO",
+			"Dreamgirl1980",
+			"Courtnee9404",
+			"MicaeliCristina",
+			"emkander",
+			"exercisecraze",
+			"mizunderztood",
+			"talisein",
+			"CJStead",
+			"Becshox",
+			"shnavid",
+			"Marlboro250",
+			"LukeROXX",
+			"wrsawlily",
+			"saltygoodness24",
+			"ZdenkaT",
+			"Multilogue",
+			"DirtyWhiteVans",
+			"bbblacky",
+			"tamanomenbaka",
+			"lynnve",
+			"catherinefeely",
+			"telukir",
+			"mistymax98",
+			"Racoosin",
+			"amezquitaesteba",
+			"c_pennington",
+			"EduardaFernands",
+			"its_Fanny",
+			"akeel14",
+			"angelo_axm"
+		];
+	</script>
+	
+	<script type="text/javascript" charset="utf-8">
+	
+		sc.setDumpLevel(1);
+	
+		$(document).ready(function() {
+			var uc = new usernameCompleter( {
+				'usernames':usernames,
+				'displayDiv':'#matches',
+				'textarea':'#messagebox',
+				'maxMatches':50
+			});
+			
+			var tree = new SpazWordTree();
+			tree.insertWords(usernames);
+			
+			var jstree = tree.toJSON();
+			
+			tree.fromJSON(jstree);
+			
+			
+		});
+	</script>
+</head>
+
+<body>
+	<textarea id="messagebox" rows="8" cols="40"></textarea>
+	
+	<div id="matches">
+		
+	</div>
+
+</body>
+</html>

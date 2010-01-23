@@ -1,4 +1,4 @@
-/*********** Built 2010-01-11 15:23:42 EST ***********/
+/*********** Built 2010-01-14 13:28:30 EST ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -5673,8 +5673,8 @@ sc.helpers.deJSON = function(json)
  {
 
 	// Fix twitter data bug
-	var re = new RegExp("Couldn\\'t\\ find\\ Status\\ with\\ ID\\=[0-9]+\\,", "g");
-	json = json.replace(re, "");
+	// var re = new RegExp("Couldn\\'t\\ find\\ Status\\ with\\ ID\\=[0-9]+\\,", "g");
+	// json = json.replace(re, "");
 
 	var done = false;
 	try {
@@ -6946,7 +6946,331 @@ sc.helpers.createXMLFromString = function (string) {
 };
 
 
-/*jslint 
+
+/**
+ * "constants" for account types 
+ */
+var SPAZCORE_ACCOUNT_TWITTER	= 'twitter';
+var SPAZCORE_ACCOUNT_IDENTICA	= 'identi.ca';
+var SPAZCORE_ACCOUNT_STATUSNET	= 'StatusNet';
+var SPAZCORE_ACCOUNT_FLICKR		= 'flickr';
+var SPAZCORE_ACCOUNT_WORDPRESS	= 'wordpress.com';
+var SPAZCORE_ACCOUNT_TUMBLR		= 'tumblr';
+var SPAZCORE_ACCOUNT_FACEBOOK	= 'facebook';
+var SPAZCORE_ACCOUNT_FRIENDFEED	= 'friendfeed';
+
+/**
+ * This creates a new SpazAccounts object, and optionally associates it with an existing preferences object
+ * @constructor
+ * @param (Object) prefsObj  An existing SpazPrefs object (optional)
+ */
+var SpazAccounts = function(prefsObj) {
+	if (prefsObj) {
+		this.prefs = prefsObj;
+	} else {
+		this.prefs = new SpazPrefs();
+		this.prefs.load();
+	}
+	
+	/*
+		load existing accounts
+	*/
+	this.load();
+
+};
+
+/**
+ * the key used inside the prefs object 
+ */
+SpazAccounts.prototype.prefskey = 'users';
+
+/**
+ * loads the accounts array from the prefs object 
+ */
+SpazAccounts.prototype.load	= function() { 
+	var accjson = this.prefs.get(this.prefskey);
+	
+	sch.debug("accjson:'"+accjson+"'");
+	
+	try {
+		this._accounts = sch.deJSON(this.prefs.get(this.prefskey));
+	} catch(e) {
+		sch.error(e.message);
+		this._accounts = [];
+	}		
+
+	/*
+		sanity check
+	*/
+	if (!sch.isArray(this._accounts)) {
+		this._accounts = [];
+	}
+	
+	sch.debug("this._accounts:'"+this._accounts+"'")
+	
+};
+
+/**
+ * saves the accounts array to the prefs obj 
+ */
+SpazAccounts.prototype.save	= function() {
+	
+	
+	this.prefs.set(this.prefskey, sch.enJSON(this._accounts));
+	sch.debug('saved users to "'+this.prefskey+'" pref');
+	for (var x in this._accounts) {
+		sch.debug(this._accounts[x].id);
+	};
+	
+	sch.debug('THE ACCOUNTS:')
+	sch.debug(sch.enJSON(this._accounts));
+
+	sch.debug('ALL PREFS:')
+	sch.debug(sch.enJSON(this.prefs._prefs));
+
+	
+};
+
+/**
+ * returns the array of accounts
+ * @returns {array} the accounts 
+ */
+SpazAccounts.prototype.getAll = function() {
+	return this._accounts;
+};
+
+/**
+ * Set all users by passing in a hash. overwrites all existing data!
+ * @param {array} accounts_array an array of account objects
+ */
+SpazAccounts.prototype.setAll = function(accounts_array) {
+	this._accounts = accounts_array;
+	this.save();
+	sch.debug("Saved these accounts:");
+	for (var i=0; i < this_accounts.length; i++) {
+		sch.debug(this._accounts[x].id);
+	};
+};
+
+/**
+ * @param {string} id the UUID to update
+ * @param {object} acctobj
+ * @param {string} [acctobj.username] a new username
+ * @param {string} [acctobj.password] a new password
+ * @param {string} [acctobj.type] a new account type
+ * @param {object} [acctobj.meta] the hash of metadata; you should probably use SpazAccounts.setMeta() instead
+ */
+SpazAccounts.prototype.update = function(id, acctobj) {
+	var orig = this.get(id);
+	if (orig) {
+		var modified = sch.defaults(orig, acctobj);
+		return this.get(id);
+	} else {
+		sch.error('No account with id "'+id+'" exists');
+		return null;
+	}
+}
+
+
+
+/**
+ * wipes the accounts array and saves it
+ */
+SpazAccounts.prototype.initAccounts	= function() {
+	this._accounts = [];
+	this.save();
+};
+
+/**
+ * add a new account
+ * @param {string} username the username
+ * @param {string} password the password
+ * @param {type} type the type of account
+ * @returns {object} the account object just added
+ */
+SpazAccounts.prototype.add = function(username, password, type) {
+	
+	if (!type) {
+		sch.error("Type must be set");
+		return false;
+	}
+	
+	var username = username.toLowerCase();
+	var id = this.generateID();
+	this._accounts.push({
+		'id':id,
+		'username':username,
+		'password':password,
+		'type':type,
+		'meta':{}
+	});
+	this.save();
+	
+	sch.debug("Added new user:"+id);
+	
+	return this.get(id);
+};
+
+
+/**
+ * @param {string} id the UUID of the account to delete 
+ */
+SpazAccounts.prototype.remove = function(id) {
+	sch.debug("Deleting '"+id+"'…");
+	
+	var index = this._findUserIndex(id);
+	if (index !== false) {
+		var deleted = this._accounts.splice(index, 1);
+		sch.debug("Deleted account '"+deleted[0].id+"'");
+		return deleted[0];
+	} else {
+		sch.error("Could not find this id to delete: '"+id+"'");
+		return false;
+	}
+};
+
+
+/**
+ * @param {string} type the type of accounts to retrieve
+ * @returns {array} the array of matching accounts
+ */
+SpazAccounts.prototype.getByType = function(type) {
+	var matches = [];
+	
+	for (var i=0; i < this._accounts.length; i++) {
+		if (this._accounts[i].type === type) {
+			matches.push(this._accounts[i])
+		}
+	};
+	
+	return matches;
+};
+
+/**
+ * @param {string} username the username to search for
+ * @returns {array} an array of matching accounts
+ */
+SpazAccounts.prototype.getByUsername = function(username) {
+	var matches = [];
+
+	for (var i=0; i < this._accounts.length; i++) {
+		if (this._accounts[i].username === username) {
+			matches.push(this._accounts[i])
+		}
+	};
+	
+	return matches;
+};
+
+/**
+ * @param {string} username the username to search for
+ * @param {string} type the type to search for
+ * @returns {array} an array of matching accounts
+ */
+SpazAccounts.prototype.getByUsernameAndType = function(username, type) {
+	var matches = [];
+
+	for (var i=0; i < this._accounts.length; i++) {
+		if (this._accounts[i].username === username && this._accounts[i].type === type) {
+			matches.push(this._accounts[i])
+		}
+	};
+	
+	return matches;
+	
+};
+
+
+/**
+ * retrives the user object by user and type
+ * @param {string} id  the user id UUID
+ * @param {string} type 
+ */
+SpazAccounts.prototype.get = function(id) {
+
+	var index = this._findUserIndex(id);
+
+	if (index !== false) {
+		return this._accounts[i];		
+	}
+	
+	return false;
+	
+};
+
+
+/**
+ * a private function to find the user's array index by their UUID
+ * @param {string} id the user's UUID
+ * @returns {number|boolen} returns the array index or false if DNE 
+ */
+SpazAccounts.prototype._findUserIndex = function(id) {
+	
+	for (i=0; i<this._accounts.length; i++) {
+		
+		if (this._accounts[i].id === id) {
+			sch.debug('Found matching user record to '+ id);
+			return i;
+		}
+		
+	}
+	
+	return false;
+};
+
+
+
+/**
+ * @returns {string} returns the generated UUID 
+ */
+SpazAccounts.prototype.generateID = function() {
+	var id = sc.helpers.UUID();
+	return id;
+};
+
+
+
+/**
+ * @param {string} id the user's UUID
+ * @param {string} key the key for the metadata entry
+ * @returns {String|Object|Array|Boolean|Number} returns the set value, or null if user ID or meta entry is not found
+ */
+SpazAccounts.prototype.getMeta = function(id, key) {
+	
+	if ( user = this.get(id) ) {
+		if (user.meta && user.meta[key] !== null) {
+			return user.meta[key];
+		}
+	}
+	
+	return null;
+	
+};
+
+/**
+ * @param {string} id the user's UUID
+ * @param {string} key the key for the metadata entry
+ * @param {String|Object|Array|Boolean|Number} value the value of the metadata entry
+ * @returns {String|Object|Array|Boolean|Number} returns the set value, or null if user ID is not found
+ */
+SpazAccounts.prototype.setMeta = function(id, key, value) {
+	
+	var index = this._findUserIndex(id);
+
+	if (index !== false) {		
+		if (!this._accounts[index].meta) {
+			this._accounts[index].meta = {};
+		}
+		this._accounts[index].meta[key] = value;
+		
+		this.save();
+		
+		return this._accounts[index].meta[key];
+		
+	}
+	return null;
+	
+};/*jslint 
 browser: true,
 nomen: false,
 debug: true,
@@ -7823,6 +8147,10 @@ onevar: false
 var sc, Titanium, air, window, jQuery, Mojo;
 
 var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
+
+var SPAZCORE_PREFS_AIR_FILENAME = 'preferences.json';
+
+var SPAZCORE_PREFS_MOJO_COOKIENAME = 'preferences.json';
  
 /**
  * A preferences lib for AIR JS apps. This requires the json2.js library
@@ -7851,7 +8179,7 @@ var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
  * @TODO we need to pull out the platform-specifc stuff into the /platforms/... hierarchy
  * @class SpazPrefs
  */
-function SpazPrefs(defaults, sanity_methods) {	
+function SpazPrefs(defaults, id, sanity_methods) {	
 
 	/*
 		init prefs
@@ -7869,6 +8197,10 @@ function SpazPrefs(defaults, sanity_methods) {
 
 	if (sanity_methods) {
 		sc.helpers.dump('need to add sanity_method parsing');
+	}
+	
+	if (id) {
+		this.id = id;
 	}
 	
 	if (defaults) {
@@ -8010,7 +8342,7 @@ SpazPrefs.prototype.load = function(name) {
 		sc.helpers.dump('this is webOS');
 		if (!this.mojoCookie) {
 			sc.helpers.dump('making cookie');
-			this.mojoCookie = new Mojo.Model.Cookie('SpazPrefs');
+			this.mojoCookie = new Mojo.Model.Cookie(SPAZCORE_PREFS_MOJO_COOKIENAME);
 			
 			
 			
@@ -8113,7 +8445,7 @@ SpazPrefs.prototype.save = function() {
 
 	if (sc.helpers.iswebOS()) {
 		if (!this.mojoCookie) {
-			this.mojoCookie = new Mojo.Model.Cookie('SpazPrefs');
+			this.mojoCookie = new Mojo.Model.Cookie(SPAZCORE_PREFS_MOJO_COOKIENAME);
 		}
 		
 		this.mojoCookie.put(this._prefs);
@@ -13358,21 +13690,59 @@ var sc, air;
  */
 
 SpazPrefs.prototype.load = function() {
+	var filename = this.id || SPAZCORE_PREFS_AIR_FILENAME;
 	
+	var prefsFile = air.File.applicationStorageDirectory;
+    prefsFile = prefsFile.resolvePath(filename);
+
+    var fs = new air.FileStream();
+
+    if (prefsFile.exists) {
+		sch.debug('prefsfile exists');
+        fs.open(prefsFile, air.FileMode.READ);
+        var prefsJSON = fs.readUTFBytes(prefsFile.size);
+        sch.debug(prefsJSON)
+        var loaded_prefs = JSON.parse(prefsJSON);
+
+		for (var key in loaded_prefs) {
+			sc.helpers.dump('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
+            this._prefs[key] = loaded_prefs[key];
+       	}
+    } else { // init the file
+		sch.debug('prefs file does not exist; saving with defaults');
+        this.save();
+    }
+    fs.close()
 }
 
 SpazPrefs.prototype.save = function() {
-	
+	var jsonPrefs = sch.enJSON(Spaz.Prefs.preferences);
+    sch.debug(jsonPrefs);
+
+	var filename = this.id || SPAZCORE_PREFS_AIR_FILENAME;
+
+    var prefsFile = air.File.applicationStorageDirectory;
+    prefsFile = prefsFile.resolvePath(filename);
+
+    var fs = new air.FileStream();
+
+    fs.open(prefsFile, air.FileMode.WRITE);
+    fs.writeUTFBytes(sc.helpers.enJSON(this._prefs));
+    fs.close();
 };
 
 
 SpazPrefs.prototype.getEncrypted = function(key) {
-	
+	var storedValue = air.EncryptedLocalStore.getItem(key);
+	var val = storedValue.readUTFBytes(storedValue.length);
+	return val;
 };
 
 
 SpazPrefs.prototype.setEncrypted = function(key, val) {
-	
+	var bytes = new air.ByteArray();
+	bytes.writeUTFBytes(val);
+	return air.EncryptedLocalStore.setItem(key, bytes);
 };
 
 

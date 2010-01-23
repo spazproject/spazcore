@@ -1,0 +1,351 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>example_preferences</title>
+	
+	<!-- Load required vendor libs -->
+	<script src="../vendors/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore base lib -->
+	<script src="spazcore-standard.js"></script>
+	
+	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	
+	<script type="text/javascript" charset="utf-8">
+
+		var SpazPrefsUI = function(prefsObj, settings) {
+			this.setPrefsObj(prefsObj);
+			this.loadSettings(settings);
+			this.processSettings();
+			
+			var that = this;
+			/**
+			 * defined here so we can use "that" closure
+			 */
+			this.onChange = function(e) {
+				var key, val, jqel;
+
+				sch.debug(e);
+
+				jqel = jQuery(e.target);
+				key  = jqel.attr('data-spazprefsui-key', key);
+				val  = that.getUIValue(key);
+
+				that._prefs.set(key, val);
+			};
+			
+			/*
+				add listeners automatically
+			*/
+			this.addListeners();
+
+
+		};
+		
+		
+		
+		SpazPrefsUI.prototype._settings = {};
+		
+		
+		SpazPrefsUI.prototype._defaults = {
+			'filter': null,
+			'selector':null,
+			'type':'string',
+			'setUI':null,
+			'getUI':null
+		};
+		
+		
+		SpazPrefsUI.prototype.cleanup = function() {
+			this.removeListeners();
+		};
+		
+		
+		SpazPrefsUI.prototype.setPrefsObj = function(prefsObj) {
+			this._prefs = prefsObj;
+		}
+		
+		
+		SpazPrefsUI.prototype.loadSettings = function(settings) {
+			for(var key in settings) {
+				this.loadOne(key, settings[key]);
+			}
+		};
+
+
+		SpazPrefsUI.prototype.loadOne = function(key, opts) {
+			opts = sch.defaults(sch.clone(this._defaults), opts);
+			if (!opts.selector) { opts.selector = '#'+key; }
+			
+			this._settings[key] = opts;
+			sch.debug(this._settings);
+		}
+		
+		
+		/**
+		 * take the current settings and build everything 
+		 */
+		SpazPrefsUI.prototype.processSettings = function() {
+			this.setUI();
+		};
+		
+		
+		/**
+		 * Set the values of the form fields 
+		 */
+		SpazPrefsUI.prototype.setUI = function() {
+			var val, key, opts;
+			for(key in this._settings) {
+				val  = this._prefs.get(key);
+				this.setUIValue(key, val)
+			}
+		};
+		
+		/**
+		 * get the values from the form fields 
+		 */
+		SpazPrefsUI.prototype.getFromUI = function() {
+			var val, key, opts;
+			for(key in this._settings) {
+				val = this.getUIValue(key)
+				this._prefs.set(key, val);
+			}
+		};
+
+		/**
+		 * sets the form element selector for the given key 
+		 */
+		SpazPrefsUI.prototype.setSelector = function(key, selector) {
+			this._settings[key].selector = selector;
+		};
+		
+		/**
+		 * sets the filtering method for the given key 
+		 */
+		SpazPrefsUI.prototype.setFilter = function(key, filterfunc) {
+			this._settings[key].filter = filterfunc;
+		};
+
+		/**
+		 * sets the value in the UI for the give key 
+		 */
+		SpazPrefsUI.prototype.setUIValue = function(key, value) {
+			var value = this.filterValue(key, value);
+			var selector = this._settings[key].selector;
+			var jqel = jQuery(selector);
+			
+			if (jqel.length > 0) {
+
+				if (jqel.is(':checkbox')) {
+					jqel.attr('checked', !!value);
+				} else {
+					jqel.val(value);
+				}
+				
+			} else {
+				sch.error('no element matching selector "'+selector+'"');
+			}
+		};
+		
+		SpazPrefsUI.prototype.getUIValue = function(key) {
+			var value;
+			var selector = this._settings[key].selector;
+			var jqel = jQuery(selector);
+			
+			if (jqel.length > 0) {
+
+				if (jqel.is(':checkbox')) {
+					value = jqel.attr('checked');
+				} else {
+					value = jqel.val();
+				}
+				
+				value = this.filterValue(key, value);
+				
+				return value;
+				
+			} else {
+				sch.error('no element matching selector "'+selector+'"');
+				return undefined;
+			}
+			
+		};
+		
+		/**
+		 * filters the value of the key through the filter method 
+		 */
+		SpazPrefsUI.prototype.filterValue = function(key, value) {
+			value = this.castValue(key, value);
+			if (this._settings[key].filter) {
+				value = this._settings[key].filter(value);
+			}
+			return value;
+		};
+		
+		/**
+		 * converts the type of the value based on the type setting for the key 
+		 */
+		SpazPrefsUI.prototype.castValue = function(key, value) {
+			
+			var keytype = this._settings[key].type;
+			
+			switch (keytype) {
+				case 'array':
+					if (!sch.isArray(value)) {
+						cast_value = [value];
+					} else {
+						cast_value = value;
+					}
+					break;
+				case 'integer': // http://www.jibbering.com/faq/faq_notes/type_convert.html#tcToInt32
+					cast_value = value|0;
+					break;
+				case 'string':
+					if (!sch.isString(value)) {
+						cast_value = String(value);
+					} else {
+						cast_value = value;
+					}
+					break;
+				case 'number':
+					cast_value = Number(value)
+					break;
+				default:
+					cast_value = value;
+					break;
+			}
+			return cast_value;
+		}
+
+
+		
+		/**
+		 * add listeners to each form field to listen for changes 
+		 */
+		SpazPrefsUI.prototype.addListeners = function() {
+			var key;
+			for (key in this._settings) {
+				this.addListener(key);
+			}
+		};
+		
+		/**
+		 * add a listener for a given key's form field 
+		 */
+		SpazPrefsUI.prototype.addListener = function(key) {
+			var that = this;
+			var jqel = jQuery(this._settings[key].selector);
+			var el   = jqel.get(0);
+			
+			/*
+				set this custom attribute so we can ID this more easily when change fires
+			*/
+			jqel.attr('data-spazprefsui-key', key);
+			
+			sch.listen(el, 'change', this.onChange);
+		};
+		
+		
+		/**
+		 * remove all form field listeners 
+		 */
+		SpazPrefsUI.prototype.removeListeners = function() {
+			var key;
+			for (key in this._settings) {
+				this.removeListener(key);
+			}
+		};
+		
+		/**
+		 * remove a listener for a given key's form field 
+		 */
+		SpazPrefsUI.prototype.removeListener = function(key) {
+			var that = this;
+			var el = jQuery(this._settings[key].selector).get(0);
+			sch.unlisten(el, 'change', this.onChange);
+		};
+		
+		
+
+		
+	</script>
+	
+	
+	<script type="text/javascript" charset="utf-8">
+	
+		jQuery(document).ready( function() {
+			
+			sc.setDumpLevel(5);
+			
+			
+			var prefs = new SpazPrefs({
+				'enable_it':true,
+				'type_it':'Poop',
+				'pick_it':'option2'
+			});
+
+
+			var prefsUIopts = {
+				'enable_it': {
+					'type':'boolean'
+				},
+				'type_it': {
+					'type':'string'
+				},
+				'pick_it': {
+					'type':'string'
+				}
+			};
+
+			var prefsUI = new SpazPrefsUI(prefs, prefsUIopts);
+
+			
+			
+			jQuery('#clear').click(function() {
+				prefsUI.removeListeners()
+			});	
+			jQuery('#rebind').click(function() {
+				prefsUI.addListeners()
+			});	
+		});
+
+	</script>
+	
+</head>
+
+<body>
+
+<form>
+	<div>
+		<label for="enable_it">Enable It</label>
+		<input type="checkbox" name="enable_it" value="" id="enable_it">
+	</div>
+	
+	<div>
+		<label for="type_it">Type It</label>
+		<input type="text" name="type_it" value="Stuff" id="type_it">
+	</div>
+	
+	<div>
+		<label for="pick_it">Pick It</label>
+		<select name="pick_it" id="pick_it">
+			<option value="option1">Option 1</option>
+			<option value="option2">Option 2</option>
+		</select>
+	</div>
+	
+	
+	<div>
+		<input type="button" name="clear" value="Clear Listeners" id="clear">
+		<input type="button" name="rebind" value="Rebind Listeners" id="rebind">
+		
+	</div>
+	
+</form>
+
+</body>
+</html>
