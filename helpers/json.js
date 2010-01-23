@@ -17,8 +17,8 @@ sc.helpers.deJSON = function(json)
  {
 
 	// Fix twitter data bug
-	var re = new RegExp("Couldn\\'t\\ find\\ Status\\ with\\ ID\\=[0-9]+\\,", "g");
-	json = json.replace(re, "");
+	// var re = new RegExp("Couldn\\'t\\ find\\ Status\\ with\\ ID\\=[0-9]+\\,", "g");
+	// json = json.replace(re, "");
 
 	var done = false;
 	try {
