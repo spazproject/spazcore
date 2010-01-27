@@ -12,11 +12,13 @@ cat libs/spazcore.js \
 	vendors/json2.js \
 	vendors/sizzle.js \
 	vendors/underscore.js \
+	vendors/shortcut.js \
 	helpers/datetime.js \
 	helpers/event.js \
 	helpers/hash.js \
 	helpers/javascript.js \
 	helpers/json.js \
+	helpers/keyboard.js \
 	helpers/location.js \
 	helpers/string.js \
 	helpers/sys.js \
