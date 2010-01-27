@@ -29,40 +29,73 @@
 	</style>
 	
 	<script src="../vendors/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../vendors/shortcut.js" type="text/javascript" charset="utf-8"></script>
+	<script src="spazcore-standard.js" type="text/javascript" charset="utf-8"></script>
 	
 	<script type="text/javascript" charset="utf-8">
 
-		SpazTimelineNav = function() {
+		SpazTimelineNav = function(opts) {
 			
 			var thisNav = this;
 			
-			this.selected_class = 'ui-selected';
-			this.timeline_id    = 'timeline';
-			this.entry_class    = 'entry';
-			this.scroll_offset  = 200;
+			opts = sch.defaults({
+				'timeline_id'   :'timeline',
+				'selected_class':'ui-selected',
+				'entry_class'   :'entry',
+				'scroll_offset':200,
+				'keyup':'up',
+				'keydown':'down'
+			}, opts);
 			
-			this.jqtl      = jQuery('#'+timeline_id);
-			this.jqentries = jQuery('.'+entry_class, jqtl);
-			
-			
-			
-			/*
-				bind up and down
-			*/
-			jQuery('#move-up').click(function() {
-				thisNav.move('up');
-			});
-			jQuery('#move-down').click(function() {
-				thisNav.move('down');
-			});
-			
-			/*
-				add numbers for fun
-			*/
-			this.jqentries.each(function(i) {
-				this.innerHTML = i+':'+this.innerHTML;
-			});
+			this.selected_class = opts.selected_class;
+			this.timeline_id    = opts.timeline_id;
+			this.entry_class    = opts.entry_class;
+			this.scroll_offset  = opts.scroll_offset;
+			this.keyup			= opts.keyup;
+			this.keydown		= opts.keydown;
 
+
+			this.reset = function() {
+				this.jqtl      = jQuery('#'+this.timeline_id);
+				this.jqentries = jQuery('.'+this.entry_class, jqtl);
+				
+				/*
+					bind keyboard shortcuts
+				*/
+				sch.key_add(this.keyup, function() {this.move('up')});
+				sch.key_add(this.keydown, function() {this.move('down')});
+				
+				/*
+					add numbers for fun
+				*/
+				this.jqentries.each(function(i) {
+					this.innerHTML = i+':'+this.innerHTML;
+				});
+			}
+
+			/**
+			 *  
+			 */
+			this.setTimelineId = function(tlid) {
+				if (tlid.indexOf('#') === 0) {
+					tlid = tlid.replace('#', '');
+				}
+				this.timeline_id = tlid;
+			}
+
+			this.setSelectedClass = function(sel_class) {
+				if (sel_class.indexOf('.') === 0) {
+					sel_class = sel_class.replace('.', '');
+				}
+				this.selected_class = sel_class;
+			}
+
+			this.setEntryClass = function(entry_class) {
+				if (entry_class.indexOf('.') === 0) {
+					entry_class = entry_class.replace('.', '');
+				}
+				this.entry_class = entry_class;
+			}
 
 			/**
 			 *  
@@ -71,7 +104,7 @@
 				
 				var thisNav = this;
 				
-				// console.log(dir);
+				// sch.debug(dir);
 				
 				var i_first = 0;
 				var i_last  = this.jqentries.length-1;
@@ -87,9 +120,9 @@
 					}
 				});
 
-				// console.log("first:\t"+i_first);
-				// console.log("last:\t"+i_last);
-				// console.log("old selected:\t"+i_sel);
+				// sch.debug("first:\t"+i_first);
+				// sch.debug("last:\t"+i_last);
+				// sch.debug("old selected:\t"+i_sel);
 				
 				switch(dir) {
 					
@@ -97,13 +130,13 @@
 						
 						if (i_sel < 0 || i_sel > i_last) {
 							i_sel = i_last;
-							// console.log('start at bottom!');
+							// sch.debug('start at bottom!');
 						} else if (i_sel === i_first) {
 							i_sel = i_sel; // do not wrap!
-							// console.log('do not wrap!');
+							// sch.debug('do not wrap!');
 						} else {
 							i_sel--;
-							// console.log('move down!');
+							// sch.debug('move down!');
 						}
 						
 						
@@ -113,13 +146,13 @@
 
 						if (i_sel < 0 || i_sel > i_last) {
 							i_sel = i_first;
-							// console.log('start at top!');
+							// sch.debug('start at top!');
 						} else if (i_sel === i_last) {
 							i_sel = i_sel; // do not wrap!
-							// console.log('do not wrap!');
+							// sch.debug('do not wrap!');
 						} else {
 							i_sel++;
-							// console.log('move up!');
+							// sch.debug('move up!');
 						}
 					
 						break;
@@ -131,7 +164,7 @@
 
 				select(this.jqentries.get(i_sel));
 				
-				// console.log("new selected:\t"+i_sel);
+				// sch.debug("new selected:\t"+i_sel);
 				
 			};
 			
@@ -158,7 +191,7 @@
 			 */
 			this.reveal = function(element) {
 				
-				console.log('====================================');
+				sch.debug('====================================');
 				
 				var jqel = jQuery(element);
 				
@@ -175,20 +208,20 @@
 				var selected_offset    = parseInt(jqel.offset().top, 10);
 				
 
-				console.log('viewport_bottom:'+viewport_bottom);
-				console.log('selected_bottom:'+selected_bottom);
-				console.log('viewport_top   :'+viewport_top);
-				console.log('selected_top   :'+selected_top);
-				console.log('viewport_height   :'+viewport_height);
-				console.log('selected_height   :'+selected_height);
-				console.log("viewport_scrolltop:"+viewport_scrolltop);
-				console.log("selected_offset.top:"+selected_offset);
+				sch.debug('viewport_bottom:'+viewport_bottom);
+				sch.debug('selected_bottom:'+selected_bottom);
+				sch.debug('viewport_top   :'+viewport_top);
+				sch.debug('selected_top   :'+selected_top);
+				sch.debug('viewport_height   :'+viewport_height);
+				sch.debug('selected_height   :'+selected_height);
+				sch.debug("viewport_scrolltop:"+viewport_scrolltop);
+				sch.debug("selected_offset.top:"+selected_offset);
 
 				/*
 					below the fold
 				*/
 				if ( selected_height+selected_top > viewport_bottom ) {
-					console.log("el.bottom is > tl.bottom");
+					sch.debug("el.bottom is > tl.bottom");
 					var diff = (viewport_height - viewport_top - selected_bottom) * -1;
 					this.jqtl.scrollTop(viewport_scrolltop + diff);
 				}
@@ -197,15 +230,18 @@
 					above the fold
 				*/
 				if ( selected_top < 0 ) {
-					console.log("el.top is < tl.top");
+					sch.debug("el.top is < tl.top");
 					var diff = selected_top * -1;
 					this.jqtl.scrollTop(viewport_scrolltop - diff);
 				}
 				
-				console.log("New scrolltop:"+this.jqtl.scrollTop());
+				sch.debug("New scrolltop:"+this.jqtl.scrollTop());
 				
 				
 			};
+			
+			
+			this.reset();
 			
 		}
 		
