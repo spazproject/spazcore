@@ -473,7 +473,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
  * @param {string} username optional
  * @param {string} password optional
 */
-SpazTwit.prototype.verifyCredentials = function(username, password) {
+SpazTwit.prototype.verifyCredentials = function(username, password, onSuccess, onFailure) {
 	var url = this.getAPIURL('verify_credentials');
 	
 	if (!username) {
@@ -490,6 +490,8 @@ SpazTwit.prototype.verifyCredentials = function(username, password) {
 		'process_callback': this._processAuthenticatedUser,
 		'success_event_type':'verify_credentials_succeeded',
 		'failure_event_type':'verify_credentials_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'method':'GET'
 	};
 
@@ -1620,7 +1622,7 @@ SpazTwit.prototype._callMethod = function(opts) {
 
 
 
-SpazTwit.prototype.getUser = function(user_id) {
+SpazTwit.prototype.getUser = function(user_id, onSuccess, onFailure) {
 	var data = {};
 	data['id'] = user_id;
 	
@@ -1633,6 +1635,8 @@ SpazTwit.prototype.getUser = function(user_id) {
 		// 'process_callback': this._processUserData,
 		'success_event_type':'get_user_succeeded',
 		'failure_event_type':'get_user_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'method':'GET'
 	};
 
@@ -1738,7 +1742,7 @@ SpazTwit.prototype._processUserList = function(section_name, ret_items, opts, pr
 };
 
 
-SpazTwit.prototype.addFriend = function(user_id) {
+SpazTwit.prototype.addFriend = function(user_id, onSuccess, onFailure) {
 	var data = {};
 	data['id'] = user_id;
 	
@@ -1750,6 +1754,8 @@ SpazTwit.prototype.addFriend = function(user_id) {
 		'password':this.password,
 		'success_event_type':'create_friendship_succeeded',
 		'failure_event_type':'create_friendship_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'data':data
 	};
 
@@ -1758,7 +1764,7 @@ SpazTwit.prototype.addFriend = function(user_id) {
 	*/
 	var xhr = this._callMethod(opts);
 };
-SpazTwit.prototype.removeFriend = function(user_id) {
+SpazTwit.prototype.removeFriend = function(user_id, onSuccess, onFailure) {
 	var data = {};
 	data['id'] = user_id;
 	
@@ -1770,6 +1776,8 @@ SpazTwit.prototype.removeFriend = function(user_id) {
 		'password':this.password,
 		'success_event_type':'destroy_friendship_succeeded',
 		'failure_event_type':'destroy_friendship_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'data':data
 	};
 
@@ -1780,7 +1788,7 @@ SpazTwit.prototype.removeFriend = function(user_id) {
 
 };
 
-SpazTwit.prototype.block = function(user_id) {
+SpazTwit.prototype.block = function(user_id, onSuccess, onFailure) {
 	var data = {};
 	data['id'] = user_id;
 	
@@ -1792,6 +1800,8 @@ SpazTwit.prototype.block = function(user_id) {
 		'password':this.password,
 		'success_event_type':'create_block_succeeded',
 		'failure_event_type':'create_block_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'data':data
 	};
 
@@ -1800,7 +1810,7 @@ SpazTwit.prototype.block = function(user_id) {
 	*/
 	var xhr = this._callMethod(opts);
 };
-SpazTwit.prototype.unblock = function(user_id) {
+SpazTwit.prototype.unblock = function(user_id, onSuccess, onFailure) {
 	var data = {};
 	data['id'] = user_id;
 	
@@ -1812,6 +1822,8 @@ SpazTwit.prototype.unblock = function(user_id) {
 		'password':this.password,
 		'success_event_type':'destroy_block_succeeded',
 		'failure_event_type':'destroy_block_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'data':data
 	};
 
@@ -1822,11 +1834,11 @@ SpazTwit.prototype.unblock = function(user_id) {
 
 };
 
-SpazTwit.prototype.follow = function(user_id) {}; // to add notification
-SpazTwit.prototype.unfollow = function(user_id) {}; // to remove notification
+SpazTwit.prototype.follow = function(user_id, onSuccess, onFailure) {}; // to add notification
+SpazTwit.prototype.unfollow = function(user_id, onSuccess, onFailure) {}; // to remove notification
 
 
-SpazTwit.prototype.update = function(status, source, in_reply_to_status_id) {
+SpazTwit.prototype.update = function(status, source, in_reply_to_status_id, onSuccess, onFailure) {
 
 	var url = this.getAPIURL('update');
 	
@@ -1850,6 +1862,8 @@ SpazTwit.prototype.update = function(status, source, in_reply_to_status_id) {
 		'password':password,
 		'data':data,
 		'process_callback': this._processUpdateReturn,
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'success_event_type':'update_succeeded',
 		'failure_event_type':'update_failed'
 	};
@@ -1874,7 +1888,7 @@ SpazTwit.prototype.destroy = function(id) {};
 SpazTwit.prototype.destroyDirectMessage = function(id) {};
 
 
-SpazTwit.prototype.getOne = function(id, onSuccess) {
+SpazTwit.prototype.getOne = function(id, onSuccess, onFailure) {
 	var data = {};
 	data['id'] = id;
 	
@@ -1887,6 +1901,7 @@ SpazTwit.prototype.getOne = function(id, onSuccess) {
 		'process_callback': this._processOneItem,
 		'success_event_type':'get_one_status_succeeded',
 		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'failure_event_type':'get_one_status_failed',
 		'method':'GET'
 	};
@@ -1912,7 +1927,7 @@ SpazTwit.prototype._processOneItem = function(data, opts) {
 	
 };
 
-SpazTwit.prototype.favorite = function(id) {
+SpazTwit.prototype.favorite = function(id, onSuccess, onFailure) {
 	var data = {};
 	data['id'] = id;
 	
@@ -1924,6 +1939,8 @@ SpazTwit.prototype.favorite = function(id) {
 		'password':this.password,
 		'success_event_type':'create_favorite_succeeded',
 		'failure_event_type':'create_favorite_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'data':data
 	};
 
@@ -1933,7 +1950,7 @@ SpazTwit.prototype.favorite = function(id) {
 	var xhr = this._callMethod(opts);
 };
 
-SpazTwit.prototype.unfavorite = function(id) {
+SpazTwit.prototype.unfavorite = function(id, onSuccess, onFailure) {
 	var data = {};
 	data['id'] = id;
 	
@@ -1945,6 +1962,8 @@ SpazTwit.prototype.unfavorite = function(id) {
 		'password':this.password,
 		'success_event_type':'destroy_favorite_succeeded',
 		'failure_event_type':'destroy_favorite_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'data':data
 	};
 
@@ -1957,7 +1976,7 @@ SpazTwit.prototype.unfavorite = function(id) {
 
 
 
-SpazTwit.prototype.updateLocation = function(location_str) {
+SpazTwit.prototype.updateLocation = function(location_str, onSuccess, onFailure) {
 	var data = {};
 	data.location = location_str;
 	
@@ -1971,6 +1990,8 @@ SpazTwit.prototype.updateLocation = function(location_str) {
 		'password':this.password,
 		'success_event_type':'update_location_succeeded',
 		'failure_event_type':'update_location_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'data':data
 	};
 
@@ -2142,7 +2163,7 @@ SpazTwit.prototype.removeExtraElements = function(items, max, remove_from_top) {
 /**
  * gets the saved searches the authenticating user has 
  */
-SpazTwit.prototype.getSavedSearches = function() {
+SpazTwit.prototype.getSavedSearches = function(onSuccess, onFailure) {
 	var url = this.getAPIURL('saved_searches');
 	
 	var opts = {
@@ -2151,6 +2172,8 @@ SpazTwit.prototype.getSavedSearches = function() {
 		'password':this.password,
 		'success_event_type':'new_saved_searches_data',
 		'failure_event_type':'error_saved_searches_data',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'method':'GET'
 	};
 
@@ -2165,7 +2188,7 @@ SpazTwit.prototype.getSavedSearches = function() {
  * 
  * @param {String} search_query 
  */
-SpazTwit.prototype.addSavedSearch = function(search_query) {
+SpazTwit.prototype.addSavedSearch = function(search_query, onSuccess, onFailure) {
 	var url = this.getAPIURL('saved_searches_create');
 	
 	var opts = {
@@ -2174,6 +2197,8 @@ SpazTwit.prototype.addSavedSearch = function(search_query) {
 		'password':this.password,
 		'success_event_type':'create_saved_search_succeeded',
 		'failure_event_type':'create_saved_search_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'data':{'query':search_query},
 		'method':'POST'
 	};
@@ -2190,7 +2215,7 @@ SpazTwit.prototype.addSavedSearch = function(search_query) {
  * 
  * @param {String} search_id  Note that this is converted to a string via search_id.toString()
  */
-SpazTwit.prototype.removeSavedSearch = function(search_id) {
+SpazTwit.prototype.removeSavedSearch = function(search_id, onSuccess, onFailure) {
 	var url = this.getAPIURL('saved_searches_destroy', search_id.toString());
 	
 	var opts = {
@@ -2199,6 +2224,8 @@ SpazTwit.prototype.removeSavedSearch = function(search_id) {
 		'password':this.password,
 		'success_event_type':'destroy_saved_search_succeeded',
 		'failure_event_type':'destroy_saved_search_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'data':{'id':search_id},
 		'method':'POST'
 	};
@@ -2308,7 +2335,7 @@ SpazTwit.prototype._processList = function(item, section_name) {
  * retrieves a given list timeline
  * @param {string} list 
  */
-SpazTwit.prototype.getListInfo = function(list, user) {
+SpazTwit.prototype.getListInfo = function(list, user, onSuccess, onFailure) {
 	if (!user && !this.username) {
 		sch.error('must pass a username or have one set to get list');
 		return false;
@@ -2327,6 +2354,8 @@ SpazTwit.prototype.getListInfo = function(list, user) {
 		'password':this.password,
 		'success_event_type':'get_list_succeeded',
 		'failure_event_type':'get_list_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'method':'GET'
 	};
 
