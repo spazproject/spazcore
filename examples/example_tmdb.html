@@ -8,17 +8,128 @@
 	<title>SpazCore Example Shell</title>
 	
 	<!-- Load required vendor libs -->
-	<script src="../vendors/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../vendors/jquery-1.4.1.js" type="text/javascript" charset="utf-8"></script>
 
 	<!-- Load SpazCore base lib -->
 	<script src="spazcore-standard.js"></script>
+	<script src="js/jquery-1.tools.min.js" type="text/javascript" charset="utf-8"></script>
 	
 	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	
+	<style type="text/css" media="screen">
+	
+		body {
+			margin:0;
+			padding:0;
+			background:#333;
+		}
+		
+		input {
+			font-family: Arial, Helvetica, "MS Trebuchet", sans-serif;
+		}
+	
+		#container {
+			margin-left:auto;
+			margin-right:auto;
+			width:320px;
+			height:480px;
+			background-color:#666;
+			color:#FFF;
+		}
+	
+		ul.tabs {
+			padding:0;
+			margin:0 0;
+			list-style:none;
+			padding:.2em 0;
+			background-color:rgba(32,32,32,.7);
+		}
+		
+		ul.tabs>li {
+			display:inline;
+		}
+		ul.tabs>li>a.tab {
+			display:inline-block;
+			background-color:#EECCEE;
+			width:148px;
+			height:28px;
+			font-size:20px;
+			padding:5px;
+			margin:0;
+			text-align:center;
+			background-color:rgba(192,192,192,.8);
+			color:#000;
+			text-decoration:none;
+			text-shadow: 0px 1px 4px #666;
+			line-height:1.4em 
+		}
+		
+		
+		a#tab-movies {
+			-webkit-border-top-left-radius:   1em;
+			-webkit-border-bottom-left-radius:1em;
+		}
+		
+		a#tab-people {
+			-webkit-border-top-right-radius:   1em;
+			-webkit-border-bottom-right-radius:1em;
+			
+		}
+		
+		ul.tabs>li>a.current {
+			background-color:rgba(64,64,64,.8);
+			color:#FFF;
+		}
+		
+		
+		input.searchbox {
+			display:block;
+			height:40px;
+			font-size:20px;
+			width:320px;
+			border:0;
+			padding:0;
+			background-image:-webkit-gradient(
+			    linear,
+			    left bottom,
+			    left top,
+			    color-stop(1, rgb(191,191,191)),
+			    color-stop(0.91, rgb(230,230,230)),
+			    color-stop(0.8, rgb(255,255,255)),
+			    color-stop(0.58, rgb(255,255,255))
+			);
+		}
+		
+		
+		input.searchbutton {
+			display:block;
+			font-size:20px;
+			width:320px;
+			background-color:rgba(192,192,192,.8);
+			-webkit-border-radius:.5em;
+			border:0;
+			color:#333;
+			padding:5px 0;
+			-webkit-border-radius:1em;
+		}
+		input.searchbutton:active {
+			background-color:rgba(64,64,64,.8);
+			color:#CCC;
+
+		}
+	</style>
 	
 	<script type="text/javascript" charset="utf-8">
 		$().ready(function() {
 			var tmdb = new SpazTMDB({
 				'apikey':'REDACTED'
+			});
+			
+			/*
+				setup taps
+			*/
+			$("ul.tabs").tabs("div.panes > div", {
+				'effect':'fade'
 			});
 			
 			$("#search").click(function(){
@@ -59,21 +170,32 @@
 </head>
 
 <body>
-	<form onsubmit="javascript:$('#search').trigger('click'); return false;">
-		<label for="search_for">Search For</label>
-		<input type="text" name="search_for" value="Road House" id="search_for">
-		<select name="search_for_type" id="search_for_type" size="1">
-			<option value="movie" selected>movie</option>
-			<option value="person">person</option>
-		</select>
-		<input type="button" name="search" value="Search" id="search">
+	<div id='container'>
+	
+		<ul class="tabs">
+			<li><a class="tab" id="tab-movies" href="#">Movies</a></li>
+			<li><a class="tab" id="tab-people" href="#">People</a></li>
+		</ul>
+	
+		<div class="panes">
+			<div id="movies-pane">
+				<form onsubmit="javascript:$('#search-movies').trigger('click'); return false;">
+					<input type="text" class="searchbox" name="search-for-movies" value="Road House" id="search-for-movies">
+					<input type="button" class="searchbutton" name="search-movies" value="Search" id="search-movies">
+	
+				</form>
+			</div>
 		
-	</form>
+			<div id="people-pane">
+				<form onsubmit="javascript:$('#search-people').trigger('click'); return false;">
+					<input type="text" class="searchbox" name="search-for-people" value="Joss Whedon" id="search-for-people">
+					<input type="button" class="searchbutton" name="search-people" value="Search" id="search-people">
+	
+				</form>
+			</div>
+		</div>
 
-
-	<pre id="response">
-		
-	</pre>
+	</div>
 
 </body>
 </html>
