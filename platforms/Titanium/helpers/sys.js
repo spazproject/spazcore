@@ -17,7 +17,7 @@ var sc, Titanium;
  * dump an object's first level to console
  */
 sc.helpers.dump = function(obj, level) {
-	var dumper;
+	var dumper, tilogger;
 	
 	if (!level) { level = SPAZCORE_DUMPLEVEL_DEBUG; }
 	
@@ -25,13 +25,34 @@ sc.helpers.dump = function(obj, level) {
 		return;
 	}
 	
+	switch(level) {
+		case SPAZCORE_DUMPLEVEL_DEBUG:
+			tilogger = Titanium.API.debug;
+			break;
+		case SPAZCORE_DUMPLEVEL_NOTICE:
+			tilogger = Titanium.API.notice;
+			break;
+		case SPAZCORE_DUMPLEVEL_WARNING:
+			tilogger = Titanium.API.warn;
+			break;
+		case SPAZCORE_DUMPLEVEL_ERROR:
+			tilogger = Titanium.API.error;
+			break;
+		case SPAZCORE_DUMPLEVEL_NONE:
+			return;
+		default:
+			tilogger = Titanium.API.debug;
+	}
+	
 	if (sc.helpers.isString(obj) || sc.helpers.isNumber(obj) || !obj) {
 		dumper = function(str) {
-			console.debug(str);
+			tilogger(str);
 		};
 	} else {
-		dumper = function(obj) {
-			console.dir(obj);
+		dumper = function() {
+			for(var x in obj) {
+				tilogger("'"+x+"':"+obj[x]);
+			}
 		};
 	}
 	

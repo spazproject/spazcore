@@ -41,6 +41,8 @@ sc.helpers.setFileContents = function(url, content, serialize) {
 	try { 
 		var f = Titanium.Filesystem.getFile(url);
 		f.write(content);
+	} catch (e) {
+		sch.error('There was an error setting file contents:'+e.message);
 	}
 };
 

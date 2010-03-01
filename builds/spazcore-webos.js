@@ -1,4 +1,4 @@
-/*********** Built 2009-12-19 16:40:21 EST ***********/
+/*********** Built 2010-01-29 13:07:07 EST ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -5654,7 +5654,10 @@ sc.helpers.defaults = function(defaults, passed) {
 	}
 	
 	return args;
-}/*jslint 
+}
+
+
+/*jslint 
 browser: true,
 nomen: false,
 debug: true,
@@ -5673,8 +5676,8 @@ sc.helpers.deJSON = function(json)
  {
 
 	// Fix twitter data bug
-	var re = new RegExp("Couldn\\'t\\ find\\ Status\\ with\\ ID\\=[0-9]+\\,", "g");
-	json = json.replace(re, "");
+	// var re = new RegExp("Couldn\\'t\\ find\\ Status\\ with\\ ID\\=[0-9]+\\,", "g");
+	// json = json.replace(re, "");
 
 	var done = false;
 	try {
@@ -6608,6 +6611,13 @@ var SPAZCORE_PLATFORM_WEBOS		= 'webOS';
 var SPAZCORE_PLATFORM_TITANIUM	= 'Titanium';
 var SPAZCORE_PLATFORM_UNKNOWN		= '__UNKNOWN';
 
+
+var SPAZCORE_OS_WINDOWS		= 'Windows';
+var SPAZCORE_OS_LINUX		= 'Linux';
+var SPAZCORE_OS_MACOS		= 'MacOS';
+var SPAZCORE_OS_UNKNOWN		= '__OS_UNKNOWN';
+
+
 /**
  * error reporting levels 
  */
@@ -6670,6 +6680,7 @@ sc.helpers.iswebOS = function() {
 sc.helpers.isTitanium = function() {
 	return sc.helpers.isPlatform(SPAZCORE_PLATFORM_TITANIUM);
 };
+
 
 
 /**
@@ -6820,6 +6831,43 @@ sc.helpers.getPreferencesFile = function(name, create) {
 sc.helpers.init_file = function(path, overwrite) {
 	// stub
 };
+
+
+/**
+* Returns a string identifier for the OS.
+* 
+* @return {String} an identifier for the OS.  See the SPAZCORE_OS_* variables
+*/
+sc.helpers.getOS = function() {
+	// stub
+	return SPAZCORE_OS_UNKNOWN;
+};
+
+/**
+* checks to see if current platform is the one passed in. Use one of the defined constants, like SPAZCORE_OS_WINDOWS
+* 
+* @param {String} str the platform you're checking for
+* 
+*/
+sc.helpers.isOS = function(str) {
+	var type = sc.helpers.getOS();
+	if (type === str) {
+		return true;
+	}
+	return false;
+}
+
+sc.helpers.isWindows = function() {
+	return sc.helpers.isOS(SPAZCORE_OS_WINDOWS)
+};
+
+sc.helpers.isLinux = function() {
+	return sc.helpers.isOS(SPAZCORE_OS_LINUX)
+};
+
+sc.helpers.isMacOS = function() {
+	return sc.helpers.isOS(SPAZCORE_OS_MACOS)
+};
 /*jslint 
 browser: true,
 nomen: false,
@@ -6946,7 +6994,331 @@ sc.helpers.createXMLFromString = function (string) {
 };
 
 
+
 /**
+ * "constants" for account types 
+ */
+var SPAZCORE_ACCOUNT_TWITTER	= 'twitter';
+var SPAZCORE_ACCOUNT_IDENTICA	= 'identi.ca';
+var SPAZCORE_ACCOUNT_STATUSNET	= 'StatusNet';
+var SPAZCORE_ACCOUNT_FLICKR		= 'flickr';
+var SPAZCORE_ACCOUNT_WORDPRESS	= 'wordpress.com';
+var SPAZCORE_ACCOUNT_TUMBLR		= 'tumblr';
+var SPAZCORE_ACCOUNT_FACEBOOK	= 'facebook';
+var SPAZCORE_ACCOUNT_FRIENDFEED	= 'friendfeed';
+
+/**
+ * This creates a new SpazAccounts object, and optionally associates it with an existing preferences object
+ * @constructor
+ * @param (Object) prefsObj  An existing SpazPrefs object (optional)
+ */
+var SpazAccounts = function(prefsObj) {
+	if (prefsObj) {
+		this.prefs = prefsObj;
+	} else {
+		this.prefs = new SpazPrefs();
+		this.prefs.load();
+	}
+	
+	/*
+		load existing accounts
+	*/
+	this.load();
+
+};
+
+/**
+ * the key used inside the prefs object 
+ */
+SpazAccounts.prototype.prefskey = 'users';
+
+/**
+ * loads the accounts array from the prefs object 
+ */
+SpazAccounts.prototype.load	= function() { 
+	var accjson = this.prefs.get(this.prefskey);
+	
+	sch.debug("accjson:'"+accjson+"'");
+	
+	try {
+		this._accounts = sch.deJSON(this.prefs.get(this.prefskey));
+	} catch(e) {
+		sch.error(e.message);
+		this._accounts = [];
+	}		
+
+	/*
+		sanity check
+	*/
+	if (!sch.isArray(this._accounts)) {
+		this._accounts = [];
+	}
+	
+	sch.debug("this._accounts:'"+this._accounts+"'")
+	
+};
+
+/**
+ * saves the accounts array to the prefs obj 
+ */
+SpazAccounts.prototype.save	= function() {
+	
+	
+	this.prefs.set(this.prefskey, sch.enJSON(this._accounts));
+	sch.debug('saved users to "'+this.prefskey+'" pref');
+	for (var x in this._accounts) {
+		sch.debug(this._accounts[x].id);
+	};
+	
+	sch.debug('THE ACCOUNTS:')
+	sch.debug(sch.enJSON(this._accounts));
+
+	sch.debug('ALL PREFS:')
+	sch.debug(sch.enJSON(this.prefs._prefs));
+
+	
+};
+
+/**
+ * returns the array of accounts
+ * @returns {array} the accounts 
+ */
+SpazAccounts.prototype.getAll = function() {
+	return this._accounts;
+};
+
+/**
+ * Set all users by passing in a hash. overwrites all existing data!
+ * @param {array} accounts_array an array of account objects
+ */
+SpazAccounts.prototype.setAll = function(accounts_array) {
+	this._accounts = accounts_array;
+	this.save();
+	sch.debug("Saved these accounts:");
+	for (var i=0; i < this_accounts.length; i++) {
+		sch.debug(this._accounts[x].id);
+	};
+};
+
+/**
+ * @param {string} id the UUID to update
+ * @param {object} acctobj
+ * @param {string} [acctobj.username] a new username
+ * @param {string} [acctobj.password] a new password
+ * @param {string} [acctobj.type] a new account type
+ * @param {object} [acctobj.meta] the hash of metadata; you should probably use SpazAccounts.setMeta() instead
+ */
+SpazAccounts.prototype.update = function(id, acctobj) {
+	var orig = this.get(id);
+	if (orig) {
+		var modified = sch.defaults(orig, acctobj);
+		return this.get(id);
+	} else {
+		sch.error('No account with id "'+id+'" exists');
+		return null;
+	}
+}
+
+
+
+/**
+ * wipes the accounts array and saves it
+ */
+SpazAccounts.prototype.initAccounts	= function() {
+	this._accounts = [];
+	this.save();
+};
+
+/**
+ * add a new account
+ * @param {string} username the username
+ * @param {string} password the password
+ * @param {type} type the type of account
+ * @returns {object} the account object just added
+ */
+SpazAccounts.prototype.add = function(username, password, type) {
+	
+	if (!type) {
+		sch.error("Type must be set");
+		return false;
+	}
+	
+	var username = username.toLowerCase();
+	var id = this.generateID();
+	this._accounts.push({
+		'id':id,
+		'username':username,
+		'password':password,
+		'type':type,
+		'meta':{}
+	});
+	this.save();
+	
+	sch.debug("Added new user:"+id);
+	
+	return this.get(id);
+};
+
+
+/**
+ * @param {string} id the UUID of the account to delete 
+ */
+SpazAccounts.prototype.remove = function(id) {
+	sch.debug("Deleting '"+id+"'…");
+	
+	var index = this._findUserIndex(id);
+	if (index !== false) {
+		var deleted = this._accounts.splice(index, 1);
+		sch.debug("Deleted account '"+deleted[0].id+"'");
+		return deleted[0];
+	} else {
+		sch.error("Could not find this id to delete: '"+id+"'");
+		return false;
+	}
+};
+
+
+/**
+ * @param {string} type the type of accounts to retrieve
+ * @returns {array} the array of matching accounts
+ */
+SpazAccounts.prototype.getByType = function(type) {
+	var matches = [];
+	
+	for (var i=0; i < this._accounts.length; i++) {
+		if (this._accounts[i].type === type) {
+			matches.push(this._accounts[i])
+		}
+	};
+	
+	return matches;
+};
+
+/**
+ * @param {string} username the username to search for
+ * @returns {array} an array of matching accounts
+ */
+SpazAccounts.prototype.getByUsername = function(username) {
+	var matches = [];
+
+	for (var i=0; i < this._accounts.length; i++) {
+		if (this._accounts[i].username === username) {
+			matches.push(this._accounts[i])
+		}
+	};
+	
+	return matches;
+};
+
+/**
+ * @param {string} username the username to search for
+ * @param {string} type the type to search for
+ * @returns {array} an array of matching accounts
+ */
+SpazAccounts.prototype.getByUsernameAndType = function(username, type) {
+	var matches = [];
+
+	for (var i=0; i < this._accounts.length; i++) {
+		if (this._accounts[i].username === username && this._accounts[i].type === type) {
+			matches.push(this._accounts[i])
+		}
+	};
+	
+	return matches;
+	
+};
+
+
+/**
+ * retrives the user object by user and type
+ * @param {string} id  the user id UUID
+ * @param {string} type 
+ */
+SpazAccounts.prototype.get = function(id) {
+
+	var index = this._findUserIndex(id);
+
+	if (index !== false) {
+		return this._accounts[i];		
+	}
+	
+	return false;
+	
+};
+
+
+/**
+ * a private function to find the user's array index by their UUID
+ * @param {string} id the user's UUID
+ * @returns {number|boolen} returns the array index or false if DNE 
+ */
+SpazAccounts.prototype._findUserIndex = function(id) {
+	
+	for (i=0; i<this._accounts.length; i++) {
+		
+		if (this._accounts[i].id === id) {
+			sch.debug('Found matching user record to '+ id);
+			return i;
+		}
+		
+	}
+	
+	return false;
+};
+
+
+
+/**
+ * @returns {string} returns the generated UUID 
+ */
+SpazAccounts.prototype.generateID = function() {
+	var id = sc.helpers.UUID();
+	return id;
+};
+
+
+
+/**
+ * @param {string} id the user's UUID
+ * @param {string} key the key for the metadata entry
+ * @returns {String|Object|Array|Boolean|Number} returns the set value, or null if user ID or meta entry is not found
+ */
+SpazAccounts.prototype.getMeta = function(id, key) {
+	
+	if ( user = this.get(id) ) {
+		if (user.meta && user.meta[key] !== null) {
+			return user.meta[key];
+		}
+	}
+	
+	return null;
+	
+};
+
+/**
+ * @param {string} id the user's UUID
+ * @param {string} key the key for the metadata entry
+ * @param {String|Object|Array|Boolean|Number} value the value of the metadata entry
+ * @returns {String|Object|Array|Boolean|Number} returns the set value, or null if user ID is not found
+ */
+SpazAccounts.prototype.setMeta = function(id, key, value) {
+	
+	var index = this._findUserIndex(id);
+
+	if (index !== false) {		
+		if (!this._accounts[index].meta) {
+			this._accounts[index].meta = {};
+		}
+		this._accounts[index].meta[key] = value;
+		
+		this.save();
+		
+		return this._accounts[index].meta[key];
+		
+	}
+	return null;
+	
+};/**
  * a library to get direct image urls for various image hosting servces 
  */
 function SpazImageURL(args) {
@@ -7823,6 +8195,10 @@ onevar: false
 var sc, Titanium, air, window, jQuery, Mojo;
 
 var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
+
+var SPAZCORE_PREFS_AIR_FILENAME = 'preferences.json';
+
+var SPAZCORE_PREFS_MOJO_COOKIENAME = 'preferences.json';
  
 /**
  * A preferences lib for AIR JS apps. This requires the json2.js library
@@ -7851,7 +8227,7 @@ var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
  * @TODO we need to pull out the platform-specifc stuff into the /platforms/... hierarchy
  * @class SpazPrefs
  */
-function SpazPrefs(defaults, sanity_methods) {	
+function SpazPrefs(defaults, id, sanity_methods) {	
 
 	/*
 		init prefs
@@ -7869,6 +8245,10 @@ function SpazPrefs(defaults, sanity_methods) {
 
 	if (sanity_methods) {
 		sc.helpers.dump('need to add sanity_method parsing');
+	}
+	
+	if (id) {
+		this.id = id;
 	}
 	
 	if (defaults) {
@@ -7996,111 +8376,13 @@ SpazPrefs.prototype.setEncrypted = function(key, val) {
 /**
  * loads the prefs file and parses the prefs into this._prefs,
  * or initializes the file and loads the defaults
- * @todo
+ * @stub
  */
 SpazPrefs.prototype.load = function(name) {
-	
-	var thisPrefs = this;
-	
-	/*
-		webOS implementation
-	*/
-	if (sc.helpers.iswebOS()) {
-
-		sc.helpers.dump('this is webOS');
-		if (!this.mojoCookie) {
-			sc.helpers.dump('making cookie');
-			this.mojoCookie = new Mojo.Model.Cookie('SpazPrefs');
-			
-			
-			
-		}
-		var loaded_prefs = this.mojoCookie.get();
-		if (loaded_prefs) {
-			sc.helpers.dump('Prefs loaded');
-			for (var key in loaded_prefs) {
-				//sc.helpers.dump('Copying loaded pref "' + key + '":"' + thisPrefs._prefs[key] + '" (' + typeof(thisPrefs._prefs[key]) + ')');
-	            thisPrefs._prefs[key] = loaded_prefs[key];
-	       	}
-			jQuery().trigger('spazprefs_loaded');
-		} else {
-			sc.helpers.dump('Prefs loading failed in onGet');
-			this.migrateFromMojoDepot();
-			// thisPrefs.resetPrefs();
-		}
-		
-
-		
-
-	}
-	
-	/*
-		Titanium implementation
-		@TODO
-	*/
-	if (sc.helpers.isTitanium()) {
-		if (Titanium.App.Properties.hasProperty(SPAZCORE_PREFS_TI_KEY)) {
-			var prefs_json = Titanium.App.Properties.getString(SPAZCORE_PREFS_TI_KEY);
-			var loaded_prefs = sc.helpers.deJSON(prefs_json);
-			for (var key in loaded_prefs) {
-				sc.helpers.dump('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
-	            this._prefs[key] = loaded_prefs[key];
-	       	}
-		} else {
-			// save the defaults if this is the first time
-			this.save();
-		}
-		jQuery().trigger('spazprefs_loaded');
-	}
-	
 };
 
 
-/**
- * We used to store the data in a Depot, so we may need
- * to migrate data out of there 
- */
-SpazPrefs.prototype.migrateFromMojoDepot = function() {
-	
-	var thisPrefs = this;
-	
-	sch.error('MIGRATING FROM DEPOT! ============================ ');
-	
-	sc.helpers.dump('this is webOS');
-	if (!this.mojoDepot) {
-		sc.helpers.dump('making depot');
-		this.mojoDepot = new Mojo.Depot({
-			name:'SpazDepotPrefs',
-			replace:false
-		});
-	}
-	
-	var onGet = function(loaded_prefs) {
-		if (loaded_prefs) {
-			sc.helpers.dump('Prefs loaded');
-			for (var key in loaded_prefs) {
-				//sc.helpers.dump('Copying loaded pref "' + key + '":"' + thisPrefs._prefs[key] + '" (' + typeof(thisPrefs._prefs[key]) + ')');
-	            thisPrefs._prefs[key] = loaded_prefs[key];
-	       	}
-		} else {
-			sc.helpers.dump('Prefs loading failed in onGet');
-			thisPrefs.resetPrefs();
-		}
-		thisPrefs.save(); // write to cookie
-		jQuery().trigger('spazprefs_loaded');
-	};
 
-	var onFail = function() {
-		sc.helpers.dump('Prefs loading failed in onFail');
-		thisPrefs.resetPrefs();
-		jQuery().trigger('spazprefs_loaded');
-	};
-	
-	sc.helpers.dump('simpleget depot');
-	this.mojoDepot.simpleGet('SpazPrefs', onGet, onFail);
-	sc.helpers.dump('sent simpleget');
-	
-};
 
 
 
@@ -8109,26 +8391,9 @@ SpazPrefs.prototype.migrateFromMojoDepot = function() {
  * saves the current preferences
  * @todo
  */
-SpazPrefs.prototype.save = function(name) {
+SpazPrefs.prototype.save = function() {
 
-	if (sc.helpers.iswebOS()) {
-		if (!this.mojoCookie) {
-			this.mojoCookie = new Mojo.Model.Cookie('SpazPrefs');
-		}
-		
-		this.mojoCookie.put(this._prefs);
-	}
-	
-	/*
-		Titanium implementation
-		@TODO
-	*/
-	if (sc.helpers.isTitanium()) {
-		// save the file to a default place
-		var prefs_json = sc.helpers.enJSON(this._prefs);
-		Titanium.App.Properties.setString(SPAZCORE_PREFS_TI_KEY, prefs_json);
-	}
-		
+
 	
 };
 
@@ -8140,316 +8405,6 @@ SpazPrefs.prototype.save = function(name) {
 if (sc) {
 	var scPrefs = SpazPrefs;
 }
-
-
-
-
-
-
-
-
-/**
- * methods for Titanium
- */
-if (sc.helpers.isTitanium()) {
-
-	/*
-		Saves the size and placement of the window this executes in
-	*/
-	SpazPrefs.prototype.saveWindowState = function() {
-		var width  = Titanium.UI.currentWindow.getWidth();
-		var height = Titanium.UI.currentWindow.getHeight();
-		var x      = Titanium.UI.currentWindow.getX();
-		var y      = Titanium.UI.currentWindow.getY();
-		
-		if (x && y && width && height) {
-			Titanium.App.Properties.setInt('__window-width',  width);
-			Titanium.App.Properties.setInt('__window-height', height);
-			Titanium.App.Properties.setInt('__window-x',      x);
-			Titanium.App.Properties.setInt('__window-y',      y);
-		}
-	};
-
-	/*
-		Loads the size and placement of the window this executes in
-	*/
-	SpazPrefs.prototype.loadWindowState = function() {
-		if (!Titanium.App.Properties.hasProperty('__window-width')) { // we assume if this isn't set, none are set
-			this.saveWindowState(); // save the current state
-			return;
-		}
-		
-		var width  = Titanium.App.Properties.getInt('__window-width');
-		var height = Titanium.App.Properties.getInt('__window-height');
-		var x      = Titanium.App.Properties.getInt('__window-x');
-		var y      = Titanium.App.Properties.getInt('__window-y');
-		
-		if (x && y && width && height) {
-			Titanium.UI.currentWindow.setWidth(width);
-			Titanium.UI.currentWindow.setHeight(height);
-			Titanium.UI.currentWindow.setX(x);
-			Titanium.UI.currentWindow.setY(y);
-		}
-	};
-}
-
-
-
-/**
- * methods for AIR 
- * @TODO
- */
-if (sc.helpers.isAIR()) {
-
-	/*
-		Saves the size and placement of the window this executes in
-	*/
-	this.saveWindowState = function() {
-		this.set('__window-height', window.nativeWindow.width);
-		this.set('__window-height', window.nativeWindow.height);
-		this.set('__window-x', window.nativeWindow.x);
-		this.set('__window-y', window.nativeWindow.y);
-	};
-
-	/*
-		Loads the size and placement of the window this executes in
-	*/
-	this.loadWindowState = function() {
-		var width  = this.get('__window-height');
-		var height = this.get('__window-height');
-		var x      = this.get('__window-x');
-		var y      = this.get('__window-y');
-		
-		if (x && y && width && height) {
-			window.nativeWindow.width  = width;
-			window.nativeWindow.height = height;
-			window.nativeWindow.x = x;
-			window.nativeWindow.y = y;
-		}
-		
-	};
-	
-}
-
-
-
-
-
-// var SpazPrefs = function(defaults) {
-// 	
-// 	if (defaults) {
-// 		this.defaults = defaults;
-// 	} else {
-// 		this.defaults = {};
-// 	}
-// 
-// 	this.prefs    = clone(this.defaults);
-// 
-// 	/*
-// 		returns the application storage directory air.File object
-// 	*/
-// 	this.getPrefsDir = function() {
-// 		return air.File.applicationStorageDirectory;
-// 	}
-// 	
-// 	/*
-// 		returns the prefs air.File object. 
-// 	*/
-// 	this.getPrefsFile = function(name) {
-// 		if (!name) {name='preferences';}
-// 		
-// 		var prefsDir = this.getPrefsDir();
-// 		prefsFile = prefsDir.resolvePath(name+".json");
-// 		return prefsFile;
-// 	}
-// 	
-// 	/*
-// 		loads the prefs file and parses the prefs into this.prefs,
-// 		or initializes the file and loads the defaults
-// 	*/
-// 	this.load = function(name) {
-// 		var prefsFile = this.getPrefsFile(name);
-// 
-// 		// if file DNE, init file with defaults
-// 		if (prefsFile.exists) {
-// 			var prefsJSON = get_file_contents(prefsFile.url);
-// 			air.trace(prefsJSON);
-// 			var loaded_prefs = JSON.parse(prefsJSON);
-// 			for (var key in loaded_prefs) {
-// 	            this.set(key, loaded_prefs[key]);
-//         	}
-// 
-// 		} else {
-// 			init_file(prefsFile.url);
-// 			set_file_contents(prefsFile.url, this.defaults, true);
-// 			this.prefs = clone(this.defaults); // we have to pass by value, not ref
-// 		}
-// 
-// 		return prefsFile;
-// 	}
-// 	
-// 	
-// 	/*
-// 		
-// 	*/
-// 	this.save = function(name) {
-// 		var prefsFile = this.getPrefsFile(name);
-// 		set_file_contents(prefsFile.url, this.prefs, true);
-// 	};
-// 	
-// 	
-// 	/*
-// 		Get a preference
-// 	*/
-// 	this.get = function(key, encrypted) {
-// 		if (encrypted) {
-// 			return this.getEncrypted(key);
-// 		} 
-// 		
-// 		if (this.prefs[key]) {
-// 			return this.prefs[key];
-// 		} else {
-// 			return false
-// 		}
-// 	}
-// 	
-// 	/*
-// 		Saves the size and placement of the window this executes in
-// 	*/
-// 	this.saveWindowState = function() {
-// 		this.set('__window-height', window.nativeWindow.width);
-// 		this.set('__window-height', window.nativeWindow.height);
-// 		this.set('__window-x', window.nativeWindow.x);
-// 		this.set('__window-y', window.nativeWindow.y);
-// 	}
-// 
-// 	/*
-// 		Loads the size and placement of the window this executes in
-// 	*/
-// 	this.loadWindowState = function() {
-// 		var width  = this.get('__window-height');
-// 		var height = this.get('__window-height');
-// 		var x      = this.get('__window-x');
-// 		var y      = this.get('__window-y');
-// 		
-// 		if (x && y && width && height) {
-// 			window.nativeWindow.width  = width;
-// 			window.nativeWindow.height = height;
-// 			window.nativeWindow.x = x;
-// 			window.nativeWindow.y = y;
-// 		}
-// 		
-// 	}
-// 	
-// 	
-// 	/*
-// 		get an encrypted preference
-// 	*/
-// 	this.getEncrypted = function(key) {
-// 		return get_encrypted_value(key);
-// 	};
-// 	
-// 	
-// 	/*
-// 		set a preference
-// 	*/
-// 	this.set = function(key, val, encrypted) {
-// 		if (encrypted) {
-// 			return this.setEncrypted(key, val);
-// 		} 
-// 
-// 		this.prefs[key] = val;
-// 	}
-// 	
-// 	
-// 	/*
-// 		Sets an encrypted pref
-// 	*/
-// 	this.setEncrypted = function(key, val) {
-// 		return set_encrypted_value(key, val);
-// 	};
-// 	
-// 	
-// 	/*
-// 		Gets the contents of a file
-// 	*/
-// 	function get_file_contents(path) {
-// 		var f = new air.File(path);
-// 		if (f.exists) {
-// 			var fs = new air.FileStream();
-// 			fs.open(f, air.FileMode.READ);
-// 			var str = fs.readMultiByte(f.size, air.File.systemCharset);
-// 			fs.close();
-// 			return str;
-// 		} else {
-// 			return false;
-// 		}
-// 	}
-// 
-// 	/*
-// 		Saves the contents to a specified path. Serializes a passed object if 
-// 		serialize == true
-// 	*/
-// 	function set_file_contents(path, content, serialize) {
-// 
-// 		if (serialize) {
-// 			content = JSON.stringify(content);
-// 		}
-// 
-// 		// Spaz.dump('setFileContents for '+path+ ' to "' +content+ '"');
-// 
-// 		try { 
-// 			var f = new air.File(path);
-// 			var fs = new air.FileStream();
-// 			fs.open(f, air.FileMode.WRITE);
-// 			fs.writeUTFBytes(content);
-// 			fs.close();
-// 		} catch (e) {
-// 			air.trace(e.errorMsg)
-// 		}
-// 	};
-// 	
-// 	
-// 	
-// 	/*
-// 		Loads a value for a key from EncryptedLocalStore
-// 	*/
-// 	function get_encrypted_value(key) {
-// 		var storedValue = air.EncryptedLocalStore.getItem(key);
-// 		var val = storedValue.readUTFBytes(storedValue.length);
-// 		return val;
-// 	}
-// 
-// 	/*
-// 		Sets a value in the EncryptedLocalStore of AIR
-// 	*/
-// 	function set_encrypted_value(key, val) {
-// 		var bytes = new air.ByteArray();
-// 	    bytes.writeUTFBytes(val);
-// 	    return air.EncryptedLocalStore.setItem(key, bytes);
-// 	}
-// 	
-// 	/*
-// 		initializes a file at the given location. set overwrite to true
-// 		to clear out an existing file.
-// 		returns the air.File object or false
-// 	*/
-// 	function init_file(path, overwrite) {
-// 		var file = new air.File(path);
-// 		if ( !file.exists || (file.exists && overwrite) ) {
-// 			var fs = new air.FileStream();
-// 			fs.open(file, air.FileMode.WRITE);
-// 			fs.writeUTFBytes('');
-// 			fs.close();
-// 			return file;
-// 		} else {
-// 			return false;
-// 		}
-// 
-// 	}
-// 	
-// }
-
 /*jslint 
 browser: true,
 nomen: false,
@@ -8503,10 +8458,10 @@ SpazShortText.prototype.genBaseMaps = function() {
 		'boyfriend'			    :'bf',
 		'but'					:'but',
 		'girlfriend'		    :'gf',
-		'between'			    :'btwn',
+		'between'			    :'b/t',
 		'by the way'		    :'btw',
 		'definitely'		    :'def',
-		'everyone'				:'evry1',
+		'everyone'				:'evr1',
 		'favorite'				:'fav',
 		'for'					:'fr',
 		'from'					:'frm',
@@ -8517,7 +8472,7 @@ SpazShortText.prototype.genBaseMaps = function() {
 		'following'				:'fllwng',
 		'good'					:'gd',
 		'got'					:'gt',
-		'having'				:'hvng',
+		'having'				:'hvg',
 		'hours'					:'hrs',
 		'i don\'t know'		    :'idk',
 		'if i recall correctly' :'iirc',
@@ -8535,10 +8490,9 @@ SpazShortText.prototype.genBaseMaps = function() {
 		'pictures'			    :'pics',
 		'obviously'			    :'obvs',
 		'please'			    :'pls',
-		'really'			    :'rly',
-		'Seriously'			    :'srsly',
-		'Something'			    :'s/t',
-		'Sorry'				    :'sry',
+		'seriously'			    :'srsly',
+		'something'			    :'s/t',
+		'sorry'				    :'sry',
 		'text'				    :'txt',
 		'thanks'			    :'thx',
 		'think'				    :'thk',
@@ -8548,6 +8502,446 @@ SpazShortText.prototype.genBaseMaps = function() {
 		'weeks'					:'wks',
 		'with'					:'w',
 		'without'				:'w/o',
+		
+		'that'			:'tht',
+		'what'			:'wht',
+		'have'			:'hv',
+		'don\'t'			:'dnt',
+		'was'			:'ws',
+		'well'			:'wll',
+		'right'			:'rt',
+		'here'			:'hr',
+		'going'			:'gng',
+		'like'			:'lk',
+		'can'			:'cn',
+		'want'			:'wnt',
+		'that\'s'			:'thts',
+		'there'			:'thr',
+		'come'			:'cme',
+		'really'			:'rly',
+		'would'			:'wld',
+		'look'			:'lk',
+		'when'			:'whn',
+		'okay'			:'ok',
+		'can\'t'			:'cnt',
+		'tell'			:'tll',
+		'I\'ll'			:'Ill',
+		'could'			:'cl',
+		'didn\'t'			:'ddnt',
+		'yes'			:'y',
+		'had'			:'hd',
+		'then'			:'thn',
+		'take'			:'tke',
+		'make'			:'mk',
+		'gonna'			:'gna',
+		'never'			:'nvr',
+		'them'			:'thm',
+		'more'			:'mr',
+		'over'			:'ovr',
+		'where'			:'whr',
+		'what\'s'			:'whts',
+		'thing'			:'thg',
+		'maybe'			:'mybe',
+		'down'			:'dwn',
+		'very'			:'very',
+		'should'			:'shld',
+		'anything'			:'nethg',
+		'said'			:'sd',
+		'any'			:'ne',
+		'even'			:'evn',
+		'thank'			:'thk',
+		'give'			:'gve',
+		'thought'			:'thot',
+		'help'			:'hlp',
+		'talk'			:'tlk',
+		'people'			:'ppl',
+		'find'			:'fnd',
+		'nothing'			:'nthg',
+		'again'			:'agn',
+		'things'			:'thgs',
+		'call'			:'cll',
+		'told'			:'tld',
+		'great'			:'grt',
+		'before'			:'b4',
+		'better'			:'bttr',
+		'ever'			:'evr',
+		'night'			:'nite',
+		'than'			:'thn',
+		'away'			:'awy',
+		'first'			:'1st',
+		'believe'			:'blve',
+		'other'			:'othr',
+		'everything'			:'evrythg',
+		'work'			:'wrk',
+		'fine'			:'fne',
+		'home'			:'hme',
+		'after'			:'aftr',
+		'last'			:'lst',
+		'keep'			:'kp',
+		'around'			:'arnd',
+		'stop'			:'stp',
+		'long'			:'lng',
+		'always'			:'alwys',
+		'listen'			:'lstn',
+		'wanted'			:'wntd',
+		'happened'			:'hppnd',
+		'won\'t'			:'wnt',
+		'trying'			:'tryng',
+		'kind'			:'knd',
+		'wrong'			:'wrng',
+		'talking'			:'tlkg',
+		'being'			:'bng',
+		'bad'			:'bd',
+		'remember'			:'rmbr',
+		'getting'			:'gttg',
+		'together'			:'togthr',
+		'mother'			:'mom',
+		'understand'			:'undrstd',
+		'wouldn\'t'			:'wldnt',
+		'actually'			:'actly',
+		'baby'			:'bby',
+		'father'			:'dad',
+		'done'			:'dne',
+		'wasn\'t'			:'wsnt',
+		'might'			:'mite',
+		'every'			:'evry',
+		'enough'			:'engh',
+		'someone'			:'sm1',
+		'family'			:'fmly',
+		'whole'			:'whl',
+		'another'			:'anthr',
+		'jack'			:'jck',
+		'yourself'			:'yrslf',
+		'best'			:'bst',
+		'must'			:'mst',
+		'coming'			:'cmg',
+		'looking'			:'lkg',
+		'woman'			:'wmn',
+		'which'			:'whch',
+		'years'			:'yrs',
+		'room'			:'rm',
+		'left'			:'lft',
+		'tonight'			:'2nte',
+		'real'			:'rl',
+		'hmm'			:'hm',
+		'happy'			:'hpy',
+		'pretty'			:'prty',
+		'girl'			:'grl',
+		'show'			:'shw',
+		'friend'			:'frnd',
+		'already'			:'alrdy',
+		'saying'			:'syng',
+		'next'			:'nxt',
+		'job'			:'jb',
+		'problem'			:'prblm',
+		'minute'			:'min',
+		'found'			:'fnd',
+		'world'			:'wrld',
+		'thinking'			:'thkg',
+		'haven\'t'			:'hvnt',
+		'heard'			:'hrd',
+		'honey'			:'hny',
+		'matter'			:'mttr',
+		'myself'			:'myslf',
+		'couldn\'t'			:'cldnt',
+		'exactly'			:'xctly',
+		'probably'			:'prob',
+		'happen'			:'hppn',
+		'we\'ve'			:'wve',
+		'hurt'			:'hrt',
+		'both'			:'bth',
+		'gotta'			:'gtta',
+		'alone'			:'alne',
+		'excuse'			:'xcse',
+		'start'			:'strt',
+		'today'			:'2dy',
+		'ready'			:'rdy',
+		'until'			:'untl',
+		'whatever'			:'wtevr',
+		'wants'			:'wnts',
+		'hold'			:'hld',
+		'yet'			:'yt',
+		'took'			:'tk',
+		'once'			:'1ce',
+		'gone'			:'gne',
+		'called'			:'clld',
+		'morning'			:'morn',
+		'supposed'			:'sppsd',
+		'friends'			:'frnds',
+		'stuff'			:'stff',
+		'most'			:'mst',
+		'used'			:'usd',
+		'worry'			:'wrry',
+		'second'			:'2nd',
+		'part'			:'prt',
+		'truth'			:'trth',
+		'school'			:'schl',
+		'forget'			:'frgt',
+		'business'			:'biz',
+		'cause'			:'cuz',
+		'telling'			:'tllg',
+		'chance'			:'chnce',
+		'move'			:'mv',
+		'person'			:'prsn',
+		'somebody'			:'smbdy',
+		'heart'			:'hrt',
+		'point'			:'pt',
+		'later'			:'ltr',
+		'making'			:'makg',
+		'anyway'			:'nywy',
+		'many'			:'mny',
+		'phone'			:'phn',
+		'reason'			:'rsn',
+		'looks'			:'lks',
+		'bring'			:'brng',
+		'turn'			:'trn',
+		'tomorrow'			:'tmrw',
+		'trust'			:'trst',
+		'check'			:'chk',
+		'change'			:'chng',
+		'anymore'			:'anymr',
+		'town'			:'twn',
+		'aren\'t'			:'rnt',
+		'working'			:'wrkg',
+		'year'			:'yr',
+		'taking'			:'tkg',
+		'means'			:'mns',
+		'brother'			:'bro',
+		'play'			:'ply',
+		'hate'			:'h8',
+		'says'			:'sez',
+		'beautiful'			:'btfl',
+		'crazy'			:'crzy',
+		'party'			:'prty',
+		'afraid'			:'afrd',
+		'important'			:'imptnt',
+		'rest'			:'rst',
+		'word'			:'wrd',
+		'watch'			:'wtch',
+		'glad'			:'gld',
+		'sister'			:'sistr',
+		'minutes'			:'min',
+		'everybody'			:'evrybdy',
+		'couple'			:'cpl',
+		'either'			:'ethr',
+		'feeling'			:'flg',
+		'under'			:'undr',
+		'break'			:'brk',
+		'promise'			:'prmse',
+		'easy'			:'ez',
+		'question'			:'q',
+		'doctor'			:'doc',
+		'walk'			:'wlk',
+		'trouble'			:'trbl',
+		'different'			:'diff',
+		'hospital'			:'hsptl',
+		'anybody'			:'anybdy',
+		'wedding'			:'wddg',
+		'perfect'			:'prfct',
+		'police'			:'cops',
+		'waiting'			:'wtng',
+		'dinner'			:'din',
+		'against'			:'agst',
+		'funny'			:'fny',
+		'husband'			:'hsbnd',
+		'child'			:'kid',
+		'shouldn\'t'			:'shldnt',
+		'half'			:'1/2',
+		'moment'			:'mmnt',
+		'sleep'			:'slp',
+		'started'			:'strtd',
+		'young'			:'yng',
+		'sounds'			:'snds',
+		'lucky'			:'lky',
+		'sometimes'			:'smtimes',
+		'plan'			:'pln',
+		'serious'			:'srs',
+		'ahead'			:'ahd',
+		'week'			:'wk',
+		'wonderful'			:'wndfl',
+		'past'			:'pst',
+		'number'			:'#',
+		'nobody'			:'nbdy',
+		'along'			:'alng',
+		'finally'			:'fnly',
+		'worried'			:'wrrd',
+		'book'			:'bk',
+		'sort'			:'srt',
+		'safe'			:'sfe',
+		'living'			:'livg',
+		'children'			:'kids',
+		'weren\'t'			:'wrnt',
+		'front'			:'frnt',
+		'loved'			:'luvd',
+		'asking'			:'askg',
+		'running'			:'rnng',
+		'clear'			:'clr',
+		'figure'			:'fgr',
+		'felt'			:'flt',
+		'parents'			:'prnts',
+		'absolutely'			:'abs',
+		'alive'			:'alve',
+		'meant'			:'mnt',
+		'happens'			:'hppns',
+		'kidding'			:'kddg',
+		'full'			:'fl',
+		'meeting'			:'mtg',
+		'coffee'			:'cffe',
+		'sound'			:'snd',
+		'women'			:'wmn',
+		'welcome'			:'wlcm',
+		'months'			:'mnths',
+		'hour'			:'hr',
+		'speak'			:'spk',
+		'thinks'			:'thks',
+		'Christmas'			:'Xmas',
+		'possible'			:'pssble',
+		'worse'			:'wrs',
+		'company'			:'co',
+		'mistake'			:'mstk',
+		'handle'			:'hndl',
+		'spend'			:'spnd',
+		'totally'			:'ttly',
+		'giving'			:'gvg',
+		'control'			:'ctrl',
+		'realize'			:'rlze',
+		'power'			:'pwr',
+		'president'			:'pres',
+		'girls'			:'grls',
+		'taken'			:'tkn',
+		'picture'			:'pic',
+		'talked'			:'tlkd',
+		'hundred'			:'hndrd',
+		'changed'			:'chgd',
+		'completely'		:'cmpltly', 
+		'explain'			:'exp',
+		'playing'			:'plyg',
+		'relationship'			:'rlshp',
+		'loves'			:'lvs',
+		'fucking'			:'fkg',
+		'anywhere'			:'newhr',
+		'questions'			:'qs',
+		'wonder'			:'wndr',
+		'calling'			:'cllg',
+		'somewhere'			:'smwhr',
+		'straight'			:'str8',
+		'fast'			:'fst',
+		'words'			:'wrds',
+		'worked'			:'wrkd',
+		'light'			:'lite',
+		'cannot'			:'can\'t',
+		'protect'			:'prtct',
+		'class'			:'cls',
+		'surprise'			:'sprise',
+		'sweetheart'			:'swthrt',
+		'looked'			:'lkd',
+		'except'			:'xcpt',
+		'takes'			:'tks',
+		'situation'			:'sitn',
+		'besides'			:'bsds',
+		'pull'			:'pll',
+		'himself'			:'hmslf',
+		'hasn\'t'			:'hsnt',
+		'worth'			:'wrth',
+		'amazing'			:'amzg',
+		'given'			:'gvn',
+		'expect'			:'xpct',
+		'rather'			:'rthr',
+		'black'			:'blk',
+		'movie'			:'film',
+		'country'			:'cntry',
+		'perhaps'			:'prhps',
+		'watching'			:'wtchg',
+		'darling'			:'darlg',
+		'honor'			:'hnr',
+		'personal'			:'prsnl',
+		'moving'			:'movg',
+		'till'			:'til',
+		'admit'			:'admt',
+		'problems'			:'prbs',
+		'information'			:'info',
+		'honest'			:'hnst',
+		'missed'			:'mssd',
+		'longer'			:'lngr',
+		'dollars'			:'$s',
+		'evening'			:'eve',
+		'starting'			:'strtg',
+		'suppose'			:'spps',
+		'street'			:'st',
+		'sitting'			:'sttg',
+		'favor'			:'fvr',
+		'apartment'			:'apt',
+		'court'			:'crt',
+		'terrible'			:'trrbl',
+		'clean'			:'cln',
+		'learn'			:'lrn',
+		'works'			:'wks',
+		'relax'			:'rlx',
+		'million'			:'mil',
+		'prove'			:'prv',
+		'smart'			:'smrt',
+		'missing'			:'missg',
+		'forgot'			:'frgt',
+		'small'			:'sm',
+		'interested'			:'intrstd',
+		'table'			:'tbl',
+		'become'			:'bcm',
+		'pregnant'			:'preg',
+		'middle'			:'mddl',
+		'ring'			:'rng',
+		'careful'			:'crfl',
+		'figured'			:'fgrd',
+		'stick'			:'stk',
+		'stopped'			:'stppd',
+		'standing'			:'stndg',
+		'forgive'			:'frgv',
+		'wearing'			:'wearg',
+		'hoping'			:'hopg',
+		'thousand'			:'k',
+		'paper'			:'ppr',
+		'tough'			:'tuff',
+		'count'			:'cnt',
+		'birthday'			:'bday',
+		'history'			:'hstry',
+		'share'			:'shr',
+		'offer'			:'offr',
+		'hurry'			:'hrry',
+		'feet'			:'ft',
+		'wondering'			:'wonderg',
+		'building'			:'buildg',
+		'ones'			:'1s',
+		'finish'			:'fin',
+		'would\'ve'			:'wldve',
+		'interesting'			:'intrstg',
+		'enjoy'			:'njoy',
+		'road'			:'rd',
+		'staying'			:'stayg',
+		'short'			:'shrt',
+		'finished'			:'fin',
+		'respect'			:'rspct',
+		'spent'			:'spnt',
+		'attention'			:'attn',
+		'holding'			:'hldg',
+		'surprised'			:'srprsd',
+		'keeping'			:'kpg',
+		'putting'			:'puttg',
+		'dark'			:'drk',
+		'self'			:'slf',
+		'using'			:'usg',
+		'helping'			:'helpg',
+		'normal'			:'nrml',
+		'lawyer'			:'atty',
+		'floor'			:'flr',
+		'whether'			:'whthr',
+		'everything\'s'			:'evrthg\'s',
+		'present'			:'prsnt',
+		'private'			:'priv',
+		'cover'			:'cvr',
+		'judge'			:'jdg',
+		'upstairs'			:'upstrs',
+		'mommy'			:'mom',
+		'possibly'			:'pssbly',
+		'worst'			:'wrst',
 		
 		
 		/*
@@ -8638,7 +9032,9 @@ SpazShortText.prototype.genBaseMaps = function() {
 		'nine'					:'9',
 		'ten'					:'10',
 		'eleven'				:'11',
-		'twelve'				:'12'
+		'twelve'				:'12',
+		'twenty'				:'20'
+		
 	};
 	
 	
@@ -9393,17 +9789,18 @@ SpazTimeline.prototype.addItems = function(items) {
 	
 	if (this.add_method === 'append') {
 		items_html.reverse();
-		timeline_html = '<div>'+items_html.join('')+'</div>';
+		// timeline_html = '<div>'+items_html.join('')+'</div>';
+		timeline_html = items_html.join('');
 		this.append(timeline_html);
 	} else {
-		timeline_html = '<div>'+items_html.join('')+'</div>';
+		// timeline_html = '<div>'+items_html.join('')+'</div>';
+		timeline_html = items_html.join('');
 		this.prepend(timeline_html);
 	}
 	
 	this.removeExtraItems();
 	
 };
-
 
 SpazTimeline.prototype.renderItem = function(item, templatefunc) {
 	sch.debug('Rendering item in timeline');
@@ -10182,8 +10579,8 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.block_destroy		= "blocks/destroy/{{ID}}.json";
     urls.start_notifications= "notifications/follow/{{ID}}.json";
     urls.stop_notifications = "notifications/leave/{{ID}}.json";
-    urls.favorites_create 	= "favourings/create/{{ID}}.json";
-    urls.favorites_destroy	= "favourings/destroy/{{ID}}.json";
+    urls.favorites_create 	= "favorites/create/{{ID}}.json";
+    urls.favorites_destroy	= "favorites/destroy/{{ID}}.json";
     urls.saved_searches_create 	= "saved_searches/create.json";
     urls.saved_searches_destroy	= "saved_searches/destroy/{{ID}}.json";
     urls.verify_credentials = "account/verify_credentials.json";
@@ -11009,7 +11406,8 @@ SpazTwit.prototype._getTimeline = function(opts) {
         },
         'type': 	opts.method,
         'url': 		opts.url,
-        'data': 	opts.data
+        'data': 	opts.data,
+		'dataType':'text'
 	});
 	
 	return xhr;
@@ -11406,7 +11804,8 @@ SpazTwit.prototype._callMethod = function(opts) {
 	    },
 	    'type': method,
 	    'url' : opts.url,
-		'data': opts.data
+		'data': opts.data,
+		'dataType':'text'
 	});
 	return xhr;
 };
@@ -12402,7 +12801,46 @@ if (sc) {
 * 
 * 
 */
-/*jslint 
+/**
+ * THIS IS NOT FINISHED
+ * 
+ * returns the current geocode location as a string and the full object as second param
+ * 
+ * raises events: 'location_retrieved_success', 'location_retrieved_error'
+ * 
+ * @param {Object}   controller  a Mojo scene controller
+ * @param {Function} onsuccess
+ * @param {Function} onerror
+ */
+sc.helpers.getCurrentLocation = function(onsuccess, onerror) {
+
+	var success = function(data) {
+		if (onsuccess) {
+			onsuccess(data);
+		}
+		var geoloc = data.latitude + ',' + data.longitude;
+		// jQuery().trigger('location_retrieved_success', [geoloc,data]);
+	};
+
+	var error = function(data) {
+		if (onerror) {
+			onerror(data);
+		}
+		// jQuery().trigger('location_retrieved_error', [errorCode]);
+	};
+
+	var loc = new Mojo.Service.Request('palm://com.palm.location', {
+			method:"getCurrentPosition",
+			parameters:{
+				'accuracy'     : 1,
+				'responseTime' : 1,
+				'maximumAge'   : 30 // seconds
+			},
+			onSuccess:success,
+			onFailure:error
+		}
+	);
+};/*jslint 
 browser: true,
 nomen: false,
 debug: true,
@@ -12553,6 +12991,135 @@ sc.helpers.getMojoURL = function(url) {
 		return url;
 	}
 	
-};/**
+};/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, Mojo;
+
+
+/**
+ * WEBOS
  * platform-specific definitions for prefs lib 
  */
+
+SpazPrefs.prototype.load = function() {
+	
+	var thisPrefs = this;
+	
+	
+	sc.helpers.dump('this is webOS');
+	if (!this.mojoCookie) {
+		sc.helpers.dump('making cookie');
+		this.mojoCookie = new Mojo.Model.Cookie(SPAZCORE_PREFS_MOJO_COOKIENAME);
+		
+		
+		
+	}
+	var loaded_prefs = this.mojoCookie.get();
+	if (loaded_prefs) {
+		sc.helpers.dump('Prefs loaded');
+		for (var key in loaded_prefs) {
+			//sc.helpers.dump('Copying loaded pref "' + key + '":"' + thisPrefs._prefs[key] + '" (' + typeof(thisPrefs._prefs[key]) + ')');
+            thisPrefs._prefs[key] = loaded_prefs[key];
+       	}
+		jQuery().trigger('spazprefs_loaded');
+	} else {
+		sc.helpers.dump('Prefs loading failed in onGet');
+		this.migrateFromMojoDepot();
+		// thisPrefs.resetPrefs();
+	}
+	
+
+	
+
+}
+
+SpazPrefs.prototype.save = function() {
+	if (sc.helpers.iswebOS()) {
+		if (!this.mojoCookie) {
+			this.mojoCookie = new Mojo.Model.Cookie(SPAZCORE_PREFS_MOJO_COOKIENAME);
+		}
+		
+		this.mojoCookie.put(this._prefs);
+	}
+
+};
+
+/**
+ * @todo 
+ */
+SpazPrefs.prototype.getEncrypted = function(key) {
+
+};
+
+/**
+ * @todo 
+ */
+SpazPrefs.prototype.setEncrypted = function(key, val) {
+
+};
+
+
+
+SpazPrefs.prototype.saveWindowState = function() {
+	sch.error('saveWindowState not available');
+	return undefined;
+};
+
+
+SpazPrefs.prototype.loadWindowState = function() {
+	sch.error('loadWindowState not available');
+	return undefined;
+};
+
+/**
+ * We used to store the data in a Depot, so we may need
+ * to migrate data out of there 
+ */
+SpazPrefs.prototype.migrateFromMojoDepot = function() {
+	
+	var thisPrefs = this;
+	
+	sch.error('MIGRATING FROM DEPOT! ============================ ');
+	
+	sc.helpers.dump('this is webOS');
+	if (!this.mojoDepot) {
+		sc.helpers.dump('making depot');
+		this.mojoDepot = new Mojo.Depot({
+			name:'SpazDepotPrefs',
+			replace:false
+		});
+	}
+	
+	var onGet = function(loaded_prefs) {
+		if (loaded_prefs) {
+			sc.helpers.dump('Prefs loaded');
+			for (var key in loaded_prefs) {
+				//sc.helpers.dump('Copying loaded pref "' + key + '":"' + thisPrefs._prefs[key] + '" (' + typeof(thisPrefs._prefs[key]) + ')');
+	            thisPrefs._prefs[key] = loaded_prefs[key];
+	       	}
+		} else {
+			sc.helpers.dump('Prefs loading failed in onGet');
+			thisPrefs.resetPrefs();
+		}
+		thisPrefs.save(); // write to cookie
+		jQuery().trigger('spazprefs_loaded');
+	};
+
+	var onFail = function() {
+		sc.helpers.dump('Prefs loading failed in onFail');
+		thisPrefs.resetPrefs();
+		jQuery().trigger('spazprefs_loaded');
+	};
+	
+	sc.helpers.dump('simpleget depot');
+	this.mojoDepot.simpleGet('SpazPrefs', onGet, onFail);
+	sc.helpers.dump('sent simpleget');
+	
+};
