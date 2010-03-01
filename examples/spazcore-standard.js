@@ -1,4 +1,4 @@
-/*********** Built 2010-01-13 16:14:59 EST ***********/
+/*********** Built 2010-01-26 11:26:42 EST ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -4439,7 +4439,229 @@ window.Sizzle = Sizzle;
   };
 
 })();
-/*jslint 
+/**
+ * http://www.openjs.com/scripts/events/keyboard_shortcuts/
+ * Version : 2.01.B
+ * By Binny V A
+ * License : BSD
+ */
+shortcut = {
+	'all_shortcuts':{},//All the shortcuts are stored in this array
+	'add': function(shortcut_combination,callback,opt) {
+		//Provide a set of default options
+		var default_options = {
+			'type':'keydown',
+			'propagate':false,
+			'disable_in_input':false,
+			'target':document,
+			'keycode':false
+		}
+		if(!opt) opt = default_options;
+		else {
+			for(var dfo in default_options) {
+				if(typeof opt[dfo] == 'undefined') opt[dfo] = default_options[dfo];
+			}
+		}
+
+		var ele = opt.target;
+		if(typeof opt.target == 'string') ele = document.getElementById(opt.target);
+		var ths = this;
+		shortcut_combination = shortcut_combination.toLowerCase();
+
+		//The function to be called at keypress
+		var func = function(e) {
+			e = e || window.event;
+			
+			if(opt['disable_in_input']) { //Don't enable shortcut keys in Input, Textarea fields
+				var element;
+				if(e.target) element=e.target;
+				else if(e.srcElement) element=e.srcElement;
+				if(element.nodeType==3) element=element.parentNode;
+
+				if(element.tagName == 'INPUT' || element.tagName == 'TEXTAREA') return;
+			}
+	
+			//Find Which key is pressed
+			if (e.keyCode) code = e.keyCode;
+			else if (e.which) code = e.which;
+			var character = String.fromCharCode(code).toLowerCase();
+			
+			if(code == 188) character=","; //If the user presses , when the type is onkeydown
+			if(code == 190) character="."; //If the user presses , when the type is onkeydown
+
+			var keys = shortcut_combination.split("+");
+			//Key Pressed - counts the number of valid keypresses - if it is same as the number of keys, the shortcut function is invoked
+			var kp = 0;
+			
+			//Work around for stupid Shift key bug created by using lowercase - as a result the shift+num combination was broken
+			var shift_nums = {
+				"`":"~",
+				"1":"!",
+				"2":"@",
+				"3":"#",
+				"4":"$",
+				"5":"%",
+				"6":"^",
+				"7":"&",
+				"8":"*",
+				"9":"(",
+				"0":")",
+				"-":"_",
+				"=":"+",
+				";":":",
+				"'":"\"",
+				",":"<",
+				".":">",
+				"/":"?",
+				"\\":"|"
+			}
+			//Special Keys - and their codes
+			var special_keys = {
+				'esc':27,
+				'escape':27,
+				'tab':9,
+				'space':32,
+				'return':13,
+				'enter':13,
+				'backspace':8,
+	
+				'scrolllock':145,
+				'scroll_lock':145,
+				'scroll':145,
+				'capslock':20,
+				'caps_lock':20,
+				'caps':20,
+				'numlock':144,
+				'num_lock':144,
+				'num':144,
+				
+				'pause':19,
+				'break':19,
+				
+				'insert':45,
+				'home':36,
+				'delete':46,
+				'end':35,
+				
+				'pageup':33,
+				'page_up':33,
+				'pu':33,
+	
+				'pagedown':34,
+				'page_down':34,
+				'pd':34,
+	
+				'left':37,
+				'up':38,
+				'right':39,
+				'down':40,
+	
+				'f1':112,
+				'f2':113,
+				'f3':114,
+				'f4':115,
+				'f5':116,
+				'f6':117,
+				'f7':118,
+				'f8':119,
+				'f9':120,
+				'f10':121,
+				'f11':122,
+				'f12':123
+			}
+	
+			var modifiers = { 
+				shift: { wanted:false, pressed:false},
+				ctrl : { wanted:false, pressed:false},
+				alt  : { wanted:false, pressed:false},
+				meta : { wanted:false, pressed:false}	//Meta is Mac specific
+			};
+                        
+			if(e.ctrlKey)	modifiers.ctrl.pressed = true;
+			if(e.shiftKey)	modifiers.shift.pressed = true;
+			if(e.altKey)	modifiers.alt.pressed = true;
+			if(e.metaKey)   modifiers.meta.pressed = true;
+                        
+			for(var i=0; k=keys[i],i<keys.length; i++) {
+				//Modifiers
+				if(k == 'ctrl' || k == 'control') {
+					kp++;
+					modifiers.ctrl.wanted = true;
+
+				} else if(k == 'shift') {
+					kp++;
+					modifiers.shift.wanted = true;
+
+				} else if(k == 'alt') {
+					kp++;
+					modifiers.alt.wanted = true;
+				} else if(k == 'meta') {
+					kp++;
+					modifiers.meta.wanted = true;
+				} else if(k.length > 1) { //If it is a special key
+					if(special_keys[k] == code) kp++;
+					
+				} else if(opt['keycode']) {
+					if(opt['keycode'] == code) kp++;
+
+				} else { //The special keys did not match
+					if(character == k) kp++;
+					else {
+						if(shift_nums[character] && e.shiftKey) { //Stupid Shift key bug created by using lowercase
+							character = shift_nums[character]; 
+							if(character == k) kp++;
+						}
+					}
+				}
+			}
+			
+			if(kp == keys.length && 
+						modifiers.ctrl.pressed == modifiers.ctrl.wanted &&
+						modifiers.shift.pressed == modifiers.shift.wanted &&
+						modifiers.alt.pressed == modifiers.alt.wanted &&
+						modifiers.meta.pressed == modifiers.meta.wanted) {
+				callback(e);
+	
+				if(!opt['propagate']) { //Stop the event
+					//e.cancelBubble is supported by IE - this will kill the bubbling process.
+					e.cancelBubble = true;
+					e.returnValue = false;
+	
+					//e.stopPropagation works in Firefox.
+					if (e.stopPropagation) {
+						e.stopPropagation();
+						e.preventDefault();
+					}
+					return false;
+				}
+			}
+		}
+		this.all_shortcuts[shortcut_combination] = {
+			'callback':func, 
+			'target':ele, 
+			'event': opt['type']
+		};
+		//Attach the function with the event
+		if(ele.addEventListener) ele.addEventListener(opt['type'], func, false);
+		else if(ele.attachEvent) ele.attachEvent('on'+opt['type'], func);
+		else ele['on'+opt['type']] = func;
+	},
+
+	//Remove the shortcut - just specify the shortcut and I will remove the binding
+	'remove':function(shortcut_combination) {
+		shortcut_combination = shortcut_combination.toLowerCase();
+		var binding = this.all_shortcuts[shortcut_combination];
+		delete(this.all_shortcuts[shortcut_combination])
+		if(!binding) return;
+		var type = binding['event'];
+		var ele = binding['target'];
+		var callback = binding['callback'];
+
+		if(ele.detachEvent) ele.detachEvent('on'+type, callback);
+		else if(ele.removeEventListener) ele.removeEventListener(type, callback, false);
+		else ele['on'+type] = false;
+	}
+}/*jslint 
 browser: true,
 nomen: false,
 debug: true,
@@ -5673,8 +5895,8 @@ sc.helpers.deJSON = function(json)
  {
 
 	// Fix twitter data bug
-	var re = new RegExp("Couldn\\'t\\ find\\ Status\\ with\\ ID\\=[0-9]+\\,", "g");
-	json = json.replace(re, "");
+	// var re = new RegExp("Couldn\\'t\\ find\\ Status\\ with\\ ID\\=[0-9]+\\,", "g");
+	// json = json.replace(re, "");
 
 	var done = false;
 	try {
@@ -5878,6 +6100,52 @@ sc.helpers.xml2json = function(xml, extended) {
 
 
 /*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, DOMParser, shortcut;
+
+/**
+ * this is really a wrapper for shortcut.add in shortcut.js 
+ * @param {string} shortcut The shortcut key combination should be specified in this format: Modifier[+Modifier..]+Key
+ * @param {Object} func	The function to be called when key is pressed
+ * @param {Object} opts A hash of options
+ * @param {string} [opts.type] The event type - can be 'keydown','keyup','keypress'. Default: 'keydown' 
+ * @param {Boolean} [opts.disable_in_input] If this is set to true, keyboard capture will be disabled in input and textarea fields. Default is TRUE
+ * @param {Object} [opts.target] The dom node that should be watched for the keyboard event. Default is the document element
+ * @param {Boolean} [opts.propagate] If the key event should propagate. Default is FALSE
+ * @param {Number} [opts.keycode] Watch for the given keycode
+ */
+sc.helpers.key_add = function(keystroke, func, opts) {
+	opts = sch.defaults({
+		'type':'keydown',
+		'disable_in_input':'true',
+
+	}, opts);
+	
+	shortcut.add(keystroke, func, opts);
+};
+
+/**
+ * this is really a wrapper for shortcut.remove in shortcut.js 
+ */
+sc.helpers.key_remove = function(keystroke) {
+	shortcut.remove(keystroke);
+};
+
+/**
+ * @todo 
+ */
+sc.helpers.getModKey = function() {
+	// get the primary modkey based on the OS
+	// if OS X, use 'Meta'
+	// if Win or Linux, use 'Ctrl'
+}/*jslint 
 browser: true,
 nomen: false,
 debug: true,
@@ -6608,6 +6876,13 @@ var SPAZCORE_PLATFORM_WEBOS		= 'webOS';
 var SPAZCORE_PLATFORM_TITANIUM	= 'Titanium';
 var SPAZCORE_PLATFORM_UNKNOWN		= '__UNKNOWN';
 
+
+var SPAZCORE_OS_WINDOWS		= 'Windows';
+var SPAZCORE_OS_LINUX		= 'Linux';
+var SPAZCORE_OS_MACOS		= 'MacOS';
+var SPAZCORE_OS_UNKNOWN		= '__OS_UNKNOWN';
+
+
 /**
  * error reporting levels 
  */
@@ -6670,6 +6945,7 @@ sc.helpers.iswebOS = function() {
 sc.helpers.isTitanium = function() {
 	return sc.helpers.isPlatform(SPAZCORE_PLATFORM_TITANIUM);
 };
+
 
 
 /**
@@ -6819,6 +7095,43 @@ sc.helpers.getPreferencesFile = function(name, create) {
 */
 sc.helpers.init_file = function(path, overwrite) {
 	// stub
+};
+
+
+/**
+* Returns a string identifier for the OS.
+* 
+* @return {String} an identifier for the OS.  See the SPAZCORE_OS_* variables
+*/
+sc.helpers.getOS = function() {
+	// stub
+	return SPAZCORE_OS_UNKNOWN;
+};
+
+/**
+* checks to see if current platform is the one passed in. Use one of the defined constants, like SPAZCORE_OS_WINDOWS
+* 
+* @param {String} str the platform you're checking for
+* 
+*/
+sc.helpers.isOS = function(str) {
+	var type = sc.helpers.getOS();
+	if (type === str) {
+		return true;
+	}
+	return false;
+}
+
+sc.helpers.isWindows = function() {
+	return sc.helpers.isOS(SPAZCORE_OS_WINDOWS)
+};
+
+sc.helpers.isLinux = function() {
+	return sc.helpers.isOS(SPAZCORE_OS_LINUX)
+};
+
+sc.helpers.isMacOS = function() {
+	return sc.helpers.isOS(SPAZCORE_OS_MACOS)
 };
 /**
  * Takes a key/val pair object and returns a query string 
@@ -7000,18 +7313,47 @@ SpazAccounts.prototype.prefskey = 'users';
  * loads the accounts array from the prefs object 
  */
 SpazAccounts.prototype.load	= function() { 
-	this._accounts = this.prefs.get(this.prefskey) || [];
+	var accjson = this.prefs.get(this.prefskey);
+	
+	sch.debug("accjson:'"+accjson+"'");
+	
+	try {
+		this._accounts = sch.deJSON(this.prefs.get(this.prefskey));
+	} catch(e) {
+		sch.error(e.message);
+		this._accounts = [];
+	}		
+
+	/*
+		sanity check
+	*/
+	if (!sch.isArray(this._accounts)) {
+		this._accounts = [];
+	}
+	
+	sch.debug("this._accounts:'"+this._accounts+"'")
+	
 };
 
 /**
  * saves the accounts array to the prefs obj 
  */
 SpazAccounts.prototype.save	= function() {
-	this.prefs.set(this.prefskey, this._accounts);
+	
+	
+	this.prefs.set(this.prefskey, sch.enJSON(this._accounts));
 	sch.debug('saved users to "'+this.prefskey+'" pref');
 	for (var x in this._accounts) {
 		sch.debug(this._accounts[x].id);
 	};
+	
+	sch.debug('THE ACCOUNTS:')
+	sch.debug(sch.enJSON(this._accounts));
+
+	sch.debug('ALL PREFS:')
+	sch.debug(sch.enJSON(this.prefs._prefs));
+
+	
 };
 
 /**
@@ -7896,111 +8238,13 @@ SpazPrefs.prototype.setEncrypted = function(key, val) {
 /**
  * loads the prefs file and parses the prefs into this._prefs,
  * or initializes the file and loads the defaults
- * @todo
+ * @stub
  */
 SpazPrefs.prototype.load = function(name) {
-	
-	var thisPrefs = this;
-	
-	/*
-		webOS implementation
-	*/
-	if (sc.helpers.iswebOS()) {
-
-		sc.helpers.dump('this is webOS');
-		if (!this.mojoCookie) {
-			sc.helpers.dump('making cookie');
-			this.mojoCookie = new Mojo.Model.Cookie(SPAZCORE_PREFS_MOJO_COOKIENAME);
-			
-			
-			
-		}
-		var loaded_prefs = this.mojoCookie.get();
-		if (loaded_prefs) {
-			sc.helpers.dump('Prefs loaded');
-			for (var key in loaded_prefs) {
-				//sc.helpers.dump('Copying loaded pref "' + key + '":"' + thisPrefs._prefs[key] + '" (' + typeof(thisPrefs._prefs[key]) + ')');
-	            thisPrefs._prefs[key] = loaded_prefs[key];
-	       	}
-			jQuery().trigger('spazprefs_loaded');
-		} else {
-			sc.helpers.dump('Prefs loading failed in onGet');
-			this.migrateFromMojoDepot();
-			// thisPrefs.resetPrefs();
-		}
-		
-
-		
-
-	}
-	
-	/*
-		Titanium implementation
-		@TODO
-	*/
-	if (sc.helpers.isTitanium()) {
-		if (Titanium.App.Properties.hasProperty(SPAZCORE_PREFS_TI_KEY)) {
-			var prefs_json = Titanium.App.Properties.getString(SPAZCORE_PREFS_TI_KEY);
-			var loaded_prefs = sc.helpers.deJSON(prefs_json);
-			for (var key in loaded_prefs) {
-				sc.helpers.dump('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
-	            this._prefs[key] = loaded_prefs[key];
-	       	}
-		} else {
-			// save the defaults if this is the first time
-			this.save();
-		}
-		jQuery().trigger('spazprefs_loaded');
-	}
-	
 };
 
 
-/**
- * We used to store the data in a Depot, so we may need
- * to migrate data out of there 
- */
-SpazPrefs.prototype.migrateFromMojoDepot = function() {
-	
-	var thisPrefs = this;
-	
-	sch.error('MIGRATING FROM DEPOT! ============================ ');
-	
-	sc.helpers.dump('this is webOS');
-	if (!this.mojoDepot) {
-		sc.helpers.dump('making depot');
-		this.mojoDepot = new Mojo.Depot({
-			name:'SpazDepotPrefs',
-			replace:false
-		});
-	}
-	
-	var onGet = function(loaded_prefs) {
-		if (loaded_prefs) {
-			sc.helpers.dump('Prefs loaded');
-			for (var key in loaded_prefs) {
-				//sc.helpers.dump('Copying loaded pref "' + key + '":"' + thisPrefs._prefs[key] + '" (' + typeof(thisPrefs._prefs[key]) + ')');
-	            thisPrefs._prefs[key] = loaded_prefs[key];
-	       	}
-		} else {
-			sc.helpers.dump('Prefs loading failed in onGet');
-			thisPrefs.resetPrefs();
-		}
-		thisPrefs.save(); // write to cookie
-		jQuery().trigger('spazprefs_loaded');
-	};
 
-	var onFail = function() {
-		sc.helpers.dump('Prefs loading failed in onFail');
-		thisPrefs.resetPrefs();
-		jQuery().trigger('spazprefs_loaded');
-	};
-	
-	sc.helpers.dump('simpleget depot');
-	this.mojoDepot.simpleGet('SpazPrefs', onGet, onFail);
-	sc.helpers.dump('sent simpleget');
-	
-};
 
 
 
@@ -8011,24 +8255,7 @@ SpazPrefs.prototype.migrateFromMojoDepot = function() {
  */
 SpazPrefs.prototype.save = function() {
 
-	if (sc.helpers.iswebOS()) {
-		if (!this.mojoCookie) {
-			this.mojoCookie = new Mojo.Model.Cookie(SPAZCORE_PREFS_MOJO_COOKIENAME);
-		}
-		
-		this.mojoCookie.put(this._prefs);
-	}
-	
-	/*
-		Titanium implementation
-		@TODO
-	*/
-	if (sc.helpers.isTitanium()) {
-		// save the file to a default place
-		var prefs_json = sc.helpers.enJSON(this._prefs);
-		Titanium.App.Properties.setString(SPAZCORE_PREFS_TI_KEY, prefs_json);
-	}
-		
+
 	
 };
 
@@ -8040,316 +8267,6 @@ SpazPrefs.prototype.save = function() {
 if (sc) {
 	var scPrefs = SpazPrefs;
 }
-
-
-
-
-
-
-
-
-/**
- * methods for Titanium
- */
-if (sc.helpers.isTitanium()) {
-
-	/*
-		Saves the size and placement of the window this executes in
-	*/
-	SpazPrefs.prototype.saveWindowState = function() {
-		var width  = Titanium.UI.currentWindow.getWidth();
-		var height = Titanium.UI.currentWindow.getHeight();
-		var x      = Titanium.UI.currentWindow.getX();
-		var y      = Titanium.UI.currentWindow.getY();
-		
-		if (x && y && width && height) {
-			Titanium.App.Properties.setInt('__window-width',  width);
-			Titanium.App.Properties.setInt('__window-height', height);
-			Titanium.App.Properties.setInt('__window-x',      x);
-			Titanium.App.Properties.setInt('__window-y',      y);
-		}
-	};
-
-	/*
-		Loads the size and placement of the window this executes in
-	*/
-	SpazPrefs.prototype.loadWindowState = function() {
-		if (!Titanium.App.Properties.hasProperty('__window-width')) { // we assume if this isn't set, none are set
-			this.saveWindowState(); // save the current state
-			return;
-		}
-		
-		var width  = Titanium.App.Properties.getInt('__window-width');
-		var height = Titanium.App.Properties.getInt('__window-height');
-		var x      = Titanium.App.Properties.getInt('__window-x');
-		var y      = Titanium.App.Properties.getInt('__window-y');
-		
-		if (x && y && width && height) {
-			Titanium.UI.currentWindow.setWidth(width);
-			Titanium.UI.currentWindow.setHeight(height);
-			Titanium.UI.currentWindow.setX(x);
-			Titanium.UI.currentWindow.setY(y);
-		}
-	};
-}
-
-
-
-/**
- * methods for AIR 
- * @TODO
- */
-if (sc.helpers.isAIR()) {
-
-	/*
-		Saves the size and placement of the window this executes in
-	*/
-	this.saveWindowState = function() {
-		this.set('__window-height', window.nativeWindow.width);
-		this.set('__window-height', window.nativeWindow.height);
-		this.set('__window-x', window.nativeWindow.x);
-		this.set('__window-y', window.nativeWindow.y);
-	};
-
-	/*
-		Loads the size and placement of the window this executes in
-	*/
-	this.loadWindowState = function() {
-		var width  = this.get('__window-height');
-		var height = this.get('__window-height');
-		var x      = this.get('__window-x');
-		var y      = this.get('__window-y');
-		
-		if (x && y && width && height) {
-			window.nativeWindow.width  = width;
-			window.nativeWindow.height = height;
-			window.nativeWindow.x = x;
-			window.nativeWindow.y = y;
-		}
-		
-	};
-	
-}
-
-
-
-
-
-// var SpazPrefs = function(defaults) {
-// 	
-// 	if (defaults) {
-// 		this.defaults = defaults;
-// 	} else {
-// 		this.defaults = {};
-// 	}
-// 
-// 	this.prefs    = clone(this.defaults);
-// 
-// 	/*
-// 		returns the application storage directory air.File object
-// 	*/
-// 	this.getPrefsDir = function() {
-// 		return air.File.applicationStorageDirectory;
-// 	}
-// 	
-// 	/*
-// 		returns the prefs air.File object. 
-// 	*/
-// 	this.getPrefsFile = function(name) {
-// 		if (!name) {name='preferences';}
-// 		
-// 		var prefsDir = this.getPrefsDir();
-// 		prefsFile = prefsDir.resolvePath(name+".json");
-// 		return prefsFile;
-// 	}
-// 	
-// 	/*
-// 		loads the prefs file and parses the prefs into this.prefs,
-// 		or initializes the file and loads the defaults
-// 	*/
-// 	this.load = function(name) {
-// 		var prefsFile = this.getPrefsFile(name);
-// 
-// 		// if file DNE, init file with defaults
-// 		if (prefsFile.exists) {
-// 			var prefsJSON = get_file_contents(prefsFile.url);
-// 			air.trace(prefsJSON);
-// 			var loaded_prefs = JSON.parse(prefsJSON);
-// 			for (var key in loaded_prefs) {
-// 	            this.set(key, loaded_prefs[key]);
-//         	}
-// 
-// 		} else {
-// 			init_file(prefsFile.url);
-// 			set_file_contents(prefsFile.url, this.defaults, true);
-// 			this.prefs = clone(this.defaults); // we have to pass by value, not ref
-// 		}
-// 
-// 		return prefsFile;
-// 	}
-// 	
-// 	
-// 	/*
-// 		
-// 	*/
-// 	this.save = function(name) {
-// 		var prefsFile = this.getPrefsFile(name);
-// 		set_file_contents(prefsFile.url, this.prefs, true);
-// 	};
-// 	
-// 	
-// 	/*
-// 		Get a preference
-// 	*/
-// 	this.get = function(key, encrypted) {
-// 		if (encrypted) {
-// 			return this.getEncrypted(key);
-// 		} 
-// 		
-// 		if (this.prefs[key]) {
-// 			return this.prefs[key];
-// 		} else {
-// 			return false
-// 		}
-// 	}
-// 	
-// 	/*
-// 		Saves the size and placement of the window this executes in
-// 	*/
-// 	this.saveWindowState = function() {
-// 		this.set('__window-height', window.nativeWindow.width);
-// 		this.set('__window-height', window.nativeWindow.height);
-// 		this.set('__window-x', window.nativeWindow.x);
-// 		this.set('__window-y', window.nativeWindow.y);
-// 	}
-// 
-// 	/*
-// 		Loads the size and placement of the window this executes in
-// 	*/
-// 	this.loadWindowState = function() {
-// 		var width  = this.get('__window-height');
-// 		var height = this.get('__window-height');
-// 		var x      = this.get('__window-x');
-// 		var y      = this.get('__window-y');
-// 		
-// 		if (x && y && width && height) {
-// 			window.nativeWindow.width  = width;
-// 			window.nativeWindow.height = height;
-// 			window.nativeWindow.x = x;
-// 			window.nativeWindow.y = y;
-// 		}
-// 		
-// 	}
-// 	
-// 	
-// 	/*
-// 		get an encrypted preference
-// 	*/
-// 	this.getEncrypted = function(key) {
-// 		return get_encrypted_value(key);
-// 	};
-// 	
-// 	
-// 	/*
-// 		set a preference
-// 	*/
-// 	this.set = function(key, val, encrypted) {
-// 		if (encrypted) {
-// 			return this.setEncrypted(key, val);
-// 		} 
-// 
-// 		this.prefs[key] = val;
-// 	}
-// 	
-// 	
-// 	/*
-// 		Sets an encrypted pref
-// 	*/
-// 	this.setEncrypted = function(key, val) {
-// 		return set_encrypted_value(key, val);
-// 	};
-// 	
-// 	
-// 	/*
-// 		Gets the contents of a file
-// 	*/
-// 	function get_file_contents(path) {
-// 		var f = new air.File(path);
-// 		if (f.exists) {
-// 			var fs = new air.FileStream();
-// 			fs.open(f, air.FileMode.READ);
-// 			var str = fs.readMultiByte(f.size, air.File.systemCharset);
-// 			fs.close();
-// 			return str;
-// 		} else {
-// 			return false;
-// 		}
-// 	}
-// 
-// 	/*
-// 		Saves the contents to a specified path. Serializes a passed object if 
-// 		serialize == true
-// 	*/
-// 	function set_file_contents(path, content, serialize) {
-// 
-// 		if (serialize) {
-// 			content = JSON.stringify(content);
-// 		}
-// 
-// 		// Spaz.dump('setFileContents for '+path+ ' to "' +content+ '"');
-// 
-// 		try { 
-// 			var f = new air.File(path);
-// 			var fs = new air.FileStream();
-// 			fs.open(f, air.FileMode.WRITE);
-// 			fs.writeUTFBytes(content);
-// 			fs.close();
-// 		} catch (e) {
-// 			air.trace(e.errorMsg)
-// 		}
-// 	};
-// 	
-// 	
-// 	
-// 	/*
-// 		Loads a value for a key from EncryptedLocalStore
-// 	*/
-// 	function get_encrypted_value(key) {
-// 		var storedValue = air.EncryptedLocalStore.getItem(key);
-// 		var val = storedValue.readUTFBytes(storedValue.length);
-// 		return val;
-// 	}
-// 
-// 	/*
-// 		Sets a value in the EncryptedLocalStore of AIR
-// 	*/
-// 	function set_encrypted_value(key, val) {
-// 		var bytes = new air.ByteArray();
-// 	    bytes.writeUTFBytes(val);
-// 	    return air.EncryptedLocalStore.setItem(key, bytes);
-// 	}
-// 	
-// 	/*
-// 		initializes a file at the given location. set overwrite to true
-// 		to clear out an existing file.
-// 		returns the air.File object or false
-// 	*/
-// 	function init_file(path, overwrite) {
-// 		var file = new air.File(path);
-// 		if ( !file.exists || (file.exists && overwrite) ) {
-// 			var fs = new air.FileStream();
-// 			fs.open(file, air.FileMode.WRITE);
-// 			fs.writeUTFBytes('');
-// 			fs.close();
-// 			return file;
-// 		} else {
-// 			return false;
-// 		}
-// 
-// 	}
-// 	
-// }
-
 /*jslint 
 browser: true,
 nomen: false,

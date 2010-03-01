@@ -22,6 +22,13 @@ var SPAZCORE_PLATFORM_WEBOS		= 'webOS';
 var SPAZCORE_PLATFORM_TITANIUM	= 'Titanium';
 var SPAZCORE_PLATFORM_UNKNOWN		= '__UNKNOWN';
 
+
+var SPAZCORE_OS_WINDOWS		= 'Windows';
+var SPAZCORE_OS_LINUX		= 'Linux';
+var SPAZCORE_OS_MACOS		= 'MacOS';
+var SPAZCORE_OS_UNKNOWN		= '__OS_UNKNOWN';
+
+
 /**
  * error reporting levels 
  */
@@ -84,6 +91,7 @@ sc.helpers.iswebOS = function() {
 sc.helpers.isTitanium = function() {
 	return sc.helpers.isPlatform(SPAZCORE_PLATFORM_TITANIUM);
 };
+
 
 
 /**
@@ -233,4 +241,41 @@ sc.helpers.getPreferencesFile = function(name, create) {
 */
 sc.helpers.init_file = function(path, overwrite) {
 	// stub
+};
+
+
+/**
+* Returns a string identifier for the OS.
+* 
+* @return {String} an identifier for the OS.  See the SPAZCORE_OS_* variables
+*/
+sc.helpers.getOS = function() {
+	// stub
+	return SPAZCORE_OS_UNKNOWN;
+};
+
+/**
+* checks to see if current platform is the one passed in. Use one of the defined constants, like SPAZCORE_OS_WINDOWS
+* 
+* @param {String} str the platform you're checking for
+* 
+*/
+sc.helpers.isOS = function(str) {
+	var type = sc.helpers.getOS();
+	if (type === str) {
+		return true;
+	}
+	return false;
+}
+
+sc.helpers.isWindows = function() {
+	return sc.helpers.isOS(SPAZCORE_OS_WINDOWS)
+};
+
+sc.helpers.isLinux = function() {
+	return sc.helpers.isOS(SPAZCORE_OS_LINUX)
+};
+
+sc.helpers.isMacOS = function() {
+	return sc.helpers.isOS(SPAZCORE_OS_MACOS)
 };

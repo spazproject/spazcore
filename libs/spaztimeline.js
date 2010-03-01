@@ -213,17 +213,18 @@ SpazTimeline.prototype.addItems = function(items) {
 	
 	if (this.add_method === 'append') {
 		items_html.reverse();
-		timeline_html = '<div>'+items_html.join('')+'</div>';
+		// timeline_html = '<div>'+items_html.join('')+'</div>';
+		timeline_html = items_html.join('');
 		this.append(timeline_html);
 	} else {
-		timeline_html = '<div>'+items_html.join('')+'</div>';
+		// timeline_html = '<div>'+items_html.join('')+'</div>';
+		timeline_html = items_html.join('');
 		this.prepend(timeline_html);
 	}
 	
 	this.removeExtraItems();
 	
 };
-
 
 SpazTimeline.prototype.renderItem = function(item, templatefunc) {
 	sch.debug('Rendering item in timeline');
