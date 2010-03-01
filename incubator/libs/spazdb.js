@@ -50,7 +50,7 @@ SpazDB.prototype.get = function(key, callback) {
  * Deletes a document from the database
  * @param {string} Document key
  */
-SpazDB.prototype.delete = function(key) {
+SpazDB.prototype.remove = function(key) {
 
 	this.db.remove(key);
 	return true;

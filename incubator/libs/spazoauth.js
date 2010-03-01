@@ -1,11 +1,10 @@
 /**
  * OAuth library for Spaz
- * This library wraps the library found at http://oauth.googlecode.com/
- *
  * @param {object} (service string)
  */
 function SpazOAuth(args) {
 
+	this.db = new SpazDB();
 	this.services = {};
 	this.requestToken = null;
 	this.accessToken = null;
@@ -13,6 +12,15 @@ function SpazOAuth(args) {
 
 	this.initServices();
 	this.setService(args.service);
+
+	// Check to see if there is already an access token in the local database
+	var that = this;
+	this.db.get('oauth', function(doc) {
+		if (doc && doc[that.getService().name]) {
+			that.accessToken = doc[that.getService().name].accessToken;
+			that.accessTokenSecret = doc[that.getService().name].accessTokenSecret;
+		}
+	});
 
 };
 
@@ -66,13 +74,26 @@ SpazOAuth.prototype.getService = function() {
 };
 
 /**
+ * Returns true if the user has already authorized Spaz with the service
+ * and has an access token
+ */
+SpazOAuth.prototype.isAuthorized = function() {
+
+	if (this.accessToken) {
+		return true;
+	}
+
+	return false;
+
+};
+
+/**
  * Gets the request token
  */
 SpazOAuth.prototype.getRequestToken = function() {
 
+	var that = this;
 	var success = false;
-	var requestToken = null;
-	var userAuthorizationUrl = this.getService().userAuthorizationUrl;
 	var method = 'post';
 	var authHeader = this.getAuthHeader({
 		method: method,
@@ -90,23 +111,19 @@ SpazOAuth.prototype.getRequestToken = function() {
 		complete: function(req, textStatus) {
 			if (req.status == 200) {
 				var results = OAuth.decodeForm(req.responseText);
-				requestToken = OAuth.getParameter(results, 'oauth_token');
+				that.requestToken = OAuth.getParameter(results, 'oauth_token');
 
 				// Open another browser window to allow the user to authorize
 				// service access to Spaz and retrieve the authorization PIN
 				sc.helpers.openInBrowser(OAuth.addToURL(
-					userAuthorizationUrl,
-					{oauth_token : requestToken}
+					that.getService().userAuthorizationUrl,
+					{oauth_token : that.requestToken}
 				));
 
 				success = true;
 			}
 		},
 	});
-
-	if (success) {
-		this.requestToken = requestToken;
-	}
 
 	return success;
 
@@ -122,9 +139,8 @@ SpazOAuth.prototype.getAuthorization = function(accessPIN) {
 		return false;
 	}
 
+	var that = this;
 	var success = false;
-	var accessToken = null;
-	var accessTokenSecret = null;
 	var method = 'post';
 	var authHeader = this.getAuthHeader({
 		method: method,
@@ -146,18 +162,21 @@ SpazOAuth.prototype.getAuthorization = function(accessPIN) {
 		complete: function(req, textStatus) {
 			if (req.status == 200) {
 				var results = OAuth.decodeForm(req.responseText);
-				accessToken = OAuth.getParameter(results, 'oauth_token');
-				accessTokenSecret = OAuth.getParameter(results, 'oauth_token_secret');
+				that.accessToken = OAuth.getParameter(results, 'oauth_token');
+				that.accessTokenSecret = OAuth.getParameter(results, 'oauth_token_secret');
+
+				// Store the access token to the local database
+				var doc = { key: 'oauth' };
+				doc[that.getService().name] = {
+					accessToken: that.accessToken,
+					accessTokenSecret: that.accessTokenSecret
+				};
+				that.db.set(doc);
 
 				success = true;
 			}
 		},
 	});
-
-	if (success) {
-		this.accessToken = accessToken;
-		this.accessTokenSecret = accessTokenSecret;
-	}
 
 	return success;
 };
