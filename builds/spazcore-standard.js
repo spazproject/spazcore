@@ -1,4 +1,8 @@
+<<<<<<< HEAD:builds/spazcore-standard.js
 /*********** Built 2010-03-01 20:32:46 EST ***********/
+=======
+/*********** Built 2010-03-12 06:17:53 EST ***********/
+>>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-standard.js
 /*jslint 
 browser: true,
 nomen: false,
@@ -4734,7 +4738,7 @@ sc.helpers.getRelativeTime = function(time_value, labels, use_dateparse) {
 
 
 sc.helpers.httpTimeToInt = function(entry_date, use_dateparse) {
-	return sc.helpers.dateToInt(entry_date, use_dateparse)
+	return sc.helpers.dateToInt(entry_date, use_dateparse);
 };
 
 /**
@@ -5782,7 +5786,7 @@ sc.helpers.UUID = (function() {
  */
 sc.helpers.isUUID = function(val) {
 	return val.match(/^[0-9A-Z]{8}-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{12}$/);
-}
+};
 /*jslint 
 browser: true,
 nomen: false,
@@ -5876,7 +5880,11 @@ sc.helpers.defaults = function(defaults, passed) {
 	}
 	
 	return args;
+<<<<<<< HEAD:builds/spazcore-standard.js
 }
+=======
+};
+>>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-standard.js
 
 
 /*jslint 
@@ -6127,7 +6135,7 @@ var sc, DOMParser, shortcut;
 sc.helpers.key_add = function(keystroke, func, opts) {
 	opts = sch.defaults({
 		'type':'keydown',
-		'disable_in_input':'true',
+		'disable_in_input':'true'
 
 	}, opts);
 	
@@ -6148,7 +6156,7 @@ sc.helpers.getModKey = function() {
 	// get the primary modkey based on the OS
 	// if OS X, use 'Meta'
 	// if Win or Linux, use 'Ctrl'
-}/*jslint 
+};/*jslint 
 browser: true,
 nomen: false,
 debug: true,
@@ -6166,7 +6174,7 @@ var sc;
  */
 sc.helpers.getCurrentLocation = function() {
 	
-}/*jslint 
+};/*jslint 
 bitwise: false,
 browser: true,
 newcap: false,
@@ -6544,7 +6552,7 @@ sc.helpers.htmlspecialchars = function(string, quote_style) {
     }
 
     return tmp_str;
-}
+};
 
 
 
@@ -7123,18 +7131,18 @@ sc.helpers.isOS = function(str) {
 		return true;
 	}
 	return false;
-}
+};
 
 sc.helpers.isWindows = function() {
-	return sc.helpers.isOS(SPAZCORE_OS_WINDOWS)
+	return sc.helpers.isOS(SPAZCORE_OS_WINDOWS);
 };
 
 sc.helpers.isLinux = function() {
-	return sc.helpers.isOS(SPAZCORE_OS_LINUX)
+	return sc.helpers.isOS(SPAZCORE_OS_LINUX);
 };
 
 sc.helpers.isMacOS = function() {
-	return sc.helpers.isOS(SPAZCORE_OS_MACOS)
+	return sc.helpers.isOS(SPAZCORE_OS_MACOS);
 };
 /**
  * Takes a key/val pair object and returns a query string 
@@ -7334,7 +7342,7 @@ SpazAccounts.prototype.load	= function() {
 		this._accounts = [];
 	}
 	
-	sch.debug("this._accounts:'"+this._accounts+"'")
+	sch.debug("this._accounts:'"+this._accounts+"'");
 	
 };
 
@@ -7350,10 +7358,10 @@ SpazAccounts.prototype.save	= function() {
 		sch.debug(this._accounts[x].id);
 	};
 	
-	sch.debug('THE ACCOUNTS:')
+	sch.debug('THE ACCOUNTS:');
 	sch.debug(sch.enJSON(this._accounts));
 
-	sch.debug('ALL PREFS:')
+	sch.debug('ALL PREFS:');
 	sch.debug(sch.enJSON(this.prefs._prefs));
 
 	
@@ -7397,7 +7405,7 @@ SpazAccounts.prototype.update = function(id, acctobj) {
 		sch.error('No account with id "'+id+'" exists');
 		return null;
 	}
-}
+};
 
 
 
@@ -7467,7 +7475,7 @@ SpazAccounts.prototype.getByType = function(type) {
 	
 	for (var i=0; i < this._accounts.length; i++) {
 		if (this._accounts[i].type === type) {
-			matches.push(this._accounts[i])
+			matches.push(this._accounts[i]);
 		}
 	};
 	
@@ -7483,7 +7491,7 @@ SpazAccounts.prototype.getByUsername = function(username) {
 
 	for (var i=0; i < this._accounts.length; i++) {
 		if (this._accounts[i].username === username) {
-			matches.push(this._accounts[i])
+			matches.push(this._accounts[i]);
 		}
 	};
 	
@@ -7500,7 +7508,7 @@ SpazAccounts.prototype.getByUsernameAndType = function(username, type) {
 
 	for (var i=0; i < this._accounts.length; i++) {
 		if (this._accounts[i].username === username && this._accounts[i].type === type) {
-			matches.push(this._accounts[i])
+			matches.push(this._accounts[i]);
 		}
 	};
 	
@@ -8962,7 +8970,7 @@ SpazShortText.prototype.shorten = function(text) {
 	
 	for (var key in this.map) {
 		var re = this.map[key].regex;
-		var rp = this.map[key].short;
+		var rp = this.map[key]["short"];
 		text = text.replace(re, rp);
 	}
 	
@@ -9242,7 +9250,7 @@ SpazShortURL.prototype.expand = function(shorturl, opts) {
 	var longurl;
 	
 	if (!opts) {
-		opts = {}
+		opts = {};
 	}
 	
 	opts.event_target = opts.event_target || document;
@@ -9781,9 +9789,9 @@ SpazTimeline.prototype.getEntrySelector = function() {
  */
 SpazTimelineFilter = function(opts) {
 	
-	if (!opts) { opts = {} };
+	if (!opts) { opts = {}; };
 	
-	if (opts.type !== 'whitelist') { opts.type = 'blacklist' };
+	if (opts.type !== 'whitelist') { opts.type = 'blacklist'; };
 	
 	this.settings = {
 		name : opts.name || 'unnamed',
@@ -9798,7 +9806,7 @@ SpazTimelineFilter = function(opts) {
 		username_attr  : opts.username_attr    || 'data-user-screen_name',
 		content_selector:opts.content_selector || 'div.timeline-entry status-text',
 		style_selector : opts.style_selector   || 'style[title="custom-timeline-filters"]'
-	}
+	};
 	// this.settings = {
 	// 	name : 'php-people',
 	// 	type : 'whitelist', // whitelist | blacklist
@@ -9814,7 +9822,7 @@ SpazTimelineFilter = function(opts) {
 	// 	style_selector : 'style[title="custom-timeline-filters"]'
 	// }
 	
-}
+};
 
 
 
@@ -9879,7 +9887,7 @@ SpazTimelineFilter.prototype.getUserCSS = function() {
 	};
 
 	return rules.join("\n");
-}
+};
 
 
 /**
@@ -10048,7 +10056,7 @@ SpazTimelineFilter.prototype.applyContentFilters = function() {
 SpazTimelineFilter.prototype.disableContentFilters = function() {
 	var jq_entries = jQuery(this.getBaseSelector());
 	jq_entries.filter().show();
-}
+};
 
 /**
  * this builds the content filtering selectors used by jQuery to hide and 
@@ -10059,7 +10067,7 @@ SpazTimelineFilter.prototype.buildContentFilterSelectors = function() {
 	var contentfilters = {
 		'hide':[],
 		'show':[]
-	}
+	};
 	
 	for (var i=0; i < this.settings.content_hide.length; i++) {
 		thiscontent = this.settings.content_hide[i];
@@ -11775,7 +11783,7 @@ SpazTwit.prototype._addToSectionItems = function(section_name, arr, sortfunc) {
 	this.data[section_name].items = this.data[section_name].items.concat(arr);
 
 	this._cleanupItemArray(this.data[section_name].items, this.data[section_name].max, sortfunc);
-}
+};
 
 /**
  * Sorts (optionally), removes dupes, and removes extra items from a given
