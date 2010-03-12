@@ -690,7 +690,7 @@ SpazShortText.prototype.shorten = function(text) {
 	
 	for (var key in this.map) {
 		var re = this.map[key].regex;
-		var rp = this.map[key].short;
+		var rp = this.map[key]["short"];
 		text = text.replace(re, rp);
 	}
 	

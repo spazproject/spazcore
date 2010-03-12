@@ -830,4 +830,4 @@ sc.helpers.UUID = (function() {
  */
 sc.helpers.isUUID = function(val) {
 	return val.match(/^[0-9A-Z]{8}-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{12}$/);
-}
+};

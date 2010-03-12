@@ -376,7 +376,7 @@ sc.helpers.htmlspecialchars = function(string, quote_style) {
     }
 
     return tmp_str;
-}
+};
 
 
 

@@ -8,7 +8,7 @@
 var SpazWordTree = function(currentDepth) {
 	// reset everything to defaults
 	this.reset(currentDepth);
-}
+};
 
 /**
  * resets all the depth, word and branch settings 
@@ -53,7 +53,7 @@ SpazWordTree.prototype.insertWord = function(word) { // A function that files wo
 		var branch = this.getBranch(indexLetter);
 		branch.insertWord(word);
 	}
-}
+};
 
 /**
  * takes an array of words and inserts each one into the tree
@@ -63,7 +63,7 @@ SpazWordTree.prototype.insertWords = function(wordarray) {
 	for (var i = wordarray.length - 1; i >= 0; i--){
 		this.insertWord(wordarray[i]);
 	};
-}
+};
 
 /**
  * search for a word 
@@ -80,9 +80,9 @@ SpazWordTree.prototype.searchWord = function(searchFor) {
 		}
 		return returnMe;
 	} else {
-		return this.getBranch(searchFor.substring(0,1)).searchWord(searchFor.substr(1,searchFor.length-1))
+		return this.getBranch(searchFor.substring(0,1)).searchWord(searchFor.substr(1,searchFor.length-1));
 	}
-}
+};
 
 /**
  * retrieve all the strings in this tree node and below as an array
@@ -98,7 +98,7 @@ SpazWordTree.prototype.getWords = function() {
 	ret_words = ret_words.concat(this.words);
 	
 	return ret_words;
-}
+};
 
 /**
  * returns a JSON version of the tree properties

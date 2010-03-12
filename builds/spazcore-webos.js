@@ -1,4 +1,8 @@
+<<<<<<< HEAD:builds/spazcore-webos.js
 /*********** Built 2010-03-03 10:17:54 EST ***********/
+=======
+/*********** Built 2010-03-12 06:18:02 EST ***********/
+>>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-webos.js
 /*jslint 
 browser: true,
 nomen: false,
@@ -4512,7 +4516,7 @@ sc.helpers.getRelativeTime = function(time_value, labels, use_dateparse) {
 
 
 sc.helpers.httpTimeToInt = function(entry_date, use_dateparse) {
-	return sc.helpers.dateToInt(entry_date, use_dateparse)
+	return sc.helpers.dateToInt(entry_date, use_dateparse);
 };
 
 /**
@@ -5560,7 +5564,7 @@ sc.helpers.UUID = (function() {
  */
 sc.helpers.isUUID = function(val) {
 	return val.match(/^[0-9A-Z]{8}-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{12}$/);
-}
+};
 /*jslint 
 browser: true,
 nomen: false,
@@ -5654,7 +5658,7 @@ sc.helpers.defaults = function(defaults, passed) {
 	}
 	
 	return args;
-}
+};
 
 
 /*jslint 
@@ -5898,7 +5902,7 @@ var sc;
  */
 sc.helpers.getCurrentLocation = function() {
 	
-}/*jslint 
+};/*jslint 
 bitwise: false,
 browser: true,
 newcap: false,
@@ -6276,7 +6280,7 @@ sc.helpers.htmlspecialchars = function(string, quote_style) {
     }
 
     return tmp_str;
-}
+};
 
 
 
@@ -6855,18 +6859,18 @@ sc.helpers.isOS = function(str) {
 		return true;
 	}
 	return false;
-}
+};
 
 sc.helpers.isWindows = function() {
-	return sc.helpers.isOS(SPAZCORE_OS_WINDOWS)
+	return sc.helpers.isOS(SPAZCORE_OS_WINDOWS);
 };
 
 sc.helpers.isLinux = function() {
-	return sc.helpers.isOS(SPAZCORE_OS_LINUX)
+	return sc.helpers.isOS(SPAZCORE_OS_LINUX);
 };
 
 sc.helpers.isMacOS = function() {
-	return sc.helpers.isOS(SPAZCORE_OS_MACOS)
+	return sc.helpers.isOS(SPAZCORE_OS_MACOS);
 };
 /*jslint 
 browser: true,
@@ -7060,7 +7064,7 @@ SpazAccounts.prototype.load	= function() {
 		this._accounts = [];
 	}
 	
-	sch.debug("this._accounts:'"+this._accounts+"'")
+	sch.debug("this._accounts:'"+this._accounts+"'");
 	
 };
 
@@ -7076,10 +7080,10 @@ SpazAccounts.prototype.save	= function() {
 		sch.debug(this._accounts[x].id);
 	};
 	
-	sch.debug('THE ACCOUNTS:')
+	sch.debug('THE ACCOUNTS:');
 	sch.debug(sch.enJSON(this._accounts));
 
-	sch.debug('ALL PREFS:')
+	sch.debug('ALL PREFS:');
 	sch.debug(sch.enJSON(this.prefs._prefs));
 
 	
@@ -7123,7 +7127,7 @@ SpazAccounts.prototype.update = function(id, acctobj) {
 		sch.error('No account with id "'+id+'" exists');
 		return null;
 	}
-}
+};
 
 
 
@@ -7193,7 +7197,7 @@ SpazAccounts.prototype.getByType = function(type) {
 	
 	for (var i=0; i < this._accounts.length; i++) {
 		if (this._accounts[i].type === type) {
-			matches.push(this._accounts[i])
+			matches.push(this._accounts[i]);
 		}
 	};
 	
@@ -7209,7 +7213,7 @@ SpazAccounts.prototype.getByUsername = function(username) {
 
 	for (var i=0; i < this._accounts.length; i++) {
 		if (this._accounts[i].username === username) {
-			matches.push(this._accounts[i])
+			matches.push(this._accounts[i]);
 		}
 	};
 	
@@ -7226,7 +7230,7 @@ SpazAccounts.prototype.getByUsernameAndType = function(username, type) {
 
 	for (var i=0; i < this._accounts.length; i++) {
 		if (this._accounts[i].username === username && this._accounts[i].type === type) {
-			matches.push(this._accounts[i])
+			matches.push(this._accounts[i]);
 		}
 	};
 	
@@ -7689,7 +7693,7 @@ SpazFileUploader.prototype.getAPIs = function() {
 			'processResult': function(event, apiobj) {
 				var loader = event.target;
 				
-				var returnobj = {}
+				var returnobj = {};
 
 				var parser=new DOMParser();
 				var xmldoc = parser.parseFromString(loader.data,"text/xml");
@@ -9121,7 +9125,7 @@ SpazShortText.prototype.shorten = function(text) {
 	
 	for (var key in this.map) {
 		var re = this.map[key].regex;
-		var rp = this.map[key].short;
+		var rp = this.map[key]["short"];
 		text = text.replace(re, rp);
 	}
 	
@@ -9401,7 +9405,7 @@ SpazShortURL.prototype.expand = function(shorturl, opts) {
 	var longurl;
 	
 	if (!opts) {
-		opts = {}
+		opts = {};
 	}
 	
 	opts.event_target = opts.event_target || document;
@@ -11607,7 +11611,10 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 		if (opts.success_callback) {
 			opts.success_callback(this.data[SPAZCORE_SECTION_COMBINED].newitems);
 		}
+<<<<<<< HEAD:builds/spazcore-webos.js
 		sch.debug('this.data[SPAZCORE_SECTION_COMBINED].newitems has '+this.data[SPAZCORE_SECTION_COMBINED].newitems.length+' items');
+=======
+>>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-webos.js
 		this.triggerEvent('new_combined_timeline_data', this.data[SPAZCORE_SECTION_COMBINED].newitems);
 		this.data[SPAZCORE_SECTION_COMBINED].newitems = []; // reset combined.newitems
 		this.initializeCombinedTracker();
@@ -13186,7 +13193,7 @@ SpazPrefs.prototype.load = function() {
 
 	
 
-}
+};
 
 SpazPrefs.prototype.save = function() {
 	if (sc.helpers.iswebOS()) {

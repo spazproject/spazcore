@@ -243,7 +243,7 @@ SpazShortURL.prototype.expand = function(shorturl, opts) {
 	var longurl;
 	
 	if (!opts) {
-		opts = {}
+		opts = {};
 	}
 	
 	opts.event_target = opts.event_target || document;

@@ -1,4 +1,8 @@
+<<<<<<< HEAD:builds/spazcore-titanium.js
 /*********** Built 2010-02-11 16:34:06 EST ***********/
+=======
+/*********** Built 2010-03-12 06:17:58 EST ***********/
+>>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-titanium.js
 /*jslint 
 browser: true,
 nomen: false,
@@ -2916,12 +2920,21 @@ var Sizzle = function(selector, context, results, seed) {
 	} else {
 		makeArray( checkSet, results );
 	}
+<<<<<<< HEAD:builds/spazcore-titanium.js
 
 	if ( extra ) {
 		Sizzle( extra, origContext, results, seed );
 		Sizzle.uniqueSort( results );
 	}
 
+=======
+
+	if ( extra ) {
+		Sizzle( extra, origContext, results, seed );
+		Sizzle.uniqueSort( results );
+	}
+
+>>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-titanium.js
 	return results;
 };
 
@@ -4512,7 +4525,11 @@ sc.helpers.getRelativeTime = function(time_value, labels, use_dateparse) {
 
 
 sc.helpers.httpTimeToInt = function(entry_date, use_dateparse) {
+<<<<<<< HEAD:builds/spazcore-titanium.js
 	return sc.helpers.dateToInt(entry_date, use_dateparse)
+=======
+	return sc.helpers.dateToInt(entry_date, use_dateparse);
+>>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-titanium.js
 };
 
 /**
@@ -5560,7 +5577,7 @@ sc.helpers.UUID = (function() {
  */
 sc.helpers.isUUID = function(val) {
 	return val.match(/^[0-9A-Z]{8}-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{12}$/);
-}
+};
 /*jslint 
 browser: true,
 nomen: false,
@@ -5654,7 +5671,11 @@ sc.helpers.defaults = function(defaults, passed) {
 	}
 	
 	return args;
+<<<<<<< HEAD:builds/spazcore-titanium.js
 }
+=======
+};
+>>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-titanium.js
 
 
 /*jslint 
@@ -5898,7 +5919,7 @@ var sc;
  */
 sc.helpers.getCurrentLocation = function() {
 	
-}/*jslint 
+};/*jslint 
 bitwise: false,
 browser: true,
 newcap: false,
@@ -6276,7 +6297,7 @@ sc.helpers.htmlspecialchars = function(string, quote_style) {
     }
 
     return tmp_str;
-}
+};
 
 
 
@@ -6855,6 +6876,7 @@ sc.helpers.isOS = function(str) {
 		return true;
 	}
 	return false;
+<<<<<<< HEAD:builds/spazcore-titanium.js
 }
 
 sc.helpers.isWindows = function() {
@@ -6867,6 +6889,20 @@ sc.helpers.isLinux = function() {
 
 sc.helpers.isMacOS = function() {
 	return sc.helpers.isOS(SPAZCORE_OS_MACOS)
+=======
+};
+
+sc.helpers.isWindows = function() {
+	return sc.helpers.isOS(SPAZCORE_OS_WINDOWS);
+};
+
+sc.helpers.isLinux = function() {
+	return sc.helpers.isOS(SPAZCORE_OS_LINUX);
+};
+
+sc.helpers.isMacOS = function() {
+	return sc.helpers.isOS(SPAZCORE_OS_MACOS);
+>>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-titanium.js
 };
 /*jslint 
 browser: true,
@@ -6993,6 +7029,309 @@ sc.helpers.createXMLFromString = function (string) {
 	}
 };
 
+
+
+/**
+ * "constants" for account types 
+ */
+var SPAZCORE_ACCOUNT_TWITTER	= 'twitter';
+var SPAZCORE_ACCOUNT_IDENTICA	= 'identi.ca';
+var SPAZCORE_ACCOUNT_STATUSNET	= 'StatusNet';
+var SPAZCORE_ACCOUNT_FLICKR		= 'flickr';
+var SPAZCORE_ACCOUNT_WORDPRESS	= 'wordpress.com';
+var SPAZCORE_ACCOUNT_TUMBLR		= 'tumblr';
+var SPAZCORE_ACCOUNT_FACEBOOK	= 'facebook';
+var SPAZCORE_ACCOUNT_FRIENDFEED	= 'friendfeed';
+
+/**
+ * This creates a new SpazAccounts object, and optionally associates it with an existing preferences object
+ * @constructor
+ * @param (Object) prefsObj  An existing SpazPrefs object (optional)
+ */
+var SpazAccounts = function(prefsObj) {
+	if (prefsObj) {
+		this.prefs = prefsObj;
+	} else {
+		this.prefs = new SpazPrefs();
+		this.prefs.load();
+	}
+	
+	/*
+		load existing accounts
+	*/
+	this.load();
+
+};
+
+/**
+ * the key used inside the prefs object 
+ */
+SpazAccounts.prototype.prefskey = 'users';
+
+/**
+ * loads the accounts array from the prefs object 
+ */
+SpazAccounts.prototype.load	= function() { 
+	var accjson = this.prefs.get(this.prefskey);
+	
+	sch.debug("accjson:'"+accjson+"'");
+	
+	try {
+		this._accounts = sch.deJSON(this.prefs.get(this.prefskey));
+	} catch(e) {
+		sch.error(e.message);
+		this._accounts = [];
+	}		
+
+	/*
+		sanity check
+	*/
+	if (!sch.isArray(this._accounts)) {
+		this._accounts = [];
+	}
+	
+	sch.debug("this._accounts:'"+this._accounts+"'");
+	
+};
+
+/**
+ * saves the accounts array to the prefs obj 
+ */
+SpazAccounts.prototype.save	= function() {
+	
+	
+	this.prefs.set(this.prefskey, sch.enJSON(this._accounts));
+	sch.debug('saved users to "'+this.prefskey+'" pref');
+	for (var x in this._accounts) {
+		sch.debug(this._accounts[x].id);
+	};
+	
+	sch.debug('THE ACCOUNTS:');
+	sch.debug(sch.enJSON(this._accounts));
+
+	sch.debug('ALL PREFS:');
+	sch.debug(sch.enJSON(this.prefs._prefs));
+
+	
+};
+
+/**
+ * returns the array of accounts
+ * @returns {array} the accounts 
+ */
+SpazAccounts.prototype.getAll = function() {
+	return this._accounts;
+};
+
+/**
+ * Set all users by passing in a hash. overwrites all existing data!
+ * @param {array} accounts_array an array of account objects
+ */
+SpazAccounts.prototype.setAll = function(accounts_array) {
+	this._accounts = accounts_array;
+	this.save();
+	sch.debug("Saved these accounts:");
+	for (var i=0; i < this_accounts.length; i++) {
+		sch.debug(this._accounts[x].id);
+	};
+};
+
+/**
+ * @param {string} id the UUID to update
+ * @param {object} acctobj
+ * @param {string} [acctobj.username] a new username
+ * @param {string} [acctobj.password] a new password
+ * @param {string} [acctobj.type] a new account type
+ * @param {object} [acctobj.meta] the hash of metadata; you should probably use SpazAccounts.setMeta() instead
+ */
+SpazAccounts.prototype.update = function(id, acctobj) {
+	var orig = this.get(id);
+	if (orig) {
+		var modified = sch.defaults(orig, acctobj);
+		return this.get(id);
+	} else {
+		sch.error('No account with id "'+id+'" exists');
+		return null;
+	}
+};
+
+
+
+/**
+ * wipes the accounts array and saves it
+ */
+SpazAccounts.prototype.initAccounts	= function() {
+	this._accounts = [];
+	this.save();
+};
+
+/**
+ * add a new account
+ * @param {string} username the username
+ * @param {string} password the password
+ * @param {type} type the type of account
+ * @returns {object} the account object just added
+ */
+SpazAccounts.prototype.add = function(username, password, type) {
+	
+	if (!type) {
+		sch.error("Type must be set");
+		return false;
+	}
+	
+	var username = username.toLowerCase();
+	var id = this.generateID();
+	this._accounts.push({
+		'id':id,
+		'username':username,
+		'password':password,
+		'type':type,
+		'meta':{}
+	});
+	this.save();
+	
+	sch.debug("Added new user:"+id);
+	
+	return this.get(id);
+};
+
+
+/**
+ * @param {string} id the UUID of the account to delete 
+ */
+SpazAccounts.prototype.remove = function(id) {
+	sch.debug("Deleting '"+id+"'…");
+	
+	var index = this._findUserIndex(id);
+	if (index !== false) {
+		var deleted = this._accounts.splice(index, 1);
+		sch.debug("Deleted account '"+deleted[0].id+"'");
+		return deleted[0];
+	} else {
+		sch.error("Could not find this id to delete: '"+id+"'");
+		return false;
+	}
+};
+
+
+/**
+ * @param {string} type the type of accounts to retrieve
+ * @returns {array} the array of matching accounts
+ */
+SpazAccounts.prototype.getByType = function(type) {
+	var matches = [];
+	
+	for (var i=0; i < this._accounts.length; i++) {
+		if (this._accounts[i].type === type) {
+			matches.push(this._accounts[i]);
+		}
+	};
+	
+	return matches;
+};
+
+/**
+ * @param {string} username the username to search for
+ * @returns {array} an array of matching accounts
+ */
+SpazAccounts.prototype.getByUsername = function(username) {
+	var matches = [];
+
+	for (var i=0; i < this._accounts.length; i++) {
+		if (this._accounts[i].username === username) {
+			matches.push(this._accounts[i]);
+		}
+	};
+	
+	return matches;
+};
+
+/**
+ * @param {string} username the username to search for
+ * @param {string} type the type to search for
+ * @returns {array} an array of matching accounts
+ */
+SpazAccounts.prototype.getByUsernameAndType = function(username, type) {
+	var matches = [];
+
+	for (var i=0; i < this._accounts.length; i++) {
+		if (this._accounts[i].username === username && this._accounts[i].type === type) {
+			matches.push(this._accounts[i]);
+		}
+	};
+	
+	return matches;
+	
+};
+
+
+/**
+ * retrives the user object by user and type
+ * @param {string} id  the user id UUID
+ * @param {string} type 
+ */
+SpazAccounts.prototype.get = function(id) {
+
+	var index = this._findUserIndex(id);
+
+	if (index !== false) {
+		return this._accounts[i];		
+	}
+	
+	return false;
+	
+};
+
+
+/**
+ * a private function to find the user's array index by their UUID
+ * @param {string} id the user's UUID
+ * @returns {number|boolen} returns the array index or false if DNE 
+ */
+SpazAccounts.prototype._findUserIndex = function(id) {
+	
+	for (i=0; i<this._accounts.length; i++) {
+		
+		if (this._accounts[i].id === id) {
+			sch.debug('Found matching user record to '+ id);
+			return i;
+		}
+		
+	}
+	
+	return false;
+};
+
+
+
+/**
+ * @returns {string} returns the generated UUID 
+ */
+SpazAccounts.prototype.generateID = function() {
+	var id = sc.helpers.UUID();
+	return id;
+};
+
+
+
+/**
+ * @param {string} id the user's UUID
+ * @param {string} key the key for the metadata entry
+ * @returns {String|Object|Array|Boolean|Number} returns the set value, or null if user ID or meta entry is not found
+ */
+SpazAccounts.prototype.getMeta = function(id, key) {
+	
+	if ( user = this.get(id) ) {
+		if (user.meta && user.meta[key] !== null) {
+			return user.meta[key];
+		}
+	}
+	
+	return null;
+	
+};
+
+<<<<<<< HEAD:builds/spazcore-titanium.js
 
 
 /**
@@ -7295,6 +7634,8 @@ SpazAccounts.prototype.getMeta = function(id, key) {
 	
 };
 
+=======
+>>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-titanium.js
 /**
  * @param {string} id the user's UUID
  * @param {string} key the key for the metadata entry
@@ -7955,6 +8296,7 @@ SpazPrefs.prototype.getEncrypted = function(key) {
  */
 SpazPrefs.prototype.setEncrypted = function(key, val) {
 	alert('not yet implemented');
+<<<<<<< HEAD:builds/spazcore-titanium.js
 };
 
 
@@ -7984,6 +8326,37 @@ SpazPrefs.prototype.save = function() {
 
 
 
+=======
+};
+
+
+/**
+ * loads the prefs file and parses the prefs into this._prefs,
+ * or initializes the file and loads the defaults
+ * @stub
+ */
+SpazPrefs.prototype.load = function(name) {
+};
+
+
+
+
+
+
+
+/**
+ * saves the current preferences
+ * @todo
+ */
+SpazPrefs.prototype.save = function() {
+
+
+	
+};
+
+
+
+>>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-titanium.js
 /**
  * shortcut for SpazPrefs
  */
@@ -8682,7 +9055,7 @@ SpazShortText.prototype.shorten = function(text) {
 	
 	for (var key in this.map) {
 		var re = this.map[key].regex;
-		var rp = this.map[key].short;
+		var rp = this.map[key]["short"];
 		text = text.replace(re, rp);
 	}
 	
@@ -8962,7 +9335,7 @@ SpazShortURL.prototype.expand = function(shorturl, opts) {
 	var longurl;
 	
 	if (!opts) {
-		opts = {}
+		opts = {};
 	}
 	
 	opts.event_target = opts.event_target || document;
@@ -10290,6 +10663,10 @@ SpazTwit.prototype.verifyCredentials = function(username, password, onSuccess, o
 SpazTwit.prototype._processAuthenticatedUser = function(data, opts) {
 	this.me = data;
 	this.initializeData();
+	
+	if (opts.success_callback) {
+		opts.success_callback(this.me);
+	}
 	this.triggerEvent(opts.success_event_type, this.me);
 	
 };
@@ -10298,11 +10675,13 @@ SpazTwit.prototype._processAuthenticatedUser = function(data, opts) {
 /**
  * Initiates retrieval of the public timeline. 
  */
-SpazTwit.prototype.getPublicTimeline = function() {
+SpazTwit.prototype.getPublicTimeline = function(onSuccess, onFailure) {
 	var url = this.getAPIURL('public_timeline');
 	
 	var xhr = this._getTimeline({
 		'url':url,
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'success_event_type': 'new_public_timeline_data'
 	});
 };
@@ -10315,7 +10694,7 @@ SpazTwit.prototype.getPublicTimeline = function() {
  * @param {integer} count default is 200 
  * @param {integer} page default is null (ignored if null)
  */
-SpazTwit.prototype.getHomeTimeline = function(since_id, count, page, processing_opts) {
+SpazTwit.prototype.getHomeTimeline = function(since_id, count, page, processing_opts, onSuccess, onFailure) {
 	
 	if (!page) { page = null;}
 	if (!count) { count = 50;}
@@ -10349,6 +10728,8 @@ SpazTwit.prototype.getHomeTimeline = function(since_id, count, page, processing_
 		'username':this.username,
 		'password':this.password,
 		'process_callback'	: this._processHomeTimeline,
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'success_event_type': 'new_home_timeline_data',
 		'failure_event_type': 'error_home_timeline_data',
 		'processing_opts':processing_opts
@@ -10371,7 +10752,7 @@ SpazTwit.prototype._processHomeTimeline = function(ret_items, opts, processing_o
  * @param {integer} count default is 200 
  * @param {integer} page default is null (ignored if null)
  */
-SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page, processing_opts) {
+SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page, processing_opts, onSuccess, onFailure) {
 	
 	if (!page) { page = null;}
 	if (!count) { count = 50;}
@@ -10405,6 +10786,8 @@ SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page, processi
 		'username':this.username,
 		'password':this.password,
 		'process_callback'	: this._processFriendsTimeline,
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'success_event_type': 'new_friends_timeline_data',
 		'failure_event_type': 'error_friends_timeline_data',
 		'processing_opts':processing_opts
@@ -10422,7 +10805,7 @@ SpazTwit.prototype._processFriendsTimeline = function(ret_items, opts, processin
 /**
  *  
  */
-SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts) {	
+SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts, onSuccess, onFailure) {	
 	if (!page) { page = null;}
 	if (!count) { count = null;}
 	if (!since_id) {
@@ -10457,6 +10840,8 @@ SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts)
 		'username':this.username,
 		'password':this.password,
 		'process_callback'	: this._processRepliesTimeline,
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'success_event_type': 'new_replies_timeline_data',
 		'failure_event_type': 'error_replies_timeline_data',
 		'processing_opts':processing_opts
@@ -10476,7 +10861,7 @@ SpazTwit.prototype._processRepliesTimeline = function(ret_items, opts, processin
 /**
  *  
  */
-SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processing_opts) {
+SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processing_opts, onSuccess, onFailure) {
 	if (!page) { page = null;}
 	if (!count) { count = null;}
 	if (!since_id) {
@@ -10510,6 +10895,8 @@ SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processin
 		'username':this.username,
 		'password':this.password,
 		'process_callback'	: this._processDMTimeline,
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'success_event_type': 'new_dms_timeline_data',
 		'failure_event_type': 'error_dms_timeline_data',
 		'processing_opts':processing_opts		
@@ -10528,7 +10915,7 @@ SpazTwit.prototype._processDMTimeline = function(ret_items, opts, processing_opt
 /**
  *  
  */
-SpazTwit.prototype.getFavorites = function(page, processing_opts) {	
+SpazTwit.prototype.getFavorites = function(page, processing_opts, onSuccess, onFailure) {	
 	if (!page) { page = null;}
 	if (!processing_opts) {
 		processing_opts = {};
@@ -10546,6 +10933,8 @@ SpazTwit.prototype.getFavorites = function(page, processing_opts) {
 		'username':this.username,
 		'password':this.password,
 		'process_callback'	: this._processFavoritesTimeline,
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'success_event_type': 'new_favorites_timeline_data',
 		'failure_event_type': 'error_favorites_timeline_data',
 		'processing_opts':processing_opts
@@ -10561,10 +10950,10 @@ SpazTwit.prototype._processFavoritesTimeline = function(ret_items, opts, process
 
 
 
-SpazTwit.prototype.getSent = function(since_id, count, page) {}; // auth user's sent statuses
-SpazTwit.prototype.getSentDirectMessages = function(since_id, page) {};
+SpazTwit.prototype.getSent = function(since_id, count, page, onSuccess, onFailure) {}; // auth user's sent statuses
+SpazTwit.prototype.getSentDirectMessages = function(since_id, page, onSuccess, onFailure) {};
 
-SpazTwit.prototype.getUserTimeline = function(id, count, page) {
+SpazTwit.prototype.getUserTimeline = function(id, count, page, onSuccess, onFailure) {
 	if (!id) {
 		return false;
 	}
@@ -10586,6 +10975,8 @@ SpazTwit.prototype.getUserTimeline = function(id, count, page) {
 		'username':this.username,
 		'password':this.password,
 		'process_callback'	: this._processUserTimeline,
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'success_event_type': 'new_user_timeline_data',
 		'failure_event_type': 'error_user_timeline_data'
 	});
@@ -10607,7 +10998,7 @@ SpazTwit.prototype._processUserTimeline = function(ret_items, opts, processing_o
  * 
  * 
  */
-SpazTwit.prototype.getCombinedTimeline = function(com_opts) {
+SpazTwit.prototype.getCombinedTimeline = function(com_opts, onSuccess, onFailure) {
 	var home_count, friends_count, replies_count, dm_count, home_since, friends_since, dm_since, replies_since = null;
 
 	var opts = {
@@ -10651,14 +11042,14 @@ SpazTwit.prototype.getCombinedTimeline = function(com_opts) {
 		}
 	}
 	
-	this.getHomeTimeline(home_since, home_count, null, opts);
-	this.getReplies(replies_since, replies_count, null, opts);
-	this.getDirectMessages(dm_since, dm_count, null, opts);
+	this.getHomeTimeline(home_since, home_count, null, opts, onSuccess, onFailure);
+	this.getReplies(replies_since, replies_count, null, opts, onSuccess, onFailure);
+	this.getDirectMessages(dm_since, dm_count, null, opts, onSuccess, onFailure);
 };
 
 
 
-SpazTwit.prototype.search = function(query, since_id, results_per_page, page, lang, geocode) {
+SpazTwit.prototype.search = function(query, since_id, results_per_page, page, lang, geocode, onSuccess, onFailure) {
 	if (!page) { page = 1;}
 	// if (!since_id) {
 	// 	if (this.data[SPAZCORE_SECTION_SEARCH].lastid && this.data[SPAZCORE_SECTION_SEARCH].lastid > 1) {
@@ -10688,6 +11079,8 @@ SpazTwit.prototype.search = function(query, since_id, results_per_page, page, la
 	this._getTimeline({
 		'url':url,
 		'process_callback'	: this._processSearchTimeline,
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'success_event_type': 'new_search_timeline_data',
 		'failure_event_type': 'error_search_timeline_data'
 	});
@@ -10762,11 +11155,19 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, opts, proces
 			'page'             : search_result.page,
 			'query'            : search_result.query
 		};
+		
+		if (opts.success_callback) {
+			opts.success_callback(this.data[SPAZCORE_SECTION_SEARCH].newitems, search_info);
+		}
 		this.triggerEvent(opts.success_event_type, [this.data[SPAZCORE_SECTION_SEARCH].newitems, search_info]);
 		
 
 
 	} else { // no new items, but we should fire off success anyway
+		
+		if (opts.success_callback) {
+			opts.success_callback(null, []);
+		}
 		this.triggerEvent(opts.success_event_type, []);
 	}
 	
@@ -10833,11 +11234,13 @@ SpazTwit.prototype._processSearchItem = function(item, section_name) {
 };
 
 
-SpazTwit.prototype.getTrends = function() {
+SpazTwit.prototype.getTrends = function(onSuccess, onFailure) {
 	var url = this.getAPIURL('trends');
 	this._getTimeline({
 		'url':url,
 		'process_callback'	: this._processTrends,
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'success_event_type': 'new_trends_data',
 		'failure_event_type': 'error_trends_data'
 	});
@@ -10865,6 +11268,10 @@ SpazTwit.prototype._processTrends = function(trends_result, opts, processing_opt
 			}
 		}
 		// jQuery().trigger(finished_event, [ret_items]);
+		
+		if (opts.success_callback) {
+			opts.success_callback(ret_items);
+		}
 		this.triggerEvent(opts.success_event_type, ret_items);
 		
 	}
@@ -11039,6 +11446,10 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 		
 		if (section_name === SPAZCORE_SECTION_USER) { // special case -- we don't keep this data, just parse and fire it off
 
+			if (opts.success_callback) {
+				opts.success_callback(ret_items);
+			}
+
 			this.triggerEvent(opts.success_event_type, ret_items);
 			
 		} else { // this is a "normal" timeline that we want to be persistent
@@ -11063,6 +11474,11 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 				Fire off the new section data event
 			*/
 			if (!processing_opts.combined) {
+				
+				if (opts.success_callback) {
+					opts.success_callback(this.data[section_name].newitems);
+				}
+				
 				this.triggerEvent(opts.success_event_type, this.data[section_name].items);
 			} else {
 				this.combined_finished[section_name] = true;
@@ -11082,6 +11498,9 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 	} else { // no new items, but we should fire off success anyway
 		if (!processing_opts.combined) {
 			// jQuery().trigger(finished_event, []);
+			if (opts.success_callback) {
+				opts.success_callback();
+			}
 			this.triggerEvent(opts.success_event_type);
 			
 		} else {
@@ -11107,9 +11526,16 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 		this.data[SPAZCORE_SECTION_COMBINED].newitems = this._cleanupItemArray(this.data[SPAZCORE_SECTION_COMBINED].newitems, this.data[SPAZCORE_SECTION_COMBINED].max, this._sortItemsByDateAsc);
 		
 		if (this.combinedTimelineHasErrors()) {
+			if (opts.failure_callback) {
+				opts.failure_callback(this.combined_errors);
+			}
+			
 			this.triggerEvent('error_combined_timeline_data', this.combined_errors);
 		}
 		
+		if (opts.success_callback) {
+			opts.success_callback(this.data[SPAZCORE_SECTION_COMBINED].newitems);
+		}
 		this.triggerEvent('new_combined_timeline_data', this.data[SPAZCORE_SECTION_COMBINED].newitems);
 		this.data[SPAZCORE_SECTION_COMBINED].newitems = []; // reset combined.newitems
 		this.initializeCombinedTracker();
@@ -11129,7 +11555,7 @@ SpazTwit.prototype._addToSectionItems = function(section_name, arr, sortfunc) {
 	this.data[section_name].items = this.data[section_name].items.concat(arr);
 
 	this._cleanupItemArray(this.data[section_name].items, this.data[section_name].max, sortfunc);
-}
+};
 
 /**
  * Sorts (optionally), removes dupes, and removes extra items from a given
@@ -11509,10 +11935,16 @@ SpazTwit.prototype._processUserList = function(section_name, ret_items, opts, pr
 		this.data[section_name].newitems = ret_items;
 
 		this._addToSectionItems(section_name, this.data[section_name].newitems);
-		
+
+		if (opts.success_callback) {
+			opts.success_callback(this.data[section_name].newitems);
+		}
 		this.triggerEvent(opts.success_event_type,this.data[section_name].newitems );
 
 	} else { // no new items, but we should fire off success anyway
+		if (opts.success_callback) {
+			opts.success_callback();
+		}
 		this.triggerEvent(opts.success_event_type);
 	}
 
@@ -12082,10 +12514,17 @@ SpazTwit.prototype._processUserLists = function(section_name, ret_items, opts, p
 		this.data[section_name].newitems = ret_items;
 
 		this._addToSectionItems(section_name, this.data[section_name].newitems);
-		
+
+		if (opts.success_callback) {
+			opts.success_callback(this.data[section_name].newitems);
+		}
 		this.triggerEvent(opts.success_event_type, this.data[section_name].newitems );
 
 	} else { // no new items, but we should fire off success anyway
+		
+		if (opts.success_callback) {
+			opts.success_callback();
+		}
 		this.triggerEvent(opts.success_event_type);
 	}
 };
@@ -12196,6 +12635,10 @@ SpazTwit.prototype._processListTimeline = function(data, opts, processing_opts) 
 		grab the array of items
 	*/
 	// jQuery().trigger(finished_event, [ret_items]);
+	
+	if (opts.success_callback) {
+		opts.success_callback(rdata);
+	}
 	this.triggerEvent(opts.success_event_type, rdata);
 };
 
@@ -12505,7 +12948,11 @@ sc.helpers.resolvePath = function(url, rel_path) {
  */
 sc.helpers.getFileObject = function(url) {
 	return Titanium.Filesystem.getFile(url);
+<<<<<<< HEAD:builds/spazcore-titanium.js
 }
+=======
+};
+>>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-titanium.js
 
 /**
  * copy a file 

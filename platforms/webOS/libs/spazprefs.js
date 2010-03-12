@@ -45,7 +45,7 @@ SpazPrefs.prototype.load = function() {
 
 	
 
-}
+};
 
 SpazPrefs.prototype.save = function() {
 	if (sc.helpers.iswebOS()) {
