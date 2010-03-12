@@ -98,7 +98,7 @@ sc.helpers.resolvePath = function(url, rel_path) {
  */
 sc.helpers.getFileObject = function(url) {
 	return new air.File(url);
-}
+};
 
 /**
  * copy a file 
@@ -189,11 +189,11 @@ sc.helpers.getAppDir = function() {
  */
 sc.helpers.createTempFile = function() {
 	return air.File.createTempFile().url;
-}
+};
 
 /**
  * make a temporary directory
  */
 sc.helpers.createTempDirectory = function() {
 	return air.File.createTempDirectory().url;
-}
+};

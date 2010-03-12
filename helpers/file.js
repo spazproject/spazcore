@@ -94,7 +94,7 @@ sc.helpers.createDirectory = function (url) {};
  */
 sc.helpers.createTempFile = function() {
 	
-}
+};
 
 /**
  * make a temporary directory
@@ -102,7 +102,7 @@ sc.helpers.createTempFile = function() {
  */
 sc.helpers.createTempDirectory = function() {
 	
-}
+};
 
 
 

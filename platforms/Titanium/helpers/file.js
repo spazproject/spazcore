@@ -88,7 +88,7 @@ sc.helpers.resolvePath = function(url, rel_path) {
  */
 sc.helpers.getFileObject = function(url) {
 	return Titanium.Filesystem.getFile(url);
-}
+};
 
 /**
  * copy a file 

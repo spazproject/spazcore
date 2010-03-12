@@ -79,7 +79,7 @@ SpazFileUploader.prototype.getAPIs = function() {
 			'processResult': function(event, apiobj) {
 				var loader = event.target;
 				
-				var returnobj = {}
+				var returnobj = {};
 
 				var parser=new DOMParser();
 				var xmldoc = parser.parseFromString(loader.data,"text/xml");

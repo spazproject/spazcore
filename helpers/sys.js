@@ -266,16 +266,16 @@ sc.helpers.isOS = function(str) {
 		return true;
 	}
 	return false;
-}
+};
 
 sc.helpers.isWindows = function() {
-	return sc.helpers.isOS(SPAZCORE_OS_WINDOWS)
+	return sc.helpers.isOS(SPAZCORE_OS_WINDOWS);
 };
 
 sc.helpers.isLinux = function() {
-	return sc.helpers.isOS(SPAZCORE_OS_LINUX)
+	return sc.helpers.isOS(SPAZCORE_OS_LINUX);
 };
 
 sc.helpers.isMacOS = function() {
-	return sc.helpers.isOS(SPAZCORE_OS_MACOS)
+	return sc.helpers.isOS(SPAZCORE_OS_MACOS);
 };

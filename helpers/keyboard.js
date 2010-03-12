@@ -23,7 +23,7 @@ var sc, DOMParser, shortcut;
 sc.helpers.key_add = function(keystroke, func, opts) {
 	opts = sch.defaults({
 		'type':'keydown',
-		'disable_in_input':'true',
+		'disable_in_input':'true'
 
 	}, opts);
 	
@@ -44,4 +44,4 @@ sc.helpers.getModKey = function() {
 	// get the primary modkey based on the OS
 	// if OS X, use 'Meta'
 	// if Win or Linux, use 'Ctrl'
-}
+};

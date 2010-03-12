@@ -5,9 +5,9 @@
  */
 SpazTimelineFilter = function(opts) {
 	
-	if (!opts) { opts = {} };
+	if (!opts) { opts = {}; };
 	
-	if (opts.type !== 'whitelist') { opts.type = 'blacklist' };
+	if (opts.type !== 'whitelist') { opts.type = 'blacklist'; };
 	
 	this.settings = {
 		name : opts.name || 'unnamed',
@@ -22,7 +22,7 @@ SpazTimelineFilter = function(opts) {
 		username_attr  : opts.username_attr    || 'data-user-screen_name',
 		content_selector:opts.content_selector || 'div.timeline-entry status-text',
 		style_selector : opts.style_selector   || 'style[title="custom-timeline-filters"]'
-	}
+	};
 	// this.settings = {
 	// 	name : 'php-people',
 	// 	type : 'whitelist', // whitelist | blacklist
@@ -38,7 +38,7 @@ SpazTimelineFilter = function(opts) {
 	// 	style_selector : 'style[title="custom-timeline-filters"]'
 	// }
 	
-}
+};
 
 
 
@@ -103,7 +103,7 @@ SpazTimelineFilter.prototype.getUserCSS = function() {
 	};
 
 	return rules.join("\n");
-}
+};
 
 
 /**
@@ -272,7 +272,7 @@ SpazTimelineFilter.prototype.applyContentFilters = function() {
 SpazTimelineFilter.prototype.disableContentFilters = function() {
 	var jq_entries = jQuery(this.getBaseSelector());
 	jq_entries.filter().show();
-}
+};
 
 /**
  * this builds the content filtering selectors used by jQuery to hide and 
@@ -283,7 +283,7 @@ SpazTimelineFilter.prototype.buildContentFilterSelectors = function() {
 	var contentfilters = {
 		'hide':[],
 		'show':[]
-	}
+	};
 	
 	for (var i=0; i < this.settings.content_hide.length; i++) {
 		thiscontent = this.settings.content_hide[i];
