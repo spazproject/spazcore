@@ -44,7 +44,7 @@ SpazDB.prototype.get = function(key, callback) {
 	this.db.get(key, callback);
 	return true;
 
-}
+};
 
 /**
  * Deletes a document from the database
@@ -55,4 +55,12 @@ SpazDB.prototype.remove = function(key) {
 	this.db.remove(key);
 	return true;
 
+};
+
+/**
+ * deletes everything out of the database 
+ */
+SpazDB.prototype.nuke = function() {
+	
+	this.db.nuke();
 };

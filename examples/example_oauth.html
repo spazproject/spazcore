@@ -71,19 +71,37 @@
 					alert('You must enter an access PIN.');
 				}
 			}
+			
+			
+			function xAuthTest() {
+			    
+			    var method = 'get';
+                // var url    = 'http://term.ie/oauth/example/request_token.php';
+                var url    = 'https://api.twitter.com/oauth/access_token';
+                var username = $('#username').val();
+                var password = $('#password').val();
+			    
+			    consumer.getXauthTokens({
+			        'username':username,
+			        'password':password
+			    })
+			};
 
 
 			function getTimeline() {
 				if (consumer.accessToken) {
 					var authHeader = consumer.getAuthHeader({
 						method: 'get',
-						url: 'https://twitter.com/statuses/home_timeline.json'
+						url: 'https://twitter.com/statuses/home_timeline.json',
+						parameters: [
+						    ['count', 200]
+						]
 					});
-
 					$.ajax({
 						type: 'get',
 						url: 'https://twitter.com/statuses/home_timeline.json',
 						dataType: 'json',
+						data: {'count': 200},
 						beforeSend: function(req) {
 							req.setRequestHeader('Authorization', authHeader);
 						},
@@ -135,6 +153,13 @@
 		<div id="homeTimeline" style="display: none;">
 			<button onclick="getTimeline();">Get your timeline!</button>
 			<div id="timeline" style="text-align: left;"></div>
+		</div>
+		
+		
+		<div id="xauth_test">
+		    <label for="username">username:</label><input type="text" name="username" value="" id="username">
+		    <label for="password">password:</label><input type="password" name="password" value="" id="password">
+		    <button onclick="xAuthTest();">Test xAuth</button>
 		</div>
 	</body>
 </html>

@@ -3,7 +3,11 @@
  * @param {object} (service string)
  */
 function SpazOAuth(args) {
-
+	
+	opts = sch.defaults({
+		''
+	}, opts)
+	
 	this.db = new SpazDB();
 	this.services = {};
 	this.requestToken = null;
@@ -30,8 +34,8 @@ function SpazOAuth(args) {
 SpazOAuth.prototype.initServices = function() {
 	this.addService('twitter', {
 		signatureMethod      : 'HMAC-SHA1',
-		consumerKey          : 'jZZNzafe1ixepaFWrnkBg',
-		consumerSecret       : '6z2zO3oEUJg4bxOmnNt19KTcK457tiE0KTbDNaJfY',
+		consumerKey          : 'KtCklyOTPJ9CDxey26a8w',
+		consumerSecret       : 'cVLQ0ARIAY0VfOwSUiXm9oVmMqSCRSdvMtMGoEBS0U',
 		requestTokenUrl      : 'https://twitter.com/oauth/request_token',
 		accessTokenUrl       : 'https://twitter.com/oauth/access_token',
 		userAuthorizationUrl : 'https://twitter.com/oauth/authorize'
@@ -122,12 +126,13 @@ SpazOAuth.prototype.getRequestToken = function() {
 
 				success = true;
 			}
-		},
+		}
 	});
 
 	return success;
 
 };
+
 
 /**
  * Authorize the user with the service and store the access token locally
@@ -175,18 +180,100 @@ SpazOAuth.prototype.getAuthorization = function(accessPIN) {
 
 				success = true;
 			}
-		},
+		}
 	});
 
 	return success;
 };
 
+
+
+
+/**
+ * Authorize the user with the service and store the access token locally
+ * @param {object} opts
+ * @param {object} opts.username the username
+ * @param {object} opts.password the password
+ * @param {object} [opts.mode] default is 'client_auth'
+ * @param {object} [opts.onSuccess] callback on success
+ * @param {object} [opts.onFailure] callback on failure
+ */
+SpazOAuth.prototype.getXauthTokens = function(opts) {
+
+	if (!opts.username || !opts.password) {
+		sch.error('Username and password required by getXauthTokens');
+		return;
+	}
+
+	opts = sch.defaults({
+		'mode':'client_auth'
+	}, opts);
+
+	var that = this;
+	var method = 'post';
+	var authHeader = this.getAuthHeader({
+		method: method,
+		url: this.getService().accessTokenUrl,
+		xauth: true,
+		parameters: [
+			['x_auth_username', opts.username],
+			['x_auth_password', opts.password],
+			['x_auth_mode', opts.mode]
+		]
+	});
+
+	$.ajax({
+		type: method,
+		url: this.getService().accessTokenUrl,
+		data: {
+			'x_auth_username': opts.username,
+			'x_auth_password': opts.password,
+			'x_auth_mode': opts.mode
+		},
+		beforeSend: function(req) {
+			req.setRequestHeader('Authorization', authHeader);
+			req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+		},
+		success: function(data, textStatus, req) {
+			if (opts.onSuccess) {
+				var results = OAuth.decodeForm(req.responseText);
+				alert(JSON.stringify(results));
+				that.accessToken = OAuth.getParameter(results, 'oauth_token');
+				that.accessTokenSecret = OAuth.getParameter(results, 'oauth_token_secret');
+
+				// Store the access token to the local database
+				var doc = { key: 'oauth' };
+				doc[that.getService().name] = {
+					accessToken: that.accessToken,
+					accessTokenSecret: that.accessTokenSecret
+				};
+				that.db.set(doc);
+				opts.onSuccess(data, textStatus, req);
+			}			
+		},
+		failure: function(req, textStatus, error) {
+			if (opts.onFailure) {
+				opts.onFailure(req, textStatus, error);
+			}
+		},
+		complete: function(req, textStatus) {}
+	});
+
+};
+
+
+
 /**
  * Returns the value of the HTTP authorization header to use for the request
- * @param {array} params The OAuth params to use when creating the auth header
- * @param {array} options Must include method and url, optionally parameters
+ * @param {Object} options Must include method and url, optionally parameters
+ * @param {Object} [options.parameters] parameters passed with the request
+ * @param {boolean} [options.xauth] pass this as an xauth request, removing any tokens
+ * @param {string} [options.method] the http method to use (usually 'get' or 'post')
+ * @param {string} [options.url] the url
  */
 SpazOAuth.prototype.getAuthHeader = function(options) {
+
+	var complete_opts;
 
 	if (!options.method || !options.url) {
 		return false;
@@ -202,12 +289,22 @@ SpazOAuth.prototype.getAuthHeader = function(options) {
 		parameters: options.parameters
 	};
 
-	OAuth.completeRequest(message, {
-		consumerKey: this.getService().consumerKey,
-		consumerSecret: this.getService().consumerSecret,
-		token: this.accessToken,
-		tokenSecret: this.accessTokenSecret
-	});
+	if (options.xauth) {
+		complete_opts = {
+			consumerKey: this.getService().consumerKey,
+			consumerSecret: this.getService().consumerSecret
+		};
+	} else {
+		complete_opts = {
+			consumerKey: this.getService().consumerKey,
+			consumerSecret: this.getService().consumerSecret,
+			token: this.accessToken,
+			tokenSecret: this.accessTokenSecret
+		};	
+	}
+
+
+	OAuth.completeRequest(message, complete_opts);
 
 	var authHeader = OAuth.getAuthorizationHeader(
 		this.getService().name,
