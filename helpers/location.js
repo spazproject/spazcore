@@ -16,4 +16,4 @@ var sc;
  */
 sc.helpers.getCurrentLocation = function() {
 	
-}
+};

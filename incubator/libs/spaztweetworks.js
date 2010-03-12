@@ -16,12 +16,12 @@ var sc;
 /**
  * base URL for Tweetworks API 
  */
-var SPAZCORE_TWEETWORKS_BASEURL = 'http://tweetworks.com/'
+var SPAZCORE_TWEETWORKS_BASEURL = 'http://tweetworks.com/';
 
 /**
  * events 
  */
-if (!sc.events) { sc.events = {}; }
+if (!sc.events) { sc.events = {}; };
 sc.events.tweetworksAjaxError        = 'tweetworksAjaxError';
 sc.events.tweetworksPostSuccess      = 'tweetworksPostSuccess'; 
 sc.events.tweetworksPostFailure      = 'tweetworksPostFailure';
@@ -76,7 +76,7 @@ SpazTweetWorks.prototype.getAPIURL = function(key, urldata) {
 	*/
 	urls.newest             = "posts/index/newest.json";
     urls.group_newest       = "posts/group/{{group-name}}/newest.json";
-	urls.view_discussion	= "posts/view/{{id}}.json"
+	urls.view_discussion	= "posts/view/{{id}}.json";
 
 	/*
 		user info
@@ -91,7 +91,7 @@ SpazTweetWorks.prototype.getAPIURL = function(key, urldata) {
 	*/
 	urls.groups             = "groups/index.json";
 	urls.join_group         = "groups/join/{{group-name}}.json";
-	urls.joined_groups      = "groups/joined/{{user-name}}.json"
+	urls.joined_groups      = "groups/joined/{{user-name}}.json";
 	urls.search_groups      = "groups/search.json";
 	urls.group_users        = "users/group/{{group-name}}.json";	
 	
@@ -141,7 +141,7 @@ SpazTweetWorks.prototype.setAPIKey = function(apikey) {
 SpazTweetWorks.prototype.setCredentials = function(username, password) {
 	this.username = username;
 	this.password = password;
-}
+};
 SpazTweetWorks.prototype.getUsername = function() {
 	return this.username;
 };
@@ -150,13 +150,13 @@ SpazTweetWorks.prototype.getPassword = function() {
 };
 
 
-SpazTweetWorks.prototype.post = function(body, groupId, parentId, sendToTwitter) {}
+SpazTweetWorks.prototype.post = function(body, groupId, parentId, sendToTwitter) {};
 
-SpazTweetWorks.prototype.getNewest = function(page, query) {}
+SpazTweetWorks.prototype.getNewest = function(page, query) {};
 
-SpazTweetWorks.prototype.getLatestFromGroup = function(group, page, query) {}
+SpazTweetWorks.prototype.getLatestFromGroup = function(group, page, query) {};
 
-SpazTweetWorks.prototype.getLatestFromContributedDiscussions = function(page, query) {}
+SpazTweetWorks.prototype.getLatestFromContributedDiscussions = function(page, query) {};
 
 
 

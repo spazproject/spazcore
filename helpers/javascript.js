@@ -91,6 +91,6 @@ sc.helpers.defaults = function(defaults, passed) {
 	}
 	
 	return args;
-}
+};
 
 

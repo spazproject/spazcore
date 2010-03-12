@@ -71,7 +71,7 @@ sc.helpers.getRelativeTime = function(time_value, labels, use_dateparse) {
 
 
 sc.helpers.httpTimeToInt = function(entry_date, use_dateparse) {
-	return sc.helpers.dateToInt(entry_date, use_dateparse)
+	return sc.helpers.dateToInt(entry_date, use_dateparse);
 };
 
 /**

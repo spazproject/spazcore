@@ -58,7 +58,7 @@ SpazAccounts.prototype.load	= function() {
 		this._accounts = [];
 	}
 	
-	sch.debug("this._accounts:'"+this._accounts+"'")
+	sch.debug("this._accounts:'"+this._accounts+"'");
 	
 };
 
@@ -74,10 +74,10 @@ SpazAccounts.prototype.save	= function() {
 		sch.debug(this._accounts[x].id);
 	};
 	
-	sch.debug('THE ACCOUNTS:')
+	sch.debug('THE ACCOUNTS:');
 	sch.debug(sch.enJSON(this._accounts));
 
-	sch.debug('ALL PREFS:')
+	sch.debug('ALL PREFS:');
 	sch.debug(sch.enJSON(this.prefs._prefs));
 
 	
@@ -121,7 +121,7 @@ SpazAccounts.prototype.update = function(id, acctobj) {
 		sch.error('No account with id "'+id+'" exists');
 		return null;
 	}
-}
+};
 
 
 
@@ -191,7 +191,7 @@ SpazAccounts.prototype.getByType = function(type) {
 	
 	for (var i=0; i < this._accounts.length; i++) {
 		if (this._accounts[i].type === type) {
-			matches.push(this._accounts[i])
+			matches.push(this._accounts[i]);
 		}
 	};
 	
@@ -207,7 +207,7 @@ SpazAccounts.prototype.getByUsername = function(username) {
 
 	for (var i=0; i < this._accounts.length; i++) {
 		if (this._accounts[i].username === username) {
-			matches.push(this._accounts[i])
+			matches.push(this._accounts[i]);
 		}
 	};
 	
@@ -224,7 +224,7 @@ SpazAccounts.prototype.getByUsernameAndType = function(username, type) {
 
 	for (var i=0; i < this._accounts.length; i++) {
 		if (this._accounts[i].username === username && this._accounts[i].type === type) {
-			matches.push(this._accounts[i])
+			matches.push(this._accounts[i]);
 		}
 	};
 	

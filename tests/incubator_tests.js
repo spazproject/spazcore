@@ -30,7 +30,7 @@ $().ready(function() {
 		
 		var opts = {
 			'user-name':'poophat',
-			'page':3,
+			'page':3
 		};
 		var result = tdata.tweetworks.getAPIURL('my_contributed_discussions', opts);
 		var expect = SPAZCORE_TWEETWORKS_BASEURL+'posts/contributed/poophat/updated.json?page=3';

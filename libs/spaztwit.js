@@ -1405,7 +1405,7 @@ SpazTwit.prototype._addToSectionItems = function(section_name, arr, sortfunc) {
 	this.data[section_name].items = this.data[section_name].items.concat(arr);
 
 	this._cleanupItemArray(this.data[section_name].items, this.data[section_name].max, sortfunc);
-}
+};
 
 /**
  * Sorts (optionally), removes dupes, and removes extra items from a given
