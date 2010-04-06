@@ -4,10 +4,6 @@
  */
 function SpazOAuth(args) {
 	
-	opts = sch.defaults({
-		''
-	}, opts)
-	
 	this.db = new SpazDB();
 	this.services = {};
 	this.requestToken = null;
@@ -34,8 +30,8 @@ function SpazOAuth(args) {
 SpazOAuth.prototype.initServices = function() {
 	this.addService('twitter', {
 		signatureMethod      : 'HMAC-SHA1',
-		consumerKey          : 'KtCklyOTPJ9CDxey26a8w',
-		consumerSecret       : 'cVLQ0ARIAY0VfOwSUiXm9oVmMqSCRSdvMtMGoEBS0U',
+		consumerKey          : 't94eBtc4Pz2zqo4KhABseQ',
+		consumerSecret       : 'PMEkuk4xQpQMY7HqpHZqddzg9TYr4MyJxd8kujivE',
 		requestTokenUrl      : 'https://twitter.com/oauth/request_token',
 		accessTokenUrl       : 'https://twitter.com/oauth/access_token',
 		userAuthorizationUrl : 'https://twitter.com/oauth/authorize'
@@ -234,9 +230,9 @@ SpazOAuth.prototype.getXauthTokens = function(opts) {
 			req.setRequestHeader('Authorization', authHeader);
 			req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 		},
-		success: function(data, textStatus, req) {
-			if (opts.onSuccess) {
-				var results = OAuth.decodeForm(req.responseText);
+		success: function(data, textStatus) {
+
+				var results = OAuth.decodeForm(data);
 				alert(JSON.stringify(results));
 				that.accessToken = OAuth.getParameter(results, 'oauth_token');
 				that.accessTokenSecret = OAuth.getParameter(results, 'oauth_token_secret');
@@ -248,15 +244,19 @@ SpazOAuth.prototype.getXauthTokens = function(opts) {
 					accessTokenSecret: that.accessTokenSecret
 				};
 				that.db.set(doc);
-				opts.onSuccess(data, textStatus, req);
-			}			
+				if (opts.onSuccess) {
+					opts.onSuccess(data, textStatus);
+				}			
 		},
 		failure: function(req, textStatus, error) {
 			if (opts.onFailure) {
 				opts.onFailure(req, textStatus, error);
 			}
 		},
-		complete: function(req, textStatus) {}
+		complete: function(req, textStatus) {
+			sch.error(req.responseText);
+			sch.error(textStatus);
+		}
 	});
 
 };
