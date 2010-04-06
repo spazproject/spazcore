@@ -8,7 +8,7 @@
 		<script type="text/javascript" src="../vendors/lawnchair-0.3.1/adaptors/LawnchairAdaptorHelpers.js"></script>
 		<script type="text/javascript" src="../vendors/lawnchair-0.3.1/adaptors/WebkitSQLiteAdaptor.js"></script>
 		<script type="text/javascript" src="../vendors/lawnchair-0.3.1/Lawnchair.js"></script>
-		<script type="text/javascript" src="../builds/spazcore-standard.js"></script>
+		<script type="text/javascript" src="spazcore-standard.js"></script>
 		<script type="text/javascript" src="../incubator/libs/spazdb.js"></script>
 		<script type="text/javascript" src="../incubator/libs/spazoauth.js"></script>
 		<style type="text/css">
@@ -22,18 +22,7 @@
 		<script type="text/javascript">
 
 			$(document).ready().wait(2000, function() {
-				if (consumer.isAuthorized()) {
-					$('#accessToken').text(consumer.accessToken);
-					$('#waitForIt').fadeOut('fast');
-					$('#successWindow').fadeIn('slow');
-					$('#timeline').html('<p>Loading ...</p>');
-					$('#homeTimeline').fadeIn('slow');
-					getTimeline();
-				} else {
-					$('#waitForIt').fadeOut('fast');
-					$('#requestWindow').fadeIn('slow');
-					$('#homeTimeline').fadeIn('slow');
-				}
+                
 			});
 
 		</script>
@@ -45,6 +34,22 @@
 				'service' : 'twitter'
 			});
 
+
+
+            function showStuff(consumer) {
+                if (consumer.isAuthorized()) {
+                 $('#accessToken').text(consumer.accessToken);
+                 $('#waitForIt').fadeOut('fast');
+                 $('#successWindow').fadeIn('slow');
+                 $('#timeline').html('<p>Loading ...</p>');
+                 $('#homeTimeline').fadeIn('slow');
+                 getTimeline();
+                } else {
+                 $('#waitForIt').fadeOut('fast');
+                 $('#requestWindow').fadeIn('slow');
+                 $('#homeTimeline').fadeIn('slow');
+                }
+            }
 
 			function getTokens() {
 				if (consumer.getRequestToken()) {
@@ -76,15 +81,17 @@
 			function xAuthTest() {
 			    
 			    var method = 'get';
-                // var url    = 'http://term.ie/oauth/example/request_token.php';
                 var url    = 'https://api.twitter.com/oauth/access_token';
                 var username = $('#username').val();
                 var password = $('#password').val();
 			    
 			    consumer.getXauthTokens({
 			        'username':username,
-			        'password':password
-			    })
+			        'password':password,
+			        'onSuccess': function() {
+			            showStuff(consumer);
+			        }
+			    });
 			};
 
 
@@ -135,16 +142,16 @@
 
 		</script>
 		<div id="waitForIt" style="display: block;">
-			<h1>Wait for it!</h1>
+			<h1>Please be loggin-in!</h1>
 		</div>
-		<div id="requestWindow" style="display: none;">
-			<button onclick="getTokens();">Click me to authorize Twitter access!</button>
-		</div>
-		<div id="authWindow" style="display: none;">
-			<label for="twitterPin">Enter Twitter PIN:</label>
-			<input id="twitterPin" type="text" value="" />
-			<button onclick="authorizeUser();">Authorize!</button>
-		</div>
+        <!-- <div id="requestWindow" style="display: none;">
+            <button onclick="getTokens();">Click me to authorize Twitter access!</button>
+        </div>
+        <div id="authWindow" style="display: none;">
+            <label for="twitterPin">Enter Twitter PIN:</label>
+            <input id="twitterPin" type="text" value="" />
+            <button onclick="authorizeUser();">Authorize!</button>
+        </div> -->
 		<div id="successWindow" style="display: none;">
 			<h1>Congratulations!</h1>
 			<p>You're authorized with Twitter!</p>
