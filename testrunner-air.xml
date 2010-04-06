@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <application 
-	xmlns="http://ns.adobe.com/air/application/2.0beta"
+	xmlns="http://ns.adobe.com/air/application/2.0beta2"
 	minimumPatchLevel="0">
 <!-- AIR Application Descriptor File. See http://www.adobe.com/go/learn_air_1.0_application_descriptor_en. -->
 	<id>com.funkatron.app.spazcore-testrunner-air</id>
