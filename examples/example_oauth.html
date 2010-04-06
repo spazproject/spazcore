@@ -19,15 +19,8 @@
 				padding: 5em;
 			}
 		</style>
-		<script type="text/javascript">
-
-			$(document).ready().wait(2000, function() {
-                
-			});
-
-		</script>
-	</head>
-	<body>
+		
+		
 		<script type="text/javascript">
 
 			var consumer = new SpazOAuth({
@@ -141,17 +134,21 @@
 			}
 
 		</script>
+		
+	</head>
+	<body>
+
 		<div id="waitForIt" style="display: block;">
 			<h1>Please be loggin-in!</h1>
 		</div>
-        <!-- <div id="requestWindow" style="display: none;">
+        <div id="requestWindow" style="display: none;">
             <button onclick="getTokens();">Click me to authorize Twitter access!</button>
         </div>
         <div id="authWindow" style="display: none;">
             <label for="twitterPin">Enter Twitter PIN:</label>
             <input id="twitterPin" type="text" value="" />
             <button onclick="authorizeUser();">Authorize!</button>
-        </div> -->
+        </div>
 		<div id="successWindow" style="display: none;">
 			<h1>Congratulations!</h1>
 			<p>You're authorized with Twitter!</p>
