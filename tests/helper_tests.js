@@ -509,6 +509,10 @@
 		output  = "aww man, don't say that...hastigerbanged.com is available. must. resist. htb.com/mywife => \"probably\" (for every url) <a href=\"http://gmail.com\">gmail.com</a> <a href=\"http://www.gmail.com\">www.gmail.com</a> <a href=\"http://foo.bar.com/\">foo.bar.com/</a> bit.ly/qrewof RT @ax0n: <a href=\"http://sysadvent.blogspot.com\">sysadvent.blogspot.com</a> <-- An advent calendar for UNIX nerds";
 		equals(sc.helpers.autolink(input), output);
 	
+		input   = '2009年4月19日的《泰晤士报》用一整版报道了中国几十年试验原子弹所造成的生命代价。报道说大约有19万中国人死于中国的核武器试验。http://3.ly/lzAL';
+		output  = "2009年4月19日的《泰晤士报》用一整版报道了中国几十年试验原子弹所造成的生命代价。报道说大约有19万中国人死于中国的核武器试验。<a href=\"http://3.ly/lzAL\">3.ly/lzAL</a>";
+		equals(sc.helpers.autolink(input), output);
+	
 	});
 	
 	test("makeClickable", function() {
