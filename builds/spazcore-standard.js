@@ -1,8 +1,4 @@
-<<<<<<< HEAD:builds/spazcore-standard.js
-/*********** Built 2010-03-01 20:32:46 EST ***********/
-=======
-/*********** Built 2010-03-12 06:17:53 EST ***********/
->>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-standard.js
+/*********** Built 2010-04-13 10:19:28 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -4665,7 +4661,678 @@ shortcut = {
 		else if(ele.removeEventListener) ele.removeEventListener(type, callback, false);
 		else ele['on'+type] = false;
 	}
-}/*jslint 
+}/**
+ * http://www.openjs.com/scripts/events/keyboard_shortcuts/
+ * Version : 2.01.B
+ * By Binny V A
+ * License : BSD
+ */
+shortcut = {
+	'all_shortcuts':{},//All the shortcuts are stored in this array
+	'add': function(shortcut_combination,callback,opt) {
+		//Provide a set of default options
+		var default_options = {
+			'type':'keydown',
+			'propagate':false,
+			'disable_in_input':false,
+			'target':document,
+			'keycode':false
+		}
+		if(!opt) opt = default_options;
+		else {
+			for(var dfo in default_options) {
+				if(typeof opt[dfo] == 'undefined') opt[dfo] = default_options[dfo];
+			}
+		}
+
+		var ele = opt.target;
+		if(typeof opt.target == 'string') ele = document.getElementById(opt.target);
+		var ths = this;
+		shortcut_combination = shortcut_combination.toLowerCase();
+
+		//The function to be called at keypress
+		var func = function(e) {
+			e = e || window.event;
+			
+			if(opt['disable_in_input']) { //Don't enable shortcut keys in Input, Textarea fields
+				var element;
+				if(e.target) element=e.target;
+				else if(e.srcElement) element=e.srcElement;
+				if(element.nodeType==3) element=element.parentNode;
+
+				if(element.tagName == 'INPUT' || element.tagName == 'TEXTAREA') return;
+			}
+	
+			//Find Which key is pressed
+			if (e.keyCode) code = e.keyCode;
+			else if (e.which) code = e.which;
+			var character = String.fromCharCode(code).toLowerCase();
+			
+			if(code == 188) character=","; //If the user presses , when the type is onkeydown
+			if(code == 190) character="."; //If the user presses , when the type is onkeydown
+
+			var keys = shortcut_combination.split("+");
+			//Key Pressed - counts the number of valid keypresses - if it is same as the number of keys, the shortcut function is invoked
+			var kp = 0;
+			
+			//Work around for stupid Shift key bug created by using lowercase - as a result the shift+num combination was broken
+			var shift_nums = {
+				"`":"~",
+				"1":"!",
+				"2":"@",
+				"3":"#",
+				"4":"$",
+				"5":"%",
+				"6":"^",
+				"7":"&",
+				"8":"*",
+				"9":"(",
+				"0":")",
+				"-":"_",
+				"=":"+",
+				";":":",
+				"'":"\"",
+				",":"<",
+				".":">",
+				"/":"?",
+				"\\":"|"
+			}
+			//Special Keys - and their codes
+			var special_keys = {
+				'esc':27,
+				'escape':27,
+				'tab':9,
+				'space':32,
+				'return':13,
+				'enter':13,
+				'backspace':8,
+	
+				'scrolllock':145,
+				'scroll_lock':145,
+				'scroll':145,
+				'capslock':20,
+				'caps_lock':20,
+				'caps':20,
+				'numlock':144,
+				'num_lock':144,
+				'num':144,
+				
+				'pause':19,
+				'break':19,
+				
+				'insert':45,
+				'home':36,
+				'delete':46,
+				'end':35,
+				
+				'pageup':33,
+				'page_up':33,
+				'pu':33,
+	
+				'pagedown':34,
+				'page_down':34,
+				'pd':34,
+	
+				'left':37,
+				'up':38,
+				'right':39,
+				'down':40,
+	
+				'f1':112,
+				'f2':113,
+				'f3':114,
+				'f4':115,
+				'f5':116,
+				'f6':117,
+				'f7':118,
+				'f8':119,
+				'f9':120,
+				'f10':121,
+				'f11':122,
+				'f12':123
+			}
+	
+			var modifiers = { 
+				shift: { wanted:false, pressed:false},
+				ctrl : { wanted:false, pressed:false},
+				alt  : { wanted:false, pressed:false},
+				meta : { wanted:false, pressed:false}	//Meta is Mac specific
+			};
+                        
+			if(e.ctrlKey)	modifiers.ctrl.pressed = true;
+			if(e.shiftKey)	modifiers.shift.pressed = true;
+			if(e.altKey)	modifiers.alt.pressed = true;
+			if(e.metaKey)   modifiers.meta.pressed = true;
+                        
+			for(var i=0; k=keys[i],i<keys.length; i++) {
+				//Modifiers
+				if(k == 'ctrl' || k == 'control') {
+					kp++;
+					modifiers.ctrl.wanted = true;
+
+				} else if(k == 'shift') {
+					kp++;
+					modifiers.shift.wanted = true;
+
+				} else if(k == 'alt') {
+					kp++;
+					modifiers.alt.wanted = true;
+				} else if(k == 'meta') {
+					kp++;
+					modifiers.meta.wanted = true;
+				} else if(k.length > 1) { //If it is a special key
+					if(special_keys[k] == code) kp++;
+					
+				} else if(opt['keycode']) {
+					if(opt['keycode'] == code) kp++;
+
+				} else { //The special keys did not match
+					if(character == k) kp++;
+					else {
+						if(shift_nums[character] && e.shiftKey) { //Stupid Shift key bug created by using lowercase
+							character = shift_nums[character]; 
+							if(character == k) kp++;
+						}
+					}
+				}
+			}
+			
+			if(kp == keys.length && 
+						modifiers.ctrl.pressed == modifiers.ctrl.wanted &&
+						modifiers.shift.pressed == modifiers.shift.wanted &&
+						modifiers.alt.pressed == modifiers.alt.wanted &&
+						modifiers.meta.pressed == modifiers.meta.wanted) {
+				callback(e);
+	
+				if(!opt['propagate']) { //Stop the event
+					//e.cancelBubble is supported by IE - this will kill the bubbling process.
+					e.cancelBubble = true;
+					e.returnValue = false;
+	
+					//e.stopPropagation works in Firefox.
+					if (e.stopPropagation) {
+						e.stopPropagation();
+						e.preventDefault();
+					}
+					return false;
+				}
+			}
+		}
+		this.all_shortcuts[shortcut_combination] = {
+			'callback':func, 
+			'target':ele, 
+			'event': opt['type']
+		};
+		//Attach the function with the event
+		if(ele.addEventListener) ele.addEventListener(opt['type'], func, false);
+		else if(ele.attachEvent) ele.attachEvent('on'+opt['type'], func);
+		else ele['on'+opt['type']] = func;
+	},
+
+	//Remove the shortcut - just specify the shortcut and I will remove the binding
+	'remove':function(shortcut_combination) {
+		shortcut_combination = shortcut_combination.toLowerCase();
+		var binding = this.all_shortcuts[shortcut_combination];
+		delete(this.all_shortcuts[shortcut_combination])
+		if(!binding) return;
+		var type = binding['event'];
+		var ele = binding['target'];
+		var callback = binding['callback'];
+
+		if(ele.detachEvent) ele.detachEvent('on'+type, callback);
+		else if(ele.removeEventListener) ele.removeEventListener(type, callback, false);
+		else ele['on'+type] = false;
+	}
+}/**
+ * Copyright (c) 2005 - 2010, James Auldridge
+ * All rights reserved.
+ *
+ * Licensed under the BSD, MIT, and GPL (your choice!) Licenses:
+ *  http://code.google.com/p/cookies/wiki/License
+ *
+ */
+var jaaulde = window.jaaulde || {};
+jaaulde.utils = jaaulde.utils || {};
+jaaulde.utils.cookies = ( function()
+{
+	var resolveOptions, assembleOptionsString, parseCookies, constructor, defaultOptions = {
+		expiresAt: null,
+		path: '/',
+		domain:  null,
+		secure: false
+	};
+	/**
+	* resolveOptions - receive an options object and ensure all options are present and valid, replacing with defaults where necessary
+	*
+	* @access private
+	* @static
+	* @parameter Object options - optional options to start with
+	* @return Object complete and valid options object
+	*/
+	resolveOptions = function( options )
+	{
+		var returnValue, expireDate;
+
+		if( typeof options !== 'object' || options === null )
+		{
+			returnValue = defaultOptions;
+		}
+		else
+		{
+			returnValue = {
+				expiresAt: defaultOptions.expiresAt,
+				path: defaultOptions.path,
+				domain: defaultOptions.domain,
+				secure: defaultOptions.secure
+			};
+
+			if( typeof options.expiresAt === 'object' && options.expiresAt instanceof Date )
+			{
+				returnValue.expiresAt = options.expiresAt;
+			}
+			else if( typeof options.hoursToLive === 'number' && options.hoursToLive !== 0 )
+			{
+				expireDate = new Date();
+				expireDate.setTime( expireDate.getTime() + ( options.hoursToLive * 60 * 60 * 1000 ) );
+				returnValue.expiresAt = expireDate;
+			}
+
+			if( typeof options.path === 'string' && options.path !== '' )
+			{
+				returnValue.path = options.path;
+			}
+
+			if( typeof options.domain === 'string' && options.domain !== '' )
+			{
+				returnValue.domain = options.domain;
+			}
+
+			if( options.secure === true )
+			{
+				returnValue.secure = options.secure;
+			}
+		}
+
+		return returnValue;
+		};
+	/**
+	* assembleOptionsString - analyze options and assemble appropriate string for setting a cookie with those options
+	*
+	* @access private
+	* @static
+	* @parameter options OBJECT - optional options to start with
+	* @return STRING - complete and valid cookie setting options
+	*/
+	assembleOptionsString = function( options )
+	{
+		options = resolveOptions( options );
+
+		return (
+			( typeof options.expiresAt === 'object' && options.expiresAt instanceof Date ? '; expires=' + options.expiresAt.toGMTString() : '' ) +
+			'; path=' + options.path +
+			( typeof options.domain === 'string' ? '; domain=' + options.domain : '' ) +
+			( options.secure === true ? '; secure' : '' )
+		);
+	};
+	/**
+	* parseCookies - retrieve document.cookie string and break it into a hash with values decoded and unserialized
+	*
+	* @access private
+	* @static
+	* @return OBJECT - hash of cookies from document.cookie
+	*/
+	parseCookies = function()
+	{
+		var cookies = {}, i, pair, name, value, separated = document.cookie.split( ';' ), unparsedValue;
+		for( i = 0; i < separated.length; i = i + 1 )
+		{
+			pair = separated[i].split( '=' );
+			name = pair[0].replace( /^\s*/, '' ).replace( /\s*$/, '' );
+
+			try
+			{
+				value = decodeURIComponent( pair[1] );
+			}
+			catch( e1 )
+			{
+				value = pair[1];
+			}
+
+			if( typeof JSON === 'object' && JSON !== null && typeof JSON.parse === 'function' )
+			{
+				try
+				{
+					unparsedValue = value;
+					value = JSON.parse( value );
+				}
+				catch( e2 )
+				{
+					value = unparsedValue;
+				}
+			}
+
+			cookies[name] = value;
+		}
+		return cookies;
+	};
+
+	constructor = function(){};
+
+	/**
+	 * get - get one, several, or all cookies
+	 *
+	 * @access public
+	 * @paramater Mixed cookieName - String:name of single cookie; Array:list of multiple cookie names; Void (no param):if you want all cookies
+	 * @return Mixed - Value of cookie as set; Null:if only one cookie is requested and is not found; Object:hash of multiple or all cookies (if multiple or all requested);
+	 */
+	constructor.prototype.get = function( cookieName )
+	{
+		var returnValue, item, cookies = parseCookies();
+
+		if( typeof cookieName === 'string' )
+		{
+			returnValue = ( typeof cookies[cookieName] !== 'undefined' ) ? cookies[cookieName] : null;
+		}
+		else if( typeof cookieName === 'object' && cookieName !== null )
+		{
+			returnValue = {};
+			for( item in cookieName )
+			{
+				if( typeof cookies[cookieName[item]] !== 'undefined' )
+				{
+					returnValue[cookieName[item]] = cookies[cookieName[item]];
+				}
+				else
+				{
+					returnValue[cookieName[item]] = null;
+				}
+			}
+		}
+		else
+		{
+			returnValue = cookies;
+		}
+
+		return returnValue;
+	};
+	/**
+	 * filter - get array of cookies whose names match the provided RegExp
+	 *
+	 * @access public
+	 * @paramater Object RegExp - The regular expression to match against cookie names
+	 * @return Mixed - Object:hash of cookies whose names match the RegExp
+	 */
+	constructor.prototype.filter = function( cookieNameRegExp )
+	{
+		var cookieName, returnValue = {}, cookies = parseCookies();
+
+		if( typeof cookieNameRegExp === 'string' )
+		{
+			cookieNameRegExp = new RegExp( cookieNameRegExp );
+		}
+
+		for( cookieName in cookies )
+		{
+			if( cookieName.match( cookieNameRegExp ) )
+			{
+				returnValue[cookieName] = cookies[cookieName];
+			}
+		}
+
+		return returnValue;
+	};
+	/**
+	 * set - set or delete a cookie with desired options
+	 *
+	 * @access public
+	 * @paramater String cookieName - name of cookie to set
+	 * @paramater Mixed value - Any JS value. If not a string, will be JSON encoded; NULL to delete
+	 * @paramater Object options - optional list of cookie options to specify
+	 * @return void
+	 */
+	constructor.prototype.set = function( cookieName, value, options )
+	{
+		if( typeof options !== 'object' || options === null )
+		{
+			options = {};
+		}
+
+		if( typeof value === 'undefined' || value === null )
+		{
+			value = '';
+			options.hoursToLive = -8760;
+		}
+
+		else if( typeof value !== 'string' )
+		{
+			if( typeof JSON === 'object' && JSON !== null && typeof JSON.stringify === 'function' )
+			{
+				value = JSON.stringify( value );
+			}
+			else
+			{
+				throw new Error( 'cookies.set() received non-string value and could not serialize.' );
+			}
+		}
+
+
+		var optionsString = assembleOptionsString( options );
+
+		document.cookie = cookieName + '=' + encodeURIComponent( value ) + optionsString;
+	};
+	/**
+	 * del - delete a cookie (domain and path options must match those with which the cookie was set; this is really an alias for set() with parameters simplified for this use)
+	 *
+	 * @access public
+	 * @paramater MIxed cookieName - String name of cookie to delete, or Bool true to delete all
+	 * @paramater Object options - optional list of cookie options to specify ( path, domain )
+	 * @return void
+	 */
+	constructor.prototype.del = function( cookieName, options )
+	{
+		var allCookies = {}, name;
+
+		if( typeof options !== 'object' || options === null )
+		{
+			options = {};
+		}
+
+		if( typeof cookieName === 'boolean' && cookieName === true )
+		{
+			allCookies = this.get();
+		}
+		else if( typeof cookieName === 'string' )
+		{
+			allCookies[cookieName] = true;
+		}
+
+		for( name in allCookies )
+		{
+			if( typeof name === 'string' && name !== '' )
+			{
+				this.set( name, null, options );
+			}
+		}
+	};
+	/**
+	 * test - test whether the browser is accepting cookies
+	 *
+	 * @access public
+	 * @return Boolean
+	 */
+	constructor.prototype.test = function()
+	{
+		var returnValue = false, testName = 'cT', testValue = 'data';
+
+		this.set( testName, testValue );
+
+		if( this.get( testName ) === testValue )
+		{
+			this.del( testName );
+			returnValue = true;
+		}
+
+		return returnValue;
+	};
+	/**
+	 * setOptions - set default options for calls to cookie methods
+	 *
+	 * @access public
+	 * @param Object options - list of cookie options to specify
+	 * @return void
+	 */
+	constructor.prototype.setOptions = function( options )
+	{
+		if( typeof options !== 'object' )
+		{
+			options = null;
+		}
+
+		defaultOptions = resolveOptions( options );
+	};
+
+	return new constructor();
+} )();
+
+( function()
+{
+	if( window.jQuery )
+	{
+		( function( $ )
+		{
+			$.cookies = jaaulde.utils.cookies;
+
+			var extensions = {
+				/**
+				* $( 'selector' ).cookify - set the value of an input field, or the innerHTML of an element, to a cookie by the name or id of the field or element
+				*                           (field or element MUST have name or id attribute)
+				*
+				* @access public
+				* @param options OBJECT - list of cookie options to specify
+				* @return jQuery
+				*/
+				cookify: function( options )
+				{
+					return this.each( function()
+					{
+						var i, nameAttrs = ['name', 'id'], name, $this = $( this ), value;
+
+						for( i in nameAttrs )
+						{
+							if( ! isNaN( i ) )
+							{
+								name = $this.attr( nameAttrs[ i ] );
+								if( typeof name === 'string' && name !== '' )
+								{
+									if( $this.is( ':checkbox, :radio' ) )
+									{
+										if( $this.attr( 'checked' ) )
+										{
+											value = $this.val();
+										}
+									}
+									else if( $this.is( ':input' ) )
+									{
+										value = $this.val();
+									}
+									else
+									{
+										value = $this.html();
+									}
+
+									if( typeof value !== 'string' || value === '' )
+									{
+										value = null;
+									}
+
+									$.cookies.set( name, value, options );
+
+									break;
+								}
+							}
+						}
+					} );
+				},
+				/**
+				* $( 'selector' ).cookieFill - set the value of an input field or the innerHTML of an element from a cookie by the name or id of the field or element
+				*
+				* @access public
+				* @return jQuery
+				*/
+				cookieFill: function()
+				{
+					return this.each( function()
+					{
+						var n, getN, nameAttrs = ['name', 'id'], name, $this = $( this ), value;
+
+						getN = function()
+						{
+							n = nameAttrs.pop();
+							return !! n;
+						};
+
+						while( getN() )
+						{
+							name = $this.attr( n );
+							if( typeof name === 'string' && name !== '' )
+							{
+								value = $.cookies.get( name );
+								if( value !== null )
+								{
+									if( $this.is( ':checkbox, :radio' ) )
+									{
+										if( $this.val() === value )
+										{
+											$this.attr( 'checked', 'checked' );
+										}
+										else
+										{
+											$this.removeAttr( 'checked' );
+										}
+									}
+									else if( $this.is( ':input' ) )
+									{
+										$this.val( value );
+									}
+									else
+									{
+										$this.html( value );
+									}
+								}
+								
+								break;
+							}
+						}
+					} );
+				},
+				/**
+				* $( 'selector' ).cookieBind - call cookie fill on matching elements, and bind their change events to cookify()
+				*
+				* @access public
+				* @param options OBJECT - list of cookie options to specify
+				* @return jQuery
+				*/
+				cookieBind: function( options )
+				{
+					return this.each( function()
+					{
+						var $this = $( this );
+						$this.cookieFill().change( function()
+						{
+							$this.cookify( options );
+						} );
+					} );
+				}
+			};
+
+			$.each( extensions, function( i )
+			{
+				$.fn[i] = this;
+			} );
+
+		} )( window.jQuery );
+	}
+} )();/*jslint 
 browser: true,
 nomen: false,
 debug: true,
@@ -5880,11 +6547,7 @@ sc.helpers.defaults = function(defaults, passed) {
 	}
 	
 	return args;
-<<<<<<< HEAD:builds/spazcore-standard.js
-}
-=======
 };
->>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-standard.js
 
 
 /*jslint 
@@ -6209,7 +6872,7 @@ sc.helpers.containsScreenName = function(str, sn) {
  * find URLs within the given string 
  */
 sc.helpers.extractURLs = function(str) {
-	var wwwlinks = /(^|\s|\(|:)(((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+))/gi;
+	var wwwlinks = /(^|[\s\(:。])((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
 	var match = [];
 	var URLs = [];
 	while ( (match = wwwlinks.exec(str)) !== null ) {
@@ -6239,8 +6902,9 @@ sc.helpers.replaceMultiple = function(str, map) {
 
 
 /**
- * This is a port of the CodeIgniter helper "autolink" to javascript
- * It finds and links both web addresses and email addresses
+ * This is a port of the CodeIgniter helper "autolink" to javascript.
+ * It finds and links both web addresses and email addresses. It will ignore
+ * links within HTML (as attributes or between tag pairs)
  * 
  * @param {string} str
  * @param {string} type  'email', 'url', or 'both' (default is 'both')
@@ -6253,9 +6917,9 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 		type = 'both';
 	}
 
-	var re_nohttpurl = /((^|\s)(www\.)?([a-zA-Z_\-]+\.)(com|net|org)($|\s))/gi;
+	var re_nohttpurl = /((^|\s)(www\.)?([a-zA-Z_\-]+\.)(com|net|org|uk)($|\s))/gi;
 
-	var re_noemail = /(^|\s|\(|:)((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
+	var re_noemail = /(^|[\s\(:。])((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
 	var re_nourl   = /(^|\s|\()([a-zA-Z0-9_\.\-\+]+)@([a-zA-Z0-9\-]+)\.([a-zA-Z0-9\-\.]*)([^\s\)<]+)/gi;
 	
 	var x, ms, period = '';
@@ -6263,11 +6927,6 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 	if (type !== 'email')
 	{	
 		while ((ms = re_nohttpurl.exec(str))) { // look for URLs without a preceding "http://"
-			// if ( /\.$/.test(ms[4]) ) {
-			// 	period = '.';
-			//	ms[5] = ms[5].slice(0, -1);
-			// }
-			
 			/*
 				sometimes we can end up with a null instead of a blank string,
 				so we need to force the issue in javascript.
@@ -7194,6 +7853,12 @@ sc.helpers.removeExtraElements = function(item_selector, max_items, remove_from_
 	var parent = jqitems.parent().get(0);
 
 	var diff = jqitems.length - max_items;
+	
+	sch.debug('removing extra elements from '+item_selector);
+	sch.debug('matching item count '+jqitems.length);
+	sch.debug('max_items: '+max_items);
+	sch.debug('diff: '+diff);
+	sch.debug('remove_from_top: '+remove_from_top);
 
 	if (diff > 0) {
 
@@ -8072,6 +8737,8 @@ var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
 var SPAZCORE_PREFS_AIR_FILENAME = 'preferences.json';
 
 var SPAZCORE_PREFS_MOJO_COOKIENAME = 'preferences.json';
+
+var SPAZCORE_PREFS_STANDARD_COOKIENAME = 'preferences_json';
  
 /**
  * A preferences lib for AIR JS apps. This requires the json2.js library
@@ -8085,12 +8752,12 @@ var SPAZCORE_PREFS_MOJO_COOKIENAME = 'preferences.json';
  * @param {object} sanity_methods a JS object of key:object pairs that defines methods to be called when the pref is get() or set(). Example:
  * {
  * 	foo:{
- * 		onGet:function() {};
- * 		onSet:function() {};
+ * 		onGet:function(key, value) {};
+ * 		onSet:function(key, value) {};
  * 	},
  * 	bar:{
- * 		onGet:function() {};
- * 		onSet:function() {};
+ * 		onGet:function(key, value) {};
+ * 		onSet:function(key, value) {};
  * 	}
  * }
  * 
@@ -8117,7 +8784,8 @@ function SpazPrefs(defaults, id, sanity_methods) {
 
 
 	if (sanity_methods) {
-		sc.helpers.dump('need to add sanity_method parsing');
+		sch.debug('adding sanity methods to prefs');
+		this._sanity_methods = sanity_methods;
 	}
 	
 	if (id) {
@@ -8149,13 +8817,8 @@ SpazPrefs.prototype.setDefaults = function(defaults) {
 SpazPrefs.prototype._applyDefaults = function() {
 	var key;
 	for (key in this._defaults) {
-		sc.helpers.dump('Copying default "' + key + '":"' + this._defaults[key] + '" (' + typeof(this._defaults[key]) + ')');
+		sc.helpers.debug('Copying default "' + key + '":"' + this._defaults[key] + '" (' + typeof(this._defaults[key]) + ')');
 		this._prefs[key] = this._defaults[key];
-
-		if (this._sanity_methods[key] && this._sanity_methods[key].onSet) {
-			sc.helpers.dump("Calling "+key+".onSet()");
-			this._sanity_methods[key].onSet();
-		}
 	}
 };
 
@@ -8175,18 +8838,33 @@ SpazPrefs.prototype.resetPrefs = function() {
  * Note that FALSE is returned if the key does not exist
  */
 SpazPrefs.prototype.get = function(key, encrypted) {
+	var value;
+	
+	// if (this._sanity_methods[key] && this._sanity_methods[key].onSet) {
+	// 	sc.helpers.debug("Calling "+key+".onSet()");
+	// 	this._sanity_methods[key].onSet();
+	// }
+	
+	
 	if (encrypted) {
-		return this.getEncrypted(key);
-	} 
-	
-	sc.helpers.dump('Looking for pref "'+key+'"');
-	
-	if (this._prefs[key]) {
-		sc.helpers.dump('Found pref "'+key+'" of value "'+this._prefs[key]+'" ('+typeof(this._prefs[key])+')');
-		return this._prefs[key];
+		value = this.getEncrypted(key);
 	} else {
-		return false;
+		sc.helpers.debug('Looking for pref "'+key+'"');
+
+		if (this._prefs[key]) {
+			sc.helpers.debug('Found pref "'+key+'" of value "'+this._prefs[key]+'" ('+typeof(this._prefs[key])+')');
+			value = this._prefs[key];
+		} else {
+			value = false;
+		}
 	}
+	
+	if (this._sanity_methods[key] && this._sanity_methods[key].onGet) {
+		sc.helpers.debug("Calling "+key+".onGet()");
+		value = this._sanity_methods[key].onGet.call(this, key, value);
+	}
+		
+	return value;
 };
 
 
@@ -8195,13 +8873,20 @@ SpazPrefs.prototype.get = function(key, encrypted) {
  */
 SpazPrefs.prototype.set = function(key, val, encrypted) {
 	
-	sc.helpers.dump('Setting and saving "'+key+'" to "'+val+'" ('+typeof(val)+')');
+	sc.helpers.debug('Setting and saving "'+key+'" to "'+val+'" ('+typeof(val)+')');
+	
+	if (this._sanity_methods[key] && this._sanity_methods[key].onSet) {
+		sc.helpers.debug("Calling "+key+".onSet()");
+		val = this._sanity_methods[key].onSet.call(this, key, val);
+	}
 	
 	if (encrypted) {
-		return this.setEncrypted(key, val);
-	} 
+		this.setEncrypted(key, val);
+	} else {
+		this._prefs[key] = val;
+	}
 
-	this._prefs[key] = val;
+	
 	
 	this.save();
 };
@@ -8220,7 +8905,7 @@ SpazPrefs.prototype.set = function(key, val, encrypted) {
 SpazPrefs.prototype.setSanityMethod = function(key, type, method) {
 	
 	if (type !== 'onGet' && type !== 'onSet') {
-		return false;
+		sch.error('sanity method type must be onGet or onSet');
 	}
 	
 	this._sanity_methods[key][type] = method;
@@ -10968,6 +11653,7 @@ SpazTwit.prototype.getHomeTimeline = function(since_id, count, page, processing_
  * @private
  */
 SpazTwit.prototype._processHomeTimeline = function(ret_items, opts, processing_opts) {
+	sc.helpers.dump('Processing '+ret_items.length+' items returned from home method');
 	this._processTimeline(SPAZCORE_SECTION_HOME, ret_items, opts, processing_opts);
 };
 
@@ -11026,6 +11712,7 @@ SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page, processi
  * @private
  */
 SpazTwit.prototype._processFriendsTimeline = function(ret_items, opts, processing_opts) {
+	sc.helpers.dump('Processing '+ret_items.length+' items returned from friends method');
 	this._processTimeline(SPAZCORE_SECTION_FRIENDS, ret_items, opts, processing_opts);
 };
 
@@ -11369,8 +12056,10 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, opts, proces
 			concat new items onto data.items array
 		*/
 		this.data[SPAZCORE_SECTION_SEARCH].items = this.data[SPAZCORE_SECTION_SEARCH].items.concat(this.data[SPAZCORE_SECTION_SEARCH].newitems);
+		
 		this.data[SPAZCORE_SECTION_SEARCH].items = this.removeDuplicates(this.data[SPAZCORE_SECTION_SEARCH].items);
-		this.data[SPAZCORE_SECTION_SEARCH].items = this.removeExtraElements(this.data[SPAZCORE_SECTION_SEARCH].items, this.data[SPAZCORE_SECTION_SEARCH].max);
+		sch.debug('NOT removing extras from search -- we don\'t do that anymore');
+		// this.data[SPAZCORE_SECTION_SEARCH].items = this.removeExtraElements(this.data[SPAZCORE_SECTION_SEARCH].items, this.data[SPAZCORE_SECTION_SEARCH].max);
 
 
 		var search_info = {
@@ -11749,8 +12438,9 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 		
 		// sort these items -- the timelines can be out of order when combined
 
-		sc.helpers.dump('Removing duplicates in '+SPAZCORE_SECTION_COMBINED+' newitems');
 		
+		// sc.helpers.dump('Removing duplicates in '+SPAZCORE_SECTION_COMBINED+' newitems');
+		// 
 		this.data[SPAZCORE_SECTION_COMBINED].newitems = this._cleanupItemArray(this.data[SPAZCORE_SECTION_COMBINED].newitems, this.data[SPAZCORE_SECTION_COMBINED].max, this._sortItemsByDateAsc);
 		
 		if (this.combinedTimelineHasErrors()) {
@@ -11764,6 +12454,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 		if (opts.success_callback) {
 			opts.success_callback(this.data[SPAZCORE_SECTION_COMBINED].newitems);
 		}
+		sch.debug('this.data[SPAZCORE_SECTION_COMBINED].newitems has '+this.data[SPAZCORE_SECTION_COMBINED].newitems.length+' items');
 		this.triggerEvent('new_combined_timeline_data', this.data[SPAZCORE_SECTION_COMBINED].newitems);
 		this.data[SPAZCORE_SECTION_COMBINED].newitems = []; // reset combined.newitems
 		this.initializeCombinedTracker();
@@ -11800,7 +12491,8 @@ SpazTwit.prototype._cleanupItemArray = function(arr, max, sortfunc) {
 		arr = arr.sort(sortfunc);
 	}
 	arr = this.removeDuplicates(arr);
-	arr = this.removeExtraElements(arr, max);
+	sch.debug('NOT removing extras -- we don\'t do that anymore');
+	// arr = this.removeExtraElements(arr, max);
 	return arr;
 };
 
@@ -13086,3 +13778,42 @@ if (sc) {
 * 
 * 
 */
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc;
+
+/**
+ * standard
+ * platform-specific definitions for prefs lib 
+ */
+
+SpazPrefs.prototype.load = function() {
+	var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
+	var prefsval = $.cookies.get(cookie_key);
+		
+	if (prefsval) {
+		sch.debug('prefsval exists');
+		for (var key in prefsval) {
+			sc.helpers.dump('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
+            this._prefs[key] = prefsval[key];
+       	}
+    } else { // init the file
+		sch.debug('prefsval does not exist; saving with defaults');
+        this.save();
+    }
+}
+
+SpazPrefs.prototype.save = function() {
+	var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
+	$.cookies.set(cookie_key, this._prefs);
+	sch.debug('stored prefs in cookie');
+};
+
+
