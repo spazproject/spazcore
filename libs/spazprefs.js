@@ -14,6 +14,8 @@ var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
 var SPAZCORE_PREFS_AIR_FILENAME = 'preferences.json';
 
 var SPAZCORE_PREFS_MOJO_COOKIENAME = 'preferences.json';
+
+var SPAZCORE_PREFS_STANDARD_COOKIENAME = 'preferences_json';
  
 /**
  * A preferences lib for AIR JS apps. This requires the json2.js library

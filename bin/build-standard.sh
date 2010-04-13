@@ -13,6 +13,8 @@ cat libs/spazcore.js \
 	vendors/sizzle.js \
 	vendors/underscore.js \
 	vendors/shortcut.js \
+	vendors/shortcut.js \
+	vendors/jquery.cookies.2.2.0.js \
 	helpers/datetime.js \
 	helpers/event.js \
 	helpers/hash.js \
@@ -36,4 +38,5 @@ cat libs/spazcore.js \
 	libs/spaztimelinefilter.js \
 	libs/spaztmdb.js \
 	libs/spaztwit.js \
+	platforms/standard/libs/spazprefs.js \
 	>> $BUILD_FILE
