@@ -1,4 +1,4 @@
-/*********** Built 2010-04-13 10:19:28 EDT ***********/
+/*********** Built 2010-04-13 17:18:04 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -8906,6 +8906,10 @@ SpazPrefs.prototype.setSanityMethod = function(key, type, method) {
 	
 	if (type !== 'onGet' && type !== 'onSet') {
 		sch.error('sanity method type must be onGet or onSet');
+	}
+	
+	if (!this._sanity_methods[key]) {
+		this._sanity_methods[key] = {};
 	}
 	
 	this._sanity_methods[key][type] = method;
