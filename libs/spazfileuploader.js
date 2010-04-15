@@ -72,6 +72,31 @@ SpazFileUploader.prototype.getAPIs = function() {
 	var thisSFU = this;
 
 	var apis = {
+	    'drippic' : {
+			'upload_url' : 'http://drippic.millwoodonline.co.uk/drippic/upload',
+		    'post_url'   : 'http://drippic.millwoodonline.co.uk/drippic/upload/tweet',
+			'processResult': function(event, apiobj) {
+				var loader = event.target;
+				
+				sch.debug('PROCESSING: EVENT');
+				sch.debug(event);
+
+				var parser=new DOMParser();
+				var xmldoc = parser.parseFromString(event.data,"text/xml");
+
+				var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
+				if (rspAttr.getNamedItem("stat").nodeValue === 'ok')
+				{
+					returnobj['mediaurl'] = jQuery(xmldoc).find('mediaurl').text();
+				} 
+				else
+				{
+					returnobj['errMsg'] = jQuery(xmldoc).find('error').text();
+				}
+				sch.debug(returnobj);
+				return returnobj;
+			}
+		},
 		'pikchur' : {
 		    'upload_url' : 'http://api.pikchur.com/simple/upload',
 		    'post_url' : 'http://api.pikchur.com/simple/uploadAndPost',
