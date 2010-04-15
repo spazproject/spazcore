@@ -14,9 +14,12 @@ var sc;
  * platform-specific definitions for prefs lib 
  */
 
+/**
+ * this requires the cookies library <http://code.google.com/p/cookies/> 
+ */
 SpazPrefs.prototype.load = function() {
 	var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
-	var prefsval = $.cookies.get(cookie_key);
+	var prefsval = jaaulde.utils.cookies.get(cookie_key);
 		
 	if (prefsval) {
 		sch.debug('prefsval exists');
@@ -28,11 +31,14 @@ SpazPrefs.prototype.load = function() {
 		sch.debug('prefsval does not exist; saving with defaults');
         this.save();
     }
-}
+};
 
+/**
+ * this requires the cookies library <http://code.google.com/p/cookies/> 
+ */
 SpazPrefs.prototype.save = function() {
 	var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
-	$.cookies.set(cookie_key, this._prefs);
+	jaaulde.utils.cookies.set(cookie_key, this._prefs);
 	sch.debug('stored prefs in cookie');
 };
 
