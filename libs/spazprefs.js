@@ -7,7 +7,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, Titanium, air, window, jQuery, Mojo;
+var sc, Titanium, air, jQuery, Mojo;
 
 var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
 

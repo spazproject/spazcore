@@ -7,7 +7,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, window;
+var sc;
  
 /**
  * These are system-oriented functions, mostly utilizing AIR apis
