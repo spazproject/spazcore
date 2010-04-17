@@ -1,4 +1,4 @@
-/*********** Built 2010-04-16 23:49:41 EDT ***********/
+/*********** Built 2010-04-17 18:54:15 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -11695,7 +11695,7 @@ SpazTwit.prototype._processItem = function(item, section_name) {
 	/*
 		is an official API retweet? then add .SC_is_retweet
 	*/
-	if ( item.retweet_status ) {
+	if ( item.retweeted_status ) {
 		item.SC_is_retweet = true;
 	}
 	
