@@ -1,4 +1,4 @@
-/*********** Built 2010-03-12 08:20:24 EST ***********/
+/*********** Built 2010-04-16 23:49:41 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -5963,8 +5963,9 @@ sc.helpers.replaceMultiple = function(str, map) {
 
 
 /**
- * This is a port of the CodeIgniter helper "autolink" to javascript
- * It finds and links both web addresses and email addresses
+ * This is a port of the CodeIgniter helper "autolink" to javascript.
+ * It finds and links both web addresses and email addresses. It will ignore
+ * links within HTML (as attributes or between tag pairs)
  * 
  * @param {string} str
  * @param {string} type  'email', 'url', or 'both' (default is 'both')
@@ -5977,9 +5978,9 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 		type = 'both';
 	}
 
-	var re_nohttpurl = /((^|\s)(www\.)?([a-zA-Z_\-]+\.)(com|net|org)($|\s))/gi;
+	var re_nohttpurl = /((^|\s)(www\.)?([a-zA-Z_\-]+\.)(com|net|org|uk)($|\s))/gi;
 
-	var re_noemail = /(^|\s|\(|:)((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
+	var re_noemail = /(^|[\s\(:。])((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
 	var re_nourl   = /(^|\s|\()([a-zA-Z0-9_\.\-\+]+)@([a-zA-Z0-9\-]+)\.([a-zA-Z0-9\-\.]*)([^\s\)<]+)/gi;
 	
 	var x, ms, period = '';
@@ -5987,11 +5988,6 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 	if (type !== 'email')
 	{	
 		while ((ms = re_nohttpurl.exec(str))) { // look for URLs without a preceding "http://"
-			// if ( /\.$/.test(ms[4]) ) {
-			// 	period = '.';
-			//	ms[5] = ms[5].slice(0, -1);
-			// }
-			
 			/*
 				sometimes we can end up with a null instead of a blank string,
 				so we need to force the issue in javascript.
@@ -6596,7 +6592,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, window;
+var sc;
  
 /**
  * These are system-oriented functions, mostly utilizing AIR apis
@@ -7398,6 +7394,31 @@ SpazFileUploader.prototype.getAPIs = function() {
 	var thisSFU = this;
 
 	var apis = {
+	    'drippic' : {
+			'upload_url' : 'http://drippic.millwoodonline.co.uk/drippic/upload',
+		    'post_url'   : 'http://drippic.millwoodonline.co.uk/drippic/upload/tweet',
+			'processResult': function(event, apiobj) {
+				var loader = event.target;
+				
+				sch.debug('PROCESSING: EVENT');
+				sch.debug(event);
+
+				var parser=new DOMParser();
+				var xmldoc = parser.parseFromString(event.data,"text/xml");
+
+				var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
+				if (rspAttr.getNamedItem("stat").nodeValue === 'ok')
+				{
+					returnobj['mediaurl'] = jQuery(xmldoc).find('mediaurl').text();
+				} 
+				else
+				{
+					returnobj['errMsg'] = jQuery(xmldoc).find('error').text();
+				}
+				sch.debug(returnobj);
+				return returnobj;
+			}
+		},
 		'pikchur' : {
 		    'upload_url' : 'http://api.pikchur.com/simple/upload',
 		    'post_url' : 'http://api.pikchur.com/simple/uploadAndPost',
@@ -8198,13 +8219,15 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, Titanium, air, window, jQuery, Mojo;
+var sc, Titanium, air, jQuery, Mojo;
 
 var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
 
 var SPAZCORE_PREFS_AIR_FILENAME = 'preferences.json';
 
 var SPAZCORE_PREFS_MOJO_COOKIENAME = 'preferences.json';
+
+var SPAZCORE_PREFS_STANDARD_COOKIENAME = 'preferences_json';
  
 /**
  * A preferences lib for AIR JS apps. This requires the json2.js library
@@ -8301,27 +8324,21 @@ SpazPrefs.prototype.resetPrefs = function() {
 
 /**
  * Get a preference
- * Note that FALSE is returned if the key does not exist
+ * Note that undefined is returned if the key does not exist
  */
 SpazPrefs.prototype.get = function(key, encrypted) {
 	var value;
-	
-	// if (this._sanity_methods[key] && this._sanity_methods[key].onSet) {
-	// 	sc.helpers.debug("Calling "+key+".onSet()");
-	// 	this._sanity_methods[key].onSet();
-	// }
-	
 	
 	if (encrypted) {
 		value = this.getEncrypted(key);
 	} else {
 		sc.helpers.debug('Looking for pref "'+key+'"');
 
-		if (this._prefs[key]) {
+		if (this._prefs[key] !== undefined) {
 			sc.helpers.debug('Found pref "'+key+'" of value "'+this._prefs[key]+'" ('+typeof(this._prefs[key])+')');
 			value = this._prefs[key];
 		} else {
-			value = false;
+			value = undefined;
 		}
 	}
 	
@@ -8372,6 +8389,10 @@ SpazPrefs.prototype.setSanityMethod = function(key, type, method) {
 	
 	if (type !== 'onGet' && type !== 'onSet') {
 		sch.error('sanity method type must be onGet or onSet');
+	}
+	
+	if (!this._sanity_methods[key]) {
+		this._sanity_methods[key] = {};
 	}
 	
 	this._sanity_methods[key][type] = method;
@@ -10226,7 +10247,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, jQuery, window, Mojo, use_palmhost_proxy;
+var sc, jQuery, Mojo, use_palmhost_proxy;
 
 /**
  * @depends ../helpers/string.js 
@@ -13139,7 +13160,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, air, window, DOMParser;
+var sc, air, DOMParser;
  
 /*
 	AIR VERSION

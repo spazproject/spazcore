@@ -1,4 +1,4 @@
-/*********** Built 2010-04-14 13:56:27 EDT ***********/
+/*********** Built 2010-04-16 16:10:24 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -1484,7 +1484,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, window;
+var sc;
  
 /**
  * These are system-oriented functions, mostly utilizing AIR apis
@@ -1765,7 +1765,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, Titanium, air, window, jQuery, Mojo;
+var sc, Titanium, air, jQuery, Mojo;
 
 var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
 
