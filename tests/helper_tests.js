@@ -465,6 +465,11 @@
 		equals(sc.helpers.autolinkTwitterHashtag(input, tpl), output);
 	});
 	
+	test("extractURLs", function(){
+		input   = 'http://www.ypass.net/blog/2010/04/solaris-licensing-changes-the-real-story/';
+		output  = ['http://www.ypass.net/blog/2010/04/solaris-licensing-changes-the-real-story/'];
+		equals(sc.helpers.extractURLs(input)[0], output[0]);
+	});
 	
 	test("autolink", function() {
 		input   = 'I think @n8han is fast becoming my favorite programming blog stylist. Read http://technically.us/code/ and enjoy.';
