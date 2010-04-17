@@ -10,7 +10,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, jQuery, window, Mojo, use_palmhost_proxy;
+var sc, jQuery, Mojo, use_palmhost_proxy;
 
 /**
  * @depends ../helpers/string.js 
