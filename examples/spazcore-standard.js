@@ -1,4 +1,4 @@
-/*********** Built 2010-04-13 17:18:04 EDT ***********/
+/*********** Built 2010-04-17 22:56:06 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -4662,228 +4662,6 @@ shortcut = {
 		else ele['on'+type] = false;
 	}
 }/**
- * http://www.openjs.com/scripts/events/keyboard_shortcuts/
- * Version : 2.01.B
- * By Binny V A
- * License : BSD
- */
-shortcut = {
-	'all_shortcuts':{},//All the shortcuts are stored in this array
-	'add': function(shortcut_combination,callback,opt) {
-		//Provide a set of default options
-		var default_options = {
-			'type':'keydown',
-			'propagate':false,
-			'disable_in_input':false,
-			'target':document,
-			'keycode':false
-		}
-		if(!opt) opt = default_options;
-		else {
-			for(var dfo in default_options) {
-				if(typeof opt[dfo] == 'undefined') opt[dfo] = default_options[dfo];
-			}
-		}
-
-		var ele = opt.target;
-		if(typeof opt.target == 'string') ele = document.getElementById(opt.target);
-		var ths = this;
-		shortcut_combination = shortcut_combination.toLowerCase();
-
-		//The function to be called at keypress
-		var func = function(e) {
-			e = e || window.event;
-			
-			if(opt['disable_in_input']) { //Don't enable shortcut keys in Input, Textarea fields
-				var element;
-				if(e.target) element=e.target;
-				else if(e.srcElement) element=e.srcElement;
-				if(element.nodeType==3) element=element.parentNode;
-
-				if(element.tagName == 'INPUT' || element.tagName == 'TEXTAREA') return;
-			}
-	
-			//Find Which key is pressed
-			if (e.keyCode) code = e.keyCode;
-			else if (e.which) code = e.which;
-			var character = String.fromCharCode(code).toLowerCase();
-			
-			if(code == 188) character=","; //If the user presses , when the type is onkeydown
-			if(code == 190) character="."; //If the user presses , when the type is onkeydown
-
-			var keys = shortcut_combination.split("+");
-			//Key Pressed - counts the number of valid keypresses - if it is same as the number of keys, the shortcut function is invoked
-			var kp = 0;
-			
-			//Work around for stupid Shift key bug created by using lowercase - as a result the shift+num combination was broken
-			var shift_nums = {
-				"`":"~",
-				"1":"!",
-				"2":"@",
-				"3":"#",
-				"4":"$",
-				"5":"%",
-				"6":"^",
-				"7":"&",
-				"8":"*",
-				"9":"(",
-				"0":")",
-				"-":"_",
-				"=":"+",
-				";":":",
-				"'":"\"",
-				",":"<",
-				".":">",
-				"/":"?",
-				"\\":"|"
-			}
-			//Special Keys - and their codes
-			var special_keys = {
-				'esc':27,
-				'escape':27,
-				'tab':9,
-				'space':32,
-				'return':13,
-				'enter':13,
-				'backspace':8,
-	
-				'scrolllock':145,
-				'scroll_lock':145,
-				'scroll':145,
-				'capslock':20,
-				'caps_lock':20,
-				'caps':20,
-				'numlock':144,
-				'num_lock':144,
-				'num':144,
-				
-				'pause':19,
-				'break':19,
-				
-				'insert':45,
-				'home':36,
-				'delete':46,
-				'end':35,
-				
-				'pageup':33,
-				'page_up':33,
-				'pu':33,
-	
-				'pagedown':34,
-				'page_down':34,
-				'pd':34,
-	
-				'left':37,
-				'up':38,
-				'right':39,
-				'down':40,
-	
-				'f1':112,
-				'f2':113,
-				'f3':114,
-				'f4':115,
-				'f5':116,
-				'f6':117,
-				'f7':118,
-				'f8':119,
-				'f9':120,
-				'f10':121,
-				'f11':122,
-				'f12':123
-			}
-	
-			var modifiers = { 
-				shift: { wanted:false, pressed:false},
-				ctrl : { wanted:false, pressed:false},
-				alt  : { wanted:false, pressed:false},
-				meta : { wanted:false, pressed:false}	//Meta is Mac specific
-			};
-                        
-			if(e.ctrlKey)	modifiers.ctrl.pressed = true;
-			if(e.shiftKey)	modifiers.shift.pressed = true;
-			if(e.altKey)	modifiers.alt.pressed = true;
-			if(e.metaKey)   modifiers.meta.pressed = true;
-                        
-			for(var i=0; k=keys[i],i<keys.length; i++) {
-				//Modifiers
-				if(k == 'ctrl' || k == 'control') {
-					kp++;
-					modifiers.ctrl.wanted = true;
-
-				} else if(k == 'shift') {
-					kp++;
-					modifiers.shift.wanted = true;
-
-				} else if(k == 'alt') {
-					kp++;
-					modifiers.alt.wanted = true;
-				} else if(k == 'meta') {
-					kp++;
-					modifiers.meta.wanted = true;
-				} else if(k.length > 1) { //If it is a special key
-					if(special_keys[k] == code) kp++;
-					
-				} else if(opt['keycode']) {
-					if(opt['keycode'] == code) kp++;
-
-				} else { //The special keys did not match
-					if(character == k) kp++;
-					else {
-						if(shift_nums[character] && e.shiftKey) { //Stupid Shift key bug created by using lowercase
-							character = shift_nums[character]; 
-							if(character == k) kp++;
-						}
-					}
-				}
-			}
-			
-			if(kp == keys.length && 
-						modifiers.ctrl.pressed == modifiers.ctrl.wanted &&
-						modifiers.shift.pressed == modifiers.shift.wanted &&
-						modifiers.alt.pressed == modifiers.alt.wanted &&
-						modifiers.meta.pressed == modifiers.meta.wanted) {
-				callback(e);
-	
-				if(!opt['propagate']) { //Stop the event
-					//e.cancelBubble is supported by IE - this will kill the bubbling process.
-					e.cancelBubble = true;
-					e.returnValue = false;
-	
-					//e.stopPropagation works in Firefox.
-					if (e.stopPropagation) {
-						e.stopPropagation();
-						e.preventDefault();
-					}
-					return false;
-				}
-			}
-		}
-		this.all_shortcuts[shortcut_combination] = {
-			'callback':func, 
-			'target':ele, 
-			'event': opt['type']
-		};
-		//Attach the function with the event
-		if(ele.addEventListener) ele.addEventListener(opt['type'], func, false);
-		else if(ele.attachEvent) ele.attachEvent('on'+opt['type'], func);
-		else ele['on'+opt['type']] = func;
-	},
-
-	//Remove the shortcut - just specify the shortcut and I will remove the binding
-	'remove':function(shortcut_combination) {
-		shortcut_combination = shortcut_combination.toLowerCase();
-		var binding = this.all_shortcuts[shortcut_combination];
-		delete(this.all_shortcuts[shortcut_combination])
-		if(!binding) return;
-		var type = binding['event'];
-		var ele = binding['target'];
-		var callback = binding['callback'];
-
-		if(ele.detachEvent) ele.detachEvent('on'+type, callback);
-		else if(ele.removeEventListener) ele.removeEventListener(type, callback, false);
-		else ele['on'+type] = false;
-	}
-}/**
  * Copyright (c) 2005 - 2010, James Auldridge
  * All rights reserved.
  *
@@ -6872,7 +6650,7 @@ sc.helpers.containsScreenName = function(str, sn) {
  * find URLs within the given string 
  */
 sc.helpers.extractURLs = function(str) {
-	var wwwlinks = /(^|[\s\(:。])((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
+	var wwwlinks = /(^|\s|\(|:)(((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+))/gi;
 	var match = [];
 	var URLs = [];
 	while ( (match = wwwlinks.exec(str)) !== null ) {
@@ -7531,7 +7309,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, window;
+var sc;
  
 /**
  * These are system-oriented functions, mostly utilizing AIR apis
@@ -8730,7 +8508,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, Titanium, air, window, jQuery, Mojo;
+var sc, Titanium, air, jQuery, Mojo;
 
 var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
 
@@ -8835,27 +8613,21 @@ SpazPrefs.prototype.resetPrefs = function() {
 
 /**
  * Get a preference
- * Note that FALSE is returned if the key does not exist
+ * Note that undefined is returned if the key does not exist
  */
 SpazPrefs.prototype.get = function(key, encrypted) {
 	var value;
-	
-	// if (this._sanity_methods[key] && this._sanity_methods[key].onSet) {
-	// 	sc.helpers.debug("Calling "+key+".onSet()");
-	// 	this._sanity_methods[key].onSet();
-	// }
-	
 	
 	if (encrypted) {
 		value = this.getEncrypted(key);
 	} else {
 		sc.helpers.debug('Looking for pref "'+key+'"');
 
-		if (this._prefs[key]) {
+		if (this._prefs[key] !== undefined) {
 			sc.helpers.debug('Found pref "'+key+'" of value "'+this._prefs[key]+'" ('+typeof(this._prefs[key])+')');
 			value = this._prefs[key];
 		} else {
-			value = false;
+			value = undefined;
 		}
 	}
 	
@@ -11077,7 +10849,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, jQuery, window, Mojo, use_palmhost_proxy;
+var sc, jQuery, Mojo, use_palmhost_proxy;
 
 /**
  * @depends ../helpers/string.js 
@@ -11173,10 +10945,11 @@ function SpazTwit(username, password, opts) {
 	this.username = username;
 	this.password = password;
 	
-	this.opts            = opts || {};
-	this.opts.event_mode = this.opts.event_mode || 'DOM';
-	this.opts.event_target = this.opts.event_target || document;
-	this.opts.timeout    = this.opts.timeout || this.DEFAULT_TIMEOUT; // 60 seconds default
+	this.opts                = opts || {};
+	this.opts.event_mode     = this.opts.event_mode || 'DOM';
+	this.opts.event_target   = this.opts.event_target || document;
+	this.opts.timeout        = this.opts.timeout || this.DEFAULT_TIMEOUT; // 60 seconds default
+	this.opts.oauth_consumer = this.opts.oauth_consumer || null;
 	
 	this.setSource('SpazCore');
 	
@@ -11405,6 +11178,11 @@ SpazTwit.prototype.setBaseURLByService= function(service) {
 SpazTwit.prototype.setCredentials= function(username, password) {
 	this.username = username;
 	this.password = password;	
+};
+
+
+SpazTwit.prototype.setOAuthConsumer = function(consumer) {
+	this.opts.oauth_consumer = consumer;
 };
 
 
@@ -11874,7 +11652,7 @@ SpazTwit.prototype.getSentDirectMessages = function(since_id, page, onSuccess, o
 
 SpazTwit.prototype.getUserTimeline = function(id, count, page, onSuccess, onFailure) {
 	if (!id) {
-		return false;
+		return;
 	}
 	if (!page) { page = null;}
 	if (!count) { count = 10;}
@@ -12315,7 +12093,14 @@ SpazTwit.prototype._getTimeline = function(opts) {
         },
         'beforeSend':function(xhr){
 			sc.helpers.dump("beforesend");
-			if (opts.username && opts.password) {
+			if (stwit.opts.oauth_consumer) {
+				var authHeader = consumer.getAuthHeader({
+					'method'    : opts.method,
+					'url'       : opts.url,
+					'parameters': stwit._convertParamsForOAuth(opts.data)
+				});
+				xhr.setRequestHeader('Authorization', authHeader);
+			} else if (opts.username && opts.password) {
 				xhr.setRequestHeader("Authorization", "Basic " + sc.helpers.Base64.encode(opts.username + ":" + opts.password));
 			}
         },
@@ -12326,6 +12111,19 @@ SpazTwit.prototype._getTimeline = function(opts) {
 	});
 	
 	return xhr;
+};
+
+/**
+ * converts jq_style ajax params into the format used by the oAuth lib
+ * @param {object} jq_style key/val params
+ * @returns {array} array based params 
+ */
+SpazTwit.prototype._convertParamsForOAuth = function(jq_style) {
+	var params = [];
+	for (var key in jq_style) {
+		params.push([ key, jq_style[key] ]);
+	}
+	return params;
 };
 
 
@@ -12525,7 +12323,7 @@ SpazTwit.prototype._processItem = function(item, section_name) {
 	/*
 		is an official API retweet? then add .SC_is_retweet
 	*/
-	if ( item.retweet_status ) {
+	if ( item.retweeted_status ) {
 		item.SC_is_retweet = true;
 	}
 	
@@ -12735,7 +12533,14 @@ SpazTwit.prototype._callMethod = function(opts) {
 	    },
 	    'beforeSend':function(xhr){
 			sc.helpers.dump(opts.url + ' beforesend');
-			if (opts.username && opts.password) {
+			if (this.opts.oauth_consumer) {
+				var authHeader = consumer.getAuthHeader({
+					'method'    : opts.method,
+					'url'       : opts.url,
+					'parameters': this._convertParamsForOAuth(opts.data)
+				});
+				xhr.setRequestHeader('Authorization', authHeader);
+			} else if (opts.username && opts.password) {
 				xhr.setRequestHeader("Authorization", "Basic " + sc.helpers.Base64.encode(opts.username + ":" + opts.password));
 			}
 	    },
@@ -13381,7 +13186,7 @@ SpazTwit.prototype.removeSavedSearch = function(search_id, onSuccess, onFailure)
  */
 SpazTwit.prototype.getLists = function(user, onSuccess, onFailure) {
 	if (!user && !this.username) {
-		return false;
+		return;
 	} else if (!user) {
 	    user = this.username;
 	}
@@ -13478,7 +13283,7 @@ SpazTwit.prototype._processList = function(item, section_name) {
 SpazTwit.prototype.getListInfo = function(list, user, onSuccess, onFailure) {
 	if (!user && !this.username) {
 		sch.error('must pass a username or have one set to get list');
-		return false;
+		return;
 	}
 	
 	user = user || this.username;
@@ -13513,7 +13318,7 @@ SpazTwit.prototype.getListInfo = function(list, user, onSuccess, onFailure) {
 SpazTwit.prototype.getListTimeline = function(list, user, onSuccess, onFailure) {
 	if (!user && !this.username) {
 		sch.error('must pass a username or have one set to get list');
-		return false;
+		return;
 	}
 	
 	user = user || this.username;
@@ -13573,7 +13378,7 @@ SpazTwit.prototype._processListTimeline = function(data, opts, processing_opts) 
 SpazTwit.prototype.getListMembers = function(list, user) {
 	if (!user && !this.username) {
 		sch.error('must pass a username or have one set to get list');
-		return false;
+		return;
 	}
 	
 	user = user || this.username;
@@ -13798,9 +13603,12 @@ var sc;
  * platform-specific definitions for prefs lib 
  */
 
+/**
+ * this requires the cookies library <http://code.google.com/p/cookies/> 
+ */
 SpazPrefs.prototype.load = function() {
 	var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
-	var prefsval = $.cookies.get(cookie_key);
+	var prefsval = jaaulde.utils.cookies.get(cookie_key);
 		
 	if (prefsval) {
 		sch.debug('prefsval exists');
@@ -13812,11 +13620,14 @@ SpazPrefs.prototype.load = function() {
 		sch.debug('prefsval does not exist; saving with defaults');
         this.save();
     }
-}
+};
 
+/**
+ * this requires the cookies library <http://code.google.com/p/cookies/> 
+ */
 SpazPrefs.prototype.save = function() {
 	var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
-	$.cookies.set(cookie_key, this._prefs);
+	jaaulde.utils.cookies.set(cookie_key, this._prefs);
 	sch.debug('stored prefs in cookie');
 };
 

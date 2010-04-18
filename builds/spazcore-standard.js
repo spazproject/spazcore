@@ -1,4 +1,4 @@
-/*********** Built 2010-04-14 09:41:58 EDT ***********/
+/*********** Built 2010-04-17 22:56:06 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -6650,7 +6650,7 @@ sc.helpers.containsScreenName = function(str, sn) {
  * find URLs within the given string 
  */
 sc.helpers.extractURLs = function(str) {
-	var wwwlinks = /(^|[\s\(:。])((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
+	var wwwlinks = /(^|\s|\(|:)(((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+))/gi;
 	var match = [];
 	var URLs = [];
 	while ( (match = wwwlinks.exec(str)) !== null ) {
@@ -7309,7 +7309,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, window;
+var sc;
  
 /**
  * These are system-oriented functions, mostly utilizing AIR apis
@@ -8508,7 +8508,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, Titanium, air, window, jQuery, Mojo;
+var sc, Titanium, air, jQuery, Mojo;
 
 var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
 
@@ -8613,27 +8613,21 @@ SpazPrefs.prototype.resetPrefs = function() {
 
 /**
  * Get a preference
- * Note that FALSE is returned if the key does not exist
+ * Note that undefined is returned if the key does not exist
  */
 SpazPrefs.prototype.get = function(key, encrypted) {
 	var value;
-	
-	// if (this._sanity_methods[key] && this._sanity_methods[key].onSet) {
-	// 	sc.helpers.debug("Calling "+key+".onSet()");
-	// 	this._sanity_methods[key].onSet();
-	// }
-	
 	
 	if (encrypted) {
 		value = this.getEncrypted(key);
 	} else {
 		sc.helpers.debug('Looking for pref "'+key+'"');
 
-		if (this._prefs[key]) {
+		if (this._prefs[key] !== undefined) {
 			sc.helpers.debug('Found pref "'+key+'" of value "'+this._prefs[key]+'" ('+typeof(this._prefs[key])+')');
 			value = this._prefs[key];
 		} else {
-			value = false;
+			value = undefined;
 		}
 	}
 	
@@ -10855,7 +10849,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, jQuery, window, Mojo, use_palmhost_proxy;
+var sc, jQuery, Mojo, use_palmhost_proxy;
 
 /**
  * @depends ../helpers/string.js 
@@ -10951,10 +10945,11 @@ function SpazTwit(username, password, opts) {
 	this.username = username;
 	this.password = password;
 	
-	this.opts            = opts || {};
-	this.opts.event_mode = this.opts.event_mode || 'DOM';
-	this.opts.event_target = this.opts.event_target || document;
-	this.opts.timeout    = this.opts.timeout || this.DEFAULT_TIMEOUT; // 60 seconds default
+	this.opts                = opts || {};
+	this.opts.event_mode     = this.opts.event_mode || 'DOM';
+	this.opts.event_target   = this.opts.event_target || document;
+	this.opts.timeout        = this.opts.timeout || this.DEFAULT_TIMEOUT; // 60 seconds default
+	this.opts.oauth_consumer = this.opts.oauth_consumer || null;
 	
 	this.setSource('SpazCore');
 	
@@ -11183,6 +11178,11 @@ SpazTwit.prototype.setBaseURLByService= function(service) {
 SpazTwit.prototype.setCredentials= function(username, password) {
 	this.username = username;
 	this.password = password;	
+};
+
+
+SpazTwit.prototype.setOAuthConsumer = function(consumer) {
+	this.opts.oauth_consumer = consumer;
 };
 
 
@@ -11652,7 +11652,7 @@ SpazTwit.prototype.getSentDirectMessages = function(since_id, page, onSuccess, o
 
 SpazTwit.prototype.getUserTimeline = function(id, count, page, onSuccess, onFailure) {
 	if (!id) {
-		return false;
+		return;
 	}
 	if (!page) { page = null;}
 	if (!count) { count = 10;}
@@ -12093,7 +12093,14 @@ SpazTwit.prototype._getTimeline = function(opts) {
         },
         'beforeSend':function(xhr){
 			sc.helpers.dump("beforesend");
-			if (opts.username && opts.password) {
+			if (stwit.opts.oauth_consumer) {
+				var authHeader = consumer.getAuthHeader({
+					'method'    : opts.method,
+					'url'       : opts.url,
+					'parameters': stwit._convertParamsForOAuth(opts.data)
+				});
+				xhr.setRequestHeader('Authorization', authHeader);
+			} else if (opts.username && opts.password) {
 				xhr.setRequestHeader("Authorization", "Basic " + sc.helpers.Base64.encode(opts.username + ":" + opts.password));
 			}
         },
@@ -12104,6 +12111,19 @@ SpazTwit.prototype._getTimeline = function(opts) {
 	});
 	
 	return xhr;
+};
+
+/**
+ * converts jq_style ajax params into the format used by the oAuth lib
+ * @param {object} jq_style key/val params
+ * @returns {array} array based params 
+ */
+SpazTwit.prototype._convertParamsForOAuth = function(jq_style) {
+	var params = [];
+	for (var key in jq_style) {
+		params.push([ key, jq_style[key] ]);
+	}
+	return params;
 };
 
 
@@ -12303,7 +12323,7 @@ SpazTwit.prototype._processItem = function(item, section_name) {
 	/*
 		is an official API retweet? then add .SC_is_retweet
 	*/
-	if ( item.retweet_status ) {
+	if ( item.retweeted_status ) {
 		item.SC_is_retweet = true;
 	}
 	
@@ -12513,7 +12533,14 @@ SpazTwit.prototype._callMethod = function(opts) {
 	    },
 	    'beforeSend':function(xhr){
 			sc.helpers.dump(opts.url + ' beforesend');
-			if (opts.username && opts.password) {
+			if (this.opts.oauth_consumer) {
+				var authHeader = consumer.getAuthHeader({
+					'method'    : opts.method,
+					'url'       : opts.url,
+					'parameters': this._convertParamsForOAuth(opts.data)
+				});
+				xhr.setRequestHeader('Authorization', authHeader);
+			} else if (opts.username && opts.password) {
 				xhr.setRequestHeader("Authorization", "Basic " + sc.helpers.Base64.encode(opts.username + ":" + opts.password));
 			}
 	    },
@@ -13159,7 +13186,7 @@ SpazTwit.prototype.removeSavedSearch = function(search_id, onSuccess, onFailure)
  */
 SpazTwit.prototype.getLists = function(user, onSuccess, onFailure) {
 	if (!user && !this.username) {
-		return false;
+		return;
 	} else if (!user) {
 	    user = this.username;
 	}
@@ -13256,7 +13283,7 @@ SpazTwit.prototype._processList = function(item, section_name) {
 SpazTwit.prototype.getListInfo = function(list, user, onSuccess, onFailure) {
 	if (!user && !this.username) {
 		sch.error('must pass a username or have one set to get list');
-		return false;
+		return;
 	}
 	
 	user = user || this.username;
@@ -13291,7 +13318,7 @@ SpazTwit.prototype.getListInfo = function(list, user, onSuccess, onFailure) {
 SpazTwit.prototype.getListTimeline = function(list, user, onSuccess, onFailure) {
 	if (!user && !this.username) {
 		sch.error('must pass a username or have one set to get list');
-		return false;
+		return;
 	}
 	
 	user = user || this.username;
@@ -13351,7 +13378,7 @@ SpazTwit.prototype._processListTimeline = function(data, opts, processing_opts) 
 SpazTwit.prototype.getListMembers = function(list, user) {
 	if (!user && !this.username) {
 		sch.error('must pass a username or have one set to get list');
-		return false;
+		return;
 	}
 	
 	user = user || this.username;
@@ -13576,9 +13603,12 @@ var sc;
  * platform-specific definitions for prefs lib 
  */
 
+/**
+ * this requires the cookies library <http://code.google.com/p/cookies/> 
+ */
 SpazPrefs.prototype.load = function() {
 	var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
-	var prefsval = $.cookies.get(cookie_key);
+	var prefsval = jaaulde.utils.cookies.get(cookie_key);
 		
 	if (prefsval) {
 		sch.debug('prefsval exists');
@@ -13592,9 +13622,12 @@ SpazPrefs.prototype.load = function() {
     }
 };
 
+/**
+ * this requires the cookies library <http://code.google.com/p/cookies/> 
+ */
 SpazPrefs.prototype.save = function() {
 	var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
-	$.cookies.set(cookie_key, this._prefs);
+	jaaulde.utils.cookies.set(cookie_key, this._prefs);
 	sch.debug('stored prefs in cookie');
 };
 
