@@ -100,7 +100,7 @@ SpazOAuth.prototype.getRequestToken = function() {
 		url: this.getService().requestTokenUrl
 	});
 
-	$.ajax({
+	jQuery.ajax({
 		async: false,
 		type: method,
 		url: this.getService().requestTokenUrl,
@@ -152,7 +152,7 @@ SpazOAuth.prototype.getAuthorization = function(accessPIN) {
 		]
 	});
 
-	$.ajax({
+	jQuery.ajax({
 		async: false,
 		type: method,
 		url: this.getService().accessTokenUrl,
@@ -218,7 +218,7 @@ SpazOAuth.prototype.getXauthTokens = function(opts) {
 		]
 	});
 
-	$.ajax({
+	jQuery.ajax({
 		type: method,
 		url: this.getService().accessTokenUrl,
 		data: {
