@@ -150,7 +150,14 @@
 			
 		});
 
-	
+		/*
+			Create list succeeded
+		*/
+		sch.listen(document, 'create_list_succeeded', function(e) {
+			showResponse(e);
+		});
+		
+
 		$().ready(function() {
 			
 			var username = $('#username').val();
@@ -160,6 +167,7 @@
 			
 			$('#login').click(function() { twit.verifyCredentials() });
 			$('#getlists').click(function() { twit.getLists() });
+			$('#newlist').click(function() { twit.addList('test list', 'private', 'A test list for SpazTwit') });
 			$('.listname').live('click', function(e) {
 				twit.getListTimeline( $(this).attr('data-list-slug') );
 			});
