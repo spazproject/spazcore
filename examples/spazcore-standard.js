@@ -12903,7 +12903,27 @@ SpazTwit.prototype.getListMembers = function(list, user) {
  * @param {string} [description]  The list description
  */
 SpazTwit.prototype.addList = function(list, visibility, description) {
+	var data = {};
+	data['name'] = list;
+	data['mode'] = visibility;
+	data['description'] = description;
 	
+	var url = this.getAPIURL('lists', {
+		'user': this.username
+	});
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'create_list_succeeded',
+		'failure_event_type':'create_list_failed',
+		'success_callback':null,
+		'failure_callback':null,
+		'data':data
+	};
+	
+	var xhr = this._callMethod(opts);
 };
 
 /**
