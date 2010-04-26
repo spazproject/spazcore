@@ -43,6 +43,14 @@
 						if (d.mode === 'private') {
 							html += '<div class="list-private">private</div>';
 						}
+						html += '<div class="list-user-add-form">'
+						+'<form onsubmit="return false;">'
+						+'<div>'
+						+'<label for="list-username">Username</label><input type="text" name="list-username" data-list-slug="'+d.slug+'" value="spaztest" id="list-'+d.slug+'-username">'
+						+'<input type="button" name="list-'+d.slug+'-add" class="list-add" data-list-slug="'+d.slug+'" value="Add" id="list-'+d.slug+'-add">'
+						+'</div>'
+						+'</form>'
+						+'</div>'
 						
 					html += '</li>';
 			return html;
@@ -169,6 +177,7 @@
 			$('#login').click(function() { twit.verifyCredentials() });
 			$('#getlists').click(function() { twit.getLists() });
 			$('#newlist').click(function() { twit.addList('test list', 'private', 'A test list for SpazTwit') });
+			$('.list-add').live('click', function(e) { twit.addUserToList($('#username').val(), $(this).attr('data-list-slug'), $('#list-'+$(this).attr('data-list-slug')+'-username').val() ); });
 			$('.listname').live('click', function(e) {
 				twit.getListTimeline( $(this).attr('data-list-slug') );
 			});
