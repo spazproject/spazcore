@@ -37,6 +37,7 @@
 							+'<span class="listname clickable" data-list-slug="'+d.slug+'">'+d.full_name+'</span>'
 							+' | Member count:<span class="list-member-count">'+d.member_count+'</span>'
 							+' | Subscriber count:<span class="list-subscriber-count">'+d.subscriber_count+'</span>'
+							+' | <a href="javascript:twit.removeList(\''+d.slug+'\', false);">Remove</a>'
 						+'</div>'
 						+'<div class="list-timeline" data-list-slug="'+d.slug+'" data-list-user="'+d.user.screen_name+'" data-list-id="'+d.id+'"></div>';
 						if (d.mode === 'private') {

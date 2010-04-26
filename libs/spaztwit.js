@@ -2567,7 +2567,31 @@ SpazTwit.prototype.addList = function(list, visibility, description) {
  * delete a list
  * @param {string} list  The list name 
  */
-SpazTwit.prototype.removeList = function(list, user) {};
+SpazTwit.prototype.removeList = function(list, user) {
+	
+	if (!user && !this.username) {
+		sch.error('must pass a username or have one set to remove list');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_list', {
+		'user': user,
+		'slug':list
+	});
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'create_list_succeeded',
+		'failure_event_type':'create_list_failed',
+		'method':'DELETE'
+	};
+	
+	var xhr = this._callMethod(opts);
+};
 
 /**
  * add a user to a list
