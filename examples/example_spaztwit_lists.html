@@ -38,6 +38,7 @@
 							+' | Member count:<span class="list-member-count">'+d.member_count+'</span>'
 							+' | Subscriber count:<span class="list-subscriber-count">'+d.subscriber_count+'</span>'
 							+' | <a href="javascript:twit.removeList(\''+d.slug+'\', false);">Remove</a>'
+							+' | <a href="javascript:twit.getListMembers(\''+d.slug+'\', false);">Show</a>'
 						+'</div>'
 						+'<div class="list-timeline" data-list-slug="'+d.slug+'" data-list-user="'+d.user.screen_name+'" data-list-id="'+d.id+'"></div>';
 						if (d.mode === 'private') {
@@ -83,6 +84,14 @@
 			+ '</div>';
 			return html;
 		});
+		tpls.addTemplateMethod('list-members', function(d) {
+			var html = '<li class="list-member" data-member-id="'+d.id+'">'+d.name
+						+'<form onsubmit="return false;">'
+						+'<input type="button" name="list-member-remove" class="list-member-remove" data-member-id="'+d.id+'" value="Remove">'
+						+'</form>'
+						+'</li>'
+			return html;
+		});
 		
 		
 		/*
@@ -125,7 +134,11 @@
 			showResponse(e);
 			var data = sch.getEventData(e);
 			
-			sch.debug(data);
+			//sch.debug(data);
+			
+			var html = tpls.parseArray('list-members', data.statuses.users);
+			$('#list-members').html(html);
+			$('#list-members').attr('data-list-slug', data.slug);
 			
 			// var jqcontainer = $('.list-timeline[data-list-slug='+data.slug+'][data-list-user='+data.user+']');
 			// sch.debug(jqcontainer);
@@ -178,6 +191,7 @@
 			$('#getlists').click(function() { twit.getLists() });
 			$('#newlist').click(function() { twit.addList('test list', 'private', 'A test list for SpazTwit') });
 			$('.list-add').live('click', function(e) { twit.addUserToList($('#username').val(), $(this).attr('data-list-slug'), $('#list-'+$(this).attr('data-list-slug')+'-username').val() ); });
+			$('.list-member-remove').live('click', function(e) { twit.removeUserFromList($('#username').val(), $('#list-members').attr('data-list-slug'), $(this).attr('data-member-id') ); });
 			$('.listname').live('click', function(e) {
 				twit.getListTimeline( $(this).attr('data-list-slug') );
 			});
@@ -207,6 +221,10 @@
 	
 	<ul id="lists">
 		
+	</ul>
+	
+	<ul id="list-members">
+	
 	</ul>
 	
 	
