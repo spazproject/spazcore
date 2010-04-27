@@ -2627,8 +2627,36 @@ SpazTwit.prototype.addUserToList = function(user, list, list_user) {
 /**
  * delete a user from a list 
  */
-SpazTwit.prototype.removeUserFromList = function(user, list, list_user) {};
-
+SpazTwit.prototype.removeUserFromList = function(user, list, list_user) {
+	var data = {};
+	data['list_id'] = list;
+	data['id'] = list_user;
+	
+	
+	if (!user && !this.username) {
+		sch.error('must pass a username or have one set to add a user to a list');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_members', {
+		'user': user,
+		'slug': list
+	});
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'create_list_succeeded',
+		'failure_event_type':'create_list_failed',
+		'data':data,
+		'method':'DELETE'
+	};
+	
+	var xhr = this._callMethod(opts);
+};
 
 
 
