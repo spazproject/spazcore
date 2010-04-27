@@ -2634,7 +2634,7 @@ SpazTwit.prototype.removeUserFromList = function(user, list, list_user) {
 	
 	
 	if (!user && !this.username) {
-		sch.error('must pass a username or have one set to add a user to a list');
+		sch.error('must pass a username or have one set to remove a user from a list');
 		return false;
 	}
 	
