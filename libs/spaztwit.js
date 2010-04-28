@@ -412,13 +412,17 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.lists_subscribers  = "{{USER}}/{{SLUG}}/subscribers.json";
     urls.lists_check_subscriber = "{{USER}}/{{SLUG}}/subscribers/{{ID}}.json";
 
+	//trends
+	urls.trends				= "trends.json";
+	urls.trends_current		= "trends/current.json";
+	urls.trends_daily		= "trends/daily.json";
+	urls.trends_weekly		= "trends/weekly.json";
+
 	// search
 	if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER) {
 		urls.search				= "http://search.twitter.com/search.json";
-		urls.trends				= "http://search.twitter.com/trends.json";
 	} else {
 		urls.search				= "search.json";
-		urls.trends				= "trends.json";
 	}
 
     // misc
