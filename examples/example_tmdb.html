@@ -125,6 +125,8 @@
 				'apikey':'REDACTED'
 			});
 			
+			
+			
 			/*
 				setup taps
 			*/
@@ -132,12 +134,13 @@
 				'effect':'fade'
 			});
 			
-			$("#search").click(function(){
-				var search_for = $('#search_for').val();
-				var search_for_type = $('#search_for_type').val();
+			$("#search-people, #search-movies").click(function(){
+				var button_id = $(this).attr('id');
+				var search_for = '';
 				
-				switch (search_for_type) {
-					case 'movie':
+				switch (button_id) {
+					case 'search-movies':
+						search_for = $('#search-for-movies').val();
 						tmdb.movieSearch(
 							search_for,
 							function(data, textStatus) {
@@ -148,8 +151,9 @@
 							}
 						);
 						break;
-					case 'person':
-						tmdb.personSearch(
+					case 'search-people':
+						search_for = $('#search-for-people').val();
+						tmdb.personSearch(							
 							search_for,
 							function(data, textStatus) {
 								$('#response').text(data);
@@ -195,6 +199,7 @@
 			</div>
 		</div>
 
+		<div id="response"></div>
 	</div>
 
 </body>
