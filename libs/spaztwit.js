@@ -1694,7 +1694,7 @@ SpazTwit.prototype._callMethod = function(opts) {
 	    },
 	    'beforeSend':function(xhr){
 			sc.helpers.dump(opts.url + ' beforesend');
-			if (this.opts.oauth_consumer) {
+			if (stwit.opts.oauth_consumer) {
 				var authHeader = consumer.getAuthHeader({
 					'method'    : opts.method,
 					'url'       : opts.url,
@@ -2602,7 +2602,7 @@ SpazTwit.prototype.removeList = function(list, user) {
 	
 	if (!user && !this.username) {
 		sch.error('must pass a username or have one set to remove list');
-		return false;
+		return;
 	}
 	
 	user = user || this.username;
@@ -2635,7 +2635,7 @@ SpazTwit.prototype.addUserToList = function(user, list, list_user) {
 	
 	if (!user && !this.username) {
 		sch.error('must pass a username or have one set to add a user to a list');
-		return false;
+		return;
 	}
 	
 	user = user || this.username;
@@ -2668,7 +2668,7 @@ SpazTwit.prototype.removeUserFromList = function(user, list, list_user) {
 	
 	if (!user && !this.username) {
 		sch.error('must pass a username or have one set to remove a user from a list');
-		return false;
+		return;
 	}
 	
 	user = user || this.username;
