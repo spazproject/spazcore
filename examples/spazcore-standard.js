@@ -10775,6 +10775,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.lists_check_member = "{{USER}}/{{SLUG}}/{{ID}}.json";
     urls.lists_subscribers  = "{{USER}}/{{SLUG}}/subscribers.json";
     urls.lists_check_subscriber = "{{USER}}/{{SLUG}}/subscribers/{{ID}}.json";
+    urls.lists_subscriptions = "{{USER}}/lists/subscriptions.json";
 
 	// search
 	if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER) {
@@ -13024,7 +13025,28 @@ SpazTwit.prototype.removeUserFromList = function(user, list, list_user) {
 };
 
 
-
+SpazTwit.prototype.listsSubscribedTo = function(user) {
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to retrieve subscribed lists');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_subscriptions', {
+		'user': user
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'get_subscriptions_succeeded',
+		'failure_event_type':'get_subscriptions_failed'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
 
 /**
  *  
