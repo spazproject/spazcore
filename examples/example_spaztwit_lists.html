@@ -188,7 +188,13 @@
 			
 			twit.setCredentials(username, password);
 			
-			$('#login').click(function() { twit.verifyCredentials() });
+			$('#login').click(function() {
+				var username = $('#username').val();
+				var password = $('#password').val();
+			
+				twit.setCredentials(username, password);
+				twit.verifyCredentials();
+			});
 			$('#getlists').click(function() { twit.getLists() });
 			$('#newlist').click(function() { twit.addList('test list', 'private', 'A test list for SpazTwit') });
 			$('.list-add').live('click', function(e) { twit.addUserToList($('#username').val(), $(this).attr('data-list-slug'), $('#list-'+$(this).attr('data-list-slug')+'-username').val() ); });
