@@ -409,7 +409,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.lists_memberships  = "{{USER}}/lists/memberships.json";
     urls.lists_timeline     = "{{USER}}/lists/{{SLUG}}/statuses.json";
     urls.lists_members      = "{{USER}}/{{SLUG}}/members.json";
-    urls.lists_check_member = "{{USER}}/{{SLUG}}/{{ID}}.json";
+    urls.lists_check_member = "{{USER}}/{{SLUG}}/members/{{ID}}.json";
     urls.lists_subscribers  = "{{USER}}/{{SLUG}}/subscribers.json";
     urls.lists_check_subscriber = "{{USER}}/{{SLUG}}/subscribers/{{ID}}.json";
     urls.lists_subscriptions = "{{USER}}/lists/subscriptions.json";
@@ -2792,7 +2792,25 @@ SpazTwit.prototype.reportSpam = function(user) {
 	var xhr = this._callMethod(opts);
 }
 
+SpazTwit.prototype.getListSubscribers = function(list, user){
+	
+}
 
+SpazTwit.prototype.isSubscribed = function(list, list_user, user){
+	
+}
+
+SpazTwit.prototype.subscribe = function(list, list_user){
+	
+}
+
+SpazTwit.prototype.unsubscribe = function(list, list_user){
+	
+}
+
+SpazTwit.prototype.isMember = function(list, list_user, user){
+	
+}
 /**
  *  
  */
