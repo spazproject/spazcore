@@ -395,7 +395,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.ratelimit_status   = "account/rate_limit_status.json";
 	urls.update_profile		= "account/update_profile.json";
 	urls.saved_searches		= "saved_searches.json";
-	urls.report_spam		= "report_spam.json"
+	urls.report_spam		= "report_spam.json";
 
     // User lists URLs
     urls.lists              = "{{USER}}/lists.json";
@@ -2739,12 +2739,17 @@ SpazTwit.prototype.listMemberships = function(user) {
 SpazTwit.prototype.reportSpam = function(user) {
 	var url = this.getAPIURL('report_spam');
 	
+	var data = {};
+	data['screen_name'] = user;
+	
 	var opts = {
 		'url':url,
 		'username': this.username,
 		'password': this.password,
 		'success_event_type':'report_spam_succeeded',
-		'failure_event_type':'report_spam_failed'
+		'failure_event_type':'report_spam_failed',
+		'method':'POST',
+		'data':data
 	};
 	
 	var xhr = this._callMethod(opts);
