@@ -131,6 +131,16 @@
 			$('#notice').attr('class', 'success');
 			showResponse(e);
 		});
+
+		/*
+			Credential verification failed
+		*/
+		sch.listen(document, 'verify_credentials_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error verifying your credentials.');
+			$('#notice').attr('class', 'error');
+		});
 		
 		/*
 			Get List listener
@@ -146,6 +156,16 @@
 			$('#lists').html(html);
 			
 		});
+
+		/*
+			Remove user from list failed
+		*/
+		sch.listen(document, 'get_lists_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error retrieving your lists.');
+			$('#notice').attr('class', 'error');
+		});
 		
 		sch.listen(document, 'get_subscriptions_succeeded', function(e) {
 			showResponse(e);
@@ -157,6 +177,17 @@
 			
 			$('#lists').html(html);
 			
+		});
+
+
+		/*
+			Get user subscriptions failed
+		*/
+		sch.listen(document, 'get_subscriptions_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error retrieving your list subscriptions.');
+			$('#notice').attr('class', 'error');
 		});
 		
 		/*
@@ -177,6 +208,16 @@
 		});
 
 		/*
+			Remove user from list failed
+		*/
+		sch.listen(document, 'get_list_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error retrieving the list.');
+			$('#notice').attr('class', 'error');
+		});
+		
+		/*
 			Get list members succeeded
 		*/
 		sch.listen(document, 'get_list_members_succeeded', function(e) {
@@ -192,6 +233,16 @@
 			$('#list-members').html(html);
 		});
 		
+		/*
+			Get list members failed
+		*/
+		sch.listen(document, 'get_list_members_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error retrieving list members.');
+			$('#notice').attr('class', 'error');
+		});
+		
 		
 		sch.listen(document, 'get_list_memberships_succeeded', function(e) {
 			showResponse(e);
@@ -204,6 +255,16 @@
 			$('#lists').html(html);
 		});
 
+
+		/*
+			Get list memberships failed
+		*/
+		sch.listen(document, 'get_list_memberships_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error removing the list of memberships.');
+			$('#notice').attr('class', 'error');
+		});
 
 
 		/*
@@ -223,6 +284,16 @@
 			jqcontainer.html(html);
 			
 		});
+		
+		/*
+			Get list timeline failed
+		*/
+		sch.listen(document, 'get_list_timeline_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error retrieving timeline.');
+			$('#notice').attr('class', 'error');
+		});
 
 		/*
 			Create list succeeded
@@ -236,6 +307,17 @@
 		});
 		
 		/*
+			Create list failed
+		*/
+		sch.listen(document, 'create_list_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error creating list.');
+			$('#notice').attr('class', 'error');
+		});
+		
+		
+		/*
 			Update list succeeded
 		*/
 		sch.listen(document, 'update_list_succeeded', function(e) {
@@ -244,6 +326,16 @@
 			
 			$('#notice').html('List update succeeded.');
 			$('#notice').attr('class', 'success');
+		});
+
+		/*
+			Update list failed
+		*/
+		sch.listen(document, 'update_list_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error updating list "'+ data.full_name + '".');
+			$('#notice').attr('class', 'error');
 		});
 		
 		/*
@@ -257,6 +349,17 @@
 			$('#notice').attr('class', 'success');
 		});
 
+
+		/*
+			Remove list failed
+		*/
+		sch.listen(document, 'remove_list_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error removing list "'+ data.full_name + '".');
+			$('#notice').attr('class', 'error');
+		});
+
 		/*
 			Add user to list succeeded
 		*/
@@ -268,9 +371,19 @@
 			$('#notice').html('Successfully added user to ' + data.full_name + '.');
 			$('#notice').attr('class', 'success');
 		});
+
+		/*
+			Add user to list failed
+		*/
+		sch.listen(document, 'add_list_user_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error adding user to '+ data.full_name + '.');
+			$('#notice').attr('class', 'error');
+		});
 		
 		/*
-			Remove list succeeded
+			Remove user from list succeeded
 		*/
 		sch.listen(document, 'remove_list_user_succeeded', function(e) {
 			showResponse(e);
@@ -280,6 +393,16 @@
 			
 			$('#notice').html('Successfully removed user from '+ data.full_name + '.');
 			$('#notice').attr('class', 'success');
+		});
+		
+		/*
+			Remove user from list failed
+		*/
+		sch.listen(document, 'remove_list_user_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error removing user from '+ data.full_name + '.');
+			$('#notice').attr('class', 'error');
 		});
 		
 
