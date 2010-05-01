@@ -7,7 +7,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, air, window, DOMParser;
+var sc, air, DOMParser;
  
 /*
 	AIR VERSION

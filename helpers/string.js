@@ -33,7 +33,7 @@ sc.helpers.containsScreenName = function(str, sn) {
  * find URLs within the given string 
  */
 sc.helpers.extractURLs = function(str) {
-	var wwwlinks = /(^|[\s\(:。])((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
+	var wwwlinks = /(^|\s|\(|:)(((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+))/gi;
 	var match = [];
 	var URLs = [];
 	while ( (match = wwwlinks.exec(str)) !== null ) {

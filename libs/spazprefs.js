@@ -7,13 +7,15 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, Titanium, air, window, jQuery, Mojo;
+var sc, Titanium, air, jQuery, Mojo;
 
 var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
 
 var SPAZCORE_PREFS_AIR_FILENAME = 'preferences.json';
 
 var SPAZCORE_PREFS_MOJO_COOKIENAME = 'preferences.json';
+
+var SPAZCORE_PREFS_STANDARD_COOKIENAME = 'preferences_json';
  
 /**
  * A preferences lib for AIR JS apps. This requires the json2.js library
@@ -110,27 +112,21 @@ SpazPrefs.prototype.resetPrefs = function() {
 
 /**
  * Get a preference
- * Note that FALSE is returned if the key does not exist
+ * Note that undefined is returned if the key does not exist
  */
 SpazPrefs.prototype.get = function(key, encrypted) {
 	var value;
-	
-	// if (this._sanity_methods[key] && this._sanity_methods[key].onSet) {
-	// 	sc.helpers.debug("Calling "+key+".onSet()");
-	// 	this._sanity_methods[key].onSet();
-	// }
-	
 	
 	if (encrypted) {
 		value = this.getEncrypted(key);
 	} else {
 		sc.helpers.debug('Looking for pref "'+key+'"');
 
-		if (this._prefs[key]) {
+		if (this._prefs[key] !== undefined) {
 			sc.helpers.debug('Found pref "'+key+'" of value "'+this._prefs[key]+'" ('+typeof(this._prefs[key])+')');
 			value = this._prefs[key];
 		} else {
-			value = false;
+			value = undefined;
 		}
 	}
 	
@@ -181,6 +177,10 @@ SpazPrefs.prototype.setSanityMethod = function(key, type, method) {
 	
 	if (type !== 'onGet' && type !== 'onSet') {
 		sch.error('sanity method type must be onGet or onSet');
+	}
+	
+	if (!this._sanity_methods[key]) {
+		this._sanity_methods[key] = {};
 	}
 	
 	this._sanity_methods[key][type] = method;
