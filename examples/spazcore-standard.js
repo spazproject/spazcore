@@ -13094,6 +13094,24 @@ SpazTwit.prototype.listMemberships = function(user) {
 	var xhr = this._callMethod(opts);
 }
 
+/*
+ * Marks a user as a spammer and blocks them
+ */
+ 
+SpazTwit.prototype.reportSpam = function(user) {
+	var url = this.getAPIURL('report_spam');
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'report_spam_succeeded',
+		'failure_event_type':'report_spam_failed'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
 /**
  *  
  */

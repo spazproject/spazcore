@@ -14,6 +14,25 @@
 	<script src="spazcore-standard.js"></script>
 	
 	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<style type="text/css">
+		#notice {
+			margin: 10px;
+			padding: 10px;
+			text-align: center;
+		}
+		#notice.error {
+			background-color: #f33;
+			display: block;
+		}
+		
+		#notice.success {
+			background-color: #af7;
+			display: block;
+		}
+		#notice.hidden {
+			display: none;
+		}
+	</style>
 	
 	<script type="text/javascript" charset="utf-8">
 		sc.setDumpLevel(5);
@@ -108,6 +127,8 @@
 			var password = $('#password').val();
 			
 			twit.setCredentials(username, password);
+			$('#notice').html('Login succeeded.');
+			$('#notice').attr('class', 'success');
 			showResponse(e);
 		});
 		
@@ -135,6 +156,7 @@
 			var html = tpls.parseArray('list', data.lists);
 			
 			$('#lists').html(html);
+			$('#notice').attr('class', 'hidden');
 			
 		});
 		
@@ -153,6 +175,7 @@
 			$('#list-form-header').attr('style', 'display:block;');
 			$('#list-form-header').attr('actionType', 'modify');
 			$('#list-form-header').attr('data-list-slug', data.slug);
+			$('#notice').attr('class', 'hidden');
 		});
 
 		/*
@@ -169,6 +192,7 @@
 			$('#list-members').attr('data-list-owner', data.user);
 			html += tpls.parseArray('list-members', data.statuses.users);
 			$('#list-members').html(html);
+			$('#notice').attr('class', 'hidden');
 		});
 		
 		
@@ -181,6 +205,7 @@
 			var html = "<h3>Member of:</h3>"
 			html += tpls.parseArray('list', data.lists);
 			$('#lists').html(html);
+			$('#notice').attr('class', 'hidden');
 		});
 
 
@@ -200,6 +225,7 @@
 			var html = tpls.parseArray('timeline-entry', data.statuses);
 			
 			jqcontainer.html(html);
+			$('#notice').attr('class', 'hidden');
 			
 		});
 
@@ -209,6 +235,9 @@
 		sch.listen(document, 'create_list_succeeded', function(e) {
 			showResponse(e);
 			twit.getLists();
+			
+			$('#notice').html('List creation succeeded.');
+			$('#notice').attr('class', 'success');
 		});
 		
 		/*
@@ -217,6 +246,9 @@
 		sch.listen(document, 'update_list_succeeded', function(e) {
 			showResponse(e);
 			twit.getLists();
+			
+			$('#notice').html('List update succeeded.');
+			$('#notice').attr('class', 'success');
 		});
 		
 		/*
@@ -225,6 +257,9 @@
 		sch.listen(document, 'remove_list_succeeded', function(e) {
 			showResponse(e);
 			twit.getLists();
+			
+			$('#notice').html('List destruction succeeded.');
+			$('#notice').attr('class', 'success');
 		});
 		
 
@@ -236,7 +271,10 @@
 			twit.setCredentials(username, password);
 			
 			$('#login').click(function() { twit.verifyCredentials() });
-			$('#getlists').click(function() { twit.getLists() });
+			$('#getlists').click(function() { 
+				$('#notice').attr('class', 'hidden');
+				twit.getLists();
+			});
 			$('#getsubscriptions').click(function() { twit.listsSubscribedTo() });
 			$('#getmemberships').click(function() { twit.listMemberships() });
 			$('#newlist').click(function() {
@@ -284,6 +322,8 @@
 <body>
 	<h1>SpazCore Twitter Lists Example</h1>
 	
+	<div id="notice" class="hidden"></div>
+	
 	<form onsubmit="return false;">
 		<div>
 			<label for="username">Username</label><input type="text" name="username" value="spaztest" id="username">
@@ -293,11 +333,10 @@
 		<div>
 			<input type="button" name="getlists" value="Get Lists" id="getlists">
 			<input type="button" name="getsubscriptions" value="Get Subscriptions" id="getsubscriptions">
-			<input type="button" name="getmemberships" value="Get Memberships" id="getmemberships">
+			<input type="button" name="getmemberships" value="Get Memberships" id="getmemberships">	
+			<input type="button" name="newlist" value="Make New List ++" id="newlist">
 		</div>
 	</form>
-	
-	<input type="button" name="newlist" value="Make New List ++" id="newlist">
 	
 	<h3 id="list-form-header" style="display: none;"></h3>
 	<div id="list-form" style="display: none;">
