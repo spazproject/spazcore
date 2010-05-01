@@ -2685,8 +2685,27 @@ SpazTwit.prototype.listsSubscribedTo = function(user) {
 	var xhr = this._callMethod(opts);
 }
 
-SpazTwit.prototype.listSubscribers = function() {
+SpazTwit.prototype.listMemberships = function(user) {
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to retrieve list memberships');
+		return false;
+	}
 	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_memberships', {
+		'user': user
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'get_list_memberships_succeeded',
+		'failure_event_type':'get_list_memberships_failed'
+	};
+	
+	var xhr = this._callMethod(opts);
 }
 
 /**
