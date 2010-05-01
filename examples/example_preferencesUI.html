@@ -11,9 +11,32 @@
 	<script src="../vendors/jquery-1.4.1.js" type="text/javascript" charset="utf-8"></script>
 
 	<!-- Load SpazCore base lib -->
-	<script src="spazcore-standard.js"></script>
-	
+	<script src="spazcore-standard-justprefs.js"></script>
+
+	<script src="js/jquery-ui-1.8.min.js" type="text/javascript" charset="utf-8"></script>
+		
 	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	
+	<link rel="stylesheet" href="css/jqui-themes/base/jquery.ui.all.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	
+	<style type="text/css" media="screen">
+		#draggable {
+			width:250px;
+			height:500px;
+			padding:.5em;
+			top:25px;
+			left:25px;
+			position:absolute;
+		}
+		
+		#draggable>div.ui-widget-header {
+			cursor:move;
+		}
+		
+		#accordion {
+		    font-size:.8em;
+		}
+	</style>
 	
 	<script type="text/javascript" charset="utf-8">
 
@@ -283,12 +306,55 @@
 			
 			
 			var prefs = new SpazPrefs({
-				'enable_it':true,
-				'type_it':'Poop',
-				'pick_it':'option2'
+					'enable_it':true,
+					'type_it':'Poop',
+					'pick_it':'option2',
+					'panel_position_left':10,
+					'panel_position_top':10,
+					'panel_accordion_active':0
+			});
+			prefs.setSanityMethod('panel_position_left', 'onGet', function(key, val) {
+				if (val < 0 || val > jQuery(window).width()) {
+					return 10;
+				} else {
+					return val;
+				}
+			});
+			prefs.setSanityMethod('panel_position_top', 'onGet', function(key, val) {
+				if (val < 0 || val > jQuery(window).height()) {
+					return 10;
+				} else {
+					return val;
+				}
 			});
 
+			prefs.load();
 
+			jQuery('#draggable').draggable(
+				{
+					'handle':'div.ui-widget-header',
+					'stop': function() {
+						prefs.set('panel_position_left', jQuery(this).position().left);
+						prefs.set('panel_position_top', jQuery(this).position().top);
+					}
+				}
+			);
+			jQuery('#draggable')	.css('left', prefs.get('panel_position_left'))
+							.css('top', prefs.get('panel_position_top'));
+
+
+            jQuery('#accordion').accordion({
+                active: prefs.get('panel_accordion_active')||0,
+                change: function(event, ui) { 
+                    console.log(ui.options.active);
+                    prefs.set('panel_accordion_active', ui.options.active);
+                }
+            });
+			
+			
+			/*
+				PrefsUI setup
+			*/
 			var prefsUIopts = {
 				'enable_it': {
 					'type':'boolean'
@@ -300,17 +366,19 @@
 					'type':'string'
 				}
 			};
-
+            
+            
+            
 			var prefsUI = new SpazPrefsUI(prefs, prefsUIopts);
 
-			
-			
 			jQuery('#clear').click(function() {
-				prefsUI.removeListeners()
+				prefsUI.removeListeners();
 			});	
 			jQuery('#rebind').click(function() {
-				prefsUI.addListeners()
+				prefsUI.addListeners();
 			});	
+
+		
 		});
 
 	</script>
@@ -319,33 +387,89 @@
 
 <body>
 
-<form>
-	<div>
-		<label for="enable_it">Enable It</label>
-		<input type="checkbox" name="enable_it" value="" id="enable_it">
-	</div>
-	
-	<div>
-		<label for="type_it">Type It</label>
-		<input type="text" name="type_it" value="Stuff" id="type_it">
-	</div>
-	
-	<div>
-		<label for="pick_it">Pick It</label>
-		<select name="pick_it" id="pick_it">
-			<option value="option1">Option 1</option>
-			<option value="option2">Option 2</option>
-		</select>
-	</div>
-	
-	
-	<div>
-		<input type="button" name="clear" value="Clear Listeners" id="clear">
-		<input type="button" name="rebind" value="Rebind Listeners" id="rebind">
+	<div id="draggable" class="ui-widget-content">
+		<div class="ui-widget-header">Here's your widget handle</div>
 		
+		<div id="accordion">
+        	<h3><a href="#">Section 1</a></h3>
+        	<div>
+        		<p>
+        		Mauris mauris ante, blandit et, ultrices a, suscipit eget, quam. Integer
+        		ut neque. Vivamus nisi metus, molestie vel, gravida in, condimentum sit
+        		amet, nunc. Nam a nibh. Donec suscipit eros. Nam mi. Proin viverra leo ut
+        		odio. Curabitur malesuada. Vestibulum a velit eu ante scelerisque vulputate.
+        		</p>
+        	</div>
+        	<h3><a href="#">Section 2</a></h3>
+        	<div>
+        		<p>
+        		Sed non urna. Donec et ante. Phasellus eu ligula. Vestibulum sit amet
+        		purus. Vivamus hendrerit, dolor at aliquet laoreet, mauris turpis porttitor
+        		velit, faucibus interdum tellus libero ac justo. Vivamus non quam. In
+        		suscipit faucibus urna.
+        		</p>
+        	</div>
+        	<h3><a href="#">Section 3</a></h3>
+        	<div>
+        		<p>
+        		Nam enim risus, molestie et, porta ac, aliquam ac, risus. Quisque lobortis.
+        		Phasellus pellentesque purus in massa. Aenean in pede. Phasellus ac libero
+        		ac tellus pellentesque semper. Sed ac felis. Sed commodo, magna quis
+        		lacinia ornare, quam ante aliquam nisi, eu iaculis leo purus venenatis dui.
+        		</p>
+        		<ul>
+        			<li>List item one</li>
+        			<li>List item two</li>
+        			<li>List item three</li>
+        		</ul>
+        	</div>
+        	<h3><a href="#">Section 4</a></h3>
+        	<div>
+        		<p>
+        		Cras dictum. Pellentesque habitant morbi tristique senectus et netus
+        		et malesuada fames ac turpis egestas. Vestibulum ante ipsum primis in
+        		faucibus orci luctus et ultrices posuere cubilia Curae; Aenean lacinia
+        		mauris vel est.
+        		</p>
+        		<p>
+        		Suspendisse eu nisl. Nullam ut libero. Integer dignissim consequat lectus.
+        		Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
+        		inceptos himenaeos.
+        		</p>
+        	</div>
+        </div>
 	</div>
 	
-</form>
+
+
+	<form>
+	
+		<div>
+			<label for="enable_it">Enable It</label>
+			<input type="checkbox" name="enable_it" value="" id="enable_it">
+		</div>
+	
+		<div>
+			<label for="type_it">Type It</label>
+			<input type="text" name="type_it" value="Stuff" id="type_it">
+		</div>
+	
+		<div>
+			<label for="pick_it">Pick It</label>
+			<select name="pick_it" id="pick_it">
+				<option value="option1">Option 1</option>
+				<option value="option2">Option 2</option>
+			</select>
+		</div>
+	
+	
+		<div>
+			<input type="button" name="clear" value="Clear Listeners" id="clear">
+			<input type="button" name="rebind" value="Rebind Listeners" id="rebind">
+		
+		</div>
+	
+	</form>
 
 </body>
 </html>

@@ -1,8 +1,4 @@
-<<<<<<< HEAD:builds/spazcore-titanium.js
-/*********** Built 2010-02-11 16:34:06 EST ***********/
-=======
-/*********** Built 2010-03-12 06:17:58 EST ***********/
->>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-titanium.js
+/*********** Built 2010-04-28 10:48:57 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -2920,21 +2916,12 @@ var Sizzle = function(selector, context, results, seed) {
 	} else {
 		makeArray( checkSet, results );
 	}
-<<<<<<< HEAD:builds/spazcore-titanium.js
 
 	if ( extra ) {
 		Sizzle( extra, origContext, results, seed );
 		Sizzle.uniqueSort( results );
 	}
 
-=======
-
-	if ( extra ) {
-		Sizzle( extra, origContext, results, seed );
-		Sizzle.uniqueSort( results );
-	}
-
->>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-titanium.js
 	return results;
 };
 
@@ -4525,11 +4512,7 @@ sc.helpers.getRelativeTime = function(time_value, labels, use_dateparse) {
 
 
 sc.helpers.httpTimeToInt = function(entry_date, use_dateparse) {
-<<<<<<< HEAD:builds/spazcore-titanium.js
-	return sc.helpers.dateToInt(entry_date, use_dateparse)
-=======
 	return sc.helpers.dateToInt(entry_date, use_dateparse);
->>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-titanium.js
 };
 
 /**
@@ -5671,11 +5654,7 @@ sc.helpers.defaults = function(defaults, passed) {
 	}
 	
 	return args;
-<<<<<<< HEAD:builds/spazcore-titanium.js
-}
-=======
 };
->>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-titanium.js
 
 
 /*jslint 
@@ -5984,8 +5963,9 @@ sc.helpers.replaceMultiple = function(str, map) {
 
 
 /**
- * This is a port of the CodeIgniter helper "autolink" to javascript
- * It finds and links both web addresses and email addresses
+ * This is a port of the CodeIgniter helper "autolink" to javascript.
+ * It finds and links both web addresses and email addresses. It will ignore
+ * links within HTML (as attributes or between tag pairs)
  * 
  * @param {string} str
  * @param {string} type  'email', 'url', or 'both' (default is 'both')
@@ -5998,9 +5978,9 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 		type = 'both';
 	}
 
-	var re_nohttpurl = /((^|\s)(www\.)?([a-zA-Z_\-]+\.)(com|net|org)($|\s))/gi;
+	var re_nohttpurl = /((^|\s)(www\.)?([a-zA-Z_\-]+\.)(com|net|org|uk)($|\s))/gi;
 
-	var re_noemail = /(^|\s|\(|:)((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
+	var re_noemail = /(^|[\s\(:。])((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
 	var re_nourl   = /(^|\s|\()([a-zA-Z0-9_\.\-\+]+)@([a-zA-Z0-9\-]+)\.([a-zA-Z0-9\-\.]*)([^\s\)<]+)/gi;
 	
 	var x, ms, period = '';
@@ -6008,11 +5988,6 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 	if (type !== 'email')
 	{	
 		while ((ms = re_nohttpurl.exec(str))) { // look for URLs without a preceding "http://"
-			// if ( /\.$/.test(ms[4]) ) {
-			// 	period = '.';
-			//	ms[5] = ms[5].slice(0, -1);
-			// }
-			
 			/*
 				sometimes we can end up with a null instead of a blank string,
 				so we need to force the issue in javascript.
@@ -6617,7 +6592,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, window;
+var sc;
  
 /**
  * These are system-oriented functions, mostly utilizing AIR apis
@@ -6746,7 +6721,7 @@ sc.helpers.dump = function(obj, level) {
  * @platformstub
  */
 sc.helpers.openInBrowser = function(url) {
-	// stub
+	window.open(url);
 };
 
 /**
@@ -6876,20 +6851,6 @@ sc.helpers.isOS = function(str) {
 		return true;
 	}
 	return false;
-<<<<<<< HEAD:builds/spazcore-titanium.js
-}
-
-sc.helpers.isWindows = function() {
-	return sc.helpers.isOS(SPAZCORE_OS_WINDOWS)
-};
-
-sc.helpers.isLinux = function() {
-	return sc.helpers.isOS(SPAZCORE_OS_LINUX)
-};
-
-sc.helpers.isMacOS = function() {
-	return sc.helpers.isOS(SPAZCORE_OS_MACOS)
-=======
 };
 
 sc.helpers.isWindows = function() {
@@ -6902,7 +6863,6 @@ sc.helpers.isLinux = function() {
 
 sc.helpers.isMacOS = function() {
 	return sc.helpers.isOS(SPAZCORE_OS_MACOS);
->>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-titanium.js
 };
 /*jslint 
 browser: true,
@@ -6942,6 +6902,12 @@ sc.helpers.removeExtraElements = function(item_selector, max_items, remove_from_
 	var parent = jqitems.parent().get(0);
 
 	var diff = jqitems.length - max_items;
+	
+	sch.debug('removing extra elements from '+item_selector);
+	sch.debug('matching item count '+jqitems.length);
+	sch.debug('max_items: '+max_items);
+	sch.debug('diff: '+diff);
+	sch.debug('remove_from_top: '+remove_from_top);
 
 	if (diff > 0) {
 
@@ -7331,311 +7297,6 @@ SpazAccounts.prototype.getMeta = function(id, key) {
 	
 };
 
-<<<<<<< HEAD:builds/spazcore-titanium.js
-
-
-/**
- * "constants" for account types 
- */
-var SPAZCORE_ACCOUNT_TWITTER	= 'twitter';
-var SPAZCORE_ACCOUNT_IDENTICA	= 'identi.ca';
-var SPAZCORE_ACCOUNT_STATUSNET	= 'StatusNet';
-var SPAZCORE_ACCOUNT_FLICKR		= 'flickr';
-var SPAZCORE_ACCOUNT_WORDPRESS	= 'wordpress.com';
-var SPAZCORE_ACCOUNT_TUMBLR		= 'tumblr';
-var SPAZCORE_ACCOUNT_FACEBOOK	= 'facebook';
-var SPAZCORE_ACCOUNT_FRIENDFEED	= 'friendfeed';
-
-/**
- * This creates a new SpazAccounts object, and optionally associates it with an existing preferences object
- * @constructor
- * @param (Object) prefsObj  An existing SpazPrefs object (optional)
- */
-var SpazAccounts = function(prefsObj) {
-	if (prefsObj) {
-		this.prefs = prefsObj;
-	} else {
-		this.prefs = new SpazPrefs();
-		this.prefs.load();
-	}
-	
-	/*
-		load existing accounts
-	*/
-	this.load();
-
-};
-
-/**
- * the key used inside the prefs object 
- */
-SpazAccounts.prototype.prefskey = 'users';
-
-/**
- * loads the accounts array from the prefs object 
- */
-SpazAccounts.prototype.load	= function() { 
-	var accjson = this.prefs.get(this.prefskey);
-	
-	sch.debug("accjson:'"+accjson+"'");
-	
-	try {
-		this._accounts = sch.deJSON(this.prefs.get(this.prefskey));
-	} catch(e) {
-		sch.error(e.message);
-		this._accounts = [];
-	}		
-
-	/*
-		sanity check
-	*/
-	if (!sch.isArray(this._accounts)) {
-		this._accounts = [];
-	}
-	
-	sch.debug("this._accounts:'"+this._accounts+"'")
-	
-};
-
-/**
- * saves the accounts array to the prefs obj 
- */
-SpazAccounts.prototype.save	= function() {
-	
-	
-	this.prefs.set(this.prefskey, sch.enJSON(this._accounts));
-	sch.debug('saved users to "'+this.prefskey+'" pref');
-	for (var x in this._accounts) {
-		sch.debug(this._accounts[x].id);
-	};
-	
-	sch.debug('THE ACCOUNTS:')
-	sch.debug(sch.enJSON(this._accounts));
-
-	sch.debug('ALL PREFS:')
-	sch.debug(sch.enJSON(this.prefs._prefs));
-
-	
-};
-
-/**
- * returns the array of accounts
- * @returns {array} the accounts 
- */
-SpazAccounts.prototype.getAll = function() {
-	return this._accounts;
-};
-
-/**
- * Set all users by passing in a hash. overwrites all existing data!
- * @param {array} accounts_array an array of account objects
- */
-SpazAccounts.prototype.setAll = function(accounts_array) {
-	this._accounts = accounts_array;
-	this.save();
-	sch.debug("Saved these accounts:");
-	for (var i=0; i < this_accounts.length; i++) {
-		sch.debug(this._accounts[x].id);
-	};
-};
-
-/**
- * @param {string} id the UUID to update
- * @param {object} acctobj
- * @param {string} [acctobj.username] a new username
- * @param {string} [acctobj.password] a new password
- * @param {string} [acctobj.type] a new account type
- * @param {object} [acctobj.meta] the hash of metadata; you should probably use SpazAccounts.setMeta() instead
- */
-SpazAccounts.prototype.update = function(id, acctobj) {
-	var orig = this.get(id);
-	if (orig) {
-		var modified = sch.defaults(orig, acctobj);
-		return this.get(id);
-	} else {
-		sch.error('No account with id "'+id+'" exists');
-		return null;
-	}
-}
-
-
-
-/**
- * wipes the accounts array and saves it
- */
-SpazAccounts.prototype.initAccounts	= function() {
-	this._accounts = [];
-	this.save();
-};
-
-/**
- * add a new account
- * @param {string} username the username
- * @param {string} password the password
- * @param {type} type the type of account
- * @returns {object} the account object just added
- */
-SpazAccounts.prototype.add = function(username, password, type) {
-	
-	if (!type) {
-		sch.error("Type must be set");
-		return false;
-	}
-	
-	var username = username.toLowerCase();
-	var id = this.generateID();
-	this._accounts.push({
-		'id':id,
-		'username':username,
-		'password':password,
-		'type':type,
-		'meta':{}
-	});
-	this.save();
-	
-	sch.debug("Added new user:"+id);
-	
-	return this.get(id);
-};
-
-
-/**
- * @param {string} id the UUID of the account to delete 
- */
-SpazAccounts.prototype.remove = function(id) {
-	sch.debug("Deleting '"+id+"'…");
-	
-	var index = this._findUserIndex(id);
-	if (index !== false) {
-		var deleted = this._accounts.splice(index, 1);
-		sch.debug("Deleted account '"+deleted[0].id+"'");
-		return deleted[0];
-	} else {
-		sch.error("Could not find this id to delete: '"+id+"'");
-		return false;
-	}
-};
-
-
-/**
- * @param {string} type the type of accounts to retrieve
- * @returns {array} the array of matching accounts
- */
-SpazAccounts.prototype.getByType = function(type) {
-	var matches = [];
-	
-	for (var i=0; i < this._accounts.length; i++) {
-		if (this._accounts[i].type === type) {
-			matches.push(this._accounts[i])
-		}
-	};
-	
-	return matches;
-};
-
-/**
- * @param {string} username the username to search for
- * @returns {array} an array of matching accounts
- */
-SpazAccounts.prototype.getByUsername = function(username) {
-	var matches = [];
-
-	for (var i=0; i < this._accounts.length; i++) {
-		if (this._accounts[i].username === username) {
-			matches.push(this._accounts[i])
-		}
-	};
-	
-	return matches;
-};
-
-/**
- * @param {string} username the username to search for
- * @param {string} type the type to search for
- * @returns {array} an array of matching accounts
- */
-SpazAccounts.prototype.getByUsernameAndType = function(username, type) {
-	var matches = [];
-
-	for (var i=0; i < this._accounts.length; i++) {
-		if (this._accounts[i].username === username && this._accounts[i].type === type) {
-			matches.push(this._accounts[i])
-		}
-	};
-	
-	return matches;
-	
-};
-
-
-/**
- * retrives the user object by user and type
- * @param {string} id  the user id UUID
- * @param {string} type 
- */
-SpazAccounts.prototype.get = function(id) {
-
-	var index = this._findUserIndex(id);
-
-	if (index !== false) {
-		return this._accounts[i];		
-	}
-	
-	return false;
-	
-};
-
-
-/**
- * a private function to find the user's array index by their UUID
- * @param {string} id the user's UUID
- * @returns {number|boolen} returns the array index or false if DNE 
- */
-SpazAccounts.prototype._findUserIndex = function(id) {
-	
-	for (i=0; i<this._accounts.length; i++) {
-		
-		if (this._accounts[i].id === id) {
-			sch.debug('Found matching user record to '+ id);
-			return i;
-		}
-		
-	}
-	
-	return false;
-};
-
-
-
-/**
- * @returns {string} returns the generated UUID 
- */
-SpazAccounts.prototype.generateID = function() {
-	var id = sc.helpers.UUID();
-	return id;
-};
-
-
-
-/**
- * @param {string} id the user's UUID
- * @param {string} key the key for the metadata entry
- * @returns {String|Object|Array|Boolean|Number} returns the set value, or null if user ID or meta entry is not found
- */
-SpazAccounts.prototype.getMeta = function(id, key) {
-	
-	if ( user = this.get(id) ) {
-		if (user.meta && user.meta[key] !== null) {
-			return user.meta[key];
-		}
-	}
-	
-	return null;
-	
-};
-
-=======
->>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-titanium.js
 /**
  * @param {string} id the user's UUID
  * @param {string} key the key for the metadata entry
@@ -8118,13 +7779,15 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, Titanium, air, window, jQuery, Mojo;
+var sc, Titanium, air, jQuery, Mojo;
 
 var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
 
 var SPAZCORE_PREFS_AIR_FILENAME = 'preferences.json';
 
 var SPAZCORE_PREFS_MOJO_COOKIENAME = 'preferences.json';
+
+var SPAZCORE_PREFS_STANDARD_COOKIENAME = 'preferences_json';
  
 /**
  * A preferences lib for AIR JS apps. This requires the json2.js library
@@ -8138,12 +7801,12 @@ var SPAZCORE_PREFS_MOJO_COOKIENAME = 'preferences.json';
  * @param {object} sanity_methods a JS object of key:object pairs that defines methods to be called when the pref is get() or set(). Example:
  * {
  * 	foo:{
- * 		onGet:function() {};
- * 		onSet:function() {};
+ * 		onGet:function(key, value) {};
+ * 		onSet:function(key, value) {};
  * 	},
  * 	bar:{
- * 		onGet:function() {};
- * 		onSet:function() {};
+ * 		onGet:function(key, value) {};
+ * 		onSet:function(key, value) {};
  * 	}
  * }
  * 
@@ -8170,7 +7833,8 @@ function SpazPrefs(defaults, id, sanity_methods) {
 
 
 	if (sanity_methods) {
-		sc.helpers.dump('need to add sanity_method parsing');
+		sch.debug('adding sanity methods to prefs');
+		this._sanity_methods = sanity_methods;
 	}
 	
 	if (id) {
@@ -8202,13 +7866,8 @@ SpazPrefs.prototype.setDefaults = function(defaults) {
 SpazPrefs.prototype._applyDefaults = function() {
 	var key;
 	for (key in this._defaults) {
-		sc.helpers.dump('Copying default "' + key + '":"' + this._defaults[key] + '" (' + typeof(this._defaults[key]) + ')');
+		sc.helpers.debug('Copying default "' + key + '":"' + this._defaults[key] + '" (' + typeof(this._defaults[key]) + ')');
 		this._prefs[key] = this._defaults[key];
-
-		if (this._sanity_methods[key] && this._sanity_methods[key].onSet) {
-			sc.helpers.dump("Calling "+key+".onSet()");
-			this._sanity_methods[key].onSet();
-		}
 	}
 };
 
@@ -8225,21 +7884,30 @@ SpazPrefs.prototype.resetPrefs = function() {
 
 /**
  * Get a preference
- * Note that FALSE is returned if the key does not exist
+ * Note that undefined is returned if the key does not exist
  */
 SpazPrefs.prototype.get = function(key, encrypted) {
+	var value;
+	
 	if (encrypted) {
-		return this.getEncrypted(key);
-	} 
-	
-	sc.helpers.dump('Looking for pref "'+key+'"');
-	
-	if (this._prefs[key]) {
-		sc.helpers.dump('Found pref "'+key+'" of value "'+this._prefs[key]+'" ('+typeof(this._prefs[key])+')');
-		return this._prefs[key];
+		value = this.getEncrypted(key);
 	} else {
-		return false;
+		sc.helpers.debug('Looking for pref "'+key+'"');
+
+		if (this._prefs[key] !== undefined) {
+			sc.helpers.debug('Found pref "'+key+'" of value "'+this._prefs[key]+'" ('+typeof(this._prefs[key])+')');
+			value = this._prefs[key];
+		} else {
+			value = undefined;
+		}
 	}
+	
+	if (this._sanity_methods[key] && this._sanity_methods[key].onGet) {
+		sc.helpers.debug("Calling "+key+".onGet()");
+		value = this._sanity_methods[key].onGet.call(this, key, value);
+	}
+		
+	return value;
 };
 
 
@@ -8248,13 +7916,20 @@ SpazPrefs.prototype.get = function(key, encrypted) {
  */
 SpazPrefs.prototype.set = function(key, val, encrypted) {
 	
-	sc.helpers.dump('Setting and saving "'+key+'" to "'+val+'" ('+typeof(val)+')');
+	sc.helpers.debug('Setting and saving "'+key+'" to "'+val+'" ('+typeof(val)+')');
+	
+	if (this._sanity_methods[key] && this._sanity_methods[key].onSet) {
+		sc.helpers.debug("Calling "+key+".onSet()");
+		val = this._sanity_methods[key].onSet.call(this, key, val);
+	}
 	
 	if (encrypted) {
-		return this.setEncrypted(key, val);
-	} 
+		this.setEncrypted(key, val);
+	} else {
+		this._prefs[key] = val;
+	}
 
-	this._prefs[key] = val;
+	
 	
 	this.save();
 };
@@ -8273,7 +7948,11 @@ SpazPrefs.prototype.set = function(key, val, encrypted) {
 SpazPrefs.prototype.setSanityMethod = function(key, type, method) {
 	
 	if (type !== 'onGet' && type !== 'onSet') {
-		return false;
+		sch.error('sanity method type must be onGet or onSet');
+	}
+	
+	if (!this._sanity_methods[key]) {
+		this._sanity_methods[key] = {};
 	}
 	
 	this._sanity_methods[key][type] = method;
@@ -8296,7 +7975,6 @@ SpazPrefs.prototype.getEncrypted = function(key) {
  */
 SpazPrefs.prototype.setEncrypted = function(key, val) {
 	alert('not yet implemented');
-<<<<<<< HEAD:builds/spazcore-titanium.js
 };
 
 
@@ -8326,37 +8004,6 @@ SpazPrefs.prototype.save = function() {
 
 
 
-=======
-};
-
-
-/**
- * loads the prefs file and parses the prefs into this._prefs,
- * or initializes the file and loads the defaults
- * @stub
- */
-SpazPrefs.prototype.load = function(name) {
-};
-
-
-
-
-
-
-
-/**
- * saves the current preferences
- * @todo
- */
-SpazPrefs.prototype.save = function() {
-
-
-	
-};
-
-
-
->>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-titanium.js
 /**
  * shortcut for SpazPrefs
  */
@@ -10160,7 +9807,7 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc, jQuery, window, Mojo, use_palmhost_proxy;
+var sc, jQuery, Mojo, use_palmhost_proxy;
 
 /**
  * @depends ../helpers/string.js 
@@ -10256,10 +9903,11 @@ function SpazTwit(username, password, opts) {
 	this.username = username;
 	this.password = password;
 	
-	this.opts            = opts || {};
-	this.opts.event_mode = this.opts.event_mode || 'DOM';
-	this.opts.event_target = this.opts.event_target || document;
-	this.opts.timeout    = this.opts.timeout || this.DEFAULT_TIMEOUT; // 60 seconds default
+	this.opts                = opts || {};
+	this.opts.event_mode     = this.opts.event_mode || 'DOM';
+	this.opts.event_target   = this.opts.event_target || document;
+	this.opts.timeout        = this.opts.timeout || this.DEFAULT_TIMEOUT; // 60 seconds default
+	this.opts.oauth_consumer = this.opts.oauth_consumer || null;
 	
 	this.setSource('SpazCore');
 	
@@ -10488,6 +10136,11 @@ SpazTwit.prototype.setBaseURLByService= function(service) {
 SpazTwit.prototype.setCredentials= function(username, password) {
 	this.username = username;
 	this.password = password;	
+};
+
+
+SpazTwit.prototype.setOAuthConsumer = function(consumer) {
+	this.opts.oauth_consumer = consumer;
 };
 
 
@@ -10740,6 +10393,7 @@ SpazTwit.prototype.getHomeTimeline = function(since_id, count, page, processing_
  * @private
  */
 SpazTwit.prototype._processHomeTimeline = function(ret_items, opts, processing_opts) {
+	sc.helpers.dump('Processing '+ret_items.length+' items returned from home method');
 	this._processTimeline(SPAZCORE_SECTION_HOME, ret_items, opts, processing_opts);
 };
 
@@ -10798,6 +10452,7 @@ SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page, processi
  * @private
  */
 SpazTwit.prototype._processFriendsTimeline = function(ret_items, opts, processing_opts) {
+	sc.helpers.dump('Processing '+ret_items.length+' items returned from friends method');
 	this._processTimeline(SPAZCORE_SECTION_FRIENDS, ret_items, opts, processing_opts);
 };
 
@@ -10955,7 +10610,7 @@ SpazTwit.prototype.getSentDirectMessages = function(since_id, page, onSuccess, o
 
 SpazTwit.prototype.getUserTimeline = function(id, count, page, onSuccess, onFailure) {
 	if (!id) {
-		return false;
+		return;
 	}
 	if (!page) { page = null;}
 	if (!count) { count = 10;}
@@ -11141,8 +10796,10 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, opts, proces
 			concat new items onto data.items array
 		*/
 		this.data[SPAZCORE_SECTION_SEARCH].items = this.data[SPAZCORE_SECTION_SEARCH].items.concat(this.data[SPAZCORE_SECTION_SEARCH].newitems);
+		
 		this.data[SPAZCORE_SECTION_SEARCH].items = this.removeDuplicates(this.data[SPAZCORE_SECTION_SEARCH].items);
-		this.data[SPAZCORE_SECTION_SEARCH].items = this.removeExtraElements(this.data[SPAZCORE_SECTION_SEARCH].items, this.data[SPAZCORE_SECTION_SEARCH].max);
+		sch.debug('NOT removing extras from search -- we don\'t do that anymore');
+		// this.data[SPAZCORE_SECTION_SEARCH].items = this.removeExtraElements(this.data[SPAZCORE_SECTION_SEARCH].items, this.data[SPAZCORE_SECTION_SEARCH].max);
 
 
 		var search_info = {
@@ -11394,7 +11051,14 @@ SpazTwit.prototype._getTimeline = function(opts) {
         },
         'beforeSend':function(xhr){
 			sc.helpers.dump("beforesend");
-			if (opts.username && opts.password) {
+			if (stwit.opts.oauth_consumer) {
+				var authHeader = consumer.getAuthHeader({
+					'method'    : opts.method,
+					'url'       : opts.url,
+					'parameters': stwit._convertParamsForOAuth(opts.data)
+				});
+				xhr.setRequestHeader('Authorization', authHeader);
+			} else if (opts.username && opts.password) {
 				xhr.setRequestHeader("Authorization", "Basic " + sc.helpers.Base64.encode(opts.username + ":" + opts.password));
 			}
         },
@@ -11405,6 +11069,19 @@ SpazTwit.prototype._getTimeline = function(opts) {
 	});
 	
 	return xhr;
+};
+
+/**
+ * converts jq_style ajax params into the format used by the oAuth lib
+ * @param {object} jq_style key/val params
+ * @returns {array} array based params 
+ */
+SpazTwit.prototype._convertParamsForOAuth = function(jq_style) {
+	var params = [];
+	for (var key in jq_style) {
+		params.push([ key, jq_style[key] ]);
+	}
+	return params;
 };
 
 
@@ -11521,8 +11198,9 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 		
 		// sort these items -- the timelines can be out of order when combined
 
-		sc.helpers.dump('Removing duplicates in '+SPAZCORE_SECTION_COMBINED+' newitems');
 		
+		// sc.helpers.dump('Removing duplicates in '+SPAZCORE_SECTION_COMBINED+' newitems');
+		// 
 		this.data[SPAZCORE_SECTION_COMBINED].newitems = this._cleanupItemArray(this.data[SPAZCORE_SECTION_COMBINED].newitems, this.data[SPAZCORE_SECTION_COMBINED].max, this._sortItemsByDateAsc);
 		
 		if (this.combinedTimelineHasErrors()) {
@@ -11536,6 +11214,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 		if (opts.success_callback) {
 			opts.success_callback(this.data[SPAZCORE_SECTION_COMBINED].newitems);
 		}
+		sch.debug('this.data[SPAZCORE_SECTION_COMBINED].newitems has '+this.data[SPAZCORE_SECTION_COMBINED].newitems.length+' items');
 		this.triggerEvent('new_combined_timeline_data', this.data[SPAZCORE_SECTION_COMBINED].newitems);
 		this.data[SPAZCORE_SECTION_COMBINED].newitems = []; // reset combined.newitems
 		this.initializeCombinedTracker();
@@ -11572,7 +11251,8 @@ SpazTwit.prototype._cleanupItemArray = function(arr, max, sortfunc) {
 		arr = arr.sort(sortfunc);
 	}
 	arr = this.removeDuplicates(arr);
-	arr = this.removeExtraElements(arr, max);
+	sch.debug('NOT removing extras -- we don\'t do that anymore');
+	// arr = this.removeExtraElements(arr, max);
 	return arr;
 };
 
@@ -11601,7 +11281,7 @@ SpazTwit.prototype._processItem = function(item, section_name) {
 	/*
 		is an official API retweet? then add .SC_is_retweet
 	*/
-	if ( item.retweet_status ) {
+	if ( item.retweeted_status ) {
 		item.SC_is_retweet = true;
 	}
 	
@@ -11811,7 +11491,14 @@ SpazTwit.prototype._callMethod = function(opts) {
 	    },
 	    'beforeSend':function(xhr){
 			sc.helpers.dump(opts.url + ' beforesend');
-			if (opts.username && opts.password) {
+			if (stwit.opts.oauth_consumer) {
+				var authHeader = consumer.getAuthHeader({
+					'method'    : opts.method,
+					'url'       : opts.url,
+					'parameters': this._convertParamsForOAuth(opts.data)
+				});
+				xhr.setRequestHeader('Authorization', authHeader);
+			} else if (opts.username && opts.password) {
 				xhr.setRequestHeader("Authorization", "Basic " + sc.helpers.Base64.encode(opts.username + ":" + opts.password));
 			}
 	    },
@@ -12457,7 +12144,7 @@ SpazTwit.prototype.removeSavedSearch = function(search_id, onSuccess, onFailure)
  */
 SpazTwit.prototype.getLists = function(user, onSuccess, onFailure) {
 	if (!user && !this.username) {
-		return false;
+		return;
 	} else if (!user) {
 	    user = this.username;
 	}
@@ -12554,7 +12241,7 @@ SpazTwit.prototype._processList = function(item, section_name) {
 SpazTwit.prototype.getListInfo = function(list, user, onSuccess, onFailure) {
 	if (!user && !this.username) {
 		sch.error('must pass a username or have one set to get list');
-		return false;
+		return;
 	}
 	
 	user = user || this.username;
@@ -12589,7 +12276,7 @@ SpazTwit.prototype.getListInfo = function(list, user, onSuccess, onFailure) {
 SpazTwit.prototype.getListTimeline = function(list, user, onSuccess, onFailure) {
 	if (!user && !this.username) {
 		sch.error('must pass a username or have one set to get list');
-		return false;
+		return;
 	}
 	
 	user = user || this.username;
@@ -12649,7 +12336,7 @@ SpazTwit.prototype._processListTimeline = function(data, opts, processing_opts) 
 SpazTwit.prototype.getListMembers = function(list, user) {
 	if (!user && !this.username) {
 		sch.error('must pass a username or have one set to get list');
-		return false;
+		return;
 	}
 	
 	user = user || this.username;
@@ -12683,25 +12370,123 @@ SpazTwit.prototype.getListMembers = function(list, user) {
  * @param {string} [description]  The list description
  */
 SpazTwit.prototype.addList = function(list, visibility, description) {
+	var data = {};
+	data['name'] = list;
+	data['mode'] = visibility;
+	data['description'] = description;
 	
+	var url = this.getAPIURL('lists', {
+		'user': this.username
+	});
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'create_list_succeeded',
+		'failure_event_type':'create_list_failed',
+		'data':data
+	};
+	
+	var xhr = this._callMethod(opts);
 };
 
 /**
  * delete a list
  * @param {string} list  The list name 
  */
-SpazTwit.prototype.removeList = function(list, user) {};
+SpazTwit.prototype.removeList = function(list, user) {
+	
+	if (!user && !this.username) {
+		sch.error('must pass a username or have one set to remove list');
+		return;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_list', {
+		'user': user,
+		'slug':list
+	});
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'create_list_succeeded',
+		'failure_event_type':'create_list_failed',
+		'method':'DELETE'
+	};
+	
+	var xhr = this._callMethod(opts);
+};
 
 /**
  * add a user to a list
  */
-SpazTwit.prototype.addUserToList = function(user, list, list_user) {};
+SpazTwit.prototype.addUserToList = function(user, list, list_user) {
+	var data = {};
+	data['list_id'] = list;
+	data['id'] = list_user;
+	
+	
+	if (!user && !this.username) {
+		sch.error('must pass a username or have one set to add a user to a list');
+		return;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_members', {
+		'user': user,
+		'slug': list
+	});
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'create_list_succeeded',
+		'failure_event_type':'create_list_failed',
+		'data':data
+	};
+	
+	var xhr = this._callMethod(opts);
+};
 
 /**
  * delete a user from a list 
  */
-SpazTwit.prototype.removeUserFromList = function(user, list, list_user) {};
-
+SpazTwit.prototype.removeUserFromList = function(user, list, list_user) {
+	var data = {};
+	data['list_id'] = list;
+	data['id'] = list_user;
+	
+	
+	if (!user && !this.username) {
+		sch.error('must pass a username or have one set to remove a user from a list');
+		return;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_members', {
+		'user': user,
+		'slug': list
+	});
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'create_list_succeeded',
+		'failure_event_type':'create_list_failed',
+		'data':data,
+		'method':'DELETE'
+	};
+	
+	var xhr = this._callMethod(opts);
+};
 
 
 
@@ -12948,11 +12733,7 @@ sc.helpers.resolvePath = function(url, rel_path) {
  */
 sc.helpers.getFileObject = function(url) {
 	return Titanium.Filesystem.getFile(url);
-<<<<<<< HEAD:builds/spazcore-titanium.js
-}
-=======
 };
->>>>>>> f6169b349f1d6cf0ea9b9e67d7016c9dbe3f8c42:builds/spazcore-titanium.js
 
 /**
  * copy a file 
@@ -13100,6 +12881,17 @@ sc.helpers.dump = function(obj, level) {
 		dumper(obj);
 	}
 };
+
+
+/*
+	Open a URL in the default system web browser
+*/
+sc.helpers.openInBrowser = function(url) {
+	// This works on Titanium Desktop only
+	Titanium.Desktop.openURL(url);
+};
+
+
 /*jslint 
 browser: true,
 nomen: false,
