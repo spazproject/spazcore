@@ -70,7 +70,7 @@
 							+'<form onsubmit="return false;">'
 							+'<div>'
 							+'<label for="list-username">Username</label><input type="text" name="list-username" data-list-slug="'+d.slug+'" value="spaztest" id="list-'+d.slug+'-username">'
-							+'<input type="button" name="list-'+d.slug+'-add" class="list-add" data-list-slug="'+d.slug+'" value="Add" id="list-'+d.slug+'-add">'
+							+'<input type="button" name="list-'+d.slug+'-add" class="list-member-add" data-list-slug="'+d.slug+'" value="Add" id="list-'+d.slug+'-add">'
 							+'</div>'
 							+'</form>'
 							+'</div>'
@@ -156,7 +156,6 @@
 			var html = tpls.parseArray('list', data.lists);
 			
 			$('#lists').html(html);
-			$('#notice').attr('class', 'hidden');
 			
 		});
 		
@@ -175,7 +174,6 @@
 			$('#list-form-header').attr('style', 'display:block;');
 			$('#list-form-header').attr('actionType', 'modify');
 			$('#list-form-header').attr('data-list-slug', data.slug);
-			$('#notice').attr('class', 'hidden');
 		});
 
 		/*
@@ -192,7 +190,6 @@
 			$('#list-members').attr('data-list-owner', data.user);
 			html += tpls.parseArray('list-members', data.statuses.users);
 			$('#list-members').html(html);
-			$('#notice').attr('class', 'hidden');
 		});
 		
 		
@@ -205,7 +202,6 @@
 			var html = "<h3>Member of:</h3>"
 			html += tpls.parseArray('list', data.lists);
 			$('#lists').html(html);
-			$('#notice').attr('class', 'hidden');
 		});
 
 
@@ -225,7 +221,6 @@
 			var html = tpls.parseArray('timeline-entry', data.statuses);
 			
 			jqcontainer.html(html);
-			$('#notice').attr('class', 'hidden');
 			
 		});
 
@@ -261,6 +256,31 @@
 			$('#notice').html('List destruction succeeded.');
 			$('#notice').attr('class', 'success');
 		});
+
+		/*
+			Add user to list succeeded
+		*/
+		sch.listen(document, 'add_list_user_succeeded', function(e) {
+			showResponse(e);
+			var data = sch.getEventData(e);
+			twit.getLists();
+			
+			$('#notice').html('Successfully added user to ' + data.full_name + '.');
+			$('#notice').attr('class', 'success');
+		});
+		
+		/*
+			Remove list succeeded
+		*/
+		sch.listen(document, 'remove_list_user_succeeded', function(e) {
+			showResponse(e);
+			var data = sch.getEventData(e);
+			twit.getLists();
+			twit.getListMembers(data.slug, data.user.screen_name);
+			
+			$('#notice').html('Successfully removed user from '+ data.full_name + '.');
+			$('#notice').attr('class', 'success');
+		});
 		
 
 		$().ready(function() {
@@ -275,8 +295,14 @@
 				$('#notice').attr('class', 'hidden');
 				twit.getLists();
 			});
-			$('#getsubscriptions').click(function() { twit.listsSubscribedTo() });
-			$('#getmemberships').click(function() { twit.listMemberships() });
+			$('#getsubscriptions').click(function() {
+				twit.listsSubscribedTo();
+				$('#notice').attr('class', 'hidden');
+			});
+			$('#getmemberships').click(function() {
+				twit.listMemberships();
+				$('#notice').attr('class', 'hidden');
+			});
 			$('#newlist').click(function() {
 				$('#list-form-header').html('Add a New List');
 				$('#list-form-header').attr('actionType', 'add');
@@ -287,19 +313,22 @@
 				$('#list-form').attr('style', 'display:block;');
 				$('#list-form-header').attr('style', 'display:block;');
 			});
-			$('.list-add').live('click', function(e) { twit.addUserToList($('#username').val(), $(this).attr('data-list-slug'), $('#list-'+$(this).attr('data-list-slug')+'-username').val() ); });
+			$('.list-member-add').live('click', function(e) { twit.addUserToList($('#username').val(), $(this).attr('data-list-slug'), $('#list-'+$(this).attr('data-list-slug')+'-username').val() ); });
 			$('.list-member-remove').live('click', function(e) { twit.removeUserFromList($('#username').val(), $('#list-members').attr('data-list-slug'), $(this).attr('data-member-id') ); });
 			$('.listname').live('click', function(e) {
 				twit.getListTimeline( $(this).attr('data-list-slug'), $(this).attr('data-user-screen_name') );
+				$('#notice').attr('class', 'hidden');
 			});
 			$('.listremove').live('click', function(e) {
 				twit.removeList( $(this).attr('data-list-slug'), false );
 			});
 			$('.listshow').live('click', function(e) {
 				twit.getListMembers( $(this).attr('data-list-slug'), $(this).attr('data-user-screen_name') );
+				$('#notice').attr('class', 'hidden');
 			});
 			$('.listmodify').live('click', function(e) {
 				twit.getListInfo($(this).attr('data-list-slug'));
+				$('#notice').attr('class', 'hidden');
 			});
 			$('#list-form-submit').live('click', function(e) {
 				if($('#list-form-header').attr('actionType') == "add"){
