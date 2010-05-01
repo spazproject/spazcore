@@ -120,6 +120,18 @@
 			
 		});
 		
+		sch.listen(document, 'get_subscriptions_succeeded', function(e) {
+			showResponse(e);
+			var data = sch.getEventData(e);
+			
+			$('#lists').empty();
+			
+			var html = tpls.parseArray('list', data.lists);
+			
+			$('#lists').html(html);
+			
+		});
+		
 		/*
 			Get list Info succeeded
 		*/
@@ -190,6 +202,7 @@
 			
 			$('#login').click(function() { twit.verifyCredentials() });
 			$('#getlists').click(function() { twit.getLists() });
+			$('#getsubscriptions').click(function() { twit.listsSubscribedTo() });
 			$('#newlist').click(function() { twit.addList('test list', 'private', 'A test list for SpazTwit') });
 			$('.list-add').live('click', function(e) { twit.addUserToList($('#username').val(), $(this).attr('data-list-slug'), $('#list-'+$(this).attr('data-list-slug')+'-username').val() ); });
 			$('.list-member-remove').live('click', function(e) { twit.removeUserFromList($('#username').val(), $('#list-members').attr('data-list-slug'), $(this).attr('data-member-id') ); });
@@ -221,6 +234,7 @@
 		</div>
 		<div>
 			<input type="button" name="getlists" value="Get Lists" id="getlists">
+			<input type="button" name="getsubscriptions" value="Get Subscriptions" id="getsubscriptions">
 		</div>
 	</form>
 	
