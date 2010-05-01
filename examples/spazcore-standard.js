@@ -13005,8 +13005,8 @@ SpazTwit.prototype.addUserToList = function(user, list, list_user) {
 		'url':url,
 		'username':this.username,
 		'password':this.password,
-		'success_event_type':'create_list_succeeded',
-		'failure_event_type':'create_list_failed',
+		'success_event_type':'add_list_user_succeeded',
+		'failure_event_type':'add_list_user_failed',
 		'data':data
 	};
 	
@@ -13038,8 +13038,8 @@ SpazTwit.prototype.removeUserFromList = function(user, list, list_user) {
 		'url':url,
 		'username':this.username,
 		'password':this.password,
-		'success_event_type':'create_list_succeeded',
-		'failure_event_type':'create_list_failed',
+		'success_event_type':'remove_list_user_succeeded',
+		'failure_event_type':'remove_list_user_failed',
 		'data':data,
 		'method':'DELETE'
 	};
