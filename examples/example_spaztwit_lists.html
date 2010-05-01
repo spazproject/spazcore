@@ -26,7 +26,6 @@
 			json = sch.enJSON(data);
 			$('#response').html(json);
 		}
-		
 		/*
 			set up templates
 		*/
@@ -39,6 +38,7 @@
 							+' | Subscriber count:<span class="list-subscriber-count">'+d.subscriber_count+'</span>'
 							if(d.user.screen_name == $('#username').val()) {
 								html += ' | <span class="listremove clickable" data-list-slug="'+d.slug+'">Remove</span>'
+								+ ' | <span class="listmodify clickable" data-list-slug="'+d.slug+'">Modify</span>'
 							}
 							html += ' | <span class="listshow clickable" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">Show</span>'
 						+'</div>'
@@ -143,6 +143,16 @@
 		*/
 		sch.listen(document, 'get_list_succeeded', function(e) {
 			showResponse(e);
+			var data = sch.getEventData(e);
+			
+			$('#list-form-name').attr('value', data.name);
+			$('#list-form-description').attr('value', data.description);
+			$('#list-form-mode-' + data.mode).attr('selected', 'selected');
+			$('#list-form-header').html('Modifying List: ' + data.name);
+			$('#list-form').attr('style', 'display:block;');
+			$('#list-form-header').attr('style', 'display:block;');
+			$('#list-form-header').attr('actionType', 'modify');
+			$('#list-form-header').attr('data-list-slug', data.slug);
 		});
 
 		/*
@@ -198,6 +208,23 @@
 		*/
 		sch.listen(document, 'create_list_succeeded', function(e) {
 			showResponse(e);
+			twit.getLists();
+		});
+		
+		/*
+			Update list succeeded
+		*/
+		sch.listen(document, 'update_list_succeeded', function(e) {
+			showResponse(e);
+			twit.getLists();
+		});
+		
+		/*
+			Remove list succeeded
+		*/
+		sch.listen(document, 'remove_list_succeeded', function(e) {
+			showResponse(e);
+			twit.getLists();
 		});
 		
 
@@ -212,7 +239,16 @@
 			$('#getlists').click(function() { twit.getLists() });
 			$('#getsubscriptions').click(function() { twit.listsSubscribedTo() });
 			$('#getmemberships').click(function() { twit.listMemberships() });
-			$('#newlist').click(function() { twit.addList('test list', 'private', 'A test list for SpazTwit') });
+			$('#newlist').click(function() {
+				$('#list-form-header').html('Add a New List');
+				$('#list-form-header').attr('actionType', 'add');
+				$('#list-form-header').attr('data-list-slug', '');
+				$('#list-form-name').attr('value', '');
+				$('#list-form-description').attr('value', '');
+				$('#list-form-mode-public').attr('selected', 'selected');
+				$('#list-form').attr('style', 'display:block;');
+				$('#list-form-header').attr('style', 'display:block;');
+			});
 			$('.list-add').live('click', function(e) { twit.addUserToList($('#username').val(), $(this).attr('data-list-slug'), $('#list-'+$(this).attr('data-list-slug')+'-username').val() ); });
 			$('.list-member-remove').live('click', function(e) { twit.removeUserFromList($('#username').val(), $('#list-members').attr('data-list-slug'), $(this).attr('data-member-id') ); });
 			$('.listname').live('click', function(e) {
@@ -223,7 +259,20 @@
 			});
 			$('.listshow').live('click', function(e) {
 				twit.getListMembers( $(this).attr('data-list-slug'), $(this).attr('data-user-screen_name') );
-			});						
+			});
+			$('.listmodify').live('click', function(e) {
+				twit.getListInfo($(this).attr('data-list-slug'));
+			});
+			$('#list-form-submit').live('click', function(e) {
+				if($('#list-form-header').attr('actionType') == "add"){
+					twit.addList($('#list-form-name').val(), $('#list-form-mode').val(), $('#list-form-description').val() );
+				}else{
+					twit.updateList($('#list-form-header').attr('data-list-slug'), $('#list-form-name').val(), $('#list-form-mode').val(), $('#list-form-description').val() );
+				}
+				$('#list-form').attr('style', 'display: none;');
+				$('#list-form-header').attr('style', 'display: none;');
+				twit.getLists();
+			});
 			
 			
 			
@@ -249,6 +298,19 @@
 	</form>
 	
 	<input type="button" name="newlist" value="Make New List ++" id="newlist">
+	
+	<h3 id="list-form-header" style="display: none;"></h3>
+	<div id="list-form" style="display: none;">
+		<form onsubmit="return false;">
+			<label for="list-form-name">Name</label><input type="text" name="list-form-name" id="list-form-name" class="list-form-input-text"><br />
+			<label for="list-form-description">Description</label><textarea name="list-form-description" id="list-form-description" class="list-form-input-textarea"></textarea><br />
+			<label for="list-form-mode">Visibility</label><select name="list-form-mode" id="list-form-mode" class="list-form-input-select">
+				<option value="private" id="list-form-mode-private">Private</option>
+				<option value="public" id="list-form-mode-public">Public</option>
+			</select><br />
+			<input type="submit" value="Save" class="list-form-input-submit" id="list-form-submit">
+		</form>
+	</div>
 	
 	<ul id="lists">
 		

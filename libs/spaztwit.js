@@ -2556,15 +2556,37 @@ SpazTwit.prototype.addList = function(list, visibility, description) {
 		'password':this.password,
 		'success_event_type':'create_list_succeeded',
 		'failure_event_type':'create_list_failed',
+		'success_callback':null,
+		'failure_callback':null,
 		'data':data
 	};
 	
 	var xhr = this._callMethod(opts);
 };
 
-SpazTwit.prototype.updateList = function(){
+SpazTwit.prototype.updateList = function(list, name, visibility, description){
+	var data = {};
+	data['name'] = name;
+	data['mode'] = visibility;
+	data['description'] = description;
 	
+	var url = this.getAPIURL('lists_list', {
+		'user': this.username,
+		'slug': list
+	});
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'update_list_succeeded',
+		'failure_event_type':'update_list_failed',
+		'data':data
+	};
+	
+	var xhr = this._callMethod(opts);
 }
+
 /**
  * delete a list
  * @param {string} list  The list name 
@@ -2587,8 +2609,8 @@ SpazTwit.prototype.removeList = function(list, user) {
 		'url':url,
 		'username':this.username,
 		'password':this.password,
-		'success_event_type':'create_list_succeeded',
-		'failure_event_type':'create_list_failed',
+		'success_event_type':'remove_list_succeeded',
+		'failure_event_type':'remove_list_failed',
 		'method':'DELETE'
 	};
 	
