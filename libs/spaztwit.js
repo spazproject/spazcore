@@ -395,6 +395,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.ratelimit_status   = "account/rate_limit_status.json";
 	urls.update_profile		= "account/update_profile.json";
 	urls.saved_searches		= "saved_searches.json";
+	urls.report_spam		= "report_spam.json"
 
     // User lists URLs
     urls.lists              = "{{USER}}/lists.json";
@@ -2730,6 +2731,25 @@ SpazTwit.prototype.listMemberships = function(user) {
 	var xhr = this._callMethod(opts);
 }
 
+/*
+ * Marks a user as a spammer and blocks them
+ */
+ 
+SpazTwit.prototype.reportSpam = function(user) {
+	var url = this.getAPIURL('report_spam');
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'report_spam_succeeded',
+		'failure_event_type':'report_spam_failed'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+
 /**
  *  
  */
@@ -2755,7 +2775,6 @@ SpazTwit.prototype.triggerEvent = function(type, data) {
 if (sc) {
 	var scTwit = SpazTwit;
 }
-
 
 
 /*
