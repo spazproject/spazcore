@@ -2769,6 +2769,131 @@ SpazTwit.prototype.listMemberships = function(user) {
 	var xhr = this._callMethod(opts);
 }
 
+SpazTwit.prototype.getListSubscribers = function(list, user){
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to retrieve list subscribers');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_subscribers', {
+		'user': user,
+		'slug': list
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'get_list_subscribers_succeeded',
+		'failure_event_type':'get_list_subscribers_failed'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+SpazTwit.prototype.isSubscribed = function(list, list_user, user){
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to retrieve list subscribers');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_check_subscriber', {
+		'user': user,
+		'slug': list,
+		'id': list_user
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'check_list_subscribers_succeeded',
+		'failure_event_type':'check_list_subscribers_failed'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+SpazTwit.prototype.subscribe = function(list, user){
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to subscribe to a list');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_subscribers', {
+		'user': user,
+		'slug': list
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'list_subscribe_succeeded',
+		'failure_event_type':'list_subscribe_failed',
+		'method':'POST'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+SpazTwit.prototype.unsubscribe = function(list, user){
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to unsubscribe');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_subscribers', {
+		'user': user,
+		'slug': list,
+		'id': list_user
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'list_unsubscribe_succeeded',
+		'failure_event_type':'list_unsubscribe_failed',
+		'method':'DELETE'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+SpazTwit.prototype.isMember = function(list, list_user, user){
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to retrieve list memberships');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_check_member', {
+		'user': user,
+		'slug': list,
+		'id': list_user
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'check_list_members_succeeded',
+		'failure_event_type':'check_list_members_failed'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
 /*
  * Marks a user as a spammer and blocks them
  */
@@ -2790,26 +2915,6 @@ SpazTwit.prototype.reportSpam = function(user) {
 	};
 	
 	var xhr = this._callMethod(opts);
-}
-
-SpazTwit.prototype.getListSubscribers = function(list, user){
-	
-}
-
-SpazTwit.prototype.isSubscribed = function(list, list_user, user){
-	
-}
-
-SpazTwit.prototype.subscribe = function(list, list_user){
-	
-}
-
-SpazTwit.prototype.unsubscribe = function(list, list_user){
-	
-}
-
-SpazTwit.prototype.isMember = function(list, list_user, user){
-	
 }
 /**
  *  
