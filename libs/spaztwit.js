@@ -2787,7 +2787,8 @@ SpazTwit.prototype.getListSubscribers = function(list, user){
 		'username': this.username,
 		'password': this.password,
 		'success_event_type':'get_list_subscribers_succeeded',
-		'failure_event_type':'get_list_subscribers_failed'
+		'failure_event_type':'get_list_subscribers_failed',
+		'method':'GET'
 	};
 	
 	var xhr = this._callMethod(opts);

@@ -60,6 +60,7 @@
 								+ ' | <span class="listmodify clickable" data-list-slug="'+d.slug+'">Modify</span>'
 							}
 							html += ' | <span class="listshow clickable" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">Show</span>'
+							+ ' | <span class="listshowsubscribers clickable" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">Show Subscribers</span>'
 						+'</div>'
 						+'<div class="list-timeline" data-list-slug="'+d.slug+'" data-list-user="'+d.user.screen_name+'" data-list-id="'+d.id+'"></div>';
 						if (d.mode === 'private') {
@@ -242,7 +243,27 @@
 			$('#notice').html('Error retrieving list members.');
 			$('#notice').attr('class', 'error');
 		});
+
+		sch.listen(document, 'get_list_subscribers_succeeded', function(e) {
+			showResponse(e);
+			var data = sch.getEventData(e);
+			
+			//sch.debug(data);
+			
+			var html = "<h3>Users subscribed to " + $('#list-members').attr('data-list-slug') + "</h3>"
+			html += tpls.parseArray('list-members', data.users);
+			$('#list-members').html(html);
+		});
 		
+		/*
+			Get list members failed
+		*/
+		sch.listen(document, 'get_list_subscribers_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error retrieving list subscribers.');
+			$('#notice').attr('class', 'error');
+		});
 		
 		sch.listen(document, 'get_list_memberships_succeeded', function(e) {
 			showResponse(e);
@@ -454,6 +475,12 @@
 			$('.listshow').live('click', function(e) {
 				twit.getListMembers( $(this).attr('data-list-slug'), $(this).attr('data-user-screen_name') );
 				$('#notice').attr('class', 'hidden');
+			});
+			$('.listshowsubscribers').live('click', function(e) {
+				twit.getListSubscribers( $(this).attr('data-list-slug'), $(this).attr('data-user-screen_name') );
+				$('#notice').attr('class', 'hidden');
+			$('#list-members').attr('data-list-slug', $(this).attr('data-list-slug'));
+			$('#list-members').attr('data-list-owner', $(this).attr('data-user-screen_name'));
 			});
 			$('.listmodify').live('click', function(e) {
 				twit.getListInfo($(this).attr('data-list-slug'));
