@@ -2813,7 +2813,8 @@ SpazTwit.prototype.isSubscribed = function(list, list_user, user){
 		'username': this.username,
 		'password': this.password,
 		'success_event_type':'check_list_subscribers_succeeded',
-		'failure_event_type':'check_list_subscribers_failed'
+		'failure_event_type':'check_list_subscribers_failed',
+		'method':'GET'
 	};
 	
 	var xhr = this._callMethod(opts);
@@ -2889,7 +2890,8 @@ SpazTwit.prototype.isMember = function(list, list_user, user){
 		'username': this.username,
 		'password': this.password,
 		'success_event_type':'check_list_members_succeeded',
-		'failure_event_type':'check_list_members_failed'
+		'failure_event_type':'check_list_members_failed',
+		'method':'GET'
 	};
 	
 	var xhr = this._callMethod(opts);
