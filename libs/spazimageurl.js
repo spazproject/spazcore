@@ -13,7 +13,7 @@ function SpazImageURL(args) {
  * Creates the initial default set of API descriptions 
  */
 SpazImageURL.prototype.initAPIs = function() {
-  this.addAPI('twitpic', {
+  this.addAPI('drippic', {
 		'url_regex'       : new RegExp("http://drippic.com/([a-zA-Z0-9]+)", "gi"),
 		'getThumbnailUrl' : function(id) {
 			var url = 'http://drippic.com/drippic/show/thumb/'+id;
