@@ -61,6 +61,9 @@
 							}
 							html += ' | <span class="listshow clickable" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">Show</span>'
 							+ ' | <span class="listshowsubscribers clickable" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">Show Subscribers</span>'
+							+ ' | <span class="listissubscribed clickable" id="list-check-subscription-'+d.user.screen_name+'-'+d.slug+'" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">Check Subscription</span>'
+							+ '<span style="display:none;" id="list-is-subscribed-'+d.user.screen_name+'-'+d.slug+'" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">You <strong>are</strong> subscribed to this list.</span>'
+							+ '<span style="display:none;" id="list-not-subscribed-'+d.user.screen_name+'-'+d.slug+'" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">You <strong>are not</strong> subscribed to this list.</span>'
 						+'</div>'
 						+'<div class="list-timeline" data-list-slug="'+d.slug+'" data-list-user="'+d.user.screen_name+'" data-list-id="'+d.id+'"></div>';
 						if (d.mode === 'private') {
@@ -244,6 +247,43 @@
 			$('#notice').attr('class', 'error');
 		});
 
+		sch.listen(document, 'check_list_subscribers_succeeded', function(e) {
+			showResponse(e);
+			var data = sch.getEventData(e);
+			
+			var expression = /\/\d+\/[\w\-]*\/[\w\-]*\/subscribers\/[\w\-]*\.json\?user=([\w\-]*)\&slug=([\w\-]*)&id=[\w\-]*/;
+			var m = expression.exec(data.url);
+			var user = m[1];
+			var slug = m[2];
+			$('#list-check-subscription-'+user+'-'+slug).attr('style', 'display:none;');
+			$('#list-is-subscribed-'+user+'-'+slug).attr('style', 'display:none;');
+			$('#list-not-subscribed-'+user+'-'+slug).attr('style', 'display:block;');
+		});
+		
+		/*
+			Get list subscribers failed
+		*/
+		sch.listen(document, 'check_list_subscribers_failed', function(e) {
+			showResponse(e);
+			var data = sch.getEventData(e);
+			
+			var expression = /\/\d+\/[\w\-]*\/[\w\-]*\/subscribers\/[\w\-]*\.json\?user=([\w\-]*)\&slug=([\w\-]*)&id=[\w\-]*/;
+			var m = expression.exec(data.url);
+			var user = m[1];
+			var slug = m[2];
+			$('#list-check-subscription-'+user+'-'+slug).attr('style', 'display:none;');
+			$('#list-is-subscribed-'+user+'-'+slug).attr('style', 'display:none;');
+			$('#list-not-subscribed-'+user+'-'+slug).attr('style', 'display:block;');
+		});
+
+
+		sch.listen(document, 'get_list_subscribers_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error retrieving list subscribers.');
+			$('#notice').attr('class', 'error');
+		});
+		
 		sch.listen(document, 'get_list_subscribers_succeeded', function(e) {
 			showResponse(e);
 			var data = sch.getEventData(e);
@@ -253,16 +293,6 @@
 			var html = "<h3>Users subscribed to " + $('#list-members').attr('data-list-slug') + "</h3>"
 			html += tpls.parseArray('list-members', data.users);
 			$('#list-members').html(html);
-		});
-		
-		/*
-			Get list members failed
-		*/
-		sch.listen(document, 'get_list_subscribers_failed', function(e) {
-			showResponse(e);
-			
-			$('#notice').html('Error retrieving list subscribers.');
-			$('#notice').attr('class', 'error');
 		});
 		
 		sch.listen(document, 'get_list_memberships_succeeded', function(e) {
@@ -479,8 +509,12 @@
 			$('.listshowsubscribers').live('click', function(e) {
 				twit.getListSubscribers( $(this).attr('data-list-slug'), $(this).attr('data-user-screen_name') );
 				$('#notice').attr('class', 'hidden');
-			$('#list-members').attr('data-list-slug', $(this).attr('data-list-slug'));
-			$('#list-members').attr('data-list-owner', $(this).attr('data-user-screen_name'));
+				$('#list-members').attr('data-list-slug', $(this).attr('data-list-slug'));
+				$('#list-members').attr('data-list-owner', $(this).attr('data-user-screen_name'));
+			});
+			$('.listissubscribed').live('click', function(e) {
+				$('#notice').attr('class', 'hidden');
+				twit.isSubscribed( $(this).attr('data-list-slug'), $(this).attr('data-user-screen_name') );
 			});
 			$('.listmodify').live('click', function(e) {
 				twit.getListInfo($(this).attr('data-list-slug'));
