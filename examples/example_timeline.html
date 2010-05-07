@@ -49,9 +49,8 @@
 			return html;
 		});
 		
-		function expandURL(e) {
+		function expandURL(e, data) {
 			var tl_el = document.getElementById('public-timeline');
-			var data = sch.getEventData(e);
 			console.log(data);
 			tl_el.innerHTML = tl_el.innerHTML.replace(data.shorturl, data.longurl);
 		}

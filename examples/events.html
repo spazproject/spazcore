@@ -37,28 +37,42 @@
 		 * this function's scope is bound to testScopeObj, so "this" will refer to testScopeObj 
 		 */
 		var scopedFunc = _.bind(function(){
-			alert(this.label)
+			alert(this.label);
 		}, testScopeObj);
 
 		
 		var button = document.getElementById('bindStuff');
 		
-		function bindStuff() {
+		var custom = document.getElementById('customButton');
+		
+		function bindStuff(e) {
 			sch.unlisten(button, 'click', bindStuff);
 			sch.listen(button, 'click', unBindStuff);
 			button.setAttribute('value', "UNbind OnMouseOver Stuff");
 			sch.listen(document.getElementById('mouseover-test'), 'mouseover', scopedFunc);
 		}
 
-		function unBindStuff() {
+		function unBindStuff(e) {
 			sch.unlisten(button, 'click', unBindStuff);
 			sch.listen(button, 'click', bindStuff);
 			button.setAttribute('value', "Bind OnMouseOver Stuff");
 			sch.unlisten(document.getElementById('mouseover-test'), 'mouseover', scopedFunc);
 		}
+		
+		function listenCustom(e, foo) {
+		    alert(sch.enJSON(foo));
+		}
 
+
+        function fireCustomEvent(e) {
+            sch.trigger('custom_event', document, 'foobar!!!');
+        }
 
 		sch.listen(button, 'click', bindStuff);
+		sch.listen(custom, 'click', fireCustomEvent);
+		
+		// listen for a custom event
+		sch.listen(document, 'custom_event', listenCustom);
 		
 	});
 	
@@ -71,6 +85,7 @@
 <body>
 	<form>
 		<input type="button" name="bindStuff" value="Bind OnMouseOver Stuff" id="bindStuff">
+		<input type="button" name="customButton" value="Trigger custom event" id="customButton">
 	</form>
 	
 	<div id="mouseover-test">When bound, you will fire and event on mouseover</div>

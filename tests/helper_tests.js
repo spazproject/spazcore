@@ -98,9 +98,7 @@
 	
 	test("addListener", missing);
 	test("removeListener", missing);
-	test("triggerCustomEvent", missing);
-	test("getEventData", missing);
-	
+	test("triggerCustomEvent", missing);	
 	
 	
 	/*
