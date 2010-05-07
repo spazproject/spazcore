@@ -9,11 +9,6 @@ onevar: false
  */
 var sc;
  
-/**
- * a constant that defines the attribute where we'll store extra data in the event 
- */
-var SPAZCORE_EVENTDATA_ATTRIBUTE = 'sc_data';
-
 
 /**
  * add an event listener to a target (element, window, etc). Uses target.addEventListener
@@ -27,29 +22,18 @@ var SPAZCORE_EVENTDATA_ATTRIBUTE = 'sc_data';
  * @function
  */
 sc.helpers.addListener = function(target, event_type, handler, scope, use_capture) {
-
-	sch.dump('listening for '+event_type);
-	sch.dump('on target nodeName:'+target.nodeName);
-	
-	if (use_capture !== true) {
-		use_capture = false;
-	}
-	
-	
 	
 	if (scope) {
-		
-		var __handler = _.bind(handler, scope);
-		target.addEventListener(event_type, __handler, use_capture);
-		return __handler;
-		
-	} else {
-		
-		target.addEventListener(event_type, handler, use_capture);
-		return handler;
-
+		sch.warn('scope no longer supported! use a closure or reference "scope" in your event handler');
+	}
+	if (use_capture) {
+		sch.warn('use_capture no longer supported!');
 	}
 	
+	sch.error('listening for '+event_type);
+	sch.error('on target nodeName:'+target.nodeName);
+	
+	jQuery(target).bind(event_type, handler);
 	
 };
 
@@ -68,14 +52,14 @@ sc.helpers.addListener = function(target, event_type, handler, scope, use_captur
  */
 sc.helpers.removeListener = function(target, event_type, handler, use_capture) {
 
-	sch.dump('removing listener for '+event_type);
-	sch.dump('on target nodeName:'+target.nodeName);
+	sch.error('removing listener for '+event_type);
+	sch.error('on target nodeName:'+target.nodeName);
 
-	if (use_capture !== true) {
-		use_capture = false;
+	if (use_capture) {
+		sch.warn('use_capture no longer supported!');
 	}
 	
-	target.removeEventListener(event_type, handler, use_capture);
+	jQuery(target).unbind(event_type, handler);
 };
 
 /**
@@ -88,28 +72,14 @@ sc.helpers.removeListener = function(target, event_type, handler, use_capture) {
  */
 sc.helpers.addDelegatedListener = function(base_target, selector, event_type, handler, scope) {
 	
-	sch.dump('listening for '+event_type);
-	sch.dump('on target nodeName:'+target.nodeName);
-	sch.dump('for selector:'+selector);
+	sch.warn('scope no longer supported! use a closure or reference "scope" in your event handler');
 	
-	if (use_capture !== true) {
-		use_capture = false;
-	}
+	sch.debug('listening for '+event_type);
+	sch.debug('on target nodeName:'+target.nodeName);
+	sch.debug('for selector:'+selector);
 	
-	
-	
-	if (scope) {
-		
-		var __handler = _.bind(handler, scope);
-		target.addEventListener(event_type, __handler, use_capture);
-		return __handler;
-		
-	} else {
-		
-		target.addEventListener(event_type, handler, use_capture);
-		return handler;
+	jQuery(base_target).delegate(selector, event_type, handler);
 
-	}
 	
 };
 
@@ -119,9 +89,11 @@ sc.helpers.addDelegatedListener = function(base_target, selector, event_type, ha
  * @param {string} event_type The event type 
  * @param {Function} handler a method that will take the event as a param, and "this" refers to target
  * @param {Object} [scope] the scope to execute the handler
- * @param {Boolean} [use_capture] Describe this parameter
  */
-sc.helpers.removeDelegatedListener = function(base_target, selector, event_type, handler, scope, use_capture) {
+sc.helpers.removeDelegatedListener = function(base_target, selector, event_type, handler, scope) {
+	sch.warn('scope no longer supported! use a closure or reference "scope" in your event handler');
+	
+	jQuery(base_target).delegate(selector, event_type, handler);
 	
 };
 
@@ -130,35 +102,37 @@ sc.helpers.removeDelegatedListener = function(base_target, selector, event_type,
  * 
  * @param {string}  event_type
  * @param {DOMElement}  target   the target for the event (element, window, etc)
- * @param {object}  data     data to pass with event
+ * @param {object}  data     data to pass with event. it is always passed as the second parameter to the handler (after the event object)
  * @param {boolean} bubble   whether the event should bubble or not. defaults to true
  * @function
  */
 sc.helpers.triggerCustomEvent = function(event_type, target, data, bubble) {
 	
-	sch.dump('triggering '+event_type);
-	sch.dump('on target nodeName:'+target.nodeName);
+	sch.error('triggering '+event_type);
+	sch.error('on target nodeName:'+target.nodeName);
+	sch.error('event data:');
+	// sch.error(sch.enJSON(data));
 	
-	if (bubble !== false) {
-		bubble = true;
+	if (bubble) {
+		sch.warn('bubble is no longer supported!');
 	}
-
-	var ev = document.createEvent("Events"); // use the Events event module
-
-	ev.initEvent(event_type, bubble, true);
-
-	ev[SPAZCORE_EVENTDATA_ATTRIBUTE] = data;
-
-	target.dispatchEvent(ev);
+	
+	if (data) {
+		data = [data];
+	}
+	
+	jQuery(target).trigger(event_type, data);
 	
 };
 
 /**
  * retrieves the data added to this event object
  * @param {DOMEvent} event_obj 
+ * @deprecated
  */
 sc.helpers.getEventData = function(event_obj) {
-	return event_obj[SPAZCORE_EVENTDATA_ATTRIBUTE];
+	sch.error('getEventData is DEPRECATED. Use second param on event handler');
+	return null;
 };
 
 /**
@@ -177,13 +151,13 @@ sc.helpers.unlisten = sc.helpers.removeListener;
  * Alias for sc.helpers.addDelegatedListener
  * @function 
  */
-sc.helpers.live = sc.helpers.addDelegatedListener;
+sc.helpers.delegate = sc.helpers.addDelegatedListener;
 
 /**
  * Alias for sc.helpers.removeDelegatedListener
  * @function 
  */
-sc.helpers.die = sc.helpers.removeDelegatedListener;
+sc.helpers.undelegate = sc.helpers.removeDelegatedListener;
 
 
 /**
