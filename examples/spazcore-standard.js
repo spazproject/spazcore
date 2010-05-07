@@ -1,4 +1,4 @@
-/*********** Built 2010-04-28 10:25:45 EDT ***********/
+/*********** Built 2010-05-07 15:30:25 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -8064,6 +8064,18 @@ function SpazImageURL(args) {
  * Creates the initial default set of API descriptions 
  */
 SpazImageURL.prototype.initAPIs = function() {
+  this.addAPI('drippic', {
+		'url_regex'       : new RegExp("http://drippic.com/([a-zA-Z0-9]+)", "gi"),
+		'getThumbnailUrl' : function(id) {
+			var url = 'http://drippic.com/drippic/show/thumb/'+id;
+			return url;
+		},
+		'getImageUrl'     : function(id) {
+			var url = 'http://drippic.com/drippic/show/full/'+id;
+			return url;
+		}
+	});
+  
 	this.addAPI('twitpic', {
 		'url_regex'       : new RegExp("http://twitpic.com/([a-zA-Z0-9]+)", "gi"),
 		'getThumbnailUrl' : function(id) {
@@ -11251,13 +11263,17 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.lists_subscribers  = "{{USER}}/{{SLUG}}/subscribers.json";
     urls.lists_check_subscriber = "{{USER}}/{{SLUG}}/subscribers/{{ID}}.json";
 
+	//trends
+	urls.trends				= "trends.json";
+	urls.trends_current		= "trends/current.json";
+	urls.trends_daily		= "trends/daily.json";
+	urls.trends_weekly		= "trends/weekly.json";
+
 	// search
 	if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER) {
 		urls.search				= "http://search.twitter.com/search.json";
-		urls.trends				= "http://search.twitter.com/trends.json";
 	} else {
 		urls.search				= "search.json";
-		urls.trends				= "trends.json";
 	}
 
     // misc
