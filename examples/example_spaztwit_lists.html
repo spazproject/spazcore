@@ -14,6 +14,25 @@
 	<script src="spazcore-standard.js"></script>
 	
 	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<style type="text/css">
+		#notice {
+			margin: 10px;
+			padding: 10px;
+			text-align: center;
+		}
+		#notice.error {
+			background-color: #f33;
+			display: block;
+		}
+		
+		#notice.success {
+			background-color: #af7;
+			display: block;
+		}
+		#notice.hidden {
+			display: none;
+		}
+	</style>
 	
 	<script type="text/javascript" charset="utf-8">
 		sc.setDumpLevel(5);
@@ -25,7 +44,6 @@
 			json = sch.enJSON(data);
 			$('#response').html(json);
 		}
-		
 		/*
 			set up templates
 		*/
@@ -33,24 +51,33 @@
 		tpls.addTemplateMethod('list', function(d) {
 			var html = '<li class="list">'
 						+'<div class="listheader">'
-							+'<span class="listname clickable" data-list-slug="'+d.slug+'">'+d.full_name+'</span>'
+							+'<span class="listname clickable" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">'+d.full_name+'</span>'
 							+' | Member count:<span class="list-member-count">'+d.member_count+'</span>'
 							+' | Subscriber count:<span class="list-subscriber-count">'+d.subscriber_count+'</span>'
-							+' | <span class="listremove clickable" data-list-slug="'+d.slug+'">Remove</span>'
-							+' | <span class="listshow clickable" data-list-slug="'+d.slug+'">Show</span>'
+							if(d.user.screen_name == $('#username').val()) {
+								html += ' | <span class="listremove clickable" data-list-slug="'+d.slug+'">Remove</span>'
+								+ ' | <span class="listmodify clickable" data-list-slug="'+d.slug+'">Modify</span>'
+							}
+							html += ' | <span class="listshow clickable" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">Show</span>'
+							+ ' | <span class="listshowsubscribers clickable" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">Show Subscribers</span>'
+							+ ' | <span class="listissubscribed clickable" id="list-check-subscription-'+d.user.screen_name+'-'+d.slug+'" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">Check Subscription</span>'
+							+ '<span style="display:none;" id="list-is-subscribed-'+d.user.screen_name+'-'+d.slug+'" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">You <strong>are</strong> subscribed to this list.</span>'
+							+ '<span style="display:none;" id="list-not-subscribed-'+d.user.screen_name+'-'+d.slug+'" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">You <strong>are not</strong> subscribed to this list.</span>'
 						+'</div>'
 						+'<div class="list-timeline" data-list-slug="'+d.slug+'" data-list-user="'+d.user.screen_name+'" data-list-id="'+d.id+'"></div>';
 						if (d.mode === 'private') {
 							html += '<div class="list-private">private</div>';
 						}
-						html += '<div class="list-user-add-form">'
-						+'<form onsubmit="return false;">'
-						+'<div>'
-						+'<label for="list-username">Username</label><input type="text" name="list-username" data-list-slug="'+d.slug+'" value="spaztest" id="list-'+d.slug+'-username">'
-						+'<input type="button" name="list-'+d.slug+'-add" class="list-add" data-list-slug="'+d.slug+'" value="Add" id="list-'+d.slug+'-add">'
-						+'</div>'
-						+'</form>'
-						+'</div>'
+						if(d.user.screen_name == $('#username').val()){
+							html += '<div class="list-user-add-form">'
+							+'<form onsubmit="return false;">'
+							+'<div>'
+							+'<label for="list-username">Username</label><input type="text" name="list-username" data-list-slug="'+d.slug+'" value="spaztest" id="list-'+d.slug+'-username">'
+							+'<input type="button" name="list-'+d.slug+'-add" class="list-member-add" data-list-slug="'+d.slug+'" value="Add" id="list-'+d.slug+'-add">'
+							+'</div>'
+							+'</form>'
+							+'</div>'
+						}
 						
 					html += '</li>';
 			return html;
@@ -85,10 +112,12 @@
 		});
 		tpls.addTemplateMethod('list-members', function(d) {
 			var html = '<li class="list-member" data-member-id="'+d.id+'">'+d.name
-						+'<form onsubmit="return false;">'
-						+'<input type="button" name="list-member-remove" class="list-member-remove" data-member-id="'+d.id+'" value="Remove">'
-						+'</form>'
-						+'</li>'
+						if($('#list-members').attr('data-list-owner') == $('#username').val()){
+							html += '<form onsubmit="return false;">'
+							+'<input type="button" name="list-member-remove" class="list-member-remove" data-member-id="'+d.id+'" value="Remove">'
+							+'</form>'
+						}
+						html += '</li>'
 			return html;
 		});
 		
@@ -101,7 +130,19 @@
 			var password = $('#password').val();
 			
 			twit.setCredentials(username, password);
+			$('#notice').html('Login succeeded.');
+			$('#notice').attr('class', 'success');
 			showResponse(e);
+		});
+
+		/*
+			Credential verification failed
+		*/
+		sch.listen(document, 'verify_credentials_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error verifying your credentials.');
+			$('#notice').attr('class', 'error');
 		});
 		
 		/*
@@ -117,14 +158,67 @@
 			$('#lists').html(html);
 			
 		});
+
+		/*
+			Remove user from list failed
+		*/
+		sch.listen(document, 'get_lists_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error retrieving your lists.');
+			$('#notice').attr('class', 'error');
+		});
+		
+		sch.listen(document, 'get_subscriptions_succeeded', function(e) {
+			showResponse(e);
+			var data = sch.getEventData(e);
+			
+			$('#lists').empty();
+			
+			var html = tpls.parseArray('list', data.lists);
+			
+			$('#lists').html(html);
+			
+		});
+
+
+		/*
+			Get user subscriptions failed
+		*/
+		sch.listen(document, 'get_subscriptions_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error retrieving your list subscriptions.');
+			$('#notice').attr('class', 'error');
+		});
 		
 		/*
 			Get list Info succeeded
 		*/
 		sch.listen(document, 'get_list_succeeded', function(e) {
 			showResponse(e);
+			var data = sch.getEventData(e);
+			
+			$('#list-form-name').attr('value', data.name);
+			$('#list-form-description').attr('value', data.description);
+			$('#list-form-mode-' + data.mode).attr('selected', 'selected');
+			$('#list-form-header').html('Modifying List: ' + data.name);
+			$('#list-form').attr('style', 'display:block;');
+			$('#list-form-header').attr('style', 'display:block;');
+			$('#list-form-header').attr('actionType', 'modify');
+			$('#list-form-header').attr('data-list-slug', data.slug);
 		});
 
+		/*
+			Get list info failed
+		*/
+		sch.listen(document, 'get_list_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error retrieving the list.');
+			$('#notice').attr('class', 'error');
+		});
+		
 		/*
 			Get list members succeeded
 		*/
@@ -134,22 +228,91 @@
 			//sch.debug(data);
 			
 			var html = "<h3>Members of " + data.slug + "</h3>"
+			$('#list-members').attr('data-list-slug', data.slug);
+			$('#list-members').attr('data-list-owner', data.user);
 			html += tpls.parseArray('list-members', data.statuses.users);
 			$('#list-members').html(html);
-			$('#list-members').attr('data-list-slug', data.slug);
+		});
+		
+		/*
+			Get list members failed
+		*/
+		sch.listen(document, 'get_list_members_failed', function(e) {
+			showResponse(e);
 			
-			// var jqcontainer = $('.list-timeline[data-list-slug='+data.slug+'][data-list-user='+data.user+']');
-			// sch.debug(jqcontainer);
-			// 
-			// var msg = 'Members of '
-			// 
-			// jqcontainer.empty();
-			// 
-			// var html = tpls.parseArray('timeline-entry', data.statuses);
-			// 
-			// jqcontainer.html(html);
+			$('#notice').html('Error retrieving list members.');
+			$('#notice').attr('class', 'error');
 		});
 
+		sch.listen(document, 'check_list_subscribers_succeeded', function(e) {
+			showResponse(e);
+			var data = sch.getEventData(e);
+			
+			var expression = /\/\d+\/[\w\-]*\/[\w\-]*\/subscribers\/[\w\-]*\.json\?user=([\w\-]*)\&slug=([\w\-]*)&id=[\w\-]*/;
+			var m = expression.exec(data.url);
+			var user = m[1];
+			var slug = m[2];
+			$('#list-check-subscription-'+user+'-'+slug).attr('style', 'display:none;');
+			$('#list-is-subscribed-'+user+'-'+slug).attr('style', 'display:none;');
+			$('#list-not-subscribed-'+user+'-'+slug).attr('style', 'display:block;');
+		});
+		
+		/*
+			Get list subscribers failed
+		*/
+		sch.listen(document, 'check_list_subscribers_failed', function(e) {
+			showResponse(e);
+			var data = sch.getEventData(e);
+			
+			var expression = /\/\d+\/[\w\-]*\/[\w\-]*\/subscribers\/[\w\-]*\.json\?user=([\w\-]*)\&slug=([\w\-]*)&id=[\w\-]*/;
+			var m = expression.exec(data.url);
+			var user = m[1];
+			var slug = m[2];
+			$('#list-check-subscription-'+user+'-'+slug).attr('style', 'display:none;');
+			$('#list-is-subscribed-'+user+'-'+slug).attr('style', 'display:none;');
+			$('#list-not-subscribed-'+user+'-'+slug).attr('style', 'display:block;');
+		});
+
+
+		sch.listen(document, 'get_list_subscribers_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error retrieving list subscribers.');
+			$('#notice').attr('class', 'error');
+		});
+		
+		sch.listen(document, 'get_list_subscribers_succeeded', function(e) {
+			showResponse(e);
+			var data = sch.getEventData(e);
+			
+			//sch.debug(data);
+			
+			var html = "<h3>Users subscribed to " + $('#list-members').attr('data-list-slug') + "</h3>"
+			html += tpls.parseArray('list-members', data.users);
+			$('#list-members').html(html);
+		});
+		
+		sch.listen(document, 'get_list_memberships_succeeded', function(e) {
+			showResponse(e);
+			var data = sch.getEventData(e);
+			
+			//sch.debug(data);
+			
+			var html = "<h3>Member of:</h3>"
+			html += tpls.parseArray('list', data.lists);
+			$('#lists').html(html);
+		});
+
+
+		/*
+			Get list memberships failed
+		*/
+		sch.listen(document, 'get_list_memberships_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error removing the list of memberships.');
+			$('#notice').attr('class', 'error');
+		});
 
 
 		/*
@@ -168,12 +331,125 @@
 			jqcontainer.html(html);
 			
 		});
+		
+		/*
+			Get list timeline failed
+		*/
+		sch.listen(document, 'get_list_timeline_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error retrieving timeline.');
+			$('#notice').attr('class', 'error');
+		});
 
 		/*
 			Create list succeeded
 		*/
 		sch.listen(document, 'create_list_succeeded', function(e) {
 			showResponse(e);
+			twit.getLists();
+			
+			$('#notice').html('List creation succeeded.');
+			$('#notice').attr('class', 'success');
+		});
+		
+		/*
+			Create list failed
+		*/
+		sch.listen(document, 'create_list_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error creating list.');
+			$('#notice').attr('class', 'error');
+		});
+		
+		
+		/*
+			Update list succeeded
+		*/
+		sch.listen(document, 'update_list_succeeded', function(e) {
+			showResponse(e);
+			twit.getLists();
+			
+			$('#notice').html('List update succeeded.');
+			$('#notice').attr('class', 'success');
+		});
+
+		/*
+			Update list failed
+		*/
+		sch.listen(document, 'update_list_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error updating list "'+ data.full_name + '".');
+			$('#notice').attr('class', 'error');
+		});
+		
+		/*
+			Remove list succeeded
+		*/
+		sch.listen(document, 'remove_list_succeeded', function(e) {
+			showResponse(e);
+			twit.getLists();
+			
+			$('#notice').html('List destruction succeeded.');
+			$('#notice').attr('class', 'success');
+		});
+
+
+		/*
+			Remove list failed
+		*/
+		sch.listen(document, 'remove_list_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error removing list "'+ data.full_name + '".');
+			$('#notice').attr('class', 'error');
+		});
+
+		/*
+			Add user to list succeeded
+		*/
+		sch.listen(document, 'add_list_user_succeeded', function(e) {
+			showResponse(e);
+			var data = sch.getEventData(e);
+			twit.getLists();
+			
+			$('#notice').html('Successfully added user to ' + data.full_name + '.');
+			$('#notice').attr('class', 'success');
+		});
+
+		/*
+			Add user to list failed
+		*/
+		sch.listen(document, 'add_list_user_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error adding user to '+ data.full_name + '.');
+			$('#notice').attr('class', 'error');
+		});
+		
+		/*
+			Remove user from list succeeded
+		*/
+		sch.listen(document, 'remove_list_user_succeeded', function(e) {
+			showResponse(e);
+			var data = sch.getEventData(e);
+			twit.getLists();
+			twit.getListMembers(data.slug, data.user.screen_name);
+			
+			$('#notice').html('Successfully removed user from '+ data.full_name + '.');
+			$('#notice').attr('class', 'success');
+		});
+		
+		/*
+			Remove user from list failed
+		*/
+		sch.listen(document, 'remove_list_user_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error removing user from '+ data.full_name + '.');
+			$('#notice').attr('class', 'error');
 		});
 		
 
@@ -191,19 +467,65 @@
 				twit.setCredentials(username, password);
 				twit.verifyCredentials();
 			});
-			$('#getlists').click(function() { twit.getLists() });
-			$('#newlist').click(function() { twit.addList('test list', 'private', 'A test list for SpazTwit') });
-			$('.list-add').live('click', function(e) { twit.addUserToList($('#username').val(), $(this).attr('data-list-slug'), $('#list-'+$(this).attr('data-list-slug')+'-username').val() ); });
+			$('#getlists').click(function() { 
+				$('#notice').attr('class', 'hidden');
+				twit.getLists();
+			});
+			$('#getsubscriptions').click(function() {
+				twit.listsSubscribedTo();
+				$('#notice').attr('class', 'hidden');
+			});
+			$('#getmemberships').click(function() {
+				twit.listMemberships();
+				$('#notice').attr('class', 'hidden');
+			});
+			$('#newlist').click(function() {
+				$('#list-form-header').html('Add a New List');
+				$('#list-form-header').attr('actionType', 'add');
+				$('#list-form-header').attr('data-list-slug', '');
+				$('#list-form-name').attr('value', '');
+				$('#list-form-description').attr('value', '');
+				$('#list-form-mode-public').attr('selected', 'selected');
+				$('#list-form').attr('style', 'display:block;');
+				$('#list-form-header').attr('style', 'display:block;');
+			});
+			$('.list-member-add').live('click', function(e) { twit.addUserToList($('#username').val(), $(this).attr('data-list-slug'), $('#list-'+$(this).attr('data-list-slug')+'-username').val() ); });
 			$('.list-member-remove').live('click', function(e) { twit.removeUserFromList($('#username').val(), $('#list-members').attr('data-list-slug'), $(this).attr('data-member-id') ); });
 			$('.listname').live('click', function(e) {
-				twit.getListTimeline( $(this).attr('data-list-slug') );
+				twit.getListTimeline( $(this).attr('data-list-slug'), $(this).attr('data-user-screen_name') );
+				$('#notice').attr('class', 'hidden');
 			});
 			$('.listremove').live('click', function(e) {
 				twit.removeList( $(this).attr('data-list-slug'), false );
 			});
 			$('.listshow').live('click', function(e) {
-				twit.getListMembers( $(this).attr('data-list-slug'), false );
-			});						
+				twit.getListMembers( $(this).attr('data-list-slug'), $(this).attr('data-user-screen_name') );
+				$('#notice').attr('class', 'hidden');
+			});
+			$('.listshowsubscribers').live('click', function(e) {
+				twit.getListSubscribers( $(this).attr('data-list-slug'), $(this).attr('data-user-screen_name') );
+				$('#notice').attr('class', 'hidden');
+				$('#list-members').attr('data-list-slug', $(this).attr('data-list-slug'));
+				$('#list-members').attr('data-list-owner', $(this).attr('data-user-screen_name'));
+			});
+			$('.listissubscribed').live('click', function(e) {
+				$('#notice').attr('class', 'hidden');
+				twit.isSubscribed( $(this).attr('data-list-slug'), $(this).attr('data-user-screen_name') );
+			});
+			$('.listmodify').live('click', function(e) {
+				twit.getListInfo($(this).attr('data-list-slug'));
+				$('#notice').attr('class', 'hidden');
+			});
+			$('#list-form-submit').live('click', function(e) {
+				if($('#list-form-header').attr('actionType') == "add"){
+					twit.addList($('#list-form-name').val(), $('#list-form-mode').val(), $('#list-form-description').val() );
+				}else{
+					twit.updateList($('#list-form-header').attr('data-list-slug'), $('#list-form-name').val(), $('#list-form-mode').val(), $('#list-form-description').val() );
+				}
+				$('#list-form').attr('style', 'display: none;');
+				$('#list-form-header').attr('style', 'display: none;');
+				twit.getLists();
+			});
 			
 			
 			
@@ -215,6 +537,8 @@
 <body>
 	<h1>SpazCore Twitter Lists Example</h1>
 	
+	<div id="notice" class="hidden"></div>
+	
 	<form onsubmit="return false;">
 		<div>
 			<label for="username">Username</label><input type="text" name="username" value="spaztest" id="username">
@@ -223,10 +547,24 @@
 		</div>
 		<div>
 			<input type="button" name="getlists" value="Get Lists" id="getlists">
+			<input type="button" name="getsubscriptions" value="Get Subscriptions" id="getsubscriptions">
+			<input type="button" name="getmemberships" value="Get Memberships" id="getmemberships">	
+			<input type="button" name="newlist" value="Make New List ++" id="newlist">
 		</div>
 	</form>
 	
-	<input type="button" name="newlist" value="Make New List ++" id="newlist">
+	<h3 id="list-form-header" style="display: none;"></h3>
+	<div id="list-form" style="display: none;">
+		<form onsubmit="return false;">
+			<label for="list-form-name">Name</label><input type="text" name="list-form-name" id="list-form-name" class="list-form-input-text"><br />
+			<label for="list-form-description">Description</label><textarea name="list-form-description" id="list-form-description" class="list-form-input-textarea"></textarea><br />
+			<label for="list-form-mode">Visibility</label><select name="list-form-mode" id="list-form-mode" class="list-form-input-select">
+				<option value="private" id="list-form-mode-private">Private</option>
+				<option value="public" id="list-form-mode-public">Public</option>
+			</select><br />
+			<input type="submit" value="Save" class="list-form-input-submit" id="list-form-submit">
+		</form>
+	</div>
 	
 	<ul id="lists">
 		
