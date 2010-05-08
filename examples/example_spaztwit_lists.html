@@ -244,9 +244,8 @@
 			$('#notice').attr('class', 'error');
 		});
 
-		sch.listen(document, 'check_list_subscribers_succeeded', function(e) {
+		sch.listen(document, 'check_list_subscribers_succeeded', function(e, data) {
 			showResponse(e);
-			var data = sch.getEventData(e);
 			
 			var expression = /\/\d+\/[\w\-]*\/[\w\-]*\/subscribers\/[\w\-]*\.json\?user=([\w\-]*)\&slug=([\w\-]*)&id=[\w\-]*/;
 			var m = expression.exec(data.url);
@@ -260,9 +259,8 @@
 		/*
 			Get list subscribers failed
 		*/
-		sch.listen(document, 'check_list_subscribers_failed', function(e) {
+		sch.listen(document, 'check_list_subscribers_failed', function(e, data) {
 			showResponse(e);
-			var data = sch.getEventData(e);
 			
 			var expression = /\/\d+\/[\w\-]*\/[\w\-]*\/subscribers\/[\w\-]*\.json\?user=([\w\-]*)\&slug=([\w\-]*)&id=[\w\-]*/;
 			var m = expression.exec(data.url);
