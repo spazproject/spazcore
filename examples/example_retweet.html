@@ -161,7 +161,9 @@
 			
 			twit.setCredentials(username, password);
 			
-			$('#login').click(function() { twit.verifyCredentials() });
+			$('#login').click(function() {
+			    twit.verifyCredentials($('#username').val(), $('#password').val());
+			});
 			$('#retweet').click(function() { 
 				$('#notice').attr('class', 'hidden');
 				twit.retweet($('#tweet-id').val());
