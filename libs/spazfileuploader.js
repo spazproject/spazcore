@@ -73,8 +73,8 @@ SpazFileUploader.prototype.getAPIs = function() {
 
 	var apis = {
 	    'drippic' : {
-			'upload_url' : 'http://drippic.millwoodonline.co.uk/drippic/upload',
-		    'post_url'   : 'http://drippic.millwoodonline.co.uk/drippic/upload/tweet',
+			'upload_url' : 'http://drippic.com/drippic/upload',
+		    'post_url'   : 'http://drippic.com/drippic/upload/tweet',
 			'processResult': function(event, apiobj) {
 				var loader = event.target;
 				

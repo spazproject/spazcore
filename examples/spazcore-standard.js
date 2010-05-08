@@ -1,4 +1,4 @@
-/*********** Built 2010-04-28 10:25:45 EDT ***********/
+/*********** Built 2010-05-07 16:26:25 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -5221,7 +5221,7 @@ var sc;
 /**
  * a constant that defines the attribute where we'll store extra data in the event 
  */
-var SPAZCORE_EVENTDATA_ATTRIBUTE = 'sc_data';
+var SPAZCORE_EVENTDATA_ATTRIBUTE = 'data';
 
 
 /**
@@ -5236,29 +5236,18 @@ var SPAZCORE_EVENTDATA_ATTRIBUTE = 'sc_data';
  * @function
  */
 sc.helpers.addListener = function(target, event_type, handler, scope, use_capture) {
-
+	
+	if (scope) {
+		sch.warn('scope no longer supported! use a closure or reference "scope" in your event handler');
+	}
+	if (use_capture) {
+		sch.warn('use_capture no longer supported!');
+	}
+	
 	sch.dump('listening for '+event_type);
 	sch.dump('on target nodeName:'+target.nodeName);
 	
-	if (use_capture !== true) {
-		use_capture = false;
-	}
-	
-	
-	
-	if (scope) {
-		
-		var __handler = _.bind(handler, scope);
-		target.addEventListener(event_type, __handler, use_capture);
-		return __handler;
-		
-	} else {
-		
-		target.addEventListener(event_type, handler, use_capture);
-		return handler;
-
-	}
-	
+	jQuery(target).bind(event_type, handler);
 	
 };
 
@@ -5280,11 +5269,11 @@ sc.helpers.removeListener = function(target, event_type, handler, use_capture) {
 	sch.dump('removing listener for '+event_type);
 	sch.dump('on target nodeName:'+target.nodeName);
 
-	if (use_capture !== true) {
-		use_capture = false;
+	if (use_capture) {
+		sch.warn('use_capture no longer supported!');
 	}
 	
-	target.removeEventListener(event_type, handler, use_capture);
+	jQuery(target).unbind(event_type, handler);
 };
 
 /**
@@ -5297,28 +5286,14 @@ sc.helpers.removeListener = function(target, event_type, handler, use_capture) {
  */
 sc.helpers.addDelegatedListener = function(base_target, selector, event_type, handler, scope) {
 	
+	sch.warn('scope no longer supported! use a closure or reference "scope" in your event handler');
+	
 	sch.dump('listening for '+event_type);
 	sch.dump('on target nodeName:'+target.nodeName);
 	sch.dump('for selector:'+selector);
 	
-	if (use_capture !== true) {
-		use_capture = false;
-	}
-	
-	
-	
-	if (scope) {
-		
-		var __handler = _.bind(handler, scope);
-		target.addEventListener(event_type, __handler, use_capture);
-		return __handler;
-		
-	} else {
-		
-		target.addEventListener(event_type, handler, use_capture);
-		return handler;
+	jQuery(base_target).delegate(selector, event_type, handler);
 
-	}
 	
 };
 
@@ -5328,9 +5303,11 @@ sc.helpers.addDelegatedListener = function(base_target, selector, event_type, ha
  * @param {string} event_type The event type 
  * @param {Function} handler a method that will take the event as a param, and "this" refers to target
  * @param {Object} [scope] the scope to execute the handler
- * @param {Boolean} [use_capture] Describe this parameter
  */
-sc.helpers.removeDelegatedListener = function(base_target, selector, event_type, handler, scope, use_capture) {
+sc.helpers.removeDelegatedListener = function(base_target, selector, event_type, handler, scope) {
+	sch.warn('scope no longer supported! use a closure or reference "scope" in your event handler');
+	
+	jQuery(base_target).delegate(selector, event_type, handler);
 	
 };
 
@@ -5339,7 +5316,7 @@ sc.helpers.removeDelegatedListener = function(base_target, selector, event_type,
  * 
  * @param {string}  event_type
  * @param {DOMElement}  target   the target for the event (element, window, etc)
- * @param {object}  data     data to pass with event
+ * @param {object}  data     data to pass with event. it is always passed as the second parameter to the handler (after the event object)
  * @param {boolean} bubble   whether the event should bubble or not. defaults to true
  * @function
  */
@@ -5348,17 +5325,15 @@ sc.helpers.triggerCustomEvent = function(event_type, target, data, bubble) {
 	sch.dump('triggering '+event_type);
 	sch.dump('on target nodeName:'+target.nodeName);
 	
-	if (bubble !== false) {
-		bubble = true;
+	if (bubble) {
+		sch.warn('bubble is no longer supported!');
 	}
-
-	var ev = document.createEvent("Events"); // use the Events event module
-
-	ev.initEvent(event_type, bubble, true);
-
-	ev[SPAZCORE_EVENTDATA_ATTRIBUTE] = data;
-
-	target.dispatchEvent(ev);
+	
+	if (data) {
+		data = [data];
+	}
+	
+	jQuery(target).trigger(event_type, data);
 	
 };
 
@@ -5386,13 +5361,13 @@ sc.helpers.unlisten = sc.helpers.removeListener;
  * Alias for sc.helpers.addDelegatedListener
  * @function 
  */
-sc.helpers.live = sc.helpers.addDelegatedListener;
+sc.helpers.delegate = sc.helpers.addDelegatedListener;
 
 /**
  * Alias for sc.helpers.removeDelegatedListener
  * @function 
  */
-sc.helpers.die = sc.helpers.removeDelegatedListener;
+sc.helpers.undelegate = sc.helpers.removeDelegatedListener;
 
 
 /**
@@ -8064,6 +8039,18 @@ function SpazImageURL(args) {
  * Creates the initial default set of API descriptions 
  */
 SpazImageURL.prototype.initAPIs = function() {
+  this.addAPI('drippic', {
+		'url_regex'       : new RegExp("http://drippic.com/([a-zA-Z0-9]+)", "gi"),
+		'getThumbnailUrl' : function(id) {
+			var url = 'http://drippic.com/drippic/show/thumb/'+id;
+			return url;
+		},
+		'getImageUrl'     : function(id) {
+			var url = 'http://drippic.com/drippic/show/full/'+id;
+			return url;
+		}
+	});
+  
 	this.addAPI('twitpic', {
 		'url_regex'       : new RegExp("http://twitpic.com/([a-zA-Z0-9]+)", "gi"),
 		'getThumbnailUrl' : function(id) {
@@ -11278,13 +11265,17 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.lists_check_subscriber = "{{USER}}/{{SLUG}}/subscribers/{{ID}}.json";
     urls.lists_subscriptions = "{{USER}}/lists/subscriptions.json";
 
+	//trends
+	urls.trends				= "trends.json";
+	urls.trends_current		= "trends/current.json";
+	urls.trends_daily		= "trends/daily.json";
+	urls.trends_weekly		= "trends/weekly.json";
+
 	// search
 	if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER) {
 		urls.search				= "http://search.twitter.com/search.json";
-		urls.trends				= "http://search.twitter.com/trends.json";
 	} else {
 		urls.search				= "search.json";
-		urls.trends				= "trends.json";
 	}
 
     // misc
