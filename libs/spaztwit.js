@@ -421,8 +421,8 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 	urls.trends_weekly		= "trends/weekly.json";
 	
 	//retweet
-	urls.retweet			= "statuses/retweet/id.json"
-	urls.retweets			= "statuses/retweets/id.json"
+	urls.retweet			= "statuses/retweet/{{ID}}.json"
+	urls.retweets			= "statuses/retweets/{{ID}}.json"
 	urls.retweeted_by_me	= "statuses/retweeted_by_me.json"
 	urls.retweeted_to_me	= "statuses/retweeted_to_me.json"
 	urls.retweets_of_me		= "statuses/retweets_of_me.json"
@@ -2038,6 +2038,141 @@ SpazTwit.prototype._processOneItem = function(data, opts) {
 	this.triggerEvent(opts.success_event_type, data);
 	
 };
+
+// Retweet API
+
+/*
+ * Retweets a tweet.
+ * id: the numeric id of a tweet
+ */
+ 
+SpazTwit.prototype.retweet = function(id, onSuccess, onFailure) {
+	var data = {};
+	data['id'] = id;
+	
+	var url = this.getAPIURL('retweet', data);
+	
+	var opts = {
+		'url' : url,
+		'username' : this.username,
+		'password' : this.password,
+		'success_event_type' : 'retweet_succeeded',
+		'failure_event_type' : 'retweet_failed',
+		'success_callback' : onSuccess,
+		'failure_callback' : onFailure,
+		'data' : data
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+/*
+ * Gets up to 100 of the latest retweets of a tweet.
+ * id: the tweet to get retweets of
+ * count: the number of retweets to get
+ */
+
+SpazTwit.prototype.getRetweets = function(id, count) {
+	var url = this.getAPIURL('retweets', {
+		'id' : id,
+		'count' : count
+	});
+	
+	var opts = {
+		'url' : url,
+		'username' : this.username,
+		'password' : this.password,
+		'success_event_type' : 'get_retweets_succeeded',
+		'failure_event_Type' : 'get_retweets_failed',
+		'method' : 'GET'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+/*
+ * Returns up to 200 of the most recent retweets by the user
+ * since: the numeric id of the tweet serving as a floor
+ * max: the numeric id of the tweet serving as a ceiling
+ * count: the number of tweets to return. Cannot be over 200.
+ * page: the page of results to return.
+ */
+ 
+SpazTwit.prototype.retweetedByMe = function(since, max, count, page){
+	var url = this.getAPIURL('retweeted_by_me', {
+		'since_id' : since,
+		'max_id' : max,
+		'count' : count,
+		'page' : page
+	});
+	
+	var opts = {
+		'url' : url,
+		'username' : this.username,
+		'password' : this.password,
+		'success_event_type' : 'retweeted_by_me_succeeded',
+		'failure_event_type' : 'retweeted_by_me_failed',
+		'method' : 'GET'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+/*
+ * Returns up to 200 of the most recent retweets by the user's friends
+ * since: the numeric id of the tweet serving as a floor
+ * max: the numeric id of the tweet serving as a ceiling
+ * count: the number of tweets to return. Cannot be over 200.
+ * page: the page of results to return.
+ */
+ 
+SpazTwit.prototype.retweetedToMe = function(since, max, count, page){
+	var url = this.getAPIURL('retweeted_to_me', {
+		'since_id' : since,
+		'max_id' : max,
+		'count' : count,
+		'page' : page
+	});
+	
+	var opts = {
+		'url' : url,
+		'username' : this.username,
+		'password' : this.password,
+		'success_event_type' : 'retweeted_to_me_succeeded',
+		'failure_event_type' : 'retweeted_to_me_failed',
+		'method' : 'GET'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+/*
+ * Returns up to 200 of the most recent retweets of the user's tweets
+ * since: the numeric id of the tweet serving as a floor
+ * max: the numeric id of the tweet serving as a ceiling
+ * count: the number of tweets to return. Cannot be over 200.
+ * page: the page of results to return.
+ */
+ 
+SpazTwit.prototype.retweetsOfMe = function(since, max, count, page){
+	var url = this.getAPIURL('retweets_of_me', {
+		'since_id' : since,
+		'max_id' : max,
+		'count' : count,
+		'page' : page
+	});
+	
+	var opts = {
+		'url' : url,
+		'username' : this.username,
+		'password' : this.password,
+		'success_event_type' : 'retweets_of_me_succeeded',
+		'failure_event_type' : 'retweets_of_me_failed',
+		'method' : 'GET'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
 
 SpazTwit.prototype.favorite = function(id, onSuccess, onFailure) {
 	var data = {};
