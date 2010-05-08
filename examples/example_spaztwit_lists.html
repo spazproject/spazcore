@@ -242,32 +242,6 @@
 			$('#notice').attr('class', 'error');
 		});
 
-		sch.listen(document, 'check_list_subscribers_succeeded', function(e, data) {
-			showResponse(e);
-			
-			var expression = /\/\d+\/[\w\-]*\/[\w\-]*\/subscribers\/[\w\-]*\.json\?user=([\w\-]*)\&slug=([\w\-]*)&id=[\w\-]*/;
-			var m = expression.exec(data.url);
-			var user = m[1];
-			var slug = m[2];
-			$('#list-check-subscription-'+user+'-'+slug).attr('style', 'display:none;');
-			$('#list-is-subscribed-'+user+'-'+slug).attr('style', 'display:none;');
-			$('#list-not-subscribed-'+user+'-'+slug).attr('style', 'display:block;');
-		});
-		
-		/*
-			Get list subscribers failed
-		*/
-		sch.listen(document, 'check_list_subscribers_failed', function(e, data) {
-			showResponse(e);
-			
-			var expression = /\/\d+\/[\w\-]*\/[\w\-]*\/subscribers\/[\w\-]*\.json\?user=([\w\-]*)\&slug=([\w\-]*)&id=[\w\-]*/;
-			var m = expression.exec(data.url);
-			var user = m[1];
-			var slug = m[2];
-			$('#list-check-subscription-'+user+'-'+slug).attr('style', 'display:none;');
-			$('#list-is-subscribed-'+user+'-'+slug).attr('style', 'display:none;');
-			$('#list-not-subscribed-'+user+'-'+slug).attr('style', 'display:block;');
-		});
 
 		sch.listen(document, 'get_list_subscribers_failed', function(e) {
 			showResponse(e);
