@@ -40,9 +40,8 @@ var SpazTimeline = function(opts) {
 	/**
 	 * Again, due to scope issues, we define this here to take advantage of the closure 
 	 */
-	this.onSuccess = function(e) {
+	this.onSuccess = function(e, data) {
 		sch.debug('onSuccess timeline');
-		var data = sc.helpers.getEventData(e);
 		thisTL.data_success.call(thisTL, e, data);
 		thisTL.startRefresher();	
 	};
@@ -50,9 +49,8 @@ var SpazTimeline = function(opts) {
 	/**
 	 * Again, due to scope issues, we define this here to take advantage of the closure 
 	 */
-	this.onFailure = function(e) {
+	this.onFailure = function(e, data) {
 		sch.debug('onFailure timeline');
-		var data = sc.helpers.getEventData(e);
 		thisTL.data_failure.call(thisTL, e, data);
 		thisTL.startRefresher();	
 	};
@@ -160,8 +158,8 @@ SpazTimeline.prototype.startListening = function() {
 SpazTimeline.prototype.stopListening = function() {
 	var thisTL = this;
 	sc.helpers.debug("Stopping listening for "+thisTL.success_event);
-	sc.helpers.unlisten(thisTL.event_target, thisTL.success_event, thisTL.onSuccess);
-	sc.helpers.unlisten(thisTL.event_target, thisTL.failure_event, thisTL.onFailure);
+	sc.helpers.unlisten(thisTL.event_target, thisTL.success_event);
+	sc.helpers.unlisten(thisTL.event_target, thisTL.failure_event);
 };
 
 SpazTimeline.prototype.startRefresher = function() {

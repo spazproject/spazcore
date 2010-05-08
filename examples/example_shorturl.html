@@ -21,21 +21,19 @@
 	/*
 		display the data passed from the event
 	*/
-	function showShortUrl(e) {
+	function showShortUrl(e, data) {
 		
 		$('#results').fadeIn(200, function() {
-			$('#short-url').html(e[SPAZCORE_EVENTDATA_ATTRIBUTE].shorturl);	
+			$('#short-url').html(data.shorturl);	
 		});
 		
 	}
 
-	function showMultipleShortURLs(e) {
+	function showMultipleShortURLs(e, data) {
 		
 		// $('#multiple-results').fadeIn(200, function() {
 		// 	$('#shortened-URLs').html(sc.helpers.getEventData(e));	
 		// });
-		
-		var data = sc.helpers.getEventData(e);
 		
 		var html = jQuery('#multiple_url').val();
 		html = sc.helpers.replaceMultiple(html, data);
@@ -43,10 +41,10 @@
 		
 	}
 
-	function showLongUrl(e) {
+	function showLongUrl(e, data) {
 		
 		$('#expand-results').fadeIn(200, function() {
-			$('#expanded_url').html(e[SPAZCORE_EVENTDATA_ATTRIBUTE].longurl);
+			$('#expanded_url').html(data.longurl);
 		});
 		
 	}

@@ -39,9 +39,8 @@
 	
 		var twit = new SpazTwit();
 
-		function showResponse(e) {
+		function showResponse(e, data) {
 			sch.debug(e);
-			data = sch.getEventData(e);
 			json = sch.enJSON(data);
 			$('#response').html(json);
 		}
@@ -149,9 +148,8 @@
 		/*
 			Get List listener
 		*/
-		sch.listen(document, 'get_lists_succeeded', function(e) {
+		sch.listen(document, 'get_lists_succeeded', function(e, data) {
 			showResponse(e);
-			var data = sch.getEventData(e);
 			
 			$('#lists').empty();
 			
@@ -224,9 +222,8 @@
 		/*
 			Get list members succeeded
 		*/
-		sch.listen(document, 'get_list_members_succeeded', function(e) {
+		sch.listen(document, 'get_list_members_succeeded', function(e, data) {
 			showResponse(e);
-			var data = sch.getEventData(e);
 			
 			//sch.debug(data);
 			
@@ -321,9 +318,8 @@
 		/*
 			Get list timeline suceeded
 		*/
-		sch.listen(document, 'get_list_timeline_succeeded', function(e) {
+		sch.listen(document, 'get_list_timeline_succeeded', function(e, data) {
 			showResponse(e);
-			var data = sch.getEventData(e);
 			
 			var jqcontainer = $('.list-timeline[data-list-slug='+data.slug+'][data-list-user='+data.user+']');
 			sch.debug(jqcontainer);
