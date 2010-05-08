@@ -10,7 +10,13 @@ This includes information on browsers we've used to run these examples
     
     Ex:
     > chromium-browser --disable-web-security example_oauth.html
-    
+
+- Chrome (OS X)
+
+	enter this in the terminal:
+	
+	open -b com.google.chrome --args --disable-web-security
+
 - Firefox 3.6 (Linux Ubuntu 10.04)
 
     Note: this is still flakey
