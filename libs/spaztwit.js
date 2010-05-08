@@ -71,6 +71,8 @@ var SPAZCORE_SERVICEURL_WORDPRESS_TWITTER = 'https://twitter-api.wordpress.com/'
  * 'update_failed' (data)
  * 'get_user_succeeded' (data)
  * 'get_user_failed' (data)
+ * 'search_users_succeeded'
+ * 'search_users_failed'
  * 'get_one_status_succeeded' (data)
  * 'get_one_status_failed' (data)
  * 'new_search_timeline_data' (data)
@@ -381,8 +383,11 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.dm_sent            = "direct_messages/sent.json";
     urls.friendslist        = "statuses/friends.json";
     urls.followerslist      = "statuses/followers.json";
-    urls.show_user			= "users/show/{{ID}}.json";
     urls.featuredlist       = "statuses/featured.json";
+
+    // User URLS
+    urls.search_users       = "users/search.json";
+    urls.show_user          = "users/show/{{ID}}.json";
 
     // Action URLs
     urls.update           	= "statuses/update.json";
@@ -1741,6 +1746,24 @@ SpazTwit.prototype.getUser = function(user_id, onSuccess, onFailure) {
 		Perform a request and get true or false back
 	*/
 	var xhr = this._callMethod(opts);
+};
+
+
+
+SpazTwit.prototype.searchUsers = function(query, onSuccess, onFailure) {
+    var url = this.getAPIURL('search_users');
+
+    var opts = {
+        'url':url,
+        'username':this.username,
+        'password':this.password,
+        'process_callback':this._processUserList,
+        'success_event_type':'search_users_succeeded',
+        'failure_event_type':'search_users_failed',
+        'method':'GET'
+    };
+
+    var xhr = this._callMethod(opts);
 };
 
 
