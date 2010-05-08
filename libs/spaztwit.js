@@ -2087,7 +2087,7 @@ SpazTwit.prototype.getRetweets = function(id, count) {
 		'method' : 'GET'
 	};
 	
-	var xhr = this._callMethod(opts);
+	var xhr = this._getTimeline(opts);
 }
 
 /*
@@ -2099,12 +2099,22 @@ SpazTwit.prototype.getRetweets = function(id, count) {
  */
  
 SpazTwit.prototype.retweetedByMe = function(since, max, count, page){
-	var url = this.getAPIURL('retweeted_by_me', {
-		'since_id' : since,
-		'max_id' : max,
-		'count' : count,
-		'page' : page
-	});
+	var params = {}
+	if(since != null){
+		params['since_id'] = since;
+	}
+	if(max != null){
+		params['max_id'] = max;
+	}
+	if(count == null){
+		count = 20;
+	}
+	params['count'] = count;
+	if(page == null){
+		page = 1;
+	}
+	params['page'] = page;
+	var url = this.getAPIURL('retweeted_by_me', params);
 	
 	var opts = {
 		'url' : url,
@@ -2115,7 +2125,7 @@ SpazTwit.prototype.retweetedByMe = function(since, max, count, page){
 		'method' : 'GET'
 	};
 	
-	var xhr = this._callMethod(opts);
+	var xhr = this._getTimeline(opts);
 }
 
 /*
@@ -2127,12 +2137,22 @@ SpazTwit.prototype.retweetedByMe = function(since, max, count, page){
  */
  
 SpazTwit.prototype.retweetedToMe = function(since, max, count, page){
-	var url = this.getAPIURL('retweeted_to_me', {
-		'since_id' : since,
-		'max_id' : max,
-		'count' : count,
-		'page' : page
-	});
+	var params = {}
+	if(since != null){
+		params['since_id'] = since;
+	}
+	if(max != null){
+		params['max_id'] = max;
+	}
+	if(count == null){
+		count = 20;
+	}
+	params['count'] = count;
+	if(page == null){
+		page = 1;
+	}
+	params['page'] = page;
+	var url = this.getAPIURL('retweeted_to_me', params);
 	
 	var opts = {
 		'url' : url,
@@ -2143,7 +2163,7 @@ SpazTwit.prototype.retweetedToMe = function(since, max, count, page){
 		'method' : 'GET'
 	};
 	
-	var xhr = this._callMethod(opts);
+	var xhr = this._getTimeline(opts);
 }
 
 /*
@@ -2155,12 +2175,22 @@ SpazTwit.prototype.retweetedToMe = function(since, max, count, page){
  */
  
 SpazTwit.prototype.retweetsOfMe = function(since, max, count, page){
-	var url = this.getAPIURL('retweets_of_me', {
-		'since_id' : since,
-		'max_id' : max,
-		'count' : count,
-		'page' : page
-	});
+	var params = {}
+	if(since != null){
+		params['since_id'] = since;
+	}
+	if(max != null){
+		params['max_id'] = max;
+	}
+	if(count == null){
+		count = 20;
+	}
+	params['count'] = count;
+	if(page == null){
+		page = 1;
+	}
+	params['page'] = page;
+	var url = this.getAPIURL('retweets_of_me', params);
 	
 	var opts = {
 		'url' : url,
@@ -2171,7 +2201,7 @@ SpazTwit.prototype.retweetsOfMe = function(since, max, count, page){
 		'method' : 'GET'
 	};
 	
-	var xhr = this._callMethod(opts);
+	var xhr = this._getTimeline(opts);
 }
 
 SpazTwit.prototype.favorite = function(id, onSuccess, onFailure) {

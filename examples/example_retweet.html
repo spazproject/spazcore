@@ -109,7 +109,46 @@
 			showResponse(e);
 			
 			
-			var html = tpls.parseArray('timeline-entry', data.statuses);
+			var html = tpls.parseArray('timeline-entry', data);
+			
+			$("#tweets").html(html);
+			
+		});
+
+		/*
+			Get Retweets of me succeeded
+		*/
+		sch.listen(document, 'retweets_of_me_succeeded', function(e, data) {
+			showResponse(e);
+			
+			
+			var html = tpls.parseArray('timeline-entry', data);
+			
+			$("#tweets").html(html);
+			
+		});
+
+		/*
+			Get Retweets by me succeeded
+		*/
+		sch.listen(document, 'retweeted_by_me_succeeded', function(e, data) {
+			showResponse(e);
+			
+			
+			var html = tpls.parseArray('timeline-entry', data);
+			
+			$("#tweets").html(html);
+			
+		});
+
+		/*
+			Get Retweets of me succeeded
+		*/
+		sch.listen(document, 'retweeted_to_me_succeeded', function(e, data) {
+			showResponse(e);
+			
+			
+			var html = tpls.parseArray('timeline-entry', data);
 			
 			$("#tweets").html(html);
 			
@@ -130,7 +169,19 @@
 			$('#get-retweets').click(function() { 
 				$('#notice').attr('class', 'hidden');
 				twit.getRetweets($('#tweet-id').val(), 20);
-			});	
+			});
+			$('#retweets-to-me').click(function() { 
+				$('#notice').attr('class', 'hidden');
+				twit.retweetedToMe(null, null, 20, 1);
+			});
+			$('#retweets-by-me').click(function() { 
+				$('#notice').attr('class', 'hidden');
+				twit.retweetedByMe(null, null, 20, 1);
+			});
+			$('#retweets-of-me').click(function() { 
+				$('#notice').attr('class', 'hidden');
+				twit.retweetsOfMe(null, null, 20, 1);
+			});
 		});
 	</script>
 	
@@ -151,6 +202,9 @@
 			<label for="tweet-id">ID to retweet</label><input type="text" name="tweet-id" value="13371088996" id="tweet-id">
 			<input type="button" name="retweet" value="Retweet" id="retweet">
 			<input type="button" name="getRetweets" value="Get Retweets" id="get-retweets">
+		</div>
+		<div>
+			Get tweets retweeted <input type="button" name="retweetsToMe" value="to" id="retweets-to-me"> / <input type="button" name="retweetsByMe" value="by" id="retweets-by-me"> / <input type="button" name="retweetsOfMe" value="from" id="retweets-of-me"> me.
 		</div>
 	</form>
 	
