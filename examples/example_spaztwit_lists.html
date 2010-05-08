@@ -169,9 +169,8 @@
 			$('#notice').attr('class', 'error');
 		});
 		
-		sch.listen(document, 'get_subscriptions_succeeded', function(e) {
+		sch.listen(document, 'get_subscriptions_succeeded', function(e, data) {
 			showResponse(e);
-			var data = sch.getEventData(e);
 			
 			$('#lists').empty();
 			
@@ -195,9 +194,8 @@
 		/*
 			Get list Info succeeded
 		*/
-		sch.listen(document, 'get_list_succeeded', function(e) {
+		sch.listen(document, 'get_list_succeeded', function(e, data) {
 			showResponse(e);
-			var data = sch.getEventData(e);
 			
 			$('#list-form-name').attr('value', data.name);
 			$('#list-form-description').attr('value', data.description);
@@ -278,9 +276,8 @@
 			$('#notice').attr('class', 'error');
 		});
 		
-		sch.listen(document, 'get_list_subscribers_succeeded', function(e) {
+		sch.listen(document, 'get_list_subscribers_succeeded', function(e, data) {
 			showResponse(e);
-			var data = sch.getEventData(e);
 			
 			//sch.debug(data);
 			
@@ -289,9 +286,8 @@
 			$('#list-members').html(html);
 		});
 		
-		sch.listen(document, 'get_list_memberships_succeeded', function(e) {
+		sch.listen(document, 'get_list_memberships_succeeded', function(e, data) {
 			showResponse(e);
-			var data = sch.getEventData(e);
 			
 			//sch.debug(data);
 			
@@ -407,9 +403,8 @@
 		/*
 			Add user to list succeeded
 		*/
-		sch.listen(document, 'add_list_user_succeeded', function(e) {
+		sch.listen(document, 'add_list_user_succeeded', function(e, data) {
 			showResponse(e);
-			var data = sch.getEventData(e);
 			twit.getLists();
 			
 			$('#notice').html('Successfully added user to ' + data.full_name + '.');
@@ -429,9 +424,8 @@
 		/*
 			Remove user from list succeeded
 		*/
-		sch.listen(document, 'remove_list_user_succeeded', function(e) {
+		sch.listen(document, 'remove_list_user_succeeded', function(e, data) {
 			showResponse(e);
-			var data = sch.getEventData(e);
 			twit.getLists();
 			twit.getListMembers(data.slug, data.user.screen_name);
 			
@@ -508,7 +502,8 @@
 			$('.listissubscribed').live('click', function(e) {
 				$('#notice').attr('class', 'hidden');
 				
-				var looking_for = $(this).attr('data-user-screen_name');
+				var user = $(this).attr('data-user-screen_name');
+				var slug = $(this).attr('data-list-slug');
 				
 				/*
 					unlisten so we don't get dupe listeners
@@ -522,33 +517,21 @@
 				sch.listen(document, 'check_list_subscribers_succeeded', function(e, data) {
 					showResponse(e);
 
-					alert(looking_for); // closure!
-
-					var expression = /\/\d+\/[\w\-]*\/[\w\-]*\/subscribers\/[\w\-]*\.json\?user=([\w\-]*)\&slug=([\w\-]*)&id=[\w\-]*/;
-					var m = expression.exec(data.url);
-					var user = m[1];
-					var slug = m[2];
 					$('#list-check-subscription-'+user+'-'+slug).attr('style', 'display:none;');
-					$('#list-is-subscribed-'+user+'-'+slug).attr('style', 'display:none;');
-					$('#list-not-subscribed-'+user+'-'+slug).attr('style', 'display:block;');
+					$('#list-is-subscribed-'+user+'-'+slug).attr('style', 'display:block;');
+					$('#list-not-subscribed-'+user+'-'+slug).attr('style', 'display:none;');
 				});
 
 
 				sch.listen(document, 'check_list_subscribers_failed', function(e, data) {
 					showResponse(e);
 
-					alert(looking_for); // closure!
-
-					var expression = /\/\d+\/[\w\-]*\/[\w\-]*\/subscribers\/[\w\-]*\.json\?user=([\w\-]*)\&slug=([\w\-]*)&id=[\w\-]*/;
-					var m = expression.exec(data.url);
-					var user = m[1];
-					var slug = m[2];
 					$('#list-check-subscription-'+user+'-'+slug).attr('style', 'display:none;');
 					$('#list-is-subscribed-'+user+'-'+slug).attr('style', 'display:none;');
 					$('#list-not-subscribed-'+user+'-'+slug).attr('style', 'display:block;');
 				});
 				
-				twit.isSubscribed( $(this).attr('data-list-slug'), looking_for );
+				twit.isSubscribed( slug, user );
 			});
 			$('.listmodify').live('click', function(e) {
 				twit.getListInfo($(this).attr('data-list-slug'));
