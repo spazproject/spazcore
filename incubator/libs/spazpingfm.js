@@ -100,7 +100,7 @@ SpazPingFM.prototype._request = function(method, data, success, failure, opts) {
         success: function(xml) {
             var rsp = jQuery(xml).find("rsp");
             var data = {
-                status: rsp.find("status").text(),
+                status: rsp.attr('status'),
                 transaction: rsp.find("transaction").text(),
                 method: rsp.find("method").text()
             };
