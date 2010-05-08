@@ -419,6 +419,13 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 	urls.trends_current		= "trends/current.json";
 	urls.trends_daily		= "trends/daily.json";
 	urls.trends_weekly		= "trends/weekly.json";
+	
+	//retweet
+	urls.retweet			= "statuses/retweet/id.json"
+	urls.retweets			= "statuses/retweets/id.json"
+	urls.retweeted_by_me	= "statuses/retweeted_by_me.json"
+	urls.retweeted_to_me	= "statuses/retweeted_to_me.json"
+	urls.retweets_of_me		= "statuses/retweets_of_me.json"
 
 	// search
 	if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER) {
