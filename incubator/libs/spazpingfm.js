@@ -85,7 +85,7 @@ SpazPingFM.prototype.setUserKey = function(userkey) {
  * @return void
  */
 SpazPingFM.prototype._request = function(method, data, success, failure, opts) {
-    if (!jQuery.isPlainObject(opts)) {
+    if (typeof opts != "object") {
         opts = {};
     }
     if (!opts.event_target) {
@@ -151,7 +151,7 @@ SpazPingFM.prototype.getUserKeyWithMobileKey = function(mobilekey, opts) {
         mobile_key: mobilekey
     };
 
-    if (!jQuery.isPlainObject(opts)) {
+    if (typeof opts != "object") {
         opts = {};
     }
     var self = this;
@@ -205,7 +205,7 @@ SpazPingFM.prototype.getServices = function(opts) {
         user_app_key: this.getUserKey() 
     };
 
-    if (!jQuery.isPlainObject(opts)) {
+    if (typeof opts != "object") {
         opts = {};
     }
     opts.process = function(rsp) {
@@ -245,7 +245,7 @@ SpazPingFM.prototype.getTriggers = function(opts) {
         user_app_key: this.getUserKey() 
     };
 
-    if (!jQuery.isPlainObject(opts)) {
+    if (typeof opts != "object") {
         opts = {};
     }
     opts.process = function(rsp) {
@@ -300,7 +300,7 @@ SpazPingFM.prototype.getLatest = function(params, opts) {
     }
     jQuery.extend(data, params);
 
-    if (!jQuery.isPlainObject(opts)) {
+    if (typeof opts != "object") {
         opts = {};
     }
     opts.process = function(rsp) {
