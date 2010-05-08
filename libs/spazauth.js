@@ -37,6 +37,34 @@ function SpazAuth(service) {
 };
 
 /**
+ * Construct a new basic authentication object.
+ *
+ * @class SpazBasicAuth
+ */
+function SpazBasicAuth() {
+}
+
+/**
+ * Set username and password of account to access service.
+ *
+ * @param {string} username
+ * @param {string} password
+ * @class SpazBasicAuth
+ */
+SpazBasicAuth.prototype.authorize(username, password) {
+    this.authHeader = "Basic " + sc.helpers.Base64.encode(username + ":" + password);
+}
+
+/**
+ * Returns the authentication header
+ * @returns {string} Authentication header value
+ * @class SpazBasicAuth
+ */
+SpazBasicAuth.prototype.signRequest() {
+    return this.authHeader;
+}
+
+/**
  * Construct a new OAuth authentication object.
  *
  * @param {string} realm
@@ -104,11 +132,7 @@ SpazOAuth.prototype.authorize = function(username, password) {
 }
 
 /**
- * Sign a HTTP request
- *
- * If parameters is provided, it will be filled with the oauth_* values.
- * You do not need to then include the Authorziation header if you include
- * those parameters in the body of the request.
+ * Sign a HTTP request and return oAuth header
  *
  * @param {string} method HTTP method of the request
  * @param {string} url the URL of the request
@@ -120,7 +144,7 @@ SpazOAuth.prototype.signRequest = function(method, url, parameters) {
     OAuth.completeRequest({
         method: method,
         action: url,
-        parameters: parameters
+        parameters: jQuery.extend({}, parameters);  // we need to copy parameters because OAuth.js modifies it
     }, this.signingCredentials);
 
     return OAuth.getAuthorizationHeader(this.realm, parameters);
