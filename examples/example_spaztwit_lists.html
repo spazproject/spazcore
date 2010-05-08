@@ -60,9 +60,14 @@
 							}
 							html += ' | <span class="listshow clickable" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">Show</span>'
 							+ ' | <span class="listshowsubscribers clickable" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">Show Subscribers</span>'
+							
 							+ ' | <span class="listissubscribed clickable" id="list-check-subscription-'+d.user.screen_name+'-'+d.slug+'" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">Check Subscription</span>'
 							+ '<span style="display:none;" id="list-is-subscribed-'+d.user.screen_name+'-'+d.slug+'" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">You <strong>are</strong> subscribed to this list.</span>'
 							+ '<span style="display:none;" id="list-not-subscribed-'+d.user.screen_name+'-'+d.slug+'" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">You <strong>are not</strong> subscribed to this list.</span>'
+							
+							+ ' | <span class="listismember clickable" id="list-check-membership-'+d.user.screen_name+'-'+d.slug+'" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">Check Membership</span>'
+							+ '<span style="display:none;" id="list-is-member-'+d.user.screen_name+'-'+d.slug+'" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">You <strong>are</strong> a member of this list.</span>'
+							+ '<span style="display:none;" id="list-not-member-'+d.user.screen_name+'-'+d.slug+'" data-list-slug="'+d.slug+'" data-user-screen_name="'+d.user.screen_name+'">You <strong>are not</strong> a member of this list.</span>'
 						+'</div>'
 						+'<div class="list-timeline" data-list-slug="'+d.slug+'" data-list-user="'+d.user.screen_name+'" data-list-id="'+d.id+'"></div>';
 						if (d.mode === 'private') {
@@ -507,6 +512,42 @@
 				
 				twit.isSubscribed( slug, user );
 			});
+			
+			$('.listismember').live('click', function(e) {
+				$('#notice').attr('class', 'hidden');
+				
+				var user = $(this).attr('data-user-screen_name');
+				var slug = $(this).attr('data-list-slug');
+				
+				/*
+					unlisten so we don't get dupe listeners
+				*/
+				sch.unlisten(document, 'check_list_members_succeeded');
+				sch.unlisten(document, 'check_list_members_failed');
+				
+				/*
+					now start up our listeners
+				*/
+				sch.listen(document, 'check_list_members_succeeded', function(e, data) {
+					showResponse(e);
+
+					$('#list-check-membership-'+user+'-'+slug).attr('style', 'display:none;');
+					$('#list-is-member-'+user+'-'+slug).attr('style', 'display:block;');
+					$('#list-not-member-'+user+'-'+slug).attr('style', 'display:none;');
+				});
+
+
+				sch.listen(document, 'check_list_members_failed', function(e, data) {
+					showResponse(e);
+
+					$('#list-check-membership-'+user+'-'+slug).attr('style', 'display:none;');
+					$('#list-is-member-'+user+'-'+slug).attr('style', 'display:none;');
+					$('#list-not-member-'+user+'-'+slug).attr('style', 'display:block;');
+				});
+				
+				twit.isMember( slug, user );
+			});
+			
 			$('.listmodify').live('click', function(e) {
 				twit.getListInfo($(this).attr('data-list-slug'));
 				$('#notice').attr('class', 'hidden');
