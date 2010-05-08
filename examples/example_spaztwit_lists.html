@@ -271,7 +271,6 @@
 			$('#list-not-subscribed-'+user+'-'+slug).attr('style', 'display:block;');
 		});
 
-
 		sch.listen(document, 'get_list_subscribers_failed', function(e) {
 			showResponse(e);
 			
@@ -508,7 +507,48 @@
 			});
 			$('.listissubscribed').live('click', function(e) {
 				$('#notice').attr('class', 'hidden');
-				twit.isSubscribed( $(this).attr('data-list-slug'), $(this).attr('data-user-screen_name') );
+				
+				var looking_for = $(this).attr('data-user-screen_name');
+				
+				/*
+					unlisten so we don't get dupe listeners
+				*/
+				sch.unlisten(document, 'check_list_subscribers_succeeded');
+				sch.unlisten(document, 'check_list_subscribers_failed');
+				
+				/*
+					now start up our listeners
+				*/
+				sch.listen(document, 'check_list_subscribers_succeeded', function(e, data) {
+					showResponse(e);
+
+					alert(looking_for); // closure!
+
+					var expression = /\/\d+\/[\w\-]*\/[\w\-]*\/subscribers\/[\w\-]*\.json\?user=([\w\-]*)\&slug=([\w\-]*)&id=[\w\-]*/;
+					var m = expression.exec(data.url);
+					var user = m[1];
+					var slug = m[2];
+					$('#list-check-subscription-'+user+'-'+slug).attr('style', 'display:none;');
+					$('#list-is-subscribed-'+user+'-'+slug).attr('style', 'display:none;');
+					$('#list-not-subscribed-'+user+'-'+slug).attr('style', 'display:block;');
+				});
+
+
+				sch.listen(document, 'check_list_subscribers_failed', function(e, data) {
+					showResponse(e);
+
+					alert(looking_for); // closure!
+
+					var expression = /\/\d+\/[\w\-]*\/[\w\-]*\/subscribers\/[\w\-]*\.json\?user=([\w\-]*)\&slug=([\w\-]*)&id=[\w\-]*/;
+					var m = expression.exec(data.url);
+					var user = m[1];
+					var slug = m[2];
+					$('#list-check-subscription-'+user+'-'+slug).attr('style', 'display:none;');
+					$('#list-is-subscribed-'+user+'-'+slug).attr('style', 'display:none;');
+					$('#list-not-subscribed-'+user+'-'+slug).attr('style', 'display:block;');
+				});
+				
+				twit.isSubscribed( $(this).attr('data-list-slug'), looking_for );
 			});
 			$('.listmodify').live('click', function(e) {
 				twit.getListInfo($(this).attr('data-list-slug'));
