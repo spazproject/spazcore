@@ -7,6 +7,7 @@
     <script type="text/javascript" src="../vendors/sha1.js"></script>
     <script type="text/javascript" src="../vendors/oauth.js"></script>
     <script type="text/javascript" src="spazcore-standard.js"></script>
+    <script type="text/javascript" src="../libs/spaztwit.js"></script>
     <script type="text/javascript" src="../libs/spazauth.js"></script>
 </head>
 
@@ -19,6 +20,7 @@
     <button id="auth">Authenticate!</button>
 
     <div id="results"></div>
+    <div id="timeline" style="display: none;"><button id="loadTimeline">Load timeline!</button></div>
 
     <script>
         var auth = new SpazAuth('twitter');
@@ -27,9 +29,28 @@
             if (result) {
                 $('#results').append("<h3>Access token key: " + auth.accessToken.key + "</h3>");
                 $('#results').append("<h3>Access token secret: " + auth.accessToken.secret + "</h3>");
+                $('#timeline').show();
             } else {
                 $('#results').append("<h3>Failed!</h3>");
             }
+        });
+
+        function renderTimeline(timeline) {
+            var html = "";
+            timeline.forEach(function(tweet) {
+                html += "<h4>";
+                html += "<strong>" + tweet.user.screen_name + ":</strong>";
+                html += tweet.text;
+                html += "</h4>";
+            });
+            $('#timeline').empty().append(html);
+        };
+
+        $('#loadTimeline').click(function() {
+            var twit = new SpazTwit(auth);
+            twit.getHomeTimeline(null, 200, null, null, renderTimeline, function(){
+                $('#timeline').append("<h3>Error loading timeline!</h3>");
+			});
         });
     </script>
 </body>

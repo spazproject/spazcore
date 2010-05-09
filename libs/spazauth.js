@@ -42,7 +42,7 @@ function SpazAuth(service) {
  * @class SpazBasicAuth
  */
 function SpazBasicAuth() {
-}
+};
 
 /**
  * Set username and password of account to access service.
@@ -51,18 +51,19 @@ function SpazBasicAuth() {
  * @param {string} password
  * @class SpazBasicAuth
  */
-SpazBasicAuth.prototype.authorize(username, password) {
+SpazBasicAuth.prototype.authorize = function(username, password) {
+    this.username = username;
     this.authHeader = "Basic " + sc.helpers.Base64.encode(username + ":" + password);
-}
+};
 
 /**
  * Returns the authentication header
  * @returns {string} Authentication header value
  * @class SpazBasicAuth
  */
-SpazBasicAuth.prototype.signRequest() {
+SpazBasicAuth.prototype.signRequest = function() {
     return this.authHeader;
-}
+};
 
 /**
  * Construct a new OAuth authentication object.
@@ -74,7 +75,7 @@ SpazBasicAuth.prototype.signRequest() {
 function SpazOAuth(realm, options) {
     this.realm = realm;
     this.opts = options;
-}
+};
 
 /**
  * Authorize access to the service by fetching an OAuth access token.
@@ -85,6 +86,8 @@ function SpazOAuth(realm, options) {
  * @class SpazOAuth
  */
 SpazOAuth.prototype.authorize = function(username, password) {
+    this.username = username;
+
     // Fill in xAuth parameters
     var parameters = {
         'x_auth_username': username,
@@ -129,7 +132,7 @@ SpazOAuth.prototype.authorize = function(username, password) {
     } else {
         return false;
     }
-}
+};
 
 /**
  * Sign a HTTP request and return oAuth header
@@ -141,11 +144,15 @@ SpazOAuth.prototype.authorize = function(username, password) {
  * @class SpazOAuth
  */
 SpazOAuth.prototype.signRequest = function(method, url, parameters) {
+    // We need to copy parameters because OAuth.js modifies it.
+    var param = jQuery.extend({}, parameters);
+
     OAuth.completeRequest({
         method: method,
         action: url,
-        parameters: jQuery.extend({}, parameters);  // we need to copy parameters because OAuth.js modifies it
+        parameters: param
     }, this.signingCredentials);
 
-    return OAuth.getAuthorizationHeader(this.realm, parameters);
-}
+    return OAuth.getAuthorizationHeader(this.realm, param);
+};
+
