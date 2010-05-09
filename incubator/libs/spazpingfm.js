@@ -99,25 +99,32 @@ SpazPingFM.prototype._request = function(method, data, success, failure, opts) {
         data: data,
         success: function(xml) {
             var rsp = jQuery(xml).find("rsp");
-            var data = {
-                status: rsp.attr('status'),
+            var response = {
+                status: rsp.attr("status"),
                 transaction: rsp.find("transaction").text(),
-                method: rsp.find("method").text()
+                method: rsp.find("method").text(),
+                request: data,
+                xml: xml,
+                message: rsp.find("message").text()
             };
             var trigger;
-            if (data.status == "OK") {
+            if (response.status == "FAIL"
+                && response.message.indexOf("User has no") != -1) {
+                response.status = "OK";
+                response.response = [];
+                trigger = success;
+            } else if (response.status != "FAIL") {
                 if (jQuery.isFunction(opts.process)) {
-                    jQuery.extend(data, opts.process(rsp));
+                    response.response = opts.process(rsp);
                 }
                 trigger = success;
             } else {
-                data.message = rsp.find("message").text();
                 trigger = failure;
             }
             sc.helpers.triggerCustomEvent(
                 trigger,
                 opts.event_target,
-                data
+                response
             );
         },
         error: function(xhr, msg, exc) {
@@ -295,7 +302,7 @@ SpazPingFM.prototype.getLatest = function(params, opts) {
         user_app_key: this.getUserKey() 
     };
 
-    if (!jQuery.isPlainObject(params)) {
+    if (typeof params != "object") {
         params = {};
     }
     jQuery.extend(data, params);
@@ -358,10 +365,11 @@ SpazPingFM.prototype.getLatest = function(params, opts) {
 SpazPingFM.prototype.post = function(body, params, opts) {
 	var data = {
         api_key: this.getAPIKey(),
-        user_app_key: this.getUserKey()
+        user_app_key: this.getUserKey(),
+        body: body
     };
 
-    if (!jQuery.isPlainObject(params)) {
+    if (typeof params != "object") {
         params = {};
     }
     jQuery.extend(data, params);
@@ -400,7 +408,7 @@ SpazPingFM.prototype.triggerPost = function(body, trigger, params, opts) {
         body: body
     };
 
-    if (!jQuery.isPlainObject(params)) {
+    if (typeof params != "object") {
         params = {};
     }
     jQuery.extend(data, params);
