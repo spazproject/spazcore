@@ -1,4 +1,4 @@
-/*********** Built 2010-05-08 16:35:05 EDT ***********/
+/*********** Built 2010-05-08 20:22:10 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -6620,6 +6620,30 @@ sc.helpers.containsScreenName = function(str, sn) {
 	
 };
 
+sc.helpers.extractScreenNames = function(str, tpl) {
+	var re_uname = /(^|\s|\(\[|,|\.|\()@([a-zA-Z0-9_]+)([^a-zA-Z0-9_]|$)/gi;
+	var usernames = [];
+	var ms = [];
+	while (ms = re_uname.exec(str))
+	{
+		
+		/*
+			sometimes we can end up with a null instead of a blank string,
+			so we need to force the issue in javascript.
+		*/
+		for (var x=0; x<ms.length; x++) {
+			if (!ms[x]) {
+				ms[x] = '';
+			}
+		}
+		
+		if(ms[2] != ''){
+			usernames.push(ms[2]);
+		}
+	}
+	return usernames;
+};
+
 /**
  * find URLs within the given string 
  */
@@ -11224,6 +11248,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.ratelimit_status   = "account/rate_limit_status.json";
 	urls.update_profile		= "account/update_profile.json";
 	urls.saved_searches		= "saved_searches.json";
+	urls.report_spam		= "report_spam.json";
 
     // User lists URLs
     urls.lists              = "{{USER}}/lists.json";
@@ -11231,15 +11256,23 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.lists_memberships  = "{{USER}}/lists/memberships.json";
     urls.lists_timeline     = "{{USER}}/lists/{{SLUG}}/statuses.json";
     urls.lists_members      = "{{USER}}/{{SLUG}}/members.json";
-    urls.lists_check_member = "{{USER}}/{{SLUG}}/{{ID}}.json";
+    urls.lists_check_member = "{{USER}}/{{SLUG}}/members/{{ID}}.json";
     urls.lists_subscribers  = "{{USER}}/{{SLUG}}/subscribers.json";
     urls.lists_check_subscriber = "{{USER}}/{{SLUG}}/subscribers/{{ID}}.json";
+    urls.lists_subscriptions = "{{USER}}/lists/subscriptions.json";
 
 	//trends
 	urls.trends				= "trends.json";
 	urls.trends_current		= "trends/current.json";
 	urls.trends_daily		= "trends/daily.json";
 	urls.trends_weekly		= "trends/weekly.json";
+	
+	//retweet
+	urls.retweet			= "statuses/retweet/{{ID}}.json"
+	urls.retweets			= "statuses/retweets/{{ID}}.json"
+	urls.retweeted_by_me	= "statuses/retweeted_by_me.json"
+	urls.retweeted_to_me	= "statuses/retweeted_to_me.json"
+	urls.retweets_of_me		= "statuses/retweets_of_me.json"
 
 	// search
 	if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER) {
@@ -12853,6 +12886,171 @@ SpazTwit.prototype._processOneItem = function(data, opts) {
 	
 };
 
+// Retweet API
+
+/*
+ * Retweets a tweet.
+ * id: the numeric id of a tweet
+ */
+ 
+SpazTwit.prototype.retweet = function(id, onSuccess, onFailure) {
+	var data = {};
+	data['id'] = id;
+	
+	var url = this.getAPIURL('retweet', data);
+	
+	var opts = {
+		'url' : url,
+		'username' : this.username,
+		'password' : this.password,
+		'success_event_type' : 'retweet_succeeded',
+		'failure_event_type' : 'retweet_failed',
+		'success_callback' : onSuccess,
+		'failure_callback' : onFailure,
+		'data' : data
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+/*
+ * Gets up to 100 of the latest retweets of a tweet.
+ * id: the tweet to get retweets of
+ * count: the number of retweets to get
+ */
+
+SpazTwit.prototype.getRetweets = function(id, count) {
+	var url = this.getAPIURL('retweets', {
+		'id' : id,
+		'count' : count
+	});
+	
+	var opts = {
+		'url' : url,
+		'username' : this.username,
+		'password' : this.password,
+		'success_event_type' : 'get_retweets_succeeded',
+		'failure_event_Type' : 'get_retweets_failed',
+		'method' : 'GET'
+	};
+	
+	var xhr = this._getTimeline(opts);
+}
+
+/*
+ * Returns up to 200 of the most recent retweets by the user
+ * since: the numeric id of the tweet serving as a floor
+ * max: the numeric id of the tweet serving as a ceiling
+ * count: the number of tweets to return. Cannot be over 200.
+ * page: the page of results to return.
+ */
+ 
+SpazTwit.prototype.retweetedByMe = function(since, max, count, page){
+	var params = {}
+	if(since != null){
+		params['since_id'] = since;
+	}
+	if(max != null){
+		params['max_id'] = max;
+	}
+	if(count == null){
+		count = 20;
+	}
+	params['count'] = count;
+	if(page == null){
+		page = 1;
+	}
+	params['page'] = page;
+	var url = this.getAPIURL('retweeted_by_me', params);
+	
+	var opts = {
+		'url' : url,
+		'username' : this.username,
+		'password' : this.password,
+		'success_event_type' : 'retweeted_by_me_succeeded',
+		'failure_event_type' : 'retweeted_by_me_failed',
+		'method' : 'GET'
+	};
+	
+	var xhr = this._getTimeline(opts);
+}
+
+/*
+ * Returns up to 200 of the most recent retweets by the user's friends
+ * since: the numeric id of the tweet serving as a floor
+ * max: the numeric id of the tweet serving as a ceiling
+ * count: the number of tweets to return. Cannot be over 200.
+ * page: the page of results to return.
+ */
+ 
+SpazTwit.prototype.retweetedToMe = function(since, max, count, page){
+	var params = {}
+	if(since != null){
+		params['since_id'] = since;
+	}
+	if(max != null){
+		params['max_id'] = max;
+	}
+	if(count == null){
+		count = 20;
+	}
+	params['count'] = count;
+	if(page == null){
+		page = 1;
+	}
+	params['page'] = page;
+	var url = this.getAPIURL('retweeted_to_me', params);
+	
+	var opts = {
+		'url' : url,
+		'username' : this.username,
+		'password' : this.password,
+		'success_event_type' : 'retweeted_to_me_succeeded',
+		'failure_event_type' : 'retweeted_to_me_failed',
+		'method' : 'GET'
+	};
+	
+	var xhr = this._getTimeline(opts);
+}
+
+/*
+ * Returns up to 200 of the most recent retweets of the user's tweets
+ * since: the numeric id of the tweet serving as a floor
+ * max: the numeric id of the tweet serving as a ceiling
+ * count: the number of tweets to return. Cannot be over 200.
+ * page: the page of results to return.
+ */
+ 
+SpazTwit.prototype.retweetsOfMe = function(since, max, count, page){
+	var params = {}
+	if(since != null){
+		params['since_id'] = since;
+	}
+	if(max != null){
+		params['max_id'] = max;
+	}
+	if(count == null){
+		count = 20;
+	}
+	params['count'] = count;
+	if(page == null){
+		page = 1;
+	}
+	params['page'] = page;
+	var url = this.getAPIURL('retweets_of_me', params);
+	
+	var opts = {
+		'url' : url,
+		'username' : this.username,
+		'password' : this.password,
+		'success_event_type' : 'retweets_of_me_succeeded',
+		'failure_event_type' : 'retweets_of_me_failed',
+		'method' : 'GET'
+	};
+	
+	var xhr = this._getTimeline(opts);
+}
+
 SpazTwit.prototype.favorite = function(id, onSuccess, onFailure) {
 	var data = {};
 	data['id'] = id;
@@ -13415,11 +13613,36 @@ SpazTwit.prototype.addList = function(list, visibility, description) {
 		'password':this.password,
 		'success_event_type':'create_list_succeeded',
 		'failure_event_type':'create_list_failed',
+		'success_callback':null,
+		'failure_callback':null,
 		'data':data
 	};
 	
 	var xhr = this._callMethod(opts);
 };
+
+SpazTwit.prototype.updateList = function(list, name, visibility, description){
+	var data = {};
+	data['name'] = name;
+	data['mode'] = visibility;
+	data['description'] = description;
+	
+	var url = this.getAPIURL('lists_list', {
+		'user': this.username,
+		'slug': list
+	});
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'update_list_succeeded',
+		'failure_event_type':'update_list_failed',
+		'data':data
+	};
+	
+	var xhr = this._callMethod(opts);
+}
 
 /**
  * delete a list
@@ -13443,8 +13666,8 @@ SpazTwit.prototype.removeList = function(list, user) {
 		'url':url,
 		'username':this.username,
 		'password':this.password,
-		'success_event_type':'create_list_succeeded',
-		'failure_event_type':'create_list_failed',
+		'success_event_type':'remove_list_succeeded',
+		'failure_event_type':'remove_list_failed',
 		'method':'DELETE'
 	};
 	
@@ -13476,8 +13699,8 @@ SpazTwit.prototype.addUserToList = function(user, list, list_user) {
 		'url':url,
 		'username':this.username,
 		'password':this.password,
-		'success_event_type':'create_list_succeeded',
-		'failure_event_type':'create_list_failed',
+		'success_event_type':'add_list_user_succeeded',
+		'failure_event_type':'add_list_user_failed',
 		'data':data
 	};
 	
@@ -13509,8 +13732,8 @@ SpazTwit.prototype.removeUserFromList = function(user, list, list_user) {
 		'url':url,
 		'username':this.username,
 		'password':this.password,
-		'success_event_type':'create_list_succeeded',
-		'failure_event_type':'create_list_failed',
+		'success_event_type':'remove_list_user_succeeded',
+		'failure_event_type':'remove_list_user_failed',
 		'data':data,
 		'method':'DELETE'
 	};
@@ -13519,7 +13742,202 @@ SpazTwit.prototype.removeUserFromList = function(user, list, list_user) {
 };
 
 
+SpazTwit.prototype.listsSubscribedTo = function(user) {
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to retrieve subscribed lists');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_subscriptions', {
+		'user': user
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'get_subscriptions_succeeded',
+		'failure_event_type':'get_subscriptions_failed'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
 
+SpazTwit.prototype.listMemberships = function(user) {
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to retrieve list memberships');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_memberships', {
+		'user': user
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'get_list_memberships_succeeded',
+		'failure_event_type':'get_list_memberships_failed'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+SpazTwit.prototype.getListSubscribers = function(list, user){
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to retrieve list subscribers');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_subscribers', {
+		'user': user,
+		'slug': list
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'get_list_subscribers_succeeded',
+		'failure_event_type':'get_list_subscribers_failed',
+		'method':'GET'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+SpazTwit.prototype.isSubscribed = function(list, list_user, user){
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to retrieve list subscribers');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_check_subscriber', {
+		'user': user,
+		'slug': list,
+		'id': list_user
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'check_list_subscribers_succeeded',
+		'failure_event_type':'check_list_subscribers_failed',
+		'method':'GET'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+SpazTwit.prototype.subscribe = function(list, user){
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to subscribe to a list');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_subscribers', {
+		'user': user,
+		'slug': list
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'list_subscribe_succeeded',
+		'failure_event_type':'list_subscribe_failed',
+		'method':'POST'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+SpazTwit.prototype.unsubscribe = function(list, user){
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to unsubscribe');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_subscribers', {
+		'user': user,
+		'slug': list,
+		'id': list_user
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'list_unsubscribe_succeeded',
+		'failure_event_type':'list_unsubscribe_failed',
+		'method':'DELETE'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+SpazTwit.prototype.isMember = function(list, list_user, user){
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to retrieve list memberships');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_check_member', {
+		'user': user,
+		'slug': list,
+		'id': list_user
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'check_list_members_succeeded',
+		'failure_event_type':'check_list_members_failed',
+		'method':'GET'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+/*
+ * Marks a user as a spammer and blocks them
+ */
+ 
+SpazTwit.prototype.reportSpam = function(user) {
+	var url = this.getAPIURL('report_spam');
+	
+	var data = {};
+	data['screen_name'] = user;
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'report_spam_succeeded',
+		'failure_event_type':'report_spam_failed',
+		'method':'POST',
+		'data':data
+	};
+	
+	var xhr = this._callMethod(opts);
+}
 /**
  *  
  */
@@ -13545,7 +13963,6 @@ SpazTwit.prototype.triggerEvent = function(type, data) {
 if (sc) {
 	var scTwit = SpazTwit;
 }
-
 
 
 /*
@@ -13672,8 +14089,7 @@ if (sc) {
 }
 * 
 * 
-*/
-/*jslint 
+*//*jslint 
 browser: true,
 nomen: false,
 debug: true,
