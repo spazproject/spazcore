@@ -1,4 +1,4 @@
-/*********** Built 2010-05-07 16:26:25 EDT ***********/
+/*********** Built 2010-05-08 20:22:10 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -5218,11 +5218,6 @@ onevar: false
  */
 var sc;
  
-/**
- * a constant that defines the attribute where we'll store extra data in the event 
- */
-var SPAZCORE_EVENTDATA_ATTRIBUTE = 'data';
-
 
 /**
  * add an event listener to a target (element, window, etc). Uses target.addEventListener
@@ -5244,8 +5239,8 @@ sc.helpers.addListener = function(target, event_type, handler, scope, use_captur
 		sch.warn('use_capture no longer supported!');
 	}
 	
-	sch.dump('listening for '+event_type);
-	sch.dump('on target nodeName:'+target.nodeName);
+	sch.error('listening for '+event_type);
+	sch.error('on target nodeName:'+target.nodeName);
 	
 	jQuery(target).bind(event_type, handler);
 	
@@ -5266,8 +5261,8 @@ sc.helpers.addListener = function(target, event_type, handler, scope, use_captur
  */
 sc.helpers.removeListener = function(target, event_type, handler, use_capture) {
 
-	sch.dump('removing listener for '+event_type);
-	sch.dump('on target nodeName:'+target.nodeName);
+	sch.error('removing listener for '+event_type);
+	sch.error('on target nodeName:'+target.nodeName);
 
 	if (use_capture) {
 		sch.warn('use_capture no longer supported!');
@@ -5288,9 +5283,9 @@ sc.helpers.addDelegatedListener = function(base_target, selector, event_type, ha
 	
 	sch.warn('scope no longer supported! use a closure or reference "scope" in your event handler');
 	
-	sch.dump('listening for '+event_type);
-	sch.dump('on target nodeName:'+target.nodeName);
-	sch.dump('for selector:'+selector);
+	sch.debug('listening for '+event_type);
+	sch.debug('on target nodeName:'+target.nodeName);
+	sch.debug('for selector:'+selector);
 	
 	jQuery(base_target).delegate(selector, event_type, handler);
 
@@ -5322,8 +5317,10 @@ sc.helpers.removeDelegatedListener = function(base_target, selector, event_type,
  */
 sc.helpers.triggerCustomEvent = function(event_type, target, data, bubble) {
 	
-	sch.dump('triggering '+event_type);
-	sch.dump('on target nodeName:'+target.nodeName);
+	sch.error('triggering '+event_type);
+	sch.error('on target nodeName:'+target.nodeName);
+	sch.error('event data:');
+	// sch.error(sch.enJSON(data));
 	
 	if (bubble) {
 		sch.warn('bubble is no longer supported!');
@@ -5340,9 +5337,11 @@ sc.helpers.triggerCustomEvent = function(event_type, target, data, bubble) {
 /**
  * retrieves the data added to this event object
  * @param {DOMEvent} event_obj 
+ * @deprecated
  */
 sc.helpers.getEventData = function(event_obj) {
-	return event_obj[SPAZCORE_EVENTDATA_ATTRIBUTE];
+	sch.error('getEventData is DEPRECATED. Use second param on event handler');
+	return null;
 };
 
 /**
@@ -6621,7 +6620,7 @@ sc.helpers.containsScreenName = function(str, sn) {
 	
 };
 
-sc.helpers.extractScreenNames = function(str) {
+sc.helpers.extractScreenNames = function(str, tpl) {
 	var re_uname = /(^|\s|\(\[|,|\.|\()@([a-zA-Z0-9_]+)([^a-zA-Z0-9_]|$)/gi;
 	var usernames = [];
 	var ms = [];
@@ -6640,8 +6639,6 @@ sc.helpers.extractScreenNames = function(str) {
 		
 		if(ms[2] != ''){
 			usernames.push(ms[2]);
-		}else{
-			alert(ms);
 		}
 	}
 	return usernames;
@@ -8725,48 +8722,23 @@ SpazPrefs.prototype.setEncrypted = function(key, val) {
  * or initializes the file and loads the defaults
  * @stub
  */
-/*jslint 
-browser: true,
-nomen: false,
-debug: true,
-forin: true,
-undef: true,
-white: false,
-onevar: false 
- */
-var sc;
-
-/**
- * standard
- * platform-specific definitions for prefs lib 
- */
-
-/**
- * this requires the cookies library <http://code.google.com/p/cookies/> 
- */
-SpazPrefs.prototype.load = function() {
-	var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
-	var prefsval = jaaulde.utils.cookies.get(cookie_key);
-		
-	if (prefsval) {
-		sch.debug('prefsval exists');
-		for (var key in prefsval) {
-			sc.helpers.dump('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
-            this._prefs[key] = prefsval[key];
-       	}
-    } else { // init the file
-		sch.debug('prefsval does not exist; saving with defaults');
-        this.save();
-    }
+SpazPrefs.prototype.load = function(name) {
 };
 
+
+
+
+
+
+
 /**
- * this requires the cookies library <http://code.google.com/p/cookies/> 
+ * saves the current preferences
+ * @todo
  */
 SpazPrefs.prototype.save = function() {
-	var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
-	jaaulde.utils.cookies.set(cookie_key, this._prefs);
-	sch.debug('stored prefs in cookie');
+
+
+	
 };
 
 
@@ -9988,9 +9960,8 @@ var SpazTimeline = function(opts) {
 	/**
 	 * Again, due to scope issues, we define this here to take advantage of the closure 
 	 */
-	this.onSuccess = function(e) {
+	this.onSuccess = function(e, data) {
 		sch.debug('onSuccess timeline');
-		var data = sc.helpers.getEventData(e);
 		thisTL.data_success.call(thisTL, e, data);
 		thisTL.startRefresher();	
 	};
@@ -9998,9 +9969,8 @@ var SpazTimeline = function(opts) {
 	/**
 	 * Again, due to scope issues, we define this here to take advantage of the closure 
 	 */
-	this.onFailure = function(e) {
+	this.onFailure = function(e, data) {
 		sch.debug('onFailure timeline');
-		var data = sc.helpers.getEventData(e);
 		thisTL.data_failure.call(thisTL, e, data);
 		thisTL.startRefresher();	
 	};
@@ -10108,8 +10078,8 @@ SpazTimeline.prototype.startListening = function() {
 SpazTimeline.prototype.stopListening = function() {
 	var thisTL = this;
 	sc.helpers.debug("Stopping listening for "+thisTL.success_event);
-	sc.helpers.unlisten(thisTL.event_target, thisTL.success_event, thisTL.onSuccess);
-	sc.helpers.unlisten(thisTL.event_target, thisTL.failure_event, thisTL.onFailure);
+	sc.helpers.unlisten(thisTL.event_target, thisTL.success_event);
+	sc.helpers.unlisten(thisTL.event_target, thisTL.failure_event);
 };
 
 SpazTimeline.prototype.startRefresher = function() {
@@ -13849,12 +13819,12 @@ SpazTwit.prototype.isSubscribed = function(list, list_user, user){
 		return false;
 	}
 	
-	user = user || this.me.id;
+	user = user || this.username;
 	
 	var url = this.getAPIURL('lists_check_subscriber', {
-		'user': list_user,
+		'user': user,
 		'slug': list,
-		'id': user
+		'id': list_user
 	});
 	
 	var opts = {
@@ -13929,9 +13899,9 @@ SpazTwit.prototype.isMember = function(list, list_user, user){
 	user = user || this.username;
 	
 	var url = this.getAPIURL('lists_check_member', {
-		'user': list_user,
+		'user': user,
 		'slug': list,
-		'id': user
+		'id': list_user
 	});
 	
 	var opts = {
@@ -13968,7 +13938,6 @@ SpazTwit.prototype.reportSpam = function(user) {
 	
 	var xhr = this._callMethod(opts);
 }
-
 /**
  *  
  */
@@ -13994,7 +13963,6 @@ SpazTwit.prototype.triggerEvent = function(type, data) {
 if (sc) {
 	var scTwit = SpazTwit;
 }
-
 
 
 /*
@@ -14121,5 +14089,48 @@ if (sc) {
 }
 * 
 * 
+*//*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc;
 
-*/
+/**
+ * standard
+ * platform-specific definitions for prefs lib 
+ */
+
+/**
+ * this requires the cookies library <http://code.google.com/p/cookies/> 
+ */
+SpazPrefs.prototype.load = function() {
+	var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
+	var prefsval = jaaulde.utils.cookies.get(cookie_key);
+		
+	if (prefsval) {
+		sch.debug('prefsval exists');
+		for (var key in prefsval) {
+			sc.helpers.dump('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
+            this._prefs[key] = prefsval[key];
+       	}
+    } else { // init the file
+		sch.debug('prefsval does not exist; saving with defaults');
+        this.save();
+    }
+};
+
+/**
+ * this requires the cookies library <http://code.google.com/p/cookies/> 
+ */
+SpazPrefs.prototype.save = function() {
+	var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
+	jaaulde.utils.cookies.set(cookie_key, this._prefs);
+	sch.debug('stored prefs in cookie');
+};
+
+
