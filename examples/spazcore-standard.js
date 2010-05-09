@@ -6621,6 +6621,32 @@ sc.helpers.containsScreenName = function(str, sn) {
 	
 };
 
+sc.helpers.extractScreenNames = function(str) {
+	var re_uname = /(^|\s|\(\[|,|\.|\()@([a-zA-Z0-9_]+)([^a-zA-Z0-9_]|$)/gi;
+	var usernames = [];
+	var ms = [];
+	while (ms = re_uname.exec(str))
+	{
+		
+		/*
+			sometimes we can end up with a null instead of a blank string,
+			so we need to force the issue in javascript.
+		*/
+		for (var x=0; x<ms.length; x++) {
+			if (!ms[x]) {
+				ms[x] = '';
+			}
+		}
+		
+		if(ms[2] != ''){
+			usernames.push(ms[2]);
+		}else{
+			alert(ms);
+		}
+	}
+	return usernames;
+};
+
 /**
  * find URLs within the given string 
  */
