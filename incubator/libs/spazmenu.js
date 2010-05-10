@@ -14,8 +14,10 @@
  * ];
  * 
  * 
+ * @param {object} trigger_event the event that is triggering the creation of this menu. needed for positioning
  * 
  * @param {object} opts options	
+ * 
  * @param {array}  opts.items menu item objects
  * @param {array}  opts.items.label item label (shown to user)
  * @param {string} [opts.items.id] item element id - not used if not present
@@ -141,12 +143,16 @@ SpazMenu.prototype._reposition = function(e, data) {
 	sch.debug('_reposition');
 };
 
-
+/**
+ * this generates the item class if one has not been provided 
+ */
 SpazMenu.prototype._generateItemClass = function(item) {
 	return item.label.replace(/[^a-z]/gi, '_').toLowerCase();
 };
 
-
+/**
+ * generates the html for the base DOM elements 
+ */
 SpazMenu.prototype._tplBase = function() {
 	
 	var html = '';
@@ -161,7 +167,10 @@ SpazMenu.prototype._tplBase = function() {
 	return html;	
 };
 
-
+/**
+ * generates the HTML for a menu item
+ * @param {object} i the item object 
+ */
 SpazMenu.prototype._tplItem = function(i) {
 	var html = '';
 	
