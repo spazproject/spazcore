@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>SpazCore Example Shell</title>
+	
+	<!-- Load required vendor libs -->
+	<script src="../vendors/jquery-1.4.2.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore base lib -->
+	<script src="spazcore-standard.js"></script>
+	<script src="../incubator/libs/spazmenu.js" type="text/javascript" charset="utf-8"></script>
+	
+	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	
+	<style type="text/css" media="screen">
+	
+	div.spaz_menu {
+		margin:    0px;
+		padding:   5px;
+		width:   200px;
+		position:absolute;
+		display: none;
+		
+		background-color:rgba(32,32,32,.8);
+		color:#FFFFFF;
+		-webkit-border-radius:5px;
+	}
+		div.spaz_menu ul {
+			margin:    0px;
+			padding:   0px;
+			list-style:none;
+			overflow:auto;
+		}
+			li.spaz_menu_li {
+				margin:    0px;
+				padding:   5px;
+				list-style:none;
+				font-size:90%;
+				-webkit-border-radius:5px;
+				cursor:pointer;
+			}
+				li.spaz_menu_li:hover {
+					background-color:#000;
+				}
+
+	</style>
+	
+	<script type="text/javascript" charset="utf-8">
+		$(document).ready(function() {
+			
+			
+			jQuery(document).delegate('div.user', 'click', function(e) {
+				
+				var username = jQuery(this).attr('username');
+				
+				var smenu = new SpazMenu(e, {
+					'anchor_selector':'div.user',
+					'items': [
+						{
+							'label':"Send @Reply to "+username,
+							'handler':function(e, data) {
+								sch.debug(e);
+								sch.debug(data);
+								alert('clicked "Send @Reply"');
+							},
+							'data':{'username':username}
+						},
+						{
+							'label':"Send DM to "+username,
+							'handler':function(e, data) {
+								alert('clicked "Send DM"');
+							},
+							'data':{'username2':username}
+						},
+						{
+							'label':"Search for "+username,
+							'handler':function(e, data) {
+								alert('clicked "Search for user"');
+							},
+							'data':{'username3':username}
+						}
+					],
+					'base_id':'user_menu'
+				});
+			});
+			
+
+			
+		});
+	</script>
+	
+</head>
+
+<body>
+	<div id='container'>
+
+		<div class="user" username="sailorhead">
+			<img src="http://a1.twimg.com/profile_images/760262336/sailorhead_bigger.png" class="user">
+		</div>
+		
+	</div>
+
+</body>
+</html>
