@@ -18,35 +18,34 @@
  * 
  * @param {object} opts options	
  * 
- * @param {array}  opts.items menu item objects
- * @param {array}  opts.items.label item label (shown to user)
- * @param {string} [opts.items.id] item element id - not used if not present
- * @param {string} [opts.items.class] item element class - generated if not present
- * @param {function} opts.items.handler click event handler, will be listening via delegation
- * @param {object} [opts.items.data] passed as second param to onClick handler
- * 
+ * @param {array}  opts.items_func a function that generates a hash of item objects. takes one parameter "data"
  * @param {string} [opts.base_id] the id attribute for the menu's base element. default is 'spaz_menu'
  * @param {string} [opts.base_class] the class attribute for the menu's base element. default is 'spaz_menu'
  * @param {string} [opts.li_class] the class attribute for the menu's base element. default is 'spaz_menu_li'
  * @param {string} [opts.show_immediately] whether or not to immediately show the menu on creation. Default is TRUE
  */
-SpazMenu = function(trigger_event, opts) {
-	this.trigger_event = trigger_event;
+SpazMenu = function(opts) {
 	this.opts = sch.defaults({
-		'items'     :[],
+		'items_func':function(data){},
 		'base_id'   :'spaz_menu',
 		'base_class':'spaz_menu',
 		'li_class'  :'spaz_menu_li',
 		'show_immediately':true
 	}, opts);
 	
-	this.items = this.opts.items;
+	// close on ANY clicks
+	jQuery(document).bind('click', {'spazmenu':this}, this.hide);
 	
-	this.create();
+	/**
+	 * dismiss with escape 
+	 */
+	jQuery(document).bind('keydown', {'spazmenu':this}, this.keypressHide);
 	
-	if (this.opts.show_immediately) {
-		this.show(this.trigger_event);
-	}
+	
+	
+	// just in case, we need to destroy any existing menus before creating new ones
+	// with the same settings
+	jQuery('div.'+this.opts.base_class).remove();
 };
 
 
@@ -54,16 +53,23 @@ SpazMenu = function(trigger_event, opts) {
 /**
  * Creates the menu, but doesn't show 
  */
-SpazMenu.prototype.create = function() {
+SpazMenu.prototype.show = function(trigger_event, itemsdata) {
+	sch.debug('creating');
 	
 	var that = this;
 	
-	// create base DOM elements
-	jQuery('body').append(this._tplBase());
+	this.trigger_event = trigger_event;
+
+	if (jQuery('#'+this.opts.base_id).length < 1) { // create base DOM elements
+		jQuery('body').append(this._tplBase());
+	}
+	jQuery('#'+this.opts.base_id + ' ul').empty();
 	
+	// create items with items_func
+	this.items = this.opts.items_func(itemdata);
 	
 	// iterate over items
-	var item, itemhtml;
+	var item, itemhtml = '';
 	for (var i=0; i < this.items.length; i++) {
 		item = this.items[i];
 		if (!item['class']) {
@@ -72,34 +78,49 @@ SpazMenu.prototype.create = function() {
 		itemhtml = this._tplItem(item);
 		
 		// -- add item DOM element
-		jQuery('#'+this.opts.base_id).append(itemhtml);
+		jQuery('#'+this.opts.base_id + ' ul').append(itemhtml);
+		
+		// -- remove any existing handlers
+		jQuery('#'+this.opts.base_id + ' ul').undelegate('.'+item['class'], 'click');
 		
 		// -- add delegated handler
-		jQuery(document).delegate('.'+item['class'], 'click', {'item':item, 'spazmenu':this}, function(e, data) {
-			e.data.item.handler.call(this, e, e.data.item.data||data);
-			e.data.spazmenu.hide();
-			e.data.spazmenu.destroy();
+		jQuery('#'+this.opts.base_id + ' ul').delegate('.'+item['class'], 'click', {'item':item, 'spazmenu':this}, function(e, data) {
+			e.data.item.handler.call(this, e, e.data.item.data||itemsdata);
+			that.hide();
 		});
-		
 	}
-};
+	
 
-/**
- * shows a created menu 
- */
-SpazMenu.prototype.show = function(e, data) {
 	sch.debug('show');
-	this._postionBeforeShow(e, data);
+	
+	this._postionBeforeShow(trigger_event);
 	jQuery('#'+this.opts.base_id).show();
-	this._reposition(e, data);
+	this._reposition(trigger_event);
 };
 
 /**
  * hides a created menu 
  */
-SpazMenu.prototype.hide = function() {
+SpazMenu.prototype.hide = function(e) {
 	sch.debug('hide');
-	jQuery('#'+this.opts.base_id).hide();
+	var that; 
+	
+	if (e && e.data && e.data.spazmenu) {
+		that = e.data.spazmenu;
+	} else {
+		that = this;
+	}
+		
+	jQuery('#'+that.opts.base_id).hide();
+};
+
+/**
+ * handler if esc is hit 
+ */
+SpazMenu.prototype.keypressHide = function(e) {
+	if (e.keyCode == 27) {
+		e.data.spazmenu.hide();
+	} // escape
 };
 
 /**
@@ -108,21 +129,35 @@ SpazMenu.prototype.hide = function() {
 SpazMenu.prototype.destroy = function() {
 	sch.debug('destroy');
 	
-	// iterate over item hash
-	var item;
-	for (var i=0; i < this.items.length; i++) {
-		item = this.items[i];
-		if (!item['class']) {
-			item['class'] = this._generateItemClass(item);
-		}
-		
-		// -- remove each delegated handler
-		jQuery(document).undelegate('.'+item['class'], 'click');	
-	}
-		
+
+	
+	// close on ANY clicks
+	jQuery(document).unbind('click', {'spazmenu':this}, this.hide);
+	
+	
+	jQuery(document).unbind('keydown', {'spazmenu':this}, this.keypressHide);
+	
 	// remove base DOM element
 	jQuery('#'+this.opts.base_id).remove();
 };
+
+/**
+ * hides AND destroys 
+ */
+SpazMenu.prototype.hideAndDestroy = function(e) {
+	
+	if (this.hide && this.destroy) {
+		this.hide();
+		this.destroy();
+	} else if (e && e.data && e.data.spazmenu) {
+		e.data.spazmenu.hide();
+		e.data.spazmenu.destroy();	
+	} else {
+		sch.error('couldn\'t hide and destroy');
+	}
+};
+
+
 
 /**
  * sets the position of the menu right before we show it 
@@ -130,8 +165,13 @@ SpazMenu.prototype.destroy = function() {
 SpazMenu.prototype._postionBeforeShow = function(e, data) {
 	sch.debug('_postionBeforeShow');
 	var jqtrigger = jQuery(e.target);
-	var top  = jqtrigger.position().top + jqtrigger.height();
-	var left = jqtrigger.position().left+ jqtrigger.width();
+	
+	// var top  = jqtrigger.position().top + jqtrigger.height();
+	// var left = jqtrigger.position().left+ jqtrigger.width();
+	
+	var top  = e.clientY;
+	var left = e.clientX;
+	
 	jQuery('#'+this.opts.base_id).css('top', top);
 	jQuery('#'+this.opts.base_id).css('left', left);
 };
