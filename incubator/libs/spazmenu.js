@@ -26,7 +26,7 @@
  */
 SpazMenu = function(opts) {
 	this.opts = sch.defaults({
-		'items_func':function(data){},
+		'items_func':function(data){ return null; },
 		'base_id'   :'spaz_menu',
 		'base_class':'spaz_menu',
 		'li_class'  :'spaz_menu_li',
@@ -52,21 +52,26 @@ SpazMenu = function(opts) {
 
 /**
  * Creates the menu, but doesn't show 
+ * @param {object} trigger_event the event that triggered the show
+ * @param {object} itemsdata a data structure that will be passed to the items_func 
  */
 SpazMenu.prototype.show = function(trigger_event, itemsdata) {
 	sch.debug('creating');
 	
 	var that = this;
 	
+	// map the triggering event
 	this.trigger_event = trigger_event;
 
-	if (jQuery('#'+this.opts.base_id).length < 1) { // create base DOM elements
-		jQuery('body').append(this._tplBase());
-	}
-	jQuery('#'+this.opts.base_id + ' ul').empty();
-	
 	// create items with items_func
-	this.items = this.opts.items_func(itemdata);
+	this.items = this.opts.items_func(itemsdata);
+
+ 	// create base DOM elements
+	if (jQuery('#'+this.opts.base_id).length < 1) {
+		jQuery('body').append(this._tplBase());
+	} else { // if exists, empty it
+		jQuery('#'+this.opts.base_id + ' ul').empty();
+	}
 	
 	// iterate over items
 	var item, itemhtml = '';
@@ -75,12 +80,14 @@ SpazMenu.prototype.show = function(trigger_event, itemsdata) {
 		if (!item['class']) {
 			item['class'] = this._generateItemClass(item);
 		}
+		
+		// create the item HTML
 		itemhtml = this._tplItem(item);
 		
 		// -- add item DOM element
 		jQuery('#'+this.opts.base_id + ' ul').append(itemhtml);
 		
-		// -- remove any existing handlers
+		// -- remove any existing handlers (in case this menu was shown before)
 		jQuery('#'+this.opts.base_id + ' ul').undelegate('.'+item['class'], 'click');
 		
 		// -- add delegated handler
