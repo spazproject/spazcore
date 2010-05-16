@@ -584,7 +584,11 @@ SpazTwit.prototype.getHomeTimeline = function(since_id, count, page, processing_
 	}
 	
 	var data = {};
-	data['since_id'] = since_id;
+	if (since_id < -1) {
+		data['max_id'] = Math.abs(since_id);
+	} else {
+		data['since_id'] = since_id;
+	}
 	data['count']	 = count;
 	if (page) {
 		data['page'] = page;
@@ -697,7 +701,11 @@ SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts,
 	
 	
 	var data = {};
-	data['since_id'] = since_id;
+	if (since_id < -1) {
+		data['max_id'] = Math.abs(since_id);
+	} else {
+		data['since_id'] = since_id;
+	}
 	if (page) {
 		data['page'] = page;
 	}
@@ -752,7 +760,11 @@ SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processin
 	}
 	
 	var data = {};
-	data['since_id'] = since_id;
+	if (since_id < -1) {
+		data['max_id'] = Math.abs(since_id);
+	} else {
+		data['since_id'] = since_id;
+	}
 	if (page) {
 		data['page'] = page;
 	}
