@@ -837,17 +837,32 @@ SpazTwit.prototype.getSent = function(since_id, count, page, onSuccess, onFailur
 SpazTwit.prototype.getSentDirectMessages = function(since_id, page, onSuccess, onFailure) {};
 
 SpazTwit.prototype.getUserTimeline = function(id, count, page, onSuccess, onFailure) {
-	if (!id) {
+
+	var opts = sch.defaults({
+		'id': id,
+		'since_id': null,
+		'count': count || 10,
+		'page': page || null,
+		'onSuccess': onSuccess,
+		'onFailure': onFailure
+	}, id);
+
+	if (!opts.id || 'object' === typeof opts.id) {
 		return;
 	}
-	if (!page) { page = null;}
-	if (!count) { count = 10;}
-	
+
 	var data = {};
-	data['id']  = id;
-	data['count']	 = count;
-	if (page) {
-		data['page'] = page;
+	data['id']    = opts.id;
+	data['count'] = opts.count;
+	if (opts.since_id) {
+		if (opts.since_id < -1) {
+			data['max_id'] = Math.abs(opts.since_id);
+		} else {
+			data['since_id'] = opts.since_id;
+		}
+	}
+	if (opts.page) {
+		data['page'] = opts.page;
 	}
 	
 	
@@ -858,8 +873,8 @@ SpazTwit.prototype.getUserTimeline = function(id, count, page, onSuccess, onFail
 		'username':this.username,
 		'password':this.password,
 		'process_callback'	: this._processUserTimeline,
-		'success_callback':onSuccess,
-		'failure_callback':onFailure,
+		'success_callback':opts.onSuccess,
+		'failure_callback':opts.onFailure,
 		'success_event_type': 'new_user_timeline_data',
 		'failure_event_type': 'error_user_timeline_data'
 	});
