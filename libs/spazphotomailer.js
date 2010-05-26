@@ -101,6 +101,7 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 					var TPAPI_header = 'TPAPI: '+username+","+password;
 					
 					jQuery.ajax({
+                	    'dataType':'text',
 						
 						'success':function(data, textStatus) {
 							var profile = sc.helpers.deJSON(data);
@@ -127,6 +128,7 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 					var TPAPI_header = 'TPAPI: '+username+","+password;
 					
 					jQuery.ajax({
+                	    'dataType':'text',
 						
 						'success':function(data, textStatus) {
 							var settings = sc.helpers.deJSON(data);
