@@ -1,4 +1,4 @@
-/*********** Built 2010-05-08 20:22:10 EDT ***********/
+/*********** Built 2010-05-26 15:58:51 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -8446,6 +8446,7 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 					var TPAPI_header = 'TPAPI: '+username+","+password;
 					
 					jQuery.ajax({
+                	    'dataType':'text',
 						
 						'success':function(data, textStatus) {
 							var profile = sc.helpers.deJSON(data);
@@ -8472,6 +8473,7 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 					var TPAPI_header = 'TPAPI: '+username+","+password;
 					
 					jQuery.ajax({
+                	    'dataType':'text',
 						
 						'success':function(data, textStatus) {
 							var settings = sc.helpers.deJSON(data);
@@ -9669,6 +9671,8 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 		
 
 	var xhr = jQuery.ajax({
+		'traditional':true, // so we don't use square brackets on arrays in data. Bit.ly doesn't like it
+		'dataType':'text',
 		complete:function(xhr, rstr) {
 		},
 		'error':function(xhr, msg, exc) {
@@ -9678,9 +9682,9 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 			
 			if (xhr) {
 				errobj.xhr = xhr;
-				sc.helpers.dump("Error:"+xhr.status+" from "+ shortener.api.url);
+				sc.helpers.error("Error:"+xhr.status+" from "+ shortener.api.url);
 			} else {
-				sc.helpers.dump("Error:Unknown from "+ shortener.api.url);
+				sc.helpers.error("Error:Unknown from "+ shortener.api.url);
 				errobj.msg = 'Unknown Error';
 			}
 			shortener._onShortenResponseFailure(errobj, opts.event_target);
@@ -9696,6 +9700,7 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 					'longurl' :longurl
 				};
 			}
+			sch.error(return_data);
 			shortener._onShortenResponseSuccess(return_data, opts.event_target);
 		},
 		'type':"POST",
@@ -9743,6 +9748,7 @@ SpazShortURL.prototype.expand = function(shorturl, opts) {
 		if not cached, do query to look it up
 	*/
 	var xhr = jQuery.ajax({
+    	'dataType':'text',
 		complete:function(xhr, rstr) {
 		},
 		'error':function(xhr, msg, exc) {
@@ -9801,7 +9807,7 @@ SpazShortURL.prototype._onExpandResponseFailure = function(errobj, target) {
 SpazShortURL.prototype.findExpandableURLs = function(str) {
 	var x, i, matches = [], re_matches, key, thisdomain, thisregex, regexes = [];
 	
-	for (var i=0; i < SPAZCORE_EXPANDABLE_DOMAINS.length; i++) {
+	for (i=0; i < SPAZCORE_EXPANDABLE_DOMAINS.length; i++) {
 		thisdomain = SPAZCORE_EXPANDABLE_DOMAINS[i];
 		if (thisdomain == 'ff.im') {
 			regexes.push(new RegExp("http://"+thisdomain+"/(-?[a-zA-Z0-9]+)", "gi"));
@@ -9811,7 +9817,7 @@ SpazShortURL.prototype.findExpandableURLs = function(str) {
 		
 	};
 	
-	for (var i=0; i < regexes.length; i++) {
+	for (i=0; i < regexes.length; i++) {
 		thisregex = regexes[i];
 		sch.dump("looking for "+thisregex+ " in '"+str+"'");
 		while( (re_matches = thisregex.exec(sch.trim(str))) != null) {
