@@ -22,23 +22,86 @@ var SPAZCORE_SHORTURL_SERVICE_BITLY	  = 'bit.ly';
 var SPAZCORE_SHORTURL_SERVICE_JMP     = 'j.mp';
 
 var SPAZCORE_EXPANDABLE_DOMAINS = [
-	'ad.vu',
-	'bit.ly',
-	'cli.gs',
-	'ff.im',
-	'is.gd',
-	'j.mp',
-	'ow.ly',
-	'poprl.com',
-	'short.ie',
-	'sn.im',
-	'snipr.com',
-	'tinyurl.com',
-	'tr.im',
-	'twurl.nl',
-	'urlzen.com',
-	'xrl.us',
-	'zi.ma'
+	"bit.ly",
+	"cli.gs",
+	"digg.com",
+	"fb.me",
+	"is.gd",
+	"j.mp",
+	"kl.am",
+	"su.pr",
+	"tinyurl.com",
+	"goo.gl",
+	"307.to",
+	"adjix.com",
+	"b23.ru",
+	"bacn.me",
+	"bloat.me",
+	"budurl.com",
+	"clipurl.us",
+	"cort.as",
+	"dwarfurl.com",
+	"ff.im",
+	"fff.to",
+	"href.in",
+	"idek.net",
+	"korta.nu",
+	"lin.cr",
+	"livesi.de",
+	"ln-s.net",
+	"loopt.us",
+	"lost.in",
+	"memurl.com",
+	"merky.de",
+	"migre.me",
+	"moourl.com",
+	"nanourl.se",
+	"om.ly",
+	"ow.ly",
+	"peaurl.com",
+	"ping.fm",
+	"piurl.com",
+	"plurl.me",
+	"pnt.me",
+	"poprl.com",
+	"post.ly",
+	"rde.me",
+	"reallytinyurl.com",
+	"redir.ec",
+	"retwt.me",
+	"rubyurl.com",
+	"short.ie",
+	"short.to",
+	"smallr.com",
+	"sn.im",
+	"sn.vc",
+	"snipr.com",
+	"snipurl.com",
+	"snurl.com",
+	"tiny.cc",
+	"tinysong.com",
+	"togoto.us",
+	"tr.im",
+	"tra.kz",
+	"trg.li",
+	"twurl.cc",
+	"twurl.nl",
+	"u.mavrev.com",
+	"u.nu",
+	"ur1.ca",
+	"url.az",
+	"url.ie",
+	"urlx.ie",
+	"w34.us",
+	"xrl.us",
+	"yep.it",
+	"zi.ma",
+	"zurl.ws",
+	"chilp.it",
+	"notlong.com",
+	"qlnk.net",
+	"trim.li",
+	"url4.eu"
 ];
 
 
@@ -191,6 +254,8 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 		
 
 	var xhr = jQuery.ajax({
+		'traditional':true, // so we don't use square brackets on arrays in data. Bit.ly doesn't like it
+		'dataType':'text',
 		complete:function(xhr, rstr) {
 		},
 		'error':function(xhr, msg, exc) {
@@ -200,9 +265,9 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 			
 			if (xhr) {
 				errobj.xhr = xhr;
-				sc.helpers.dump("Error:"+xhr.status+" from "+ shortener.api.url);
+				sc.helpers.error("Error:"+xhr.status+" from "+ shortener.api.url);
 			} else {
-				sc.helpers.dump("Error:Unknown from "+ shortener.api.url);
+				sc.helpers.error("Error:Unknown from "+ shortener.api.url);
 				errobj.msg = 'Unknown Error';
 			}
 			shortener._onShortenResponseFailure(errobj, opts.event_target);
@@ -218,6 +283,7 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 					'longurl' :longurl
 				};
 			}
+			sch.error(return_data);
 			shortener._onShortenResponseSuccess(return_data, opts.event_target);
 		},
 		'type':"POST",
@@ -265,6 +331,7 @@ SpazShortURL.prototype.expand = function(shorturl, opts) {
 		if not cached, do query to look it up
 	*/
 	var xhr = jQuery.ajax({
+    	'dataType':'text',
 		complete:function(xhr, rstr) {
 		},
 		'error':function(xhr, msg, exc) {
@@ -323,7 +390,7 @@ SpazShortURL.prototype._onExpandResponseFailure = function(errobj, target) {
 SpazShortURL.prototype.findExpandableURLs = function(str) {
 	var x, i, matches = [], re_matches, key, thisdomain, thisregex, regexes = [];
 	
-	for (var i=0; i < SPAZCORE_EXPANDABLE_DOMAINS.length; i++) {
+	for (i=0; i < SPAZCORE_EXPANDABLE_DOMAINS.length; i++) {
 		thisdomain = SPAZCORE_EXPANDABLE_DOMAINS[i];
 		if (thisdomain == 'ff.im') {
 			regexes.push(new RegExp("http://"+thisdomain+"/(-?[a-zA-Z0-9]+)", "gi"));
@@ -333,7 +400,7 @@ SpazShortURL.prototype.findExpandableURLs = function(str) {
 		
 	};
 	
-	for (var i=0; i < regexes.length; i++) {
+	for (i=0; i < regexes.length; i++) {
 		thisregex = regexes[i];
 		sch.dump("looking for "+thisregex+ " in '"+str+"'");
 		while( (re_matches = thisregex.exec(sch.trim(str))) != null) {

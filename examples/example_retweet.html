@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>SpazCore Example Twitter Lists</title>
+	
+	<!-- Load required vendor libs -->
+	<script src="../vendors/jquery-1.4.2.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore base lib -->
+	<script src="spazcore-standard.js"></script>
+	
+	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<style type="text/css">
+		#notice {
+			margin: 10px;
+			padding: 10px;
+			text-align: center;
+		}
+		#notice.error {
+			background-color: #f33;
+			display: block;
+		}
+		
+		#notice.success {
+			background-color: #af7;
+			display: block;
+		}
+		#notice.hidden {
+			display: none;
+		}
+	</style>
+	
+	<script type="text/javascript" charset="utf-8">
+		sc.setDumpLevel(5);
+	
+		var twit = new SpazTwit();
+
+		function showResponse(e) {
+			sch.debug(e);
+			data = sch.getEventData(e);
+			json = sch.enJSON(data);
+			$('#response').html(json);
+		}
+		/*
+			set up templates
+		*/
+		var tpls = new SpazTemplate();
+		
+		tpls.addTemplateMethod('timeline-entry', function(d) {
+			var html = '<div class="timeline-entry';
+			if (!d.not_new) {
+				html += ' new';
+			}
+			if (d.SC_is_reply) {
+				html += ' reply'
+			}
+			html += '" data-status-id="'+d.id+'" data-user-id="'+d.user.id+'" data-user-screen_name="'+d.user.screen_name+'" data-timestamp="'+d.created_at_unixtime+'">'
+			+ '	<div class="user" data-user-id="'+d.user.id+'" data-user-screen_name="'+d.user.screen_name+'">'
+			+ '		<div class="user-img rounded-user-image" style="background-image:url('+d.user.profile_image_url+')"></div>'
+			+ '	</div>'
+			+ '	<div class="status">'
+			+ '		<div class="meta-wrapper">'
+			+ '			<div class="screen-name">'+d.user.screen_name;
+			if (d.user.protected) {
+				html += '			<div class="protected-icon"></div>';
+			}
+			html += '			</div>'
+			+ '			<div class="meta" data-status-id="'+d.id+'"><span class="date" data-created_at="'+d.created_at+'">'+sch.getRelativeTime(d.created_at)+'</span></div>'
+			+ '		</div>'
+			+ '	 	<div class="text">'
+			+ '			'+d.text+''
+			+ '		</div>'
+			+ '	</div>'
+			+ '</div>';
+			return html;
+		});
+		
+		/*
+			Verify Listener
+		*/
+		sch.listen(document, 'verify_credentials_succeeded', function(e) {
+			var username = $('#username').val();
+			var password = $('#password').val();
+			
+			twit.setCredentials(username, password);
+			$('#notice').html('Login succeeded.');
+			$('#notice').attr('class', 'success');
+			showResponse(e);
+		});
+
+		/*
+			Credential verification failed
+		*/
+		sch.listen(document, 'verify_credentials_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error verifying your credentials.');
+			$('#notice').attr('class', 'error');
+		});
+		
+		/*
+			Get Retweets succeeded
+		*/
+		sch.listen(document, 'get_retweets_succeeded', function(e, data) {
+			showResponse(e);
+			
+			
+			var html = tpls.parseArray('timeline-entry', data);
+			
+			$("#tweets").html(html);
+			
+		});
+
+		/*
+			Get Retweets of me succeeded
+		*/
+		sch.listen(document, 'retweets_of_me_succeeded', function(e, data) {
+			showResponse(e);
+			
+			
+			var html = tpls.parseArray('timeline-entry', data);
+			
+			$("#tweets").html(html);
+			
+		});
+
+		/*
+			Get Retweets by me succeeded
+		*/
+		sch.listen(document, 'retweeted_by_me_succeeded', function(e, data) {
+			showResponse(e);
+			
+			
+			var html = tpls.parseArray('timeline-entry', data);
+			
+			$("#tweets").html(html);
+			
+		});
+
+		/*
+			Get Retweets of me succeeded
+		*/
+		sch.listen(document, 'retweeted_to_me_succeeded', function(e, data) {
+			showResponse(e);
+			
+			
+			var html = tpls.parseArray('timeline-entry', data);
+			
+			$("#tweets").html(html);
+			
+		});
+
+		$().ready(function() {
+			
+			var username = $('#username').val();
+			var password = $('#password').val();
+			
+			twit.setCredentials(username, password);
+			
+			$('#login').click(function() {
+			    twit.verifyCredentials($('#username').val(), $('#password').val());
+			});
+			$('#retweet').click(function() { 
+				$('#notice').attr('class', 'hidden');
+				twit.retweet($('#tweet-id').val());
+			});
+			$('#get-retweets').click(function() { 
+				$('#notice').attr('class', 'hidden');
+				twit.getRetweets($('#tweet-id').val(), 20);
+			});
+			$('#retweets-to-me').click(function() { 
+				$('#notice').attr('class', 'hidden');
+				twit.retweetedToMe(null, null, 20, 1);
+			});
+			$('#retweets-by-me').click(function() { 
+				$('#notice').attr('class', 'hidden');
+				twit.retweetedByMe(null, null, 20, 1);
+			});
+			$('#retweets-of-me').click(function() { 
+				$('#notice').attr('class', 'hidden');
+				twit.retweetsOfMe(null, null, 20, 1);
+			});
+		});
+	</script>
+	
+</head>
+
+<body>
+	<h1>SpazCore Retweet Example</h1>
+	
+	<div id="notice" class="hidden"></div>
+	
+	<form onsubmit="return false;">
+		<div>
+			<label for="username">Username</label><input type="text" name="username" value="spaztest" id="username">
+			<label for="password">Password</label><input type="password" name="password" value="" id="password">
+			<input type="button" name="login" value="Login" id="login">
+		</div>
+		<div>
+			<label for="tweet-id">ID to retweet</label><input type="text" name="tweet-id" value="13371088996" id="tweet-id">
+			<input type="button" name="retweet" value="Retweet" id="retweet">
+			<input type="button" name="getRetweets" value="Get Retweets" id="get-retweets">
+		</div>
+		<div>
+			Get tweets retweeted <input type="button" name="retweetsToMe" value="to" id="retweets-to-me"> / <input type="button" name="retweetsByMe" value="by" id="retweets-by-me"> / <input type="button" name="retweetsOfMe" value="from" id="retweets-of-me"> me.
+		</div>
+	</form>
+	
+	<div id="tweets">
+	</div>
+	
+	<fieldset id="" class="">
+		<legend>Response</legend>
+		<div id="response">foo</div>
+		
+	</fieldset>
+
+	
+
+</body>
+</html>

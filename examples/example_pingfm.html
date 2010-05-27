@@ -1,0 +1,376 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<title>SpazCore Ping.fm Example</title>
+	<script src="../vendors/jquery-1.3.2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="spazcore-standard.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../incubator/libs/spazpingfm.js" type="text/javascript" charset="utf-8"></script>
+	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
+</head>
+<body>
+
+<script type="text/javascript">
+if (!sc.examples) sc.examples = {};
+if (!sc.examples.pingfm) sc.examples.pingfm = {};
+</script>
+
+<!--
+E-mail Address: spaz@mailinator.com
+Password: spaz
+-->
+<h1>SpazPingFM</h1>
+<form id="creds">
+    <div>
+        <label for="creds__apikey">API Key</label>
+        <input type="text" name="apikey" id="creds__apikey" value="4f6e7a44cf584f15193e1f4c04704465" />
+    </div>
+    <div>
+        <label for="creds__userkey">User Key</label>
+        <input type="text" name="userkey" id="creds__userkey" value="3f9ac67c704b040a977eddda10207680-1273353547" />
+    </div>
+</form>
+<script type="text/javascript">
+sc.examples.pingfm.getPingfm = function() {
+    var apikeyField = jQuery("#creds__apikey");
+    var apikey = jQuery.trim(apikeyField.val());
+    if (!apikey) {
+        alert("Please specify an API key");
+        apikeyField.focus();
+        return;
+    }
+
+    var userkeyField = jQuery("#creds__userkey");
+    var userkey = jQuery.trim(userkeyField.val());
+    if (!userkey) {
+        alert("Please specify a User Key.");
+        userkeyField.focus();
+        return;
+    }
+
+    return new SpazPingFM({
+        apikey: apikey,
+        userkey: userkey
+    });
+};
+</script>
+
+<h1>getUserKeyWithMobileKey</h1>
+<form id="getUserKeyWithMobileKey">
+    <div>
+        <a href="http://ping.fm/key/">Get a mobile key</a>
+    </div>
+    <div>
+        <label for="getUserKeyWithMobileKey__mobilekey">Mobile Key</label>
+        <input type="text" name="mobilekey" id="getUserKeyWithMobileKey__mobilekey" />
+    </div>
+    <div>
+        <label for="getUserKeyWithMobileKey__userkey">User Key</label>
+        <span id="getUserKeyWithMobileKey__userkey"></span>
+    </div>
+    <div>
+        <input type="button" value="Submit" id="getUserKeyWithMobileKey__submit">
+    </div>
+</form>
+<script type="text/javascript">
+jQuery(function() {
+    jQuery("#getUserKeyWithMobileKey__submit").click(function() {
+        var pingfm = sc.examples.pingfm.getPingfm();
+        if (!pingfm) {
+            return;
+        }
+
+        var mobilekeyField = jQuery("#getUserKeyWithMobileKey__mobilekey");
+        var mobilekey = jQuery.trim(mobilekeyField.val());
+        if (!mobilekey) {
+            alert("Please specify a Mobile Key.");
+            mobilekeyField.focus();
+            return;
+        }
+
+        var userkeyField = jQuery("#getUserKeyWithMobileKey__userkey");
+
+        sc.helpers.addListener(
+            document,
+            sc.events.pingfmGetUserKeySuccess,
+            function(event, result) {
+                userkeyField.text(result.response.userkey);
+                sc.helpers.dump(result);
+            }
+        );
+
+        sc.helpers.addListener(
+            document,
+            sc.events.pingfmGetUserKeyFailure,
+            function (event, result) {
+                userkeyField.text("FAIL");
+                sc.helpers.dump(result);
+            }
+        );
+
+        pingfm.getUserKeyWithMobileKey(mobilekey);
+    });
+});
+</script>
+
+<h1>validateUserKey</h1>
+<form id="validateUserKey">
+    <div>
+        <label for="validateUserKey__result">Result</label>
+        <span id="validateUserKey__result"></span>
+    </div>
+    <div>
+        <input type="button" value="Submit" id="validateUserKey__submit" />
+    </div>
+</form>
+<script type="text/javascript">
+jQuery(function() {
+    jQuery("#validateUserKey__submit").click(function() {
+        var pingfm = sc.examples.pingfm.getPingfm();
+        if (!pingfm) {
+            return;
+        }
+
+        var resultField = jQuery("#validateUserKey__result");
+        
+        sc.helpers.addListener(
+            document,
+            sc.events.pingfmValidateUserKeySuccess,
+            function(event, result) {
+                resultField.text("OK");
+                sc.helpers.dump(result);
+            }
+        );
+
+        sc.helpers.addListener(
+            document,
+            sc.events.pingfmValidateUserKeyFailure,
+            function (event, result) {
+                resultField.text("FAIL");
+                sc.helpers.dump(result);
+            }
+        );
+
+        pingfm.validateUserKey();
+    });
+});
+</script>
+
+<h1>getServices</h1>
+<form id="getServices">
+    <div>
+        <label for="getServices__result">Result</label>
+        <span id="getServices__result"></span>
+    </div>
+    <div>
+        <input type="button" value="Submit" id="getServices__submit" />
+    </div>
+</form>
+<script type="text/javascript">
+jQuery(function() {
+    jQuery("#getServices__submit").click(function() {
+        var pingfm = sc.examples.pingfm.getPingfm();
+        if (!pingfm) {
+            return;
+        }
+
+        var resultField = jQuery("#getServices__result");
+        
+        sc.helpers.addListener(
+            document,
+            sc.events.pingfmGetServicesSuccess,
+            function(event, result) {
+                resultField.text("OK");
+                sc.helpers.dump(result);
+            }
+        );
+
+        sc.helpers.addListener(
+            document,
+            sc.events.pingfmGetServicesFailure,
+            function (event, result) {
+                resultField.text("FAIL");
+                sc.helpers.dump(result);
+            }
+        );
+
+        pingfm.getServices();
+    });
+});
+</script>
+
+<h1>getTriggers</h1>
+<form id="getTriggers">
+    <div>
+        <label for="getTriggers__result">Result</label>
+        <span id="getTriggers__result"></span>
+    </div>
+    <div>
+        <input type="button" value="Submit" id="getTriggers__submit" />
+    </div>
+</form>
+<script type="text/javascript">
+jQuery(function() {
+    jQuery("#getTriggers__submit").click(function() {
+        var pingfm = sc.examples.pingfm.getPingfm();
+        if (!pingfm) {
+            return;
+        }
+
+        var resultField = jQuery("#getTriggers__result");
+        
+        sc.helpers.addListener(
+            document,
+            sc.events.pingfmGetTriggersSuccess,
+            function(event, result) {
+                resultField.text("OK");
+                sc.helpers.dump(result);
+            }
+        );
+
+        sc.helpers.addListener(
+            document,
+            sc.events.pingfmGetTriggersFailure,
+            function (event, result) {
+                resultField.text("FAIL");
+                sc.helpers.dump(result);
+            }
+        );
+
+        pingfm.getTriggers();
+    });
+});
+</script>
+
+<h1>getLatest</h1>
+<form id="getLatest">
+    <div>
+        <label for="getLatest__result">Result</label>
+        <span id="getLatest__result"></span>
+    </div>
+    <div>
+        <input type="button" value="Submit" id="getLatest__submit" />
+    </div>
+</form>
+<script type="text/javascript">
+jQuery(function() {
+    jQuery("#getLatest__submit").click(function() {
+        var pingfm = sc.examples.pingfm.getPingfm();
+        if (!pingfm) {
+            return;
+        }
+
+        var resultField = jQuery("#getLatest__result");
+        
+        sc.helpers.addListener(
+            document,
+            sc.events.pingfmGetLatestSuccess,
+            function(event, result) {
+                resultField.text("OK");
+                sc.helpers.dump(result);
+            }
+        );
+
+        sc.helpers.addListener(
+            document,
+            sc.events.pingfmGetLatestFailure,
+            function (event, result) {
+                resultField.text("FAIL");
+                sc.helpers.dump(result);
+            }
+        );
+
+        pingfm.getLatest();
+    });
+});
+</script>
+
+<h1>post</h1>
+<form id="post">
+    <div>
+        <label for="post__result">Result</label>
+        <span id="post__result"></span>
+    </div>
+    <div>
+        <input type="button" value="Submit" id="post__submit" />
+    </div>
+</form>
+<script type="text/javascript">
+jQuery(function() {
+    jQuery("#post__submit").click(function() {
+        var pingfm = sc.examples.pingfm.getPingfm();
+        if (!pingfm) {
+            return;
+        }
+
+        var resultField = jQuery("#post__result");
+        
+        sc.helpers.addListener(
+            document,
+            sc.events.pingfmPostSuccess,
+            function(event, result) {
+                resultField.text("OK");
+                sc.helpers.dump(result);
+            }
+        );
+
+        sc.helpers.addListener(
+            document,
+            sc.events.pingfmPostFailure,
+            function (event, result) {
+                resultField.text("FAIL");
+                sc.helpers.dump(result);
+            }
+        );
+
+        pingfm.post("test post");
+    });
+});
+</script>
+
+<h1>triggerPost</h1>
+<form id="triggerPost">
+    <div>
+        <label for="triggerPost__result">Result</label>
+        <span id="triggerPost__result"></span>
+    </div>
+    <div>
+        <input type="button" value="Submit" id="triggerPost__submit" />
+    </div>
+</form>
+<script type="text/javascript">
+jQuery(function() {
+    jQuery("#triggerPost__submit").click(function() {
+        var pingfm = sc.examples.pingfm.getPingfm();
+        if (!pingfm) {
+            return;
+        }
+
+        var resultField = jQuery("#triggerPost__result");
+        
+        sc.helpers.addListener(
+            document,
+            sc.events.pingfmTriggerPostSuccess,
+            function(event, result) {
+                resultField.text("FAIL");
+                sc.helpers.dump(result);
+            }
+        );
+
+        sc.helpers.addListener(
+            document,
+            sc.events.pingfmTriggerPostFailure,
+            function (event, result) {
+                resultField.text("OK");
+                sc.helpers.dump(result);
+            }
+        );
+
+        pingfm.triggerPost("test post", "test trigger");
+    });
+});
+</script>
+
+</body>
+</html>

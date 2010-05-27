@@ -28,7 +28,7 @@
 		
 	</style>
 	
-	<script src="../vendors/jquery-1.4.1.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../vendors/jquery-1.4.2.js" type="text/javascript" charset="utf-8"></script>
 	<script src="../vendors/shortcut.js" type="text/javascript" charset="utf-8"></script>
 	<script src="spazcore-standard.js" type="text/javascript" charset="utf-8"></script>
 	
@@ -62,8 +62,8 @@
 				/*
 					bind keyboard shortcuts
 				*/
-				sch.key_add(this.keyup, function() {this.move('up')});
-				sch.key_add(this.keydown, function() {this.move('down')});
+				sch.key_add(this.keyup, function() { this.move('up'); });
+				sch.key_add(this.keydown, function() { this.move('down'); });
 				
 				/*
 					add numbers for fun
@@ -71,7 +71,7 @@
 				this.jqentries.each(function(i) {
 					this.innerHTML = i+':'+this.innerHTML;
 				});
-			}
+			};
 
 			/**
 			 *  
@@ -81,21 +81,21 @@
 					tlid = tlid.replace('#', '');
 				}
 				this.timeline_id = tlid;
-			}
+			};
 
 			this.setSelectedClass = function(sel_class) {
 				if (sel_class.indexOf('.') === 0) {
 					sel_class = sel_class.replace('.', '');
 				}
 				this.selected_class = sel_class;
-			}
+			};
 
 			this.setEntryClass = function(entry_class) {
 				if (entry_class.indexOf('.') === 0) {
 					entry_class = entry_class.replace('.', '');
 				}
 				this.entry_class = entry_class;
-			}
+			};
 
 			/**
 			 *  
@@ -220,9 +220,10 @@
 				/*
 					below the fold
 				*/
+				var diff;
 				if ( selected_height+selected_top > viewport_bottom ) {
 					sch.debug("el.bottom is > tl.bottom");
-					var diff = (viewport_height - viewport_top - selected_bottom) * -1;
+					diff = (viewport_height - viewport_top - selected_bottom) * -1;
 					this.jqtl.scrollTop(viewport_scrolltop + diff);
 				}
 
@@ -231,7 +232,7 @@
 				*/
 				if ( selected_top < 0 ) {
 					sch.debug("el.top is < tl.top");
-					var diff = selected_top * -1;
+					diff = selected_top * -1;
 					this.jqtl.scrollTop(viewport_scrolltop - diff);
 				}
 				
@@ -243,11 +244,20 @@
 			
 			this.reset();
 			
-		}
+		};
+		
+		
 		
 		jQuery().ready(function() {
 
 			tlNav = SpazTimelineNav();
+			
+			jQuery('#move-up').bind('click', function(e) {
+				tlNav.move('up');
+			});
+			jQuery('#move-down').bind('click', function(e) {
+				tlNav.move('down');
+			});
 			
 			
 		});

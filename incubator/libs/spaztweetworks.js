@@ -212,6 +212,7 @@ SpazTweetWorks.prototype._callMethod = function(opts) {
 	var stworks = this;
 	
 	var xhr = jQuery.ajax({
+	    'dataType':'text',
 	    'complete':function(xhr, msg){
 	        sc.helpers.dump(opts.url + ' complete:'+msg);
 	    },
