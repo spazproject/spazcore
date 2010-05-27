@@ -1,4 +1,4 @@
-/*********** Built 2010-05-26 15:58:54 EDT ***********/
+/*********** Built 2010-05-27 00:05:49 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -5931,11 +5931,22 @@ sc.helpers.extractScreenNames = function(str, tpl) {
  * find URLs within the given string 
  */
 sc.helpers.extractURLs = function(str) {
-	var wwwlinks = /(^|\s|\(|:)(((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+))/gi;
-	var match = [];
+	// var wwwlinks = /(^|\s)((https?|ftp)\:\/\/)?([a-z0-9+!*(),;?&=\$_.-]+(\:[a-z0-9+!*(),;?&=\$_.-]+)?@)?([✪a-z0-9-.]*)\.([a-z]{2,3})(\:[0-9]{2,5})?(\/([a-z0-9+\$_-]\.?)+)*\/?(\?[a-z+&\$_.-][a-z0-9;:@&%=+\/\$_.-]*)?(#[a-z_.-][a-z0-9+\$_.-]*)?(\s|$)/gi;
+	var wwwlinks = /(^|\s|\(|:)(((http(s?):\/\/)|(www\.))([\w✪]+[^\s\)<]+))/gi;
+		
+	var ms = [];
 	var URLs = [];
-	while ( (match = wwwlinks.exec(str)) !== null ) {
-		URLs.push(match[2]);
+	while ( (ms = wwwlinks.exec(str)) !== null ) {
+		for (var x=0; x<ms.length; x++) {
+			if (!ms[x]) {
+				ms[x] = '';
+			}
+		}
+		var last = ms[7].charAt(ms[7].length - 1);
+		if (last.search(/[\.,;\?]/) !== -1) { // if ends in common punctuation, strip
+			ms[7] = ms[7].slice(0,-1);
+		}
+		URLs.push(ms[3]+ms[7]);
 	}
 	return URLs;
 };
@@ -5978,7 +5989,7 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 
 	var re_nohttpurl = /((^|\s)(www\.)?([a-zA-Z_\-]+\.)(com|net|org|uk)($|\s))/gi;
 
-	var re_noemail = /(^|[\s\(:。])((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
+	var re_noemail = /(^|[\s\(:。])((http(s?):\/\/)|(www\.))([\w✪]+[^\s\)<]+)/gi;
 	var re_nourl   = /(^|\s|\()([a-zA-Z0-9_\.\-\+]+)@([a-zA-Z0-9\-]+)\.([a-zA-Z0-9\-\.]*)([^\s\)<]+)/gi;
 	
 	var x, ms, period = '';
@@ -6015,11 +6026,6 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 		
 		
 		while ((ms = re_noemail.exec(str))) {
-
-			if ( /\.$/.test(ms[6]) ) {
-				period = '.';
-				ms[6] = ms[6].slice(0, -1);
-			}
 			
 			/*
 				sometimes we can end up with a null instead of a blank string,
@@ -6037,12 +6043,24 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 				extra_code = '';
 			}
 			
+			/*
+				if the last character is one of . , ; ?, we strip it off and
+				stick it on the end of newstr below as "period"
+			*/
+			var last = ms[6].charAt(ms[6].length - 1);
+			if (last.search(/[\.,;\?]/) !== -1) {
+				ms[6] = ms[6].slice(0,-1);
+				period = last;
+			}
+
+
 			var desc = ms[5]+ms[6];
 
 			if (maxlen && maxlen > 0 && desc.length > maxlen) {
 				desc = desc.substr(0, maxlen)+'...';
 			}
-
+			
+			
 			var newstr = ms[1]+'<a href="http'+ms[4]+'://'+ms[5]+ms[6]+'"'+extra_code+'>'+desc+'</a>'+period;
 			str = str.replace(ms[0], newstr);
 		}
@@ -9213,23 +9231,86 @@ var SPAZCORE_SHORTURL_SERVICE_BITLY	  = 'bit.ly';
 var SPAZCORE_SHORTURL_SERVICE_JMP     = 'j.mp';
 
 var SPAZCORE_EXPANDABLE_DOMAINS = [
-	'ad.vu',
-	'bit.ly',
-	'cli.gs',
-	'ff.im',
-	'is.gd',
-	'j.mp',
-	'ow.ly',
-	'poprl.com',
-	'short.ie',
-	'sn.im',
-	'snipr.com',
-	'tinyurl.com',
-	'tr.im',
-	'twurl.nl',
-	'urlzen.com',
-	'xrl.us',
-	'zi.ma'
+	"bit.ly",
+	"cli.gs",
+	"digg.com",
+	"fb.me",
+	"is.gd",
+	"j.mp",
+	"kl.am",
+	"su.pr",
+	"tinyurl.com",
+	"goo.gl",
+	"307.to",
+	"adjix.com",
+	"b23.ru",
+	"bacn.me",
+	"bloat.me",
+	"budurl.com",
+	"clipurl.us",
+	"cort.as",
+	"dwarfurl.com",
+	"ff.im",
+	"fff.to",
+	"href.in",
+	"idek.net",
+	"korta.nu",
+	"lin.cr",
+	"livesi.de",
+	"ln-s.net",
+	"loopt.us",
+	"lost.in",
+	"memurl.com",
+	"merky.de",
+	"migre.me",
+	"moourl.com",
+	"nanourl.se",
+	"om.ly",
+	"ow.ly",
+	"peaurl.com",
+	"ping.fm",
+	"piurl.com",
+	"plurl.me",
+	"pnt.me",
+	"poprl.com",
+	"post.ly",
+	"rde.me",
+	"reallytinyurl.com",
+	"redir.ec",
+	"retwt.me",
+	"rubyurl.com",
+	"short.ie",
+	"short.to",
+	"smallr.com",
+	"sn.im",
+	"sn.vc",
+	"snipr.com",
+	"snipurl.com",
+	"snurl.com",
+	"tiny.cc",
+	"tinysong.com",
+	"togoto.us",
+	"tr.im",
+	"tra.kz",
+	"trg.li",
+	"twurl.cc",
+	"twurl.nl",
+	"u.mavrev.com",
+	"u.nu",
+	"ur1.ca",
+	"url.az",
+	"url.ie",
+	"urlx.ie",
+	"w34.us",
+	"xrl.us",
+	"yep.it",
+	"zi.ma",
+	"zurl.ws",
+	"chilp.it",
+	"notlong.com",
+	"qlnk.net",
+	"trim.li",
+	"url4.eu"
 ];
 
 
