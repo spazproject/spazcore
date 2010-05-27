@@ -57,11 +57,22 @@ sc.helpers.extractScreenNames = function(str, tpl) {
  * find URLs within the given string 
  */
 sc.helpers.extractURLs = function(str) {
-	var wwwlinks = /(^|\s|\(|:)(((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+))/gi;
-	var match = [];
+	// var wwwlinks = /(^|\s)((https?|ftp)\:\/\/)?([a-z0-9+!*(),;?&=\$_.-]+(\:[a-z0-9+!*(),;?&=\$_.-]+)?@)?([✪a-z0-9-.]*)\.([a-z]{2,3})(\:[0-9]{2,5})?(\/([a-z0-9+\$_-]\.?)+)*\/?(\?[a-z+&\$_.-][a-z0-9;:@&%=+\/\$_.-]*)?(#[a-z_.-][a-z0-9+\$_.-]*)?(\s|$)/gi;
+	var wwwlinks = /(^|\s|\(|:)(((http(s?):\/\/)|(www\.))([\w✪]+[^\s\)<]+))/gi;
+		
+	var ms = [];
 	var URLs = [];
-	while ( (match = wwwlinks.exec(str)) !== null ) {
-		URLs.push(match[2]);
+	while ( (ms = wwwlinks.exec(str)) !== null ) {
+		for (var x=0; x<ms.length; x++) {
+			if (!ms[x]) {
+				ms[x] = '';
+			}
+		}
+		var last = ms[7].charAt(ms[7].length - 1);
+		if (last.search(/[\.,;\?]/) !== -1) { // if ends in common punctuation, strip
+			ms[7] = ms[7].slice(0,-1);
+		}
+		URLs.push(ms[3]+ms[7]);
 	}
 	return URLs;
 };
@@ -104,7 +115,7 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 
 	var re_nohttpurl = /((^|\s)(www\.)?([a-zA-Z_\-]+\.)(com|net|org|uk)($|\s))/gi;
 
-	var re_noemail = /(^|[\s\(:。])((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
+	var re_noemail = /(^|[\s\(:。])((http(s?):\/\/)|(www\.))([\w✪]+[^\s\)<]+)/gi;
 	var re_nourl   = /(^|\s|\()([a-zA-Z0-9_\.\-\+]+)@([a-zA-Z0-9\-]+)\.([a-zA-Z0-9\-\.]*)([^\s\)<]+)/gi;
 	
 	var x, ms, period = '';
@@ -141,11 +152,6 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 		
 		
 		while ((ms = re_noemail.exec(str))) {
-
-			if ( /\.$/.test(ms[6]) ) {
-				period = '.';
-				ms[6] = ms[6].slice(0, -1);
-			}
 			
 			/*
 				sometimes we can end up with a null instead of a blank string,
@@ -163,12 +169,24 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 				extra_code = '';
 			}
 			
+			/*
+				if the last character is one of . , ; ?, we strip it off and
+				stick it on the end of newstr below as "period"
+			*/
+			var last = ms[6].charAt(ms[6].length - 1);
+			if (last.search(/[\.,;\?]/) !== -1) {
+				ms[6] = ms[6].slice(0,-1);
+				period = last;
+			}
+
+
 			var desc = ms[5]+ms[6];
 
 			if (maxlen && maxlen > 0 && desc.length > maxlen) {
 				desc = desc.substr(0, maxlen)+'...';
 			}
-
+			
+			
 			var newstr = ms[1]+'<a href="http'+ms[4]+'://'+ms[5]+ms[6]+'"'+extra_code+'>'+desc+'</a>'+period;
 			str = str.replace(ms[0], newstr);
 		}
