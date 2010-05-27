@@ -467,6 +467,10 @@
 		input   = 'http://www.ypass.net/blog/2010/04/solaris-licensing-changes-the-real-story/';
 		output  = ['http://www.ypass.net/blog/2010/04/solaris-licensing-changes-the-real-story/'];
 		equals(sc.helpers.extractURLs(input)[0], output[0]);
+
+		input   = 'http://✪df.ws/fez, http://www.ypass.net/blog/2010/04/solaris-licensing-changes-the-real-story/';
+		output  = ['http://✪df.ws/fez','http://www.ypass.net/blog/2010/04/solaris-licensing-changes-the-real-story/'];
+		same(sc.helpers.extractURLs(input), output);
 	});
 	
 	test("autolink", function() {
@@ -493,6 +497,14 @@
 	
 		input   = '@mynameiszanders you should get ande.rs, so you can have z@ande.rs';
 		output  = '@mynameiszanders you should get ande.rs, so you can have <a href="mailto:z@ande.rs">z@ande.rs<\/a>';
+		equals(sc.helpers.autolink(input), output);
+
+		input   = 'I like http://bit.ly/fwoiefu, too';
+		output   = 'I like <a href="http://bit.ly/fwoiefu">bit.ly/fwoiefu</a>, too';
+		equals(sc.helpers.autolink(input), output);
+
+		input   = '@mynameiszanders you should get http://✪df.ws/fez so you can have z@ande.rs';
+		output  = '@mynameiszanders you should get <a href="http://✪df.ws/fez">✪df.ws/fez</a> so you can have <a href="mailto:z@ande.rs">z@ande.rs<\/a>';
 		equals(sc.helpers.autolink(input), output);
 	
 		var extra   = "target='_blank'";
