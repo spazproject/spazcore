@@ -8,7 +8,7 @@
 	<title>SpazCore Example Shell</title>
 	
 	<!-- Load required vendor libs -->
-	<script src="../vendors/jquery-1.4.1.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../vendors/jquery-1.4.2.js" type="text/javascript" charset="utf-8"></script>
 
 	<!-- Load SpazCore base lib -->
 	<script src="spazcore-standard.js"></script>
@@ -17,17 +17,17 @@
 	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
 	
 	<style type="text/css" media="screen">
-	
+
 		body {
 			margin:0;
 			padding:0;
 			background:#333;
 		}
-		
+
 		input {
 			font-family: Arial, Helvetica, "MS Trebuchet", sans-serif;
 		}
-	
+
 		#container {
 			margin-left:auto;
 			margin-right:auto;
@@ -36,7 +36,7 @@
 			background-color:#666;
 			color:#FFF;
 		}
-	
+
 		ul.tabs {
 			padding:0;
 			margin:0 0;
@@ -44,7 +44,7 @@
 			padding:.2em 0;
 			background-color:rgba(32,32,32,.7);
 		}
-		
+
 		ul.tabs>li {
 			display:inline;
 		}
@@ -63,25 +63,37 @@
 			text-shadow: 0px 1px 4px #666;
 			line-height:1.4em 
 		}
-		
-		
+
+
 		a#tab-movies {
 			-webkit-border-top-left-radius:   1em;
 			-webkit-border-bottom-left-radius:1em;
 		}
-		
+
 		a#tab-people {
 			-webkit-border-top-right-radius:   1em;
 			-webkit-border-bottom-right-radius:1em;
-			
+
 		}
-		
+
 		ul.tabs>li>a.current {
 			background-color:rgba(64,64,64,.8);
 			color:#FFF;
 		}
-		
-		
+
+		#panes {
+			top:0px;
+			bottom:0px;
+			position:relative;
+			overflow:hidden;
+		}
+			#movies-pane, #people-pane {
+				bottom:0px;
+				position:relative;	
+				overflow:auto;
+			}
+
+
 		input.searchbox {
 			display:block;
 			height:40px;
@@ -99,8 +111,8 @@
 			    color-stop(0.58, rgb(255,255,255))
 			);
 		}
-		
-		
+
+
 		input.searchbutton {
 			display:block;
 			font-size:20px;
@@ -117,34 +129,63 @@
 			color:#CCC;
 
 		}
+
+		div.results-scroller {
+			overflow:auto;
+			height:359px;
+		}
+
+		ul#results-list-people, ul#results-list-movies {
+			padding:0;
+			margin :0;
+			list-style: none;
+		}
+			li.result-item-people, li.result-item-movies {
+				padding:7px;
+				font-size:20px;
+				list-style: none;
+				border-bottom:1px solid #999;
+			}
+			li.result-item-people:first-of-type, li.result-item-movies:first-of-type {
+				border-top: 1px solid #999;
+			}
 	</style>
-	
+
 	<script type="text/javascript" charset="utf-8">
 		$().ready(function() {
 			var tmdb = new SpazTMDB({
 				'apikey':'REDACTED'
 			});
-			
-			
-			
+
+
+
 			/*
 				setup taps
 			*/
 			$("ul.tabs").tabs("div.panes > div", {
 				'effect':'fade'
 			});
-			
+
 			$("#search-people, #search-movies").click(function(){
 				var button_id = $(this).attr('id');
 				var search_for = '';
-				
+
 				switch (button_id) {
 					case 'search-movies':
 						search_for = $('#search-for-movies').val();
 						tmdb.movieSearch(
 							search_for,
 							function(data, textStatus) {
-								$('#response').text(data);
+
+								$('#response').text(sch.enJSON(data));
+
+								$('#results-list-movies').empty();
+
+								for (var i=0; i < data.length; i++) {
+									$('#results-list-movies')
+										.append('<li class="result-item-movies">'+data[i].name+'</li>');
+								}
+
 							},
 							function(xhr, errorStr, exc) {
 								$('#response').text(errorStr);								
@@ -157,6 +198,14 @@
 							search_for,
 							function(data, textStatus) {
 								$('#response').text(data);
+
+								$('#results-list-people').empty();
+
+								for (var i=0; i < data.length; i++) {
+									$('#results-list-people')
+										.append('<li class="result-item-people">'+data[i].name+'</li>');
+								}
+
 							},
 							function(xhr, errorStr, exc) {
 								$('#response').text(errorStr);								
@@ -164,43 +213,58 @@
 						);
 						break;
 				}
-				
+
 			});
-			
-			
+
+
 		});
 	</script>
-	
+
 </head>
 
 <body>
 	<div id='container'>
-	
+
 		<ul class="tabs">
 			<li><a class="tab" id="tab-movies" href="#">Movies</a></li>
 			<li><a class="tab" id="tab-people" href="#">People</a></li>
 		</ul>
-	
+
 		<div class="panes">
 			<div id="movies-pane">
 				<form onsubmit="javascript:$('#search-movies').trigger('click'); return false;">
 					<input type="text" class="searchbox" name="search-for-movies" value="Road House" id="search-for-movies">
 					<input type="button" class="searchbutton" name="search-movies" value="Search" id="search-movies">
-	
+
 				</form>
+				<div class="results-scroller">
+					<ul id="results-list-movies">
+
+
+					</ul>
+				</div>
+
 			</div>
-		
+
 			<div id="people-pane">
 				<form onsubmit="javascript:$('#search-people').trigger('click'); return false;">
 					<input type="text" class="searchbox" name="search-for-people" value="Joss Whedon" id="search-for-people">
 					<input type="button" class="searchbutton" name="search-people" value="Search" id="search-people">
-	
+
 				</form>
+
+				<div class="results-scroller">
+					<ul id="results-list-people">
+
+
+					</ul>
+				</div>
 			</div>
 		</div>
 
-		<div id="response"></div>
+		<!-- <div id="response"></div> -->
 	</div>
 
 </body>
 </html>
+

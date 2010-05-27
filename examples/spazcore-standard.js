@@ -1,4 +1,4 @@
-/*********** Built 2010-05-07 16:26:25 EDT ***********/
+/*********** Built 2010-05-27 00:05:45 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -5218,11 +5218,6 @@ onevar: false
  */
 var sc;
  
-/**
- * a constant that defines the attribute where we'll store extra data in the event 
- */
-var SPAZCORE_EVENTDATA_ATTRIBUTE = 'data';
-
 
 /**
  * add an event listener to a target (element, window, etc). Uses target.addEventListener
@@ -5244,8 +5239,8 @@ sc.helpers.addListener = function(target, event_type, handler, scope, use_captur
 		sch.warn('use_capture no longer supported!');
 	}
 	
-	sch.dump('listening for '+event_type);
-	sch.dump('on target nodeName:'+target.nodeName);
+	sch.error('listening for '+event_type);
+	sch.error('on target nodeName:'+target.nodeName);
 	
 	jQuery(target).bind(event_type, handler);
 	
@@ -5266,8 +5261,8 @@ sc.helpers.addListener = function(target, event_type, handler, scope, use_captur
  */
 sc.helpers.removeListener = function(target, event_type, handler, use_capture) {
 
-	sch.dump('removing listener for '+event_type);
-	sch.dump('on target nodeName:'+target.nodeName);
+	sch.error('removing listener for '+event_type);
+	sch.error('on target nodeName:'+target.nodeName);
 
 	if (use_capture) {
 		sch.warn('use_capture no longer supported!');
@@ -5288,9 +5283,9 @@ sc.helpers.addDelegatedListener = function(base_target, selector, event_type, ha
 	
 	sch.warn('scope no longer supported! use a closure or reference "scope" in your event handler');
 	
-	sch.dump('listening for '+event_type);
-	sch.dump('on target nodeName:'+target.nodeName);
-	sch.dump('for selector:'+selector);
+	sch.debug('listening for '+event_type);
+	sch.debug('on target nodeName:'+target.nodeName);
+	sch.debug('for selector:'+selector);
 	
 	jQuery(base_target).delegate(selector, event_type, handler);
 
@@ -5322,8 +5317,10 @@ sc.helpers.removeDelegatedListener = function(base_target, selector, event_type,
  */
 sc.helpers.triggerCustomEvent = function(event_type, target, data, bubble) {
 	
-	sch.dump('triggering '+event_type);
-	sch.dump('on target nodeName:'+target.nodeName);
+	sch.error('triggering '+event_type);
+	sch.error('on target nodeName:'+target.nodeName);
+	sch.error('event data:');
+	// sch.error(sch.enJSON(data));
 	
 	if (bubble) {
 		sch.warn('bubble is no longer supported!');
@@ -5340,9 +5337,11 @@ sc.helpers.triggerCustomEvent = function(event_type, target, data, bubble) {
 /**
  * retrieves the data added to this event object
  * @param {DOMEvent} event_obj 
+ * @deprecated
  */
 sc.helpers.getEventData = function(event_obj) {
-	return event_obj[SPAZCORE_EVENTDATA_ATTRIBUTE];
+	sch.error('getEventData is DEPRECATED. Use second param on event handler');
+	return null;
 };
 
 /**
@@ -6621,15 +6620,50 @@ sc.helpers.containsScreenName = function(str, sn) {
 	
 };
 
+sc.helpers.extractScreenNames = function(str, tpl) {
+	var re_uname = /(^|\s|\(\[|,|\.|\()@([a-zA-Z0-9_]+)([^a-zA-Z0-9_]|$)/gi;
+	var usernames = [];
+	var ms = [];
+	while (ms = re_uname.exec(str))
+	{
+		
+		/*
+			sometimes we can end up with a null instead of a blank string,
+			so we need to force the issue in javascript.
+		*/
+		for (var x=0; x<ms.length; x++) {
+			if (!ms[x]) {
+				ms[x] = '';
+			}
+		}
+		
+		if(ms[2] != ''){
+			usernames.push(ms[2]);
+		}
+	}
+	return usernames;
+};
+
 /**
  * find URLs within the given string 
  */
 sc.helpers.extractURLs = function(str) {
-	var wwwlinks = /(^|\s|\(|:)(((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+))/gi;
-	var match = [];
+	// var wwwlinks = /(^|\s)((https?|ftp)\:\/\/)?([a-z0-9+!*(),;?&=\$_.-]+(\:[a-z0-9+!*(),;?&=\$_.-]+)?@)?([✪a-z0-9-.]*)\.([a-z]{2,3})(\:[0-9]{2,5})?(\/([a-z0-9+\$_-]\.?)+)*\/?(\?[a-z+&\$_.-][a-z0-9;:@&%=+\/\$_.-]*)?(#[a-z_.-][a-z0-9+\$_.-]*)?(\s|$)/gi;
+	var wwwlinks = /(^|\s|\(|:)(((http(s?):\/\/)|(www\.))([\w✪]+[^\s\)<]+))/gi;
+		
+	var ms = [];
 	var URLs = [];
-	while ( (match = wwwlinks.exec(str)) !== null ) {
-		URLs.push(match[2]);
+	while ( (ms = wwwlinks.exec(str)) !== null ) {
+		for (var x=0; x<ms.length; x++) {
+			if (!ms[x]) {
+				ms[x] = '';
+			}
+		}
+		var last = ms[7].charAt(ms[7].length - 1);
+		if (last.search(/[\.,;\?]/) !== -1) { // if ends in common punctuation, strip
+			ms[7] = ms[7].slice(0,-1);
+		}
+		URLs.push(ms[3]+ms[7]);
 	}
 	return URLs;
 };
@@ -6672,7 +6706,7 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 
 	var re_nohttpurl = /((^|\s)(www\.)?([a-zA-Z_\-]+\.)(com|net|org|uk)($|\s))/gi;
 
-	var re_noemail = /(^|[\s\(:。])((http(s?):\/\/)|(www\.))(\w+[^\s\)<]+)/gi;
+	var re_noemail = /(^|[\s\(:。])((http(s?):\/\/)|(www\.))([\w✪]+[^\s\)<]+)/gi;
 	var re_nourl   = /(^|\s|\()([a-zA-Z0-9_\.\-\+]+)@([a-zA-Z0-9\-]+)\.([a-zA-Z0-9\-\.]*)([^\s\)<]+)/gi;
 	
 	var x, ms, period = '';
@@ -6709,11 +6743,6 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 		
 		
 		while ((ms = re_noemail.exec(str))) {
-
-			if ( /\.$/.test(ms[6]) ) {
-				period = '.';
-				ms[6] = ms[6].slice(0, -1);
-			}
 			
 			/*
 				sometimes we can end up with a null instead of a blank string,
@@ -6731,12 +6760,24 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 				extra_code = '';
 			}
 			
+			/*
+				if the last character is one of . , ; ?, we strip it off and
+				stick it on the end of newstr below as "period"
+			*/
+			var last = ms[6].charAt(ms[6].length - 1);
+			if (last.search(/[\.,;\?]/) !== -1) {
+				ms[6] = ms[6].slice(0,-1);
+				period = last;
+			}
+
+
 			var desc = ms[5]+ms[6];
 
 			if (maxlen && maxlen > 0 && desc.length > maxlen) {
 				desc = desc.substr(0, maxlen)+'...';
 			}
-
+			
+			
 			var newstr = ms[1]+'<a href="http'+ms[4]+'://'+ms[5]+ms[6]+'"'+extra_code+'>'+desc+'</a>'+period;
 			str = str.replace(ms[0], newstr);
 		}
@@ -8423,6 +8464,7 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 					var TPAPI_header = 'TPAPI: '+username+","+password;
 					
 					jQuery.ajax({
+                	    'dataType':'text',
 						
 						'success':function(data, textStatus) {
 							var profile = sc.helpers.deJSON(data);
@@ -8449,6 +8491,7 @@ SpazPhotoMailer.prototype.getAPIs = function() {
 					var TPAPI_header = 'TPAPI: '+username+","+password;
 					
 					jQuery.ajax({
+                	    'dataType':'text',
 						
 						'success':function(data, textStatus) {
 							var settings = sc.helpers.deJSON(data);
@@ -9477,23 +9520,86 @@ var SPAZCORE_SHORTURL_SERVICE_BITLY	  = 'bit.ly';
 var SPAZCORE_SHORTURL_SERVICE_JMP     = 'j.mp';
 
 var SPAZCORE_EXPANDABLE_DOMAINS = [
-	'ad.vu',
-	'bit.ly',
-	'cli.gs',
-	'ff.im',
-	'is.gd',
-	'j.mp',
-	'ow.ly',
-	'poprl.com',
-	'short.ie',
-	'sn.im',
-	'snipr.com',
-	'tinyurl.com',
-	'tr.im',
-	'twurl.nl',
-	'urlzen.com',
-	'xrl.us',
-	'zi.ma'
+	"bit.ly",
+	"cli.gs",
+	"digg.com",
+	"fb.me",
+	"is.gd",
+	"j.mp",
+	"kl.am",
+	"su.pr",
+	"tinyurl.com",
+	"goo.gl",
+	"307.to",
+	"adjix.com",
+	"b23.ru",
+	"bacn.me",
+	"bloat.me",
+	"budurl.com",
+	"clipurl.us",
+	"cort.as",
+	"dwarfurl.com",
+	"ff.im",
+	"fff.to",
+	"href.in",
+	"idek.net",
+	"korta.nu",
+	"lin.cr",
+	"livesi.de",
+	"ln-s.net",
+	"loopt.us",
+	"lost.in",
+	"memurl.com",
+	"merky.de",
+	"migre.me",
+	"moourl.com",
+	"nanourl.se",
+	"om.ly",
+	"ow.ly",
+	"peaurl.com",
+	"ping.fm",
+	"piurl.com",
+	"plurl.me",
+	"pnt.me",
+	"poprl.com",
+	"post.ly",
+	"rde.me",
+	"reallytinyurl.com",
+	"redir.ec",
+	"retwt.me",
+	"rubyurl.com",
+	"short.ie",
+	"short.to",
+	"smallr.com",
+	"sn.im",
+	"sn.vc",
+	"snipr.com",
+	"snipurl.com",
+	"snurl.com",
+	"tiny.cc",
+	"tinysong.com",
+	"togoto.us",
+	"tr.im",
+	"tra.kz",
+	"trg.li",
+	"twurl.cc",
+	"twurl.nl",
+	"u.mavrev.com",
+	"u.nu",
+	"ur1.ca",
+	"url.az",
+	"url.ie",
+	"urlx.ie",
+	"w34.us",
+	"xrl.us",
+	"yep.it",
+	"zi.ma",
+	"zurl.ws",
+	"chilp.it",
+	"notlong.com",
+	"qlnk.net",
+	"trim.li",
+	"url4.eu"
 ];
 
 
@@ -9646,6 +9752,8 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 		
 
 	var xhr = jQuery.ajax({
+		'traditional':true, // so we don't use square brackets on arrays in data. Bit.ly doesn't like it
+		'dataType':'text',
 		complete:function(xhr, rstr) {
 		},
 		'error':function(xhr, msg, exc) {
@@ -9655,9 +9763,9 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 			
 			if (xhr) {
 				errobj.xhr = xhr;
-				sc.helpers.dump("Error:"+xhr.status+" from "+ shortener.api.url);
+				sc.helpers.error("Error:"+xhr.status+" from "+ shortener.api.url);
 			} else {
-				sc.helpers.dump("Error:Unknown from "+ shortener.api.url);
+				sc.helpers.error("Error:Unknown from "+ shortener.api.url);
 				errobj.msg = 'Unknown Error';
 			}
 			shortener._onShortenResponseFailure(errobj, opts.event_target);
@@ -9673,6 +9781,7 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 					'longurl' :longurl
 				};
 			}
+			sch.error(return_data);
 			shortener._onShortenResponseSuccess(return_data, opts.event_target);
 		},
 		'type':"POST",
@@ -9720,6 +9829,7 @@ SpazShortURL.prototype.expand = function(shorturl, opts) {
 		if not cached, do query to look it up
 	*/
 	var xhr = jQuery.ajax({
+    	'dataType':'text',
 		complete:function(xhr, rstr) {
 		},
 		'error':function(xhr, msg, exc) {
@@ -9778,7 +9888,7 @@ SpazShortURL.prototype._onExpandResponseFailure = function(errobj, target) {
 SpazShortURL.prototype.findExpandableURLs = function(str) {
 	var x, i, matches = [], re_matches, key, thisdomain, thisregex, regexes = [];
 	
-	for (var i=0; i < SPAZCORE_EXPANDABLE_DOMAINS.length; i++) {
+	for (i=0; i < SPAZCORE_EXPANDABLE_DOMAINS.length; i++) {
 		thisdomain = SPAZCORE_EXPANDABLE_DOMAINS[i];
 		if (thisdomain == 'ff.im') {
 			regexes.push(new RegExp("http://"+thisdomain+"/(-?[a-zA-Z0-9]+)", "gi"));
@@ -9788,7 +9898,7 @@ SpazShortURL.prototype.findExpandableURLs = function(str) {
 		
 	};
 	
-	for (var i=0; i < regexes.length; i++) {
+	for (i=0; i < regexes.length; i++) {
 		thisregex = regexes[i];
 		sch.dump("looking for "+thisregex+ " in '"+str+"'");
 		while( (re_matches = thisregex.exec(sch.trim(str))) != null) {
@@ -9937,9 +10047,8 @@ var SpazTimeline = function(opts) {
 	/**
 	 * Again, due to scope issues, we define this here to take advantage of the closure 
 	 */
-	this.onSuccess = function(e) {
+	this.onSuccess = function(e, data) {
 		sch.debug('onSuccess timeline');
-		var data = sc.helpers.getEventData(e);
 		thisTL.data_success.call(thisTL, e, data);
 		thisTL.startRefresher();	
 	};
@@ -9947,9 +10056,8 @@ var SpazTimeline = function(opts) {
 	/**
 	 * Again, due to scope issues, we define this here to take advantage of the closure 
 	 */
-	this.onFailure = function(e) {
+	this.onFailure = function(e, data) {
 		sch.debug('onFailure timeline');
-		var data = sc.helpers.getEventData(e);
 		thisTL.data_failure.call(thisTL, e, data);
 		thisTL.startRefresher();	
 	};
@@ -10057,8 +10165,8 @@ SpazTimeline.prototype.startListening = function() {
 SpazTimeline.prototype.stopListening = function() {
 	var thisTL = this;
 	sc.helpers.debug("Stopping listening for "+thisTL.success_event);
-	sc.helpers.unlisten(thisTL.event_target, thisTL.success_event, thisTL.onSuccess);
-	sc.helpers.unlisten(thisTL.event_target, thisTL.failure_event, thisTL.onFailure);
+	sc.helpers.unlisten(thisTL.event_target, thisTL.success_event);
+	sc.helpers.unlisten(thisTL.event_target, thisTL.failure_event);
 };
 
 SpazTimeline.prototype.startRefresher = function() {
@@ -11227,6 +11335,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.ratelimit_status   = "account/rate_limit_status.json";
 	urls.update_profile		= "account/update_profile.json";
 	urls.saved_searches		= "saved_searches.json";
+	urls.report_spam		= "report_spam.json";
 
     // User lists URLs
     urls.lists              = "{{USER}}/lists.json";
@@ -11234,15 +11343,23 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
     urls.lists_memberships  = "{{USER}}/lists/memberships.json";
     urls.lists_timeline     = "{{USER}}/lists/{{SLUG}}/statuses.json";
     urls.lists_members      = "{{USER}}/{{SLUG}}/members.json";
-    urls.lists_check_member = "{{USER}}/{{SLUG}}/{{ID}}.json";
+    urls.lists_check_member = "{{USER}}/{{SLUG}}/members/{{ID}}.json";
     urls.lists_subscribers  = "{{USER}}/{{SLUG}}/subscribers.json";
     urls.lists_check_subscriber = "{{USER}}/{{SLUG}}/subscribers/{{ID}}.json";
+    urls.lists_subscriptions = "{{USER}}/lists/subscriptions.json";
 
 	//trends
 	urls.trends				= "trends.json";
 	urls.trends_current		= "trends/current.json";
 	urls.trends_daily		= "trends/daily.json";
 	urls.trends_weekly		= "trends/weekly.json";
+	
+	//retweet
+	urls.retweet			= "statuses/retweet/{{ID}}.json"
+	urls.retweets			= "statuses/retweets/{{ID}}.json"
+	urls.retweeted_by_me	= "statuses/retweeted_by_me.json"
+	urls.retweeted_to_me	= "statuses/retweeted_to_me.json"
+	urls.retweets_of_me		= "statuses/retweets_of_me.json"
 
 	// search
 	if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER) {
@@ -12856,6 +12973,171 @@ SpazTwit.prototype._processOneItem = function(data, opts) {
 	
 };
 
+// Retweet API
+
+/*
+ * Retweets a tweet.
+ * id: the numeric id of a tweet
+ */
+ 
+SpazTwit.prototype.retweet = function(id, onSuccess, onFailure) {
+	var data = {};
+	data['id'] = id;
+	
+	var url = this.getAPIURL('retweet', data);
+	
+	var opts = {
+		'url' : url,
+		'username' : this.username,
+		'password' : this.password,
+		'success_event_type' : 'retweet_succeeded',
+		'failure_event_type' : 'retweet_failed',
+		'success_callback' : onSuccess,
+		'failure_callback' : onFailure,
+		'data' : data
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+/*
+ * Gets up to 100 of the latest retweets of a tweet.
+ * id: the tweet to get retweets of
+ * count: the number of retweets to get
+ */
+
+SpazTwit.prototype.getRetweets = function(id, count) {
+	var url = this.getAPIURL('retweets', {
+		'id' : id,
+		'count' : count
+	});
+	
+	var opts = {
+		'url' : url,
+		'username' : this.username,
+		'password' : this.password,
+		'success_event_type' : 'get_retweets_succeeded',
+		'failure_event_Type' : 'get_retweets_failed',
+		'method' : 'GET'
+	};
+	
+	var xhr = this._getTimeline(opts);
+}
+
+/*
+ * Returns up to 200 of the most recent retweets by the user
+ * since: the numeric id of the tweet serving as a floor
+ * max: the numeric id of the tweet serving as a ceiling
+ * count: the number of tweets to return. Cannot be over 200.
+ * page: the page of results to return.
+ */
+ 
+SpazTwit.prototype.retweetedByMe = function(since, max, count, page){
+	var params = {}
+	if(since != null){
+		params['since_id'] = since;
+	}
+	if(max != null){
+		params['max_id'] = max;
+	}
+	if(count == null){
+		count = 20;
+	}
+	params['count'] = count;
+	if(page == null){
+		page = 1;
+	}
+	params['page'] = page;
+	var url = this.getAPIURL('retweeted_by_me', params);
+	
+	var opts = {
+		'url' : url,
+		'username' : this.username,
+		'password' : this.password,
+		'success_event_type' : 'retweeted_by_me_succeeded',
+		'failure_event_type' : 'retweeted_by_me_failed',
+		'method' : 'GET'
+	};
+	
+	var xhr = this._getTimeline(opts);
+}
+
+/*
+ * Returns up to 200 of the most recent retweets by the user's friends
+ * since: the numeric id of the tweet serving as a floor
+ * max: the numeric id of the tweet serving as a ceiling
+ * count: the number of tweets to return. Cannot be over 200.
+ * page: the page of results to return.
+ */
+ 
+SpazTwit.prototype.retweetedToMe = function(since, max, count, page){
+	var params = {}
+	if(since != null){
+		params['since_id'] = since;
+	}
+	if(max != null){
+		params['max_id'] = max;
+	}
+	if(count == null){
+		count = 20;
+	}
+	params['count'] = count;
+	if(page == null){
+		page = 1;
+	}
+	params['page'] = page;
+	var url = this.getAPIURL('retweeted_to_me', params);
+	
+	var opts = {
+		'url' : url,
+		'username' : this.username,
+		'password' : this.password,
+		'success_event_type' : 'retweeted_to_me_succeeded',
+		'failure_event_type' : 'retweeted_to_me_failed',
+		'method' : 'GET'
+	};
+	
+	var xhr = this._getTimeline(opts);
+}
+
+/*
+ * Returns up to 200 of the most recent retweets of the user's tweets
+ * since: the numeric id of the tweet serving as a floor
+ * max: the numeric id of the tweet serving as a ceiling
+ * count: the number of tweets to return. Cannot be over 200.
+ * page: the page of results to return.
+ */
+ 
+SpazTwit.prototype.retweetsOfMe = function(since, max, count, page){
+	var params = {}
+	if(since != null){
+		params['since_id'] = since;
+	}
+	if(max != null){
+		params['max_id'] = max;
+	}
+	if(count == null){
+		count = 20;
+	}
+	params['count'] = count;
+	if(page == null){
+		page = 1;
+	}
+	params['page'] = page;
+	var url = this.getAPIURL('retweets_of_me', params);
+	
+	var opts = {
+		'url' : url,
+		'username' : this.username,
+		'password' : this.password,
+		'success_event_type' : 'retweets_of_me_succeeded',
+		'failure_event_type' : 'retweets_of_me_failed',
+		'method' : 'GET'
+	};
+	
+	var xhr = this._getTimeline(opts);
+}
+
 SpazTwit.prototype.favorite = function(id, onSuccess, onFailure) {
 	var data = {};
 	data['id'] = id;
@@ -13418,11 +13700,36 @@ SpazTwit.prototype.addList = function(list, visibility, description) {
 		'password':this.password,
 		'success_event_type':'create_list_succeeded',
 		'failure_event_type':'create_list_failed',
+		'success_callback':null,
+		'failure_callback':null,
 		'data':data
 	};
 	
 	var xhr = this._callMethod(opts);
 };
+
+SpazTwit.prototype.updateList = function(list, name, visibility, description){
+	var data = {};
+	data['name'] = name;
+	data['mode'] = visibility;
+	data['description'] = description;
+	
+	var url = this.getAPIURL('lists_list', {
+		'user': this.username,
+		'slug': list
+	});
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'update_list_succeeded',
+		'failure_event_type':'update_list_failed',
+		'data':data
+	};
+	
+	var xhr = this._callMethod(opts);
+}
 
 /**
  * delete a list
@@ -13446,8 +13753,8 @@ SpazTwit.prototype.removeList = function(list, user) {
 		'url':url,
 		'username':this.username,
 		'password':this.password,
-		'success_event_type':'create_list_succeeded',
-		'failure_event_type':'create_list_failed',
+		'success_event_type':'remove_list_succeeded',
+		'failure_event_type':'remove_list_failed',
 		'method':'DELETE'
 	};
 	
@@ -13479,8 +13786,8 @@ SpazTwit.prototype.addUserToList = function(user, list, list_user) {
 		'url':url,
 		'username':this.username,
 		'password':this.password,
-		'success_event_type':'create_list_succeeded',
-		'failure_event_type':'create_list_failed',
+		'success_event_type':'add_list_user_succeeded',
+		'failure_event_type':'add_list_user_failed',
 		'data':data
 	};
 	
@@ -13512,8 +13819,8 @@ SpazTwit.prototype.removeUserFromList = function(user, list, list_user) {
 		'url':url,
 		'username':this.username,
 		'password':this.password,
-		'success_event_type':'create_list_succeeded',
-		'failure_event_type':'create_list_failed',
+		'success_event_type':'remove_list_user_succeeded',
+		'failure_event_type':'remove_list_user_failed',
 		'data':data,
 		'method':'DELETE'
 	};
@@ -13522,7 +13829,202 @@ SpazTwit.prototype.removeUserFromList = function(user, list, list_user) {
 };
 
 
+SpazTwit.prototype.listsSubscribedTo = function(user) {
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to retrieve subscribed lists');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_subscriptions', {
+		'user': user
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'get_subscriptions_succeeded',
+		'failure_event_type':'get_subscriptions_failed'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
 
+SpazTwit.prototype.listMemberships = function(user) {
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to retrieve list memberships');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_memberships', {
+		'user': user
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'get_list_memberships_succeeded',
+		'failure_event_type':'get_list_memberships_failed'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+SpazTwit.prototype.getListSubscribers = function(list, user){
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to retrieve list subscribers');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_subscribers', {
+		'user': user,
+		'slug': list
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'get_list_subscribers_succeeded',
+		'failure_event_type':'get_list_subscribers_failed',
+		'method':'GET'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+SpazTwit.prototype.isSubscribed = function(list, list_user, user){
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to retrieve list subscribers');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_check_subscriber', {
+		'user': user,
+		'slug': list,
+		'id': list_user
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'check_list_subscribers_succeeded',
+		'failure_event_type':'check_list_subscribers_failed',
+		'method':'GET'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+SpazTwit.prototype.subscribe = function(list, user){
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to subscribe to a list');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_subscribers', {
+		'user': user,
+		'slug': list
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'list_subscribe_succeeded',
+		'failure_event_type':'list_subscribe_failed',
+		'method':'POST'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+SpazTwit.prototype.unsubscribe = function(list, user){
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to unsubscribe');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_subscribers', {
+		'user': user,
+		'slug': list,
+		'id': list_user
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'list_unsubscribe_succeeded',
+		'failure_event_type':'list_unsubscribe_failed',
+		'method':'DELETE'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+SpazTwit.prototype.isMember = function(list, list_user, user){
+	if(!user && !this.username) {
+		sch.error('must pass a username or have one set to retrieve list memberships');
+		return false;
+	}
+	
+	user = user || this.username;
+	
+	var url = this.getAPIURL('lists_check_member', {
+		'user': user,
+		'slug': list,
+		'id': list_user
+	});
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'check_list_members_succeeded',
+		'failure_event_type':'check_list_members_failed',
+		'method':'GET'
+	};
+	
+	var xhr = this._callMethod(opts);
+}
+
+/*
+ * Marks a user as a spammer and blocks them
+ */
+ 
+SpazTwit.prototype.reportSpam = function(user) {
+	var url = this.getAPIURL('report_spam');
+	
+	var data = {};
+	data['screen_name'] = user;
+	
+	var opts = {
+		'url':url,
+		'username': this.username,
+		'password': this.password,
+		'success_event_type':'report_spam_succeeded',
+		'failure_event_type':'report_spam_failed',
+		'method':'POST',
+		'data':data
+	};
+	
+	var xhr = this._callMethod(opts);
+}
 /**
  *  
  */
@@ -13548,7 +14050,6 @@ SpazTwit.prototype.triggerEvent = function(type, data) {
 if (sc) {
 	var scTwit = SpazTwit;
 }
-
 
 
 /*
@@ -13675,8 +14176,7 @@ if (sc) {
 }
 * 
 * 
-*/
-/*jslint 
+*//*jslint 
 browser: true,
 nomen: false,
 debug: true,

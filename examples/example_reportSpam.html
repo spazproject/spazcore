@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>SpazCore Example Twitter Lists</title>
+	
+	<!-- Load required vendor libs -->
+	<script src="../vendors/jquery-1.4.2.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore base lib -->
+	<script src="spazcore-standard.js"></script>
+	
+	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<style type="text/css">
+		#notice {
+			margin: 10px;
+			padding: 10px;
+			text-align: center;
+		}
+		#notice.error {
+			background-color: #f33;
+			display: block;
+		}
+		
+		#notice.success {
+			background-color: #af7;
+			display: block;
+		}
+		#notice.hidden {
+			display: none;
+		}
+	</style>
+	
+	<script type="text/javascript" charset="utf-8">
+		sc.setDumpLevel(5);
+	
+		var twit = new SpazTwit();
+
+		function showResponse(e) {
+			sch.debug(e);
+			data = sch.getEventData(e);
+			json = sch.enJSON(data);
+			$('#response').html(json);
+		}		
+		
+		/*
+			Verify Listener
+		*/
+		sch.listen(document, 'verify_credentials_succeeded', function(e) {
+			var username = $('#username').val();
+			var password = $('#password').val();
+			
+			twit.setCredentials(username, password);
+			$('#notice').html('Login succeeded.');
+			$('#notice').attr('class', 'success');
+			showResponse(e);
+		});
+
+		/*
+			Credential verification failed
+		*/
+		sch.listen(document, 'verify_credentials_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error verifying your credentials.');
+			$('#notice').attr('class', 'error');
+		});
+		
+		/*
+			Report spam succeeded
+		*/
+		sch.listen(document, 'report_spam_succeeded', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Spam successfully reported.');
+			$('#notice').attr('class', 'success');
+		});
+
+		/*
+			Report spam failed
+		*/
+		sch.listen(document, 'report_spam_failed', function(e) {
+			showResponse(e);
+			
+			$('#notice').html('Error reporting spam.');
+			$('#notice').attr('class', 'error');
+		});
+		
+
+		$().ready(function() {
+			
+			var username = $('#username').val();
+			var password = $('#password').val();
+			
+			twit.setCredentials(username, password);
+			
+			$('#login').click(function() { twit.verifyCredentials() });
+			$('#report-spam').click(function() { 
+				$('#notice').attr('class', 'hidden');
+				twit.reportSpam($('#spammer').val());
+			});			
+		});
+	</script>
+	
+</head>
+
+<body>
+	<h1>SpazCore Report Spam Example</h1>
+	
+	<div id="notice" class="hidden"></div>
+	
+	<form onsubmit="return false;">
+		<div>
+			<label for="username">Username</label><input type="text" name="username" value="spaztest" id="username">
+			<label for="password">Password</label><input type="password" name="password" value="" id="password">
+			<input type="button" name="login" value="Login" id="login">
+		</div>
+		<div>
+			<label for="spammer">Spammer</label><input type="text" name="spammer" value="examplespammer" id="spammer">
+			<input type="button" name="report-spam" value="Report Spam" id="report-spam">
+		</div>
+	</form>
+	
+	
+	<fieldset id="" class="">
+		<legend>Response</legend>
+		<div id="response">foo</div>
+		
+	</fieldset>
+
+	
+
+</body>
+</html>

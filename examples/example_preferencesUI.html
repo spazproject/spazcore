@@ -8,7 +8,7 @@
 	<title>example_preferences</title>
 	
 	<!-- Load required vendor libs -->
-	<script src="../vendors/jquery-1.4.1.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../vendors/jquery-1.4.2.js" type="text/javascript" charset="utf-8"></script>
 
 	<!-- Load SpazCore base lib -->
 	<script src="spazcore-standard-justprefs.js"></script>
@@ -34,12 +34,16 @@
 		}
 		
 		#accordion {
-		    font-size:.8em;
+			font-size:.8em;
 		}
 	</style>
 	
 	<script type="text/javascript" charset="utf-8">
-
+		/**
+		 * SpazPrefsUI
+		 * 
+		 * A class that maps the UI for preference settings to the model for those settings 
+		 */
 		var SpazPrefsUI = function(prefsObj, settings) {
 			this.setPrefsObj(prefsObj);
 			this.loadSettings(settings);
@@ -55,8 +59,8 @@
 				sch.debug(e);
 
 				jqel = jQuery(e.target);
-				key  = jqel.attr('data-spazprefsui-key', key);
-				val  = that.getUIValue(key);
+				key	 = jqel.attr('data-spazprefsui-key', key);
+				val	 = that.getUIValue(key);
 
 				that._prefs.set(key, val);
 			};
@@ -123,7 +127,7 @@
 		SpazPrefsUI.prototype.setUI = function() {
 			var val, key, opts;
 			for(key in this._settings) {
-				val  = this._prefs.get(key);
+				val	 = this._prefs.get(key);
 				this.setUIValue(key, val)
 			}
 		};
@@ -262,7 +266,7 @@
 		SpazPrefsUI.prototype.addListener = function(key) {
 			var that = this;
 			var jqel = jQuery(this._settings[key].selector);
-			var el   = jqel.get(0);
+			var el	 = jqel.get(0);
 			
 			/*
 				set this custom attribute so we can ID this more easily when change fires
@@ -343,13 +347,13 @@
 							.css('top', prefs.get('panel_position_top'));
 
 
-            jQuery('#accordion').accordion({
-                active: prefs.get('panel_accordion_active')||0,
-                change: function(event, ui) { 
-                    console.log(ui.options.active);
-                    prefs.set('panel_accordion_active', ui.options.active);
-                }
-            });
+			jQuery('#accordion').accordion({
+				active: prefs.get('panel_accordion_active')||0,
+				change: function(event, ui) { 
+					console.log(ui.options.active);
+					prefs.set('panel_accordion_active', ui.options.active);
+				}
+			});
 			
 			
 			/*
@@ -366,17 +370,17 @@
 					'type':'string'
 				}
 			};
-            
-            
-            
+			
+			
+			
 			var prefsUI = new SpazPrefsUI(prefs, prefsUIopts);
 
 			jQuery('#clear').click(function() {
 				prefsUI.removeListeners();
-			});	
+			}); 
 			jQuery('#rebind').click(function() {
 				prefsUI.addListeners();
-			});	
+			}); 
 
 		
 		});
@@ -391,53 +395,53 @@
 		<div class="ui-widget-header">Here's your widget handle</div>
 		
 		<div id="accordion">
-        	<h3><a href="#">Section 1</a></h3>
-        	<div>
-        		<p>
-        		Mauris mauris ante, blandit et, ultrices a, suscipit eget, quam. Integer
-        		ut neque. Vivamus nisi metus, molestie vel, gravida in, condimentum sit
-        		amet, nunc. Nam a nibh. Donec suscipit eros. Nam mi. Proin viverra leo ut
-        		odio. Curabitur malesuada. Vestibulum a velit eu ante scelerisque vulputate.
-        		</p>
-        	</div>
-        	<h3><a href="#">Section 2</a></h3>
-        	<div>
-        		<p>
-        		Sed non urna. Donec et ante. Phasellus eu ligula. Vestibulum sit amet
-        		purus. Vivamus hendrerit, dolor at aliquet laoreet, mauris turpis porttitor
-        		velit, faucibus interdum tellus libero ac justo. Vivamus non quam. In
-        		suscipit faucibus urna.
-        		</p>
-        	</div>
-        	<h3><a href="#">Section 3</a></h3>
-        	<div>
-        		<p>
-        		Nam enim risus, molestie et, porta ac, aliquam ac, risus. Quisque lobortis.
-        		Phasellus pellentesque purus in massa. Aenean in pede. Phasellus ac libero
-        		ac tellus pellentesque semper. Sed ac felis. Sed commodo, magna quis
-        		lacinia ornare, quam ante aliquam nisi, eu iaculis leo purus venenatis dui.
-        		</p>
-        		<ul>
-        			<li>List item one</li>
-        			<li>List item two</li>
-        			<li>List item three</li>
-        		</ul>
-        	</div>
-        	<h3><a href="#">Section 4</a></h3>
-        	<div>
-        		<p>
-        		Cras dictum. Pellentesque habitant morbi tristique senectus et netus
-        		et malesuada fames ac turpis egestas. Vestibulum ante ipsum primis in
-        		faucibus orci luctus et ultrices posuere cubilia Curae; Aenean lacinia
-        		mauris vel est.
-        		</p>
-        		<p>
-        		Suspendisse eu nisl. Nullam ut libero. Integer dignissim consequat lectus.
-        		Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
-        		inceptos himenaeos.
-        		</p>
-        	</div>
-        </div>
+			<h3><a href="#">Section 1</a></h3>
+			<div>
+				<p>
+				Mauris mauris ante, blandit et, ultrices a, suscipit eget, quam. Integer
+				ut neque. Vivamus nisi metus, molestie vel, gravida in, condimentum sit
+				amet, nunc. Nam a nibh. Donec suscipit eros. Nam mi. Proin viverra leo ut
+				odio. Curabitur malesuada. Vestibulum a velit eu ante scelerisque vulputate.
+				</p>
+			</div>
+			<h3><a href="#">Section 2</a></h3>
+			<div>
+				<p>
+				Sed non urna. Donec et ante. Phasellus eu ligula. Vestibulum sit amet
+				purus. Vivamus hendrerit, dolor at aliquet laoreet, mauris turpis porttitor
+				velit, faucibus interdum tellus libero ac justo. Vivamus non quam. In
+				suscipit faucibus urna.
+				</p>
+			</div>
+			<h3><a href="#">Section 3</a></h3>
+			<div>
+				<p>
+				Nam enim risus, molestie et, porta ac, aliquam ac, risus. Quisque lobortis.
+				Phasellus pellentesque purus in massa. Aenean in pede. Phasellus ac libero
+				ac tellus pellentesque semper. Sed ac felis. Sed commodo, magna quis
+				lacinia ornare, quam ante aliquam nisi, eu iaculis leo purus venenatis dui.
+				</p>
+				<ul>
+					<li>List item one</li>
+					<li>List item two</li>
+					<li>List item three</li>
+				</ul>
+			</div>
+			<h3><a href="#">Section 4</a></h3>
+			<div>
+				<p>
+				Cras dictum. Pellentesque habitant morbi tristique senectus et netus
+				et malesuada fames ac turpis egestas. Vestibulum ante ipsum primis in
+				faucibus orci luctus et ultrices posuere cubilia Curae; Aenean lacinia
+				mauris vel est.
+				</p>
+				<p>
+				Suspendisse eu nisl. Nullam ut libero. Integer dignissim consequat lectus.
+				Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
+				inceptos himenaeos.
+				</p>
+			</div>
+		</div>
 	</div>
 	
 
