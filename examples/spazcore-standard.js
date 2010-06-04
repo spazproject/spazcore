@@ -1,4 +1,4 @@
-/*********** Built 2010-05-27 00:05:45 EDT ***********/
+/*********** Built 2010-06-04 14:16:10 PDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -11150,6 +11150,7 @@ SpazTwit.prototype.initializeData = function() {
 	this.data[SPAZCORE_SECTION_COMBINED] = {
 		'items':   [],
 		'newitems':[],
+		'updates' :[],
 		'max':400,
 		'min_age':5*60
 	};
@@ -11220,6 +11221,48 @@ SpazTwit.prototype.combinedTimelineHasErrors = function() {
 	}
 };
 
+/**
+ * Checks to see if the combined timeline contains sent updates
+ * @return {boolean}
+ */
+SpazTwit.prototype.combinedTimelineHasUpdates = function() {
+	return this.data[SPAZCORE_SECTION_COMBINED].updates.length > 0;
+};
+
+/**
+ * Adds ids of array of statuses to updates
+ */
+SpazTwit.prototype.combinedTimelineAddUpdates = function(items) {
+	if (items.id) {
+		items = [items];
+	}
+	var i;
+	for (i in items) {
+		this.data[SPAZCORE_SECTION_COMBINED].updates.push(items[i].id);
+	}
+};
+
+/**
+ * Removes the update items from combined newitems
+ */
+SpazTwit.prototype.combinedNewItemsRemoveUpdates = function() {
+	if (!this.combinedTimelineHasUpdates()) {
+		return;
+	}
+	var data = this.data[SPAZCORE_SECTION_COMBINED],
+		iStr = ':' + data.updates.join(':') + ':',
+		news = data.newitems,
+		keep = [],
+		i;
+
+	for (i in news) {
+		if (!RegExp(':' + news[i].id + ':').test(iStr)) {
+			keep.push(news[i]);
+		}
+	}
+	data.newitems = keep;
+	data.updates  = [];
+};
 
 
 /**
@@ -11518,7 +11561,11 @@ SpazTwit.prototype.getHomeTimeline = function(since_id, count, page, processing_
 	}
 	
 	var data = {};
-	data['since_id'] = since_id;
+	if (since_id < -1) {
+		data['max_id'] = Math.abs(since_id);
+	} else {
+		data['since_id'] = since_id;
+	}
 	data['count']	 = count;
 	if (page) {
 		data['page'] = page;
@@ -11631,7 +11678,11 @@ SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts,
 	
 	
 	var data = {};
-	data['since_id'] = since_id;
+	if (since_id < -1) {
+		data['max_id'] = Math.abs(since_id);
+	} else {
+		data['since_id'] = since_id;
+	}
 	if (page) {
 		data['page'] = page;
 	}
@@ -11686,7 +11737,11 @@ SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processin
 	}
 	
 	var data = {};
-	data['since_id'] = since_id;
+	if (since_id < -1) {
+		data['max_id'] = Math.abs(since_id);
+	} else {
+		data['since_id'] = since_id;
+	}
 	if (page) {
 		data['page'] = page;
 	}
@@ -11759,17 +11814,32 @@ SpazTwit.prototype.getSent = function(since_id, count, page, onSuccess, onFailur
 SpazTwit.prototype.getSentDirectMessages = function(since_id, page, onSuccess, onFailure) {};
 
 SpazTwit.prototype.getUserTimeline = function(id, count, page, onSuccess, onFailure) {
-	if (!id) {
+
+	var opts = sch.defaults({
+		'id': id,
+		'since_id': null,
+		'count': count || 10,
+		'page': page || null,
+		'onSuccess': onSuccess,
+		'onFailure': onFailure
+	}, id);
+
+	if (!opts.id || 'object' === typeof opts.id) {
 		return;
 	}
-	if (!page) { page = null;}
-	if (!count) { count = 10;}
-	
+
 	var data = {};
-	data['id']  = id;
-	data['count']	 = count;
-	if (page) {
-		data['page'] = page;
+	data['id']    = opts.id;
+	data['count'] = opts.count;
+	if (opts.since_id) {
+		if (opts.since_id < -1) {
+			data['max_id'] = Math.abs(opts.since_id);
+		} else {
+			data['since_id'] = opts.since_id;
+		}
+	}
+	if (opts.page) {
+		data['page'] = opts.page;
 	}
 	
 	
@@ -11780,8 +11850,8 @@ SpazTwit.prototype.getUserTimeline = function(id, count, page, onSuccess, onFail
 		'username':this.username,
 		'password':this.password,
 		'process_callback'	: this._processUserTimeline,
-		'success_callback':onSuccess,
-		'failure_callback':onFailure,
+		'success_callback':opts.onSuccess,
+		'failure_callback':opts.onFailure,
 		'success_event_type': 'new_user_timeline_data',
 		'failure_event_type': 'error_user_timeline_data'
 	});
@@ -12245,7 +12315,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 	
 	if (!processing_opts) { processing_opts = {}; }
 
-	if (!section_name === SPAZCORE_SECTION_USER) { // the user timeline section isn't persistent
+	if (section_name !== SPAZCORE_SECTION_USER) { // the user timeline section isn't persistent
 		/*
 			reset .newitems data properties
 		*/
@@ -12281,10 +12351,17 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 			
 		} else { // this is a "normal" timeline that we want to be persistent
 			
-			// set lastid
-			var lastid = ret_items[ret_items.length-1].id;
-			this.data[section_name].lastid = lastid;
-			sc.helpers.dump('this.data['+section_name+'].lastid:'+this.data[section_name].lastid);
+			if (opts.is_update_item) {
+				/*
+					we do not want this to be the lastid, instead remember it in combined.updates
+				*/
+				this.combinedTimelineAddUpdates(ret_items);
+			} else {
+				// set lastid
+				var lastid = ret_items[ret_items.length-1].id;
+				this.data[section_name].lastid = lastid;
+				sc.helpers.dump('this.data['+section_name+'].lastid:'+this.data[section_name].lastid);
+			}
 
 			// add new items to data.newitems array
 			this.data[section_name].newitems = ret_items;
@@ -12341,6 +12418,11 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 	if (this.combinedTimelineFinished()) {
 		
 		/*
+			Remove those updates from combined newitems
+		*/
+		this.combinedNewItemsRemoveUpdates();
+
+		/*
 			we do this stuff here to avoid processing repeatedly
 		*/
 		
@@ -12381,9 +12463,8 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
  */
 SpazTwit.prototype._addToSectionItems = function(section_name, arr, sortfunc) {
 	// concat new items onto data.items array
-	this.data[section_name].items = this.data[section_name].items.concat(arr);
-
-	this._cleanupItemArray(this.data[section_name].items, this.data[section_name].max, sortfunc);
+	var data = this.data[section_name];
+	data.items = this._cleanupItemArray(data.items.concat(arr), null, sortfunc);
 };
 
 /**
@@ -12927,6 +13008,7 @@ SpazTwit.prototype._processUpdateReturn = function(data, opts) {
 	/*
 		Add this to the HOME section and fire off the event when done
 	*/	
+	opts.is_update_item = true;
 	this._processTimeline(SPAZCORE_SECTION_HOME, [data], opts);
 };
 
@@ -13479,7 +13561,7 @@ SpazTwit.prototype.getLists = function(user, onSuccess, onFailure) {
 		'method':'GET'
 	};
 
-	var xhr = this._getTimeline(opts);
+	var xhr = this._callMethod(opts);
 };
 
 
@@ -14176,7 +14258,8 @@ if (sc) {
 }
 * 
 * 
-*//*jslint 
+*/
+/*jslint 
 browser: true,
 nomen: false,
 debug: true,
