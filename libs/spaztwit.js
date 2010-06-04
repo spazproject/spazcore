@@ -1338,7 +1338,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 	
 	if (!processing_opts) { processing_opts = {}; }
 
-	if (!section_name === SPAZCORE_SECTION_USER) { // the user timeline section isn't persistent
+	if (section_name !== SPAZCORE_SECTION_USER) { // the user timeline section isn't persistent
 		/*
 			reset .newitems data properties
 		*/
