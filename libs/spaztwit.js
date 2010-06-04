@@ -216,6 +216,7 @@ SpazTwit.prototype.initializeData = function() {
 	this.data[SPAZCORE_SECTION_COMBINED] = {
 		'items':   [],
 		'newitems':[],
+		'updates' :[],
 		'max':400,
 		'min_age':5*60
 	};
@@ -286,6 +287,48 @@ SpazTwit.prototype.combinedTimelineHasErrors = function() {
 	}
 };
 
+/**
+ * Checks to see if the combined timeline contains sent updates
+ * @return {boolean}
+ */
+SpazTwit.prototype.combinedTimelineHasUpdates = function() {
+	return this.data[SPAZCORE_SECTION_COMBINED].updates.length > 0;
+};
+
+/**
+ * Adds ids of array of statuses to updates
+ */
+SpazTwit.prototype.combinedTimelineAddUpdates = function(items) {
+	if (items.id) {
+		items = [items];
+	}
+	var i;
+	for (i in items) {
+		this.data[SPAZCORE_SECTION_COMBINED].updates.push(items[i].id);
+	}
+};
+
+/**
+ * Removes the update items from combined newitems
+ */
+SpazTwit.prototype.combinedNewItemsRemoveUpdates = function() {
+	if (!this.combinedTimelineHasUpdates()) {
+		return;
+	}
+	var data = this.data[SPAZCORE_SECTION_COMBINED],
+		iStr = ':' + data.updates.join(':') + ':',
+		news = data.newitems,
+		keep = [],
+		i;
+
+	for (i in news) {
+		if (!RegExp(':' + news[i].id + ':').test(iStr)) {
+			keep.push(news[i]);
+		}
+	}
+	data.newitems = keep;
+	data.updates  = [];
+};
 
 
 /**
@@ -1374,10 +1417,17 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 			
 		} else { // this is a "normal" timeline that we want to be persistent
 			
-			// set lastid
-			var lastid = ret_items[ret_items.length-1].id;
-			this.data[section_name].lastid = lastid;
-			sc.helpers.dump('this.data['+section_name+'].lastid:'+this.data[section_name].lastid);
+			if (opts.is_update_item) {
+				/*
+					we do not want this to be the lastid, instead remember it in combined.updates
+				*/
+				this.combinedTimelineAddUpdates(ret_items);
+			} else {
+				// set lastid
+				var lastid = ret_items[ret_items.length-1].id;
+				this.data[section_name].lastid = lastid;
+				sc.helpers.dump('this.data['+section_name+'].lastid:'+this.data[section_name].lastid);
+			}
 
 			// add new items to data.newitems array
 			this.data[section_name].newitems = ret_items;
@@ -1434,6 +1484,11 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 	if (this.combinedTimelineFinished()) {
 		
 		/*
+			Remove those updates from combined newitems
+		*/
+		this.combinedNewItemsRemoveUpdates();
+
+		/*
 			we do this stuff here to avoid processing repeatedly
 		*/
 		
@@ -1474,9 +1529,8 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
  */
 SpazTwit.prototype._addToSectionItems = function(section_name, arr, sortfunc) {
 	// concat new items onto data.items array
-	this.data[section_name].items = this.data[section_name].items.concat(arr);
-
-	this._cleanupItemArray(this.data[section_name].items, this.data[section_name].max, sortfunc);
+	var data = this.data[section_name];
+	data.items = this._cleanupItemArray(data.items.concat(arr), null, sortfunc);
 };
 
 /**
@@ -2020,6 +2074,7 @@ SpazTwit.prototype._processUpdateReturn = function(data, opts) {
 	/*
 		Add this to the HOME section and fire off the event when done
 	*/	
+	opts.is_update_item = true;
 	this._processTimeline(SPAZCORE_SECTION_HOME, [data], opts);
 };
 
