@@ -66,8 +66,6 @@ SpazAccounts.prototype.load	= function() {
  * saves the accounts array to the prefs obj 
  */
 SpazAccounts.prototype.save	= function() {
-	
-	
 	this.prefs.set(this.prefskey, sch.enJSON(this._accounts));
 	sch.debug('saved users to "'+this.prefskey+'" pref');
 	for (var x in this._accounts) {
@@ -80,7 +78,6 @@ SpazAccounts.prototype.save	= function() {
 	sch.debug('ALL PREFS:');
 	sch.debug(sch.enJSON(this.prefs._prefs));
 
-	
 };
 
 /**
@@ -168,12 +165,13 @@ SpazAccounts.prototype.add = function(username, password, type) {
  * @param {string} id the UUID of the account to delete 
  */
 SpazAccounts.prototype.remove = function(id) {
-	sch.debug("Deleting '"+id+"'…");
+	sch.error("Deleting '"+id+"'…");
 	
 	var index = this._findUserIndex(id);
 	if (index !== false) {
 		var deleted = this._accounts.splice(index, 1);
 		sch.debug("Deleted account '"+deleted[0].id+"'");
+		this.save();
 		return deleted[0];
 	} else {
 		sch.error("Could not find this id to delete: '"+id+"'");
