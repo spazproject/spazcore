@@ -95,6 +95,10 @@ var SPAZCORE_SERVICEURL_WORDPRESS_TWITTER = 'https://twitter-api.wordpress.com/'
  * 'create_block_failed'
  * 'destroy_block_succeeded'
  * 'destroy_block_failed'
+ * 'follow_succeeded'
+ * 'follow_failed'
+ * 'unfollow_succeeded'
+ * 'unfollow_failed'
  * 
  * 
  * @param username string
@@ -412,50 +416,50 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 
 
     // Timeline URLs
-    urls.public_timeline    = "statuses/public_timeline.json";
-    urls.friends_timeline   = "statuses/friends_timeline.json";
-    urls.home_timeline		= "statuses/home_timeline.json";
-    urls.user_timeline      = "statuses/user_timeline.json";
-    urls.replies_timeline   = "statuses/replies.json";
-    urls.show				= "statuses/show/{{ID}}.json";
-    urls.favorites          = "favorites.json";
-    urls.user_favorites     = "favorites/{{ID}}.json"; // use this to retrieve favs of a user other than yourself
-    urls.dm_timeline        = "direct_messages.json";
-    urls.dm_sent            = "direct_messages/sent.json";
-    urls.friendslist        = "statuses/friends.json";
-    urls.followerslist      = "statuses/followers.json";
-    urls.show_user			= "users/show/{{ID}}.json";
-    urls.featuredlist       = "statuses/featured.json";
+	urls.public_timeline    = "statuses/public_timeline.json";
+	urls.friends_timeline   = "statuses/friends_timeline.json";
+	urls.home_timeline		= "statuses/home_timeline.json";
+	urls.user_timeline      = "statuses/user_timeline.json";
+	urls.replies_timeline   = "statuses/replies.json";
+	urls.show				= "statuses/show/{{ID}}.json";
+	urls.favorites          = "favorites.json";
+	urls.user_favorites     = "favorites/{{ID}}.json"; // use this to retrieve favs of a user other than yourself
+	urls.dm_timeline        = "direct_messages.json";
+	urls.dm_sent            = "direct_messages/sent.json";
+	urls.friendslist        = "statuses/friends.json";
+	urls.followerslist      = "statuses/followers.json";
+	urls.show_user			= "users/show/{{ID}}.json";
+	urls.featuredlist       = "statuses/featured.json";
 
-    // Action URLs
-    urls.update           	= "statuses/update.json";
-    urls.destroy_status   	= "statuses/destroy/{{ID}}.json";
-    urls.friendship_create  = "friendships/create/{{ID}}.json";
-    urls.friendship_destroy	= "friendships/destroy/{{ID}}.json";
-    urls.block_create		= "blocks/create/{{ID}}.json";
-    urls.block_destroy		= "blocks/destroy/{{ID}}.json";
-    urls.start_notifications= "notifications/follow/{{ID}}.json";
-    urls.stop_notifications = "notifications/leave/{{ID}}.json";
-    urls.favorites_create 	= "favorites/create/{{ID}}.json";
-    urls.favorites_destroy	= "favorites/destroy/{{ID}}.json";
-    urls.saved_searches_create 	= "saved_searches/create.json";
-    urls.saved_searches_destroy	= "saved_searches/destroy/{{ID}}.json";
-    urls.verify_credentials = "account/verify_credentials.json";
-    urls.ratelimit_status   = "account/rate_limit_status.json";
+	// Action URLs
+	urls.update           	= "statuses/update.json";
+	urls.destroy_status   	= "statuses/destroy/{{ID}}.json";
+	urls.friendship_create  = "friendships/create/{{ID}}.json";
+	urls.friendship_destroy	= "friendships/destroy/{{ID}}.json";
+	urls.block_create		= "blocks/create/{{ID}}.json";
+	urls.block_destroy		= "blocks/destroy/{{ID}}.json";
+	urls.follow             = "notifications/follow/{{ID}}.json";
+	urls.unfollow			= "notifications/leave/{{ID}}.json";
+	urls.favorites_create 	= "favorites/create/{{ID}}.json";
+	urls.favorites_destroy	= "favorites/destroy/{{ID}}.json";
+	urls.saved_searches_create 	= "saved_searches/create.json";
+	urls.saved_searches_destroy	= "saved_searches/destroy/{{ID}}.json";
+	urls.verify_credentials = "account/verify_credentials.json";
+	urls.ratelimit_status   = "account/rate_limit_status.json";
 	urls.update_profile		= "account/update_profile.json";
 	urls.saved_searches		= "saved_searches.json";
 	urls.report_spam		= "report_spam.json";
 
     // User lists URLs
-    urls.lists              = "{{USER}}/lists.json";
-    urls.lists_list         = "{{USER}}/lists/{{SLUG}}.json";
-    urls.lists_memberships  = "{{USER}}/lists/memberships.json";
-    urls.lists_timeline     = "{{USER}}/lists/{{SLUG}}/statuses.json";
-    urls.lists_members      = "{{USER}}/{{SLUG}}/members.json";
-    urls.lists_check_member = "{{USER}}/{{SLUG}}/members/{{ID}}.json";
-    urls.lists_subscribers  = "{{USER}}/{{SLUG}}/subscribers.json";
-    urls.lists_check_subscriber = "{{USER}}/{{SLUG}}/subscribers/{{ID}}.json";
-    urls.lists_subscriptions = "{{USER}}/lists/subscriptions.json";
+	urls.lists              = "{{USER}}/lists.json";
+	urls.lists_list         = "{{USER}}/lists/{{SLUG}}.json";
+	urls.lists_memberships  = "{{USER}}/lists/memberships.json";
+	urls.lists_timeline     = "{{USER}}/lists/{{SLUG}}/statuses.json";
+	urls.lists_members      = "{{USER}}/{{SLUG}}/members.json";
+	urls.lists_check_member = "{{USER}}/{{SLUG}}/members/{{ID}}.json";
+	urls.lists_subscribers  = "{{USER}}/{{SLUG}}/subscribers.json";
+	urls.lists_check_subscriber = "{{USER}}/{{SLUG}}/subscribers/{{ID}}.json";
+	urls.lists_subscriptions = "{{USER}}/lists/subscriptions.json";
 
 	//trends
 	urls.trends				= "trends.json";
@@ -477,9 +481,9 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 		urls.search				= "search.json";
 	}
 
-    // misc
-    urls.test 			  	= "help/test.json";
-    urls.downtime_schedule	= "help/downtime_schedule.json";
+	// misc
+	urls.test 			  	= "help/test.json";
+	urls.downtime_schedule	= "help/downtime_schedule.json";
 
 	
 	if (urls[key].indexOf('{{ID}}') > -1) {
@@ -2027,8 +2031,53 @@ SpazTwit.prototype.unblock = function(user_id, onSuccess, onFailure) {
 
 };
 
-SpazTwit.prototype.follow = function(user_id, onSuccess, onFailure) {}; // to add notification
-SpazTwit.prototype.unfollow = function(user_id, onSuccess, onFailure) {}; // to remove notification
+SpazTwit.prototype.follow = function(user_id, onSuccess, onFailure) { // to add notification
+	var data = {};
+	data['id'] = user_id;
+	
+	var url = this.getAPIURL('follow', data);
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'follow_succeeded',
+		'failure_event_type':'follow_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
+		'data':data
+	};
+
+	/*
+		Perform a request and get true or false back
+	*/
+	var xhr = this._callMethod(opts);
+    
+};
+
+SpazTwit.prototype.unfollow = function(user_id, onSuccess, onFailure) { // to remove notification
+	var data = {};
+	data['id'] = user_id;
+	
+	var url = this.getAPIURL('unfollow', data);
+	
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'success_event_type':'unfollow_succeeded',
+		'failure_event_type':'unfollow_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
+		'data':data
+	};
+
+	/*
+		Perform a request and get true or false back
+	*/
+	var xhr = this._callMethod(opts);
+    
+};
 
 
 SpazTwit.prototype.update = function(status, source, in_reply_to_status_id, onSuccess, onFailure) {
