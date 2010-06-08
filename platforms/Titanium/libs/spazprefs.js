@@ -21,11 +21,18 @@ SpazPrefs.prototype.load = function() {
 	
 	if (Titanium.App.Properties.hasProperty(SPAZCORE_PREFS_TI_KEY)) {
 		var prefs_json = Titanium.App.Properties.getString(SPAZCORE_PREFS_TI_KEY);
-		var loaded_prefs = sc.helpers.deJSON(prefs_json);
+		try {
+			var loaded_prefs = sc.helpers.deJSON(prefs_json);
+		} catch (e) {
+			sch.error('Could not load prefs JSON… using defaults');
+			this.save();
+			return;
+		}
+
 		for (var key in loaded_prefs) {
 			sc.helpers.dump('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
-            this._prefs[key] = loaded_prefs[key];
-       	}
+			this._prefs[key] = loaded_prefs[key];
+		}
 	} else {
 		// save the defaults if this is the first time
 		this.save();
