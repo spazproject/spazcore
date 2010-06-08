@@ -25,12 +25,12 @@ SpazPrefs.prototype.load = function() {
 		sch.debug('prefsval exists');
 		for (var key in prefsval) {
 			sc.helpers.dump('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
-            this._prefs[key] = prefsval[key];
-       	}
-    } else { // init the file
+			this._prefs[key] = prefsval[key];
+		}
+	} else { // init the file
 		sch.debug('prefsval does not exist; saving with defaults');
-        this.save();
-    }
+		this.save();
+	}
 };
 
 /**

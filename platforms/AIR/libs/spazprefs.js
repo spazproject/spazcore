@@ -18,42 +18,49 @@ SpazPrefs.prototype.load = function() {
 	var filename = this.id || SPAZCORE_PREFS_AIR_FILENAME;
 	
 	var prefsFile = air.File.applicationStorageDirectory;
-    prefsFile = prefsFile.resolvePath(filename);
+	prefsFile = prefsFile.resolvePath(filename);
 
-    var fs = new air.FileStream();
+	var fs = new air.FileStream();
 
-    if (prefsFile.exists) {
+	if (prefsFile.exists) {
 		sch.debug('prefsfile exists');
-        fs.open(prefsFile, air.FileMode.READ);
-        var prefsJSON = fs.readUTFBytes(prefsFile.size);
-        sch.debug(prefsJSON)
-        var loaded_prefs = JSON.parse(prefsJSON);
+		fs.open(prefsFile, air.FileMode.READ);
+		var prefsJSON = fs.readUTFBytes(prefsFile.size);
+		sch.debug(prefsJSON);
+
+		try {
+			var loaded_prefs = JSON.parse(prefsJSON);
+		} catch (e) {
+			sch.error('Could not load prefs JSON… using defaults');
+			this.save();
+			return;
+		}
 
 		for (var key in loaded_prefs) {
 			sc.helpers.dump('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
-            this._prefs[key] = loaded_prefs[key];
-       	}
-    } else { // init the file
+			this._prefs[key] = loaded_prefs[key];
+		}
+	} else { // init the file
 		sch.debug('prefs file does not exist; saving with defaults');
-        this.save();
-    }
-    fs.close()
-}
+		this.save();
+	}
+	fs.close();
+};
 
 SpazPrefs.prototype.save = function() {
 	var jsonPrefs = sch.enJSON(Spaz.Prefs.preferences);
-    sch.debug(jsonPrefs);
+	sch.debug(jsonPrefs);
 
 	var filename = this.id || SPAZCORE_PREFS_AIR_FILENAME;
 
-    var prefsFile = air.File.applicationStorageDirectory;
-    prefsFile = prefsFile.resolvePath(filename);
+	var prefsFile = air.File.applicationStorageDirectory;
+	prefsFile = prefsFile.resolvePath(filename);
 
-    var fs = new air.FileStream();
+	var fs = new air.FileStream();
 
-    fs.open(prefsFile, air.FileMode.WRITE);
-    fs.writeUTFBytes(sc.helpers.enJSON(this._prefs));
-    fs.close();
+	fs.open(prefsFile, air.FileMode.WRITE);
+	fs.writeUTFBytes(sc.helpers.enJSON(this._prefs));
+	fs.close();
 };
 
 
@@ -83,8 +90,8 @@ SpazPrefs.prototype.saveWindowState = function() {
 SpazPrefs.prototype.loadWindowState = function() {
 	var width  = this.get('__window-height');
 	var height = this.get('__window-height');
-	var x      = this.get('__window-x');
-	var y      = this.get('__window-y');
+	var x	   = this.get('__window-x');
+	var y	   = this.get('__window-y');
 	
 	if (x && y && width && height) {
 		window.nativeWindow.width  = width;
