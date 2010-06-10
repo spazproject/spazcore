@@ -17,6 +17,8 @@ cat libs/spazcore.js \
 	vendors/underscore.js \
 	vendors/shortcut.js \
 	vendors/jquery.cookies.2.2.0.js \
+	vendors/sha1.js \
+	vendors/oauth.js \
 	helpers/datetime.js \
 	helpers/event.js \
 	helpers/hash.js \
@@ -30,6 +32,7 @@ cat libs/spazcore.js \
 	helpers/view.js \
 	helpers/xml.js \
 	libs/spazaccounts.js \
+	libs/spazauth.js \
 	libs/spazimageurl.js \
 	libs/spazphotomailer.js \
 	libs/spazprefs.js \
