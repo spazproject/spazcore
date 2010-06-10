@@ -4,13 +4,13 @@
  */
 
 var SPAZAUTH_SERVICES = {
-    'twitter': {
-        authType: 'oauth',
-        consumerKey: 't94eBtc4Pz2zqo4KhABseQ',
-        consumerSecret: 'PMEkuk4xQpQMY7HqpHZqddzg9TYr4MyJxd8kujivE',
-        accessURL: 'https://twitter.com/oauth/access_token'
+    'statusnet': {
+        authType: 'basic'
     },
     'identica': {
+        authType: 'basic'
+    },
+    'default': {
         authType: 'basic'
     }
 };
@@ -25,7 +25,7 @@ function SpazAuth(service) {
     var serviceInfo = SPAZAUTH_SERVICES[service];
     if (serviceInfo == undefined) {
         sch.error("Invalid authentication service: " + service);
-        return;
+        return null;
     }
 
     switch (serviceInfo.authType) {
@@ -33,8 +33,19 @@ function SpazAuth(service) {
             return new SpazOAuth(service, serviceInfo);
         case 'basic':
             return new SpazBasicAuth();
+        default:
+            return new SpazBasicAuth();
     }
 };
+
+/**
+ * use this to add services that aren't in by default (like, say, stuff with secrets)
+ */
+SpazAuth.addService = function(label, opts) {
+    SPAZAUTH_SERVICES[label] = opts;
+};
+
+
 
 /**
  * Construct a new basic authentication object.
