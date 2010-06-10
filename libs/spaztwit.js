@@ -101,15 +101,20 @@ var SPAZCORE_SERVICEURL_WORDPRESS_TWITTER = 'https://twitter-api.wordpress.com/'
  * 'unfollow_failed'
  * 
  * 
- * @param auth SpazAuth object used for authentication
+ * @param {Object} opts various options
+ * @param {Object} [opts.auth] SpazAuth object
+ * @param {String} [opts.event_mode] The event mode to use ('jquery' or 'DOM'). Defaults to 'DOM'
+ * @param {Object} [opts.event_target] the DOM element to target the event on. Defaults to document
+ * @param {Number} [opts.timeout] length of time, in seconds, to timeout
  * @class SpazTwit
 */
-function SpazTwit(auth, opts) {
+function SpazTwit(opts) {
 	
-    this.auth = auth;
-    this.username = auth.username;
+	this.auth = auth;
+	this.username = auth.username;
 	
 	this.opts                = opts || {};
+	this.auth                = opts.auth;
 	this.opts.event_mode     = this.opts.event_mode || 'DOM';
 	this.opts.event_target   = this.opts.event_target || document;
 	this.opts.timeout        = this.opts.timeout || this.DEFAULT_TIMEOUT; // 60 seconds default
@@ -145,7 +150,9 @@ function SpazTwit(auth, opts) {
 	}
 }
 
-
+/**
+ * the default timeout value (60 seconds) 
+ */
 SpazTwit.prototype.DEFAULT_TIMEOUT = 1000*60;
 
 
@@ -445,11 +452,11 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 	urls.trends_weekly		= "trends/weekly.json";
 	
 	//retweet
-	urls.retweet			= "statuses/retweet/{{ID}}.json"
-	urls.retweets			= "statuses/retweets/{{ID}}.json"
-	urls.retweeted_by_me	= "statuses/retweeted_by_me.json"
-	urls.retweeted_to_me	= "statuses/retweeted_to_me.json"
-	urls.retweets_of_me		= "statuses/retweets_of_me.json"
+	urls.retweet			= "statuses/retweet/{{ID}}.json";
+	urls.retweets			= "statuses/retweets/{{ID}}.json";
+	urls.retweeted_by_me	= "statuses/retweeted_by_me.json";
+	urls.retweeted_to_me	= "statuses/retweeted_to_me.json";
+	urls.retweets_of_me		= "statuses/retweets_of_me.json";
 
 	// search
 	if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER) {
@@ -2091,7 +2098,7 @@ SpazTwit.prototype.retweet = function(id, onSuccess, onFailure) {
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 /*
  * Gets up to 100 of the latest retweets of a tweet.
@@ -2115,7 +2122,7 @@ SpazTwit.prototype.getRetweets = function(id, count) {
 	};
 	
 	var xhr = this._getTimeline(opts);
-}
+};
 
 /*
  * Returns up to 200 of the most recent retweets by the user
@@ -2126,7 +2133,7 @@ SpazTwit.prototype.getRetweets = function(id, count) {
  */
  
 SpazTwit.prototype.retweetedByMe = function(since, max, count, page){
-	var params = {}
+	var params = {};
 	if(since != null){
 		params['since_id'] = since;
 	}
@@ -2153,7 +2160,7 @@ SpazTwit.prototype.retweetedByMe = function(since, max, count, page){
 	};
 	
 	var xhr = this._getTimeline(opts);
-}
+};
 
 /*
  * Returns up to 200 of the most recent retweets by the user's friends
@@ -2164,7 +2171,7 @@ SpazTwit.prototype.retweetedByMe = function(since, max, count, page){
  */
  
 SpazTwit.prototype.retweetedToMe = function(since, max, count, page){
-	var params = {}
+	var params = {};
 	if(since != null){
 		params['since_id'] = since;
 	}
@@ -2191,7 +2198,7 @@ SpazTwit.prototype.retweetedToMe = function(since, max, count, page){
 	};
 	
 	var xhr = this._getTimeline(opts);
-}
+};
 
 /*
  * Returns up to 200 of the most recent retweets of the user's tweets
@@ -2202,7 +2209,7 @@ SpazTwit.prototype.retweetedToMe = function(since, max, count, page){
  */
  
 SpazTwit.prototype.retweetsOfMe = function(since, max, count, page){
-	var params = {}
+	var params = {};
 	if(since != null){
 		params['since_id'] = since;
 	}
@@ -2229,7 +2236,7 @@ SpazTwit.prototype.retweetsOfMe = function(since, max, count, page){
 	};
 	
 	var xhr = this._getTimeline(opts);
-}
+};
 
 SpazTwit.prototype.favorite = function(id, onSuccess, onFailure) {
 	var data = {};
@@ -2800,7 +2807,7 @@ SpazTwit.prototype.updateList = function(list, name, visibility, description){
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 /**
  * delete a list
@@ -2919,7 +2926,7 @@ SpazTwit.prototype.listsSubscribedTo = function(user) {
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 SpazTwit.prototype.listMemberships = function(user) {
 	if(!user && !this.username) {
@@ -2942,7 +2949,7 @@ SpazTwit.prototype.listMemberships = function(user) {
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 SpazTwit.prototype.getListSubscribers = function(list, user){
 	if(!user && !this.username) {
@@ -2967,7 +2974,7 @@ SpazTwit.prototype.getListSubscribers = function(list, user){
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 SpazTwit.prototype.isSubscribed = function(list, list_user, user){
 	if(!user && !this.username) {
@@ -2993,7 +3000,7 @@ SpazTwit.prototype.isSubscribed = function(list, list_user, user){
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 SpazTwit.prototype.subscribe = function(list, user){
 	if(!user && !this.username) {
@@ -3018,7 +3025,7 @@ SpazTwit.prototype.subscribe = function(list, user){
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 SpazTwit.prototype.unsubscribe = function(list, user){
 	if(!user && !this.username) {
@@ -3044,7 +3051,7 @@ SpazTwit.prototype.unsubscribe = function(list, user){
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 SpazTwit.prototype.isMember = function(list, list_user, user){
 	if(!user && !this.username) {
@@ -3070,7 +3077,7 @@ SpazTwit.prototype.isMember = function(list, list_user, user){
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 /*
  * Marks a user as a spammer and blocks them
@@ -3093,7 +3100,7 @@ SpazTwit.prototype.reportSpam = function(user) {
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 /**
  *  
  */
