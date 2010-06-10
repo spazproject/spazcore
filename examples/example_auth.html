@@ -3,12 +3,8 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <script type="text/javascript" src="../vendors/jquery-1.4.1.js"></script>
-    <script type="text/javascript" src="../vendors/sha1.js"></script>
-    <script type="text/javascript" src="../vendors/oauth.js"></script>
+    <script type="text/javascript" src="../vendors/jquery-1.4.2.js"></script>
     <script type="text/javascript" src="spazcore-standard.js"></script>
-    <script type="text/javascript" src="../libs/spaztwit.js"></script>
-    <script type="text/javascript" src="../libs/spazauth.js"></script>
 </head>
 
 <body>
@@ -23,6 +19,12 @@
     <div id="timeline" style="display: none;"><button id="loadTimeline">Load timeline!</button></div>
 
     <script>
+        SpazAuth.addService('twitter', {
+            authType: 'oauth',
+            consumerKey: 'REDACTED',
+            consumerSecret: 'REDACTED',
+            accessURL: 'https://twitter.com/oauth/access_token'
+        });
         var auth = new SpazAuth('twitter');
         $('#auth').click(function() {
             var result = auth.authorize($('#username').val(), $('#password').val());
@@ -47,7 +49,7 @@
         };
 
         $('#loadTimeline').click(function() {
-            var twit = new SpazTwit(auth);
+            var twit = new SpazTwit({'auth':auth});
             twit.getHomeTimeline(null, 200, null, null, renderTimeline, function(){
                 $('#timeline').append("<h3>Error loading timeline!</h3>");
 			});
