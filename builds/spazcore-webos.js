@@ -1,4 +1,4 @@
-/*********** Built 2010-06-08 13:00:39 EDT ***********/
+/*********** Built 2010-06-09 22:27:04 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -4439,6 +4439,887 @@ window.Sizzle = Sizzle;
   };
 
 })();
+/*
+ * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
+ * in FIPS 180-1
+ * Version 2.2 Copyright Paul Johnston 2000 - 2009.
+ * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+ * Distributed under the BSD License
+ * See http://pajhome.org.uk/crypt/md5 for details.
+ */
+
+/*
+ * Configurable variables. You may need to tweak these to be compatible with
+ * the server-side, but the defaults work in most cases.
+ */
+var hexcase = 0;  /* hex output format. 0 - lowercase; 1 - uppercase        */
+var b64pad  = ""; /* base-64 pad character. "=" for strict RFC compliance   */
+
+/*
+ * These are the functions you'll usually want to call
+ * They take string arguments and return either hex or base-64 encoded strings
+ */
+function hex_sha1(s)    { return rstr2hex(rstr_sha1(str2rstr_utf8(s))); }
+function b64_sha1(s)    { return rstr2b64(rstr_sha1(str2rstr_utf8(s))); }
+function any_sha1(s, e) { return rstr2any(rstr_sha1(str2rstr_utf8(s)), e); }
+function hex_hmac_sha1(k, d)
+  { return rstr2hex(rstr_hmac_sha1(str2rstr_utf8(k), str2rstr_utf8(d))); }
+function b64_hmac_sha1(k, d)
+  { return rstr2b64(rstr_hmac_sha1(str2rstr_utf8(k), str2rstr_utf8(d))); }
+function any_hmac_sha1(k, d, e)
+  { return rstr2any(rstr_hmac_sha1(str2rstr_utf8(k), str2rstr_utf8(d)), e); }
+
+/*
+ * Perform a simple self-test to see if the VM is working
+ */
+function sha1_vm_test()
+{
+  return hex_sha1("abc").toLowerCase() == "a9993e364706816aba3e25717850c26c9cd0d89d";
+}
+
+/*
+ * Calculate the SHA1 of a raw string
+ */
+function rstr_sha1(s)
+{
+  return binb2rstr(binb_sha1(rstr2binb(s), s.length * 8));
+}
+
+/*
+ * Calculate the HMAC-SHA1 of a key and some data (raw strings)
+ */
+function rstr_hmac_sha1(key, data)
+{
+  var bkey = rstr2binb(key);
+  if(bkey.length > 16) bkey = binb_sha1(bkey, key.length * 8);
+
+  var ipad = Array(16), opad = Array(16);
+  for(var i = 0; i < 16; i++)
+  {
+    ipad[i] = bkey[i] ^ 0x36363636;
+    opad[i] = bkey[i] ^ 0x5C5C5C5C;
+  }
+
+  var hash = binb_sha1(ipad.concat(rstr2binb(data)), 512 + data.length * 8);
+  return binb2rstr(binb_sha1(opad.concat(hash), 512 + 160));
+}
+
+/*
+ * Convert a raw string to a hex string
+ */
+function rstr2hex(input)
+{
+  try { hexcase } catch(e) { hexcase=0; }
+  var hex_tab = hexcase ? "0123456789ABCDEF" : "0123456789abcdef";
+  var output = "";
+  var x;
+  for(var i = 0; i < input.length; i++)
+  {
+    x = input.charCodeAt(i);
+    output += hex_tab.charAt((x >>> 4) & 0x0F)
+           +  hex_tab.charAt( x        & 0x0F);
+  }
+  return output;
+}
+
+/*
+ * Convert a raw string to a base-64 string
+ */
+function rstr2b64(input)
+{
+  try { b64pad } catch(e) { b64pad=''; }
+  var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  var output = "";
+  var len = input.length;
+  for(var i = 0; i < len; i += 3)
+  {
+    var triplet = (input.charCodeAt(i) << 16)
+                | (i + 1 < len ? input.charCodeAt(i+1) << 8 : 0)
+                | (i + 2 < len ? input.charCodeAt(i+2)      : 0);
+    for(var j = 0; j < 4; j++)
+    {
+      if(i * 8 + j * 6 > input.length * 8) output += b64pad;
+      else output += tab.charAt((triplet >>> 6*(3-j)) & 0x3F);
+    }
+  }
+  return output;
+}
+
+/*
+ * Convert a raw string to an arbitrary string encoding
+ */
+function rstr2any(input, encoding)
+{
+  var divisor = encoding.length;
+  var remainders = Array();
+  var i, q, x, quotient;
+
+  /* Convert to an array of 16-bit big-endian values, forming the dividend */
+  var dividend = Array(Math.ceil(input.length / 2));
+  for(i = 0; i < dividend.length; i++)
+  {
+    dividend[i] = (input.charCodeAt(i * 2) << 8) | input.charCodeAt(i * 2 + 1);
+  }
+
+  /*
+   * Repeatedly perform a long division. The binary array forms the dividend,
+   * the length of the encoding is the divisor. Once computed, the quotient
+   * forms the dividend for the next step. We stop when the dividend is zero.
+   * All remainders are stored for later use.
+   */
+  while(dividend.length > 0)
+  {
+    quotient = Array();
+    x = 0;
+    for(i = 0; i < dividend.length; i++)
+    {
+      x = (x << 16) + dividend[i];
+      q = Math.floor(x / divisor);
+      x -= q * divisor;
+      if(quotient.length > 0 || q > 0)
+        quotient[quotient.length] = q;
+    }
+    remainders[remainders.length] = x;
+    dividend = quotient;
+  }
+
+  /* Convert the remainders to the output string */
+  var output = "";
+  for(i = remainders.length - 1; i >= 0; i--)
+    output += encoding.charAt(remainders[i]);
+
+  /* Append leading zero equivalents */
+  var full_length = Math.ceil(input.length * 8 /
+                                    (Math.log(encoding.length) / Math.log(2)))
+  for(i = output.length; i < full_length; i++)
+    output = encoding[0] + output;
+
+  return output;
+}
+
+/*
+ * Encode a string as utf-8.
+ * For efficiency, this assumes the input is valid utf-16.
+ */
+function str2rstr_utf8(input)
+{
+  var output = "";
+  var i = -1;
+  var x, y;
+
+  while(++i < input.length)
+  {
+    /* Decode utf-16 surrogate pairs */
+    x = input.charCodeAt(i);
+    y = i + 1 < input.length ? input.charCodeAt(i + 1) : 0;
+    if(0xD800 <= x && x <= 0xDBFF && 0xDC00 <= y && y <= 0xDFFF)
+    {
+      x = 0x10000 + ((x & 0x03FF) << 10) + (y & 0x03FF);
+      i++;
+    }
+
+    /* Encode output as utf-8 */
+    if(x <= 0x7F)
+      output += String.fromCharCode(x);
+    else if(x <= 0x7FF)
+      output += String.fromCharCode(0xC0 | ((x >>> 6 ) & 0x1F),
+                                    0x80 | ( x         & 0x3F));
+    else if(x <= 0xFFFF)
+      output += String.fromCharCode(0xE0 | ((x >>> 12) & 0x0F),
+                                    0x80 | ((x >>> 6 ) & 0x3F),
+                                    0x80 | ( x         & 0x3F));
+    else if(x <= 0x1FFFFF)
+      output += String.fromCharCode(0xF0 | ((x >>> 18) & 0x07),
+                                    0x80 | ((x >>> 12) & 0x3F),
+                                    0x80 | ((x >>> 6 ) & 0x3F),
+                                    0x80 | ( x         & 0x3F));
+  }
+  return output;
+}
+
+/*
+ * Encode a string as utf-16
+ */
+function str2rstr_utf16le(input)
+{
+  var output = "";
+  for(var i = 0; i < input.length; i++)
+    output += String.fromCharCode( input.charCodeAt(i)        & 0xFF,
+                                  (input.charCodeAt(i) >>> 8) & 0xFF);
+  return output;
+}
+
+function str2rstr_utf16be(input)
+{
+  var output = "";
+  for(var i = 0; i < input.length; i++)
+    output += String.fromCharCode((input.charCodeAt(i) >>> 8) & 0xFF,
+                                   input.charCodeAt(i)        & 0xFF);
+  return output;
+}
+
+/*
+ * Convert a raw string to an array of big-endian words
+ * Characters >255 have their high-byte silently ignored.
+ */
+function rstr2binb(input)
+{
+  var output = Array(input.length >> 2);
+  for(var i = 0; i < output.length; i++)
+    output[i] = 0;
+  for(var i = 0; i < input.length * 8; i += 8)
+    output[i>>5] |= (input.charCodeAt(i / 8) & 0xFF) << (24 - i % 32);
+  return output;
+}
+
+/*
+ * Convert an array of big-endian words to a string
+ */
+function binb2rstr(input)
+{
+  var output = "";
+  for(var i = 0; i < input.length * 32; i += 8)
+    output += String.fromCharCode((input[i>>5] >>> (24 - i % 32)) & 0xFF);
+  return output;
+}
+
+/*
+ * Calculate the SHA-1 of an array of big-endian words, and a bit length
+ */
+function binb_sha1(x, len)
+{
+  /* append padding */
+  x[len >> 5] |= 0x80 << (24 - len % 32);
+  x[((len + 64 >> 9) << 4) + 15] = len;
+
+  var w = Array(80);
+  var a =  1732584193;
+  var b = -271733879;
+  var c = -1732584194;
+  var d =  271733878;
+  var e = -1009589776;
+
+  for(var i = 0; i < x.length; i += 16)
+  {
+    var olda = a;
+    var oldb = b;
+    var oldc = c;
+    var oldd = d;
+    var olde = e;
+
+    for(var j = 0; j < 80; j++)
+    {
+      if(j < 16) w[j] = x[i + j];
+      else w[j] = bit_rol(w[j-3] ^ w[j-8] ^ w[j-14] ^ w[j-16], 1);
+      var t = safe_add(safe_add(bit_rol(a, 5), sha1_ft(j, b, c, d)),
+                       safe_add(safe_add(e, w[j]), sha1_kt(j)));
+      e = d;
+      d = c;
+      c = bit_rol(b, 30);
+      b = a;
+      a = t;
+    }
+
+    a = safe_add(a, olda);
+    b = safe_add(b, oldb);
+    c = safe_add(c, oldc);
+    d = safe_add(d, oldd);
+    e = safe_add(e, olde);
+  }
+  return Array(a, b, c, d, e);
+
+}
+
+/*
+ * Perform the appropriate triplet combination function for the current
+ * iteration
+ */
+function sha1_ft(t, b, c, d)
+{
+  if(t < 20) return (b & c) | ((~b) & d);
+  if(t < 40) return b ^ c ^ d;
+  if(t < 60) return (b & c) | (b & d) | (c & d);
+  return b ^ c ^ d;
+}
+
+/*
+ * Determine the appropriate additive constant for the current iteration
+ */
+function sha1_kt(t)
+{
+  return (t < 20) ?  1518500249 : (t < 40) ?  1859775393 :
+         (t < 60) ? -1894007588 : -899497514;
+}
+
+/*
+ * Add integers, wrapping at 2^32. This uses 16-bit operations internally
+ * to work around bugs in some JS interpreters.
+ */
+function safe_add(x, y)
+{
+  var lsw = (x & 0xFFFF) + (y & 0xFFFF);
+  var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+  return (msw << 16) | (lsw & 0xFFFF);
+}
+
+/*
+ * Bitwise rotate a 32-bit number to the left.
+ */
+function bit_rol(num, cnt)
+{
+  return (num << cnt) | (num >>> (32 - cnt));
+}
+/**
+ * OAuth JavaScript library
+ * Taken from http://oauth.googlecode.com/
+ *
+ * Copyright 2008 Netflix, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Here's some JavaScript software for implementing OAuth.
+
+   This isn't as useful as you might hope.  OAuth is based around
+   allowing tools and websites to talk to each other.  However,
+   JavaScript running in web browsers is hampered by security
+   restrictions that prevent code running on one website from
+   accessing data stored or served on another.
+
+   Before you start hacking, make sure you understand the limitations
+   posed by cross-domain XMLHttpRequest.
+
+   On the bright side, some platforms use JavaScript as their
+   language, but enable the programmer to access other web sites.
+   Examples include Google Gadgets, and Microsoft Vista Sidebar.
+   For those platforms, this library should come in handy.
+*/
+
+// The HMAC-SHA1 signature method calls b64_hmac_sha1, defined by
+// http://pajhome.org.uk/crypt/md5/sha1.js
+
+/* An OAuth message is represented as an object like this:
+   {method: "GET", action: "http://server.com/path", parameters: ...}
+
+   The parameters may be either a map {name: value, name2: value2}
+   or an Array of name-value pairs [[name, value], [name2, value2]].
+   The latter representation is more powerful: it supports parameters
+   in a specific sequence, or several parameters with the same name;
+   for example [["a", 1], ["b", 2], ["a", 3]].
+
+   Parameter names and values are NOT percent-encoded in an object.
+   They must be encoded before transmission and decoded after reception.
+   For example, this message object:
+   {method: "GET", action: "http://server/path", parameters: {p: "x y"}}
+   ... can be transmitted as an HTTP request that begins:
+   GET /path?p=x%20y HTTP/1.0
+   (This isn't a valid OAuth request, since it lacks a signature etc.)
+   Note that the object "x y" is transmitted as x%20y.  To encode
+   parameters, you can call OAuth.addToURL, OAuth.formEncode or
+   OAuth.getAuthorization.
+
+   This message object model harmonizes with the browser object model for
+   input elements of an form, whose value property isn't percent encoded.
+   The browser encodes each value before transmitting it. For example,
+   see consumer.setInputs in example/consumer.js.
+ */
+
+/* This script needs to know what time it is. By default, it uses the local
+   clock (new Date), which is apt to be inaccurate in browsers. To do
+   better, you can load this script from a URL whose query string contains
+   an oauth_timestamp parameter, whose value is a current Unix timestamp.
+   For example, when generating the enclosing document using PHP:
+
+   <script src="oauth.js?oauth_timestamp=<?=time()?>" ...
+
+   Another option is to call OAuth.correctTimestamp with a Unix timestamp.
+ */
+
+var OAuth; if (OAuth == null) OAuth = {};
+
+OAuth.setProperties = function setProperties(into, from) {
+    if (into != null && from != null) {
+        for (var key in from) {
+            into[key] = from[key];
+        }
+    }
+    return into;
+}
+
+OAuth.setProperties(OAuth, // utility functions
+{
+    percentEncode: function percentEncode(s) {
+        if (s == null) {
+            return "";
+        }
+        if (s instanceof Array) {
+            var e = "";
+            for (var i = 0; i < s.length; ++s) {
+                if (e != "") e += '&';
+                e += OAuth.percentEncode(s[i]);
+            }
+            return e;
+        }
+        s = encodeURIComponent(s);
+        // Now replace the values which encodeURIComponent doesn't do
+        // encodeURIComponent ignores: - _ . ! ~ * ' ( )
+        // OAuth dictates the only ones you can ignore are: - _ . ~
+        // Source: http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Global_Functions:encodeURIComponent
+        s = s.replace(/\!/g, "%21");
+        s = s.replace(/\*/g, "%2A");
+        s = s.replace(/\'/g, "%27");
+        s = s.replace(/\(/g, "%28");
+        s = s.replace(/\)/g, "%29");
+        return s;
+    }
+,
+    decodePercent: function decodePercent(s) {
+        if (s != null) {
+            // Handle application/x-www-form-urlencoded, which is defined by
+            // http://www.w3.org/TR/html4/interact/forms.html#h-17.13.4.1
+            s = s.replace(/\+/g, " ");
+        }
+        return decodeURIComponent(s);
+    }
+,
+    /** Convert the given parameters to an Array of name-value pairs. */
+    getParameterList: function getParameterList(parameters) {
+        if (parameters == null) {
+            return [];
+        }
+        if (typeof parameters != "object") {
+            return OAuth.decodeForm(parameters + "");
+        }
+        if (parameters instanceof Array) {
+            return parameters;
+        }
+        var list = [];
+        for (var p in parameters) {
+            list.push([p, parameters[p]]);
+        }
+        return list;
+    }
+,
+    /** Convert the given parameters to a map from name to value. */
+    getParameterMap: function getParameterMap(parameters) {
+        if (parameters == null) {
+            return {};
+        }
+        if (typeof parameters != "object") {
+            return OAuth.getParameterMap(OAuth.decodeForm(parameters + ""));
+        }
+        if (parameters instanceof Array) {
+            var map = {};
+            for (var p = 0; p < parameters.length; ++p) {
+                var key = parameters[p][0];
+                if (map[key] === undefined) { // first value wins
+                    map[key] = parameters[p][1];
+                }
+            }
+            return map;
+        }
+        return parameters;
+    }
+,
+    getParameter: function getParameter(parameters, name) {
+        if (parameters instanceof Array) {
+            for (var p = 0; p < parameters.length; ++p) {
+                if (parameters[p][0] == name) {
+                    return parameters[p][1]; // first value wins
+                }
+            }
+        } else {
+            return OAuth.getParameterMap(parameters)[name];
+        }
+        return null;
+    }
+,
+    formEncode: function formEncode(parameters) {
+        var form = "";
+        var list = OAuth.getParameterList(parameters);
+        for (var p = 0; p < list.length; ++p) {
+            var value = list[p][1];
+            if (value == null) value = "";
+            if (form != "") form += '&';
+            form += OAuth.percentEncode(list[p][0])
+              +'='+ OAuth.percentEncode(value);
+        }
+        return form;
+    }
+,
+    decodeForm: function decodeForm(form) {
+        var list = [];
+        var nvps = form.split('&');
+        for (var n = 0; n < nvps.length; ++n) {
+            var nvp = nvps[n];
+            if (nvp == "") {
+                continue;
+            }
+            var equals = nvp.indexOf('=');
+            var name;
+            var value;
+            if (equals < 0) {
+                name = OAuth.decodePercent(nvp);
+                value = null;
+            } else {
+                name = OAuth.decodePercent(nvp.substring(0, equals));
+                value = OAuth.decodePercent(nvp.substring(equals + 1));
+            }
+            list.push([name, value]);
+        }
+        return list;
+    }
+,
+    setParameter: function setParameter(message, name, value) {
+        var parameters = message.parameters;
+        if (parameters instanceof Array) {
+            for (var p = 0; p < parameters.length; ++p) {
+                if (parameters[p][0] == name) {
+                    if (value === undefined) {
+                        parameters.splice(p, 1);
+                    } else {
+                        parameters[p][1] = value;
+                        value = undefined;
+                    }
+                }
+            }
+            if (value !== undefined) {
+                parameters.push([name, value]);
+            }
+        } else {
+            parameters = OAuth.getParameterMap(parameters);
+            parameters[name] = value;
+            message.parameters = parameters;
+        }
+    }
+,
+    setParameters: function setParameters(message, parameters) {
+        var list = OAuth.getParameterList(parameters);
+        for (var i = 0; i < list.length; ++i) {
+            OAuth.setParameter(message, list[i][0], list[i][1]);
+        }
+    }
+,
+    /** Fill in parameters to help construct a request message.
+        This function doesn't fill in every parameter.
+        The accessor object should be like:
+        {consumerKey:'foo', consumerSecret:'bar', accessorSecret:'nurn', token:'krelm', tokenSecret:'blah'}
+        The accessorSecret property is optional.
+     */
+    completeRequest: function completeRequest(message, accessor) {
+        if (message.method == null) {
+            message.method = "GET";
+        }
+        var map = OAuth.getParameterMap(message.parameters);
+        if (map.oauth_consumer_key == null) {
+            OAuth.setParameter(message, "oauth_consumer_key", accessor.consumerKey || "");
+        }
+        if (map.oauth_token == null && accessor.token != null) {
+            OAuth.setParameter(message, "oauth_token", accessor.token);
+        }
+        if (map.oauth_version == null) {
+            OAuth.setParameter(message, "oauth_version", "1.0");
+        }
+        if (map.oauth_timestamp == null) {
+            OAuth.setParameter(message, "oauth_timestamp", OAuth.timestamp());
+        }
+        if (map.oauth_nonce == null) {
+            OAuth.setParameter(message, "oauth_nonce", OAuth.nonce(6));
+        }
+        OAuth.SignatureMethod.sign(message, accessor);
+    }
+,
+    setTimestampAndNonce: function setTimestampAndNonce(message) {
+        OAuth.setParameter(message, "oauth_timestamp", OAuth.timestamp());
+        OAuth.setParameter(message, "oauth_nonce", OAuth.nonce(6));
+    }
+,
+    addToURL: function addToURL(url, parameters) {
+        newURL = url;
+        if (parameters != null) {
+            var toAdd = OAuth.formEncode(parameters);
+            if (toAdd.length > 0) {
+                var q = url.indexOf('?');
+                if (q < 0) newURL += '?';
+                else       newURL += '&';
+                newURL += toAdd;
+            }
+        }
+        return newURL;
+    }
+,
+    /** Construct the value of the Authorization header for an HTTP request. */
+    getAuthorizationHeader: function getAuthorizationHeader(realm, parameters) {
+        var header = 'OAuth realm="' + OAuth.percentEncode(realm) + '"';
+        var list = OAuth.getParameterList(parameters);
+        for (var p = 0; p < list.length; ++p) {
+            var parameter = list[p];
+            var name = parameter[0];
+            if (name.indexOf("oauth_") == 0) {
+                header += ',' + OAuth.percentEncode(name) + '="' + OAuth.percentEncode(parameter[1]) + '"';
+            }
+        }
+        return header;
+    }
+,
+    /** Correct the time using a parameter from the URL from which the last script was loaded. */
+    correctTimestampFromSrc: function correctTimestampFromSrc(parameterName) {
+        parameterName = parameterName || "oauth_timestamp";
+        var scripts = document.getElementsByTagName('script');
+        if (scripts == null || !scripts.length) return;
+        var src = scripts[scripts.length-1].src;
+        if (!src) return;
+        var q = src.indexOf("?");
+        if (q < 0) return;
+        parameters = OAuth.getParameterMap(OAuth.decodeForm(src.substring(q+1)));
+        var t = parameters[parameterName];
+        if (t == null) return;
+        OAuth.correctTimestamp(t);
+    }
+,
+    /** Generate timestamps starting with the given value. */
+    correctTimestamp: function correctTimestamp(timestamp) {
+        OAuth.timeCorrectionMsec = (timestamp * 1000) - (new Date()).getTime();
+    }
+,
+    /** The difference between the correct time and my clock. */
+    timeCorrectionMsec: 0
+,
+    timestamp: function timestamp() {
+        var t = (new Date()).getTime() + OAuth.timeCorrectionMsec;
+        return Math.floor(t / 1000);
+    }
+,
+    nonce: function nonce(length) {
+        var chars = OAuth.nonce.CHARS;
+        var result = "";
+        for (var i = 0; i < length; ++i) {
+            var rnum = Math.floor(Math.random() * chars.length);
+            result += chars.substring(rnum, rnum+1);
+        }
+        return result;
+    }
+});
+
+OAuth.nonce.CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+
+/** Define a constructor function,
+    without causing trouble to anyone who was using it as a namespace.
+    That is, if parent[name] already existed and had properties,
+    copy those properties into the new constructor.
+ */
+OAuth.declareClass = function declareClass(parent, name, newConstructor) {
+    var previous = parent[name];
+    parent[name] = newConstructor;
+    if (newConstructor != null && previous != null) {
+        for (var key in previous) {
+            if (key != "prototype") {
+                newConstructor[key] = previous[key];
+            }
+        }
+    }
+    return newConstructor;
+}
+
+/** An abstract algorithm for signing messages. */
+OAuth.declareClass(OAuth, "SignatureMethod", function OAuthSignatureMethod(){});
+
+OAuth.setProperties(OAuth.SignatureMethod.prototype, // instance members
+{
+    /** Add a signature to the message. */
+    sign: function sign(message) {
+        var baseString = OAuth.SignatureMethod.getBaseString(message);
+        var signature = this.getSignature(baseString);
+        OAuth.setParameter(message, "oauth_signature", signature);
+        return signature; // just in case someone's interested
+    }
+,
+    /** Set the key string for signing. */
+    initialize: function initialize(name, accessor) {
+        var consumerSecret;
+        if (accessor.accessorSecret != null
+            && name.length > 9
+            && name.substring(name.length-9) == "-Accessor")
+        {
+            consumerSecret = accessor.accessorSecret;
+        } else {
+            consumerSecret = accessor.consumerSecret;
+        }
+        this.key = OAuth.percentEncode(consumerSecret)
+             +"&"+ OAuth.percentEncode(accessor.tokenSecret);
+    }
+});
+
+/* SignatureMethod expects an accessor object to be like this:
+   {tokenSecret: "lakjsdflkj...", consumerSecret: "QOUEWRI..", accessorSecret: "xcmvzc..."}
+   The accessorSecret property is optional.
+ */
+// Class members:
+OAuth.setProperties(OAuth.SignatureMethod, // class members
+{
+    sign: function sign(message, accessor) {
+        var name = OAuth.getParameterMap(message.parameters).oauth_signature_method;
+        if (name == null || name == "") {
+            name = "HMAC-SHA1";
+            OAuth.setParameter(message, "oauth_signature_method", name);
+        }
+        OAuth.SignatureMethod.newMethod(name, accessor).sign(message);
+    }
+,
+    /** Instantiate a SignatureMethod for the given method name. */
+    newMethod: function newMethod(name, accessor) {
+        var impl = OAuth.SignatureMethod.REGISTERED[name];
+        if (impl != null) {
+            var method = new impl();
+            method.initialize(name, accessor);
+            return method;
+        }
+        var err = new Error("signature_method_rejected");
+        var acceptable = "";
+        for (var r in OAuth.SignatureMethod.REGISTERED) {
+            if (acceptable != "") acceptable += '&';
+            acceptable += OAuth.percentEncode(r);
+        }
+        err.oauth_acceptable_signature_methods = acceptable;
+        throw err;
+    }
+,
+    /** A map from signature method name to constructor. */
+    REGISTERED : {}
+,
+    /** Subsequently, the given constructor will be used for the named methods.
+        The constructor will be called with no parameters.
+        The resulting object should usually implement getSignature(baseString).
+        You can easily define such a constructor by calling makeSubclass, below.
+     */
+    registerMethodClass: function registerMethodClass(names, classConstructor) {
+        for (var n = 0; n < names.length; ++n) {
+            OAuth.SignatureMethod.REGISTERED[names[n]] = classConstructor;
+        }
+    }
+,
+    /** Create a subclass of OAuth.SignatureMethod, with the given getSignature function. */
+    makeSubclass: function makeSubclass(getSignatureFunction) {
+        var superClass = OAuth.SignatureMethod;
+        var subClass = function() {
+            superClass.call(this);
+        };
+        subClass.prototype = new superClass();
+        // Delete instance variables from prototype:
+        // delete subclass.prototype... There aren't any.
+        subClass.prototype.getSignature = getSignatureFunction;
+        subClass.prototype.constructor = subClass;
+        return subClass;
+    }
+,
+    getBaseString: function getBaseString(message) {
+        var URL = message.action;
+        var q = URL.indexOf('?');
+        var parameters;
+        if (q < 0) {
+            parameters = message.parameters;
+        } else {
+            // Combine the URL query string with the other parameters:
+            parameters = OAuth.decodeForm(URL.substring(q + 1));
+            var toAdd = OAuth.getParameterList(message.parameters);
+            for (var a = 0; a < toAdd.length; ++a) {
+                parameters.push(toAdd[a]);
+            }
+        }
+        return OAuth.percentEncode(message.method.toUpperCase())
+         +'&'+ OAuth.percentEncode(OAuth.SignatureMethod.normalizeUrl(URL))
+         +'&'+ OAuth.percentEncode(OAuth.SignatureMethod.normalizeParameters(parameters));
+    }
+,
+    normalizeUrl: function normalizeUrl(url) {
+        var uri = OAuth.SignatureMethod.parseUri(url);
+        var scheme = uri.protocol.toLowerCase();
+        var authority = uri.authority.toLowerCase();
+        var dropPort = (scheme == "http" && uri.port == 80)
+                    || (scheme == "https" && uri.port == 443);
+        if (dropPort) {
+            // find the last : in the authority
+            var index = authority.lastIndexOf(":");
+            if (index >= 0) {
+                authority = authority.substring(0, index);
+            }
+        }
+        var path = uri.path;
+        if (!path) {
+            path = "/"; // conforms to RFC 2616 section 3.2.2
+        }
+        // we know that there is no query and no fragment here.
+        return scheme + "://" + authority + path;
+    }
+,
+    parseUri: function parseUri (str) {
+        /* This function was adapted from parseUri 1.2.1
+           http://stevenlevithan.com/demo/parseuri/js/assets/parseuri.js
+         */
+        var o = {key: ["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"],
+                 parser: {strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@\/]*):?([^:@\/]*))?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/ }};
+        var m = o.parser.strict.exec(str);
+        var uri = {};
+        var i = 14;
+        while (i--) uri[o.key[i]] = m[i] || "";
+        return uri;
+    }
+,
+    normalizeParameters: function normalizeParameters(parameters) {
+        if (parameters == null) {
+            return "";
+        }
+        var list = OAuth.getParameterList(parameters);
+        var sortable = [];
+        for (var p = 0; p < list.length; ++p) {
+            var nvp = list[p];
+            if (nvp[0] != "oauth_signature") {
+                sortable.push([ OAuth.percentEncode(nvp[0])
+                              + " " // because it comes before any character that can appear in a percentEncoded string.
+                              + OAuth.percentEncode(nvp[1])
+                              , nvp]);
+            }
+        }
+        sortable.sort(function(a,b) {
+                          if (a[0] < b[0]) return  -1;
+                          if (a[0] > b[0]) return 1;
+                          return 0;
+                      });
+        var sorted = [];
+        for (var s = 0; s < sortable.length; ++s) {
+            sorted.push(sortable[s][1]);
+        }
+        return OAuth.formEncode(sorted);
+    }
+});
+
+OAuth.SignatureMethod.registerMethodClass(["PLAINTEXT", "PLAINTEXT-Accessor"],
+    OAuth.SignatureMethod.makeSubclass(
+        function getSignature(baseString) {
+            return this.key;
+        }
+    ));
+
+OAuth.SignatureMethod.registerMethodClass(["HMAC-SHA1", "HMAC-SHA1-Accessor"],
+    OAuth.SignatureMethod.makeSubclass(
+        function getSignature(baseString) {
+            b64pad = '=';
+            var signature = b64_hmac_sha1(this.key, baseString);
+            return signature;
+        }
+    ));
+
+OAuth.correctTimestampFromSrc();
 /*jslint 
 browser: true,
 nomen: false,
@@ -7335,6 +8216,175 @@ SpazAccounts.prototype.setMeta = function(id, key, value) {
 	return null;
 	
 };/**
+ * A library for performing authentication.
+ * Currently supports both Basic and oAuth.
+ */
+
+var SPAZAUTH_SERVICES = {
+    'statusnet': {
+        authType: 'basic'
+    },
+    'identica': {
+        authType: 'basic'
+    },
+    'default': {
+        authType: 'basic'
+    }
+};
+
+/**
+ * Construct a new authentication object.
+ *
+ * @param {string} service name of the service to authenticate (ex: twitter, identica)
+ * @class SpazAuth
+ */
+function SpazAuth(service) {
+    var serviceInfo = SPAZAUTH_SERVICES[service];
+    if (serviceInfo == undefined) {
+        sch.error("Invalid authentication service: " + service);
+        return null;
+    }
+
+    switch (serviceInfo.authType) {
+        case 'oauth':
+            return new SpazOAuth(service, serviceInfo);
+        case 'basic':
+            return new SpazBasicAuth();
+        default:
+            return new SpazBasicAuth();
+    }
+};
+
+/**
+ * use this to add services that aren't in by default (like, say, stuff with secrets)
+ */
+SpazAuth.addService = function(label, opts) {
+    SPAZAUTH_SERVICES[label] = opts;
+};
+
+
+
+/**
+ * Construct a new basic authentication object.
+ *
+ * @class SpazBasicAuth
+ */
+function SpazBasicAuth() {
+};
+
+/**
+ * Set username and password of account to access service.
+ *
+ * @param {string} username
+ * @param {string} password
+ * @class SpazBasicAuth
+ */
+SpazBasicAuth.prototype.authorize = function(username, password) {
+    this.username = username;
+    this.authHeader = "Basic " + sc.helpers.Base64.encode(username + ":" + password);
+};
+
+/**
+ * Returns the authentication header
+ * @returns {string} Authentication header value
+ * @class SpazBasicAuth
+ */
+SpazBasicAuth.prototype.signRequest = function() {
+    return this.authHeader;
+};
+
+/**
+ * Construct a new OAuth authentication object.
+ *
+ * @param {string} realm
+ * @param {object} options
+ * @class SpazOAuth
+ */
+function SpazOAuth(realm, options) {
+    this.realm = realm;
+    this.opts = options;
+};
+
+/**
+ * Authorize access to the service by fetching an OAuth access token.
+ *
+ * @param {string} username
+ * @param {string} password
+ * @returns {boolean} true if authorization successful, otherwise false
+ * @class SpazOAuth
+ */
+SpazOAuth.prototype.authorize = function(username, password) {
+    this.username = username;
+
+    // Fill in xAuth parameters
+    var parameters = {
+        'x_auth_username': username,
+        'x_auth_password': password,
+        'x_auth_mode': 'client_auth'
+    };
+
+    // Sign the request
+    OAuth.completeRequest({
+        method: 'post',
+        action: this.opts.accessURL,
+        parameters: parameters
+    }, this.opts);
+
+    // Perform request to fetch access token
+    var accessToken = null;
+    jQuery.ajax({
+        async: false,
+        type: 'post',
+        url: this.opts.accessURL,
+        data: parameters,
+        success: function(data, textStatus) {
+            var results = OAuth.decodeForm(data);
+            accessToken = {};
+            accessToken.key = OAuth.getParameter(results, 'oauth_token');
+            accessToken.secret = OAuth.getParameter(results, 'oauth_token_secret');
+        },
+        error: function(req, textStatus, error) {
+            sch.error("Failed to fetch oAuth access token: " + req.responseText);
+        }
+    });
+
+    if (accessToken != null) {
+        this.accessToken = accessToken;
+        this.signingCredentials = {
+            consumerKey: this.opts.consumerKey,
+            consumerSecret: this.opts.consumerSecret,
+            token: accessToken.key,
+            tokenSecret: accessToken.secret
+        };
+        return true;
+    } else {
+        return false;
+    }
+};
+
+/**
+ * Sign a HTTP request and return oAuth header
+ *
+ * @param {string} method HTTP method of the request
+ * @param {string} url the URL of the request
+ * @param {object} parameters map of all parameters in the request
+ * @returns {string} Authorization header value
+ * @class SpazOAuth
+ */
+SpazOAuth.prototype.signRequest = function(method, url, parameters) {
+    // We need to copy parameters because OAuth.js modifies it.
+    var param = jQuery.extend({}, parameters);
+
+    OAuth.completeRequest({
+        method: method,
+        action: url,
+        parameters: param
+    }, this.signingCredentials);
+
+    return OAuth.getAuthorizationHeader(this.realm, param);
+};
+
+/**
  * a library to get direct image urls for various image hosting servces 
  */
 function SpazImageURL(args) {
@@ -10431,20 +11481,23 @@ var SPAZCORE_SERVICEURL_WORDPRESS_TWITTER = 'https://twitter-api.wordpress.com/'
  * 'unfollow_failed'
  * 
  * 
- * @param username string
- * @param password string
+ * @param {Object} opts various options
+ * @param {Object} [opts.auth] SpazAuth object
+ * @param {String} [opts.event_mode] The event mode to use ('jquery' or 'DOM'). Defaults to 'DOM'
+ * @param {Object} [opts.event_target] the DOM element to target the event on. Defaults to document
+ * @param {Number} [opts.timeout] length of time, in seconds, to timeout
  * @class SpazTwit
 */
-function SpazTwit(username, password, opts) {
+function SpazTwit(opts) {
 	
-	this.username = username;
-	this.password = password;
+	this.auth = auth;
+	this.username = auth.username;
 	
 	this.opts                = opts || {};
+	this.auth                = opts.auth;
 	this.opts.event_mode     = this.opts.event_mode || 'DOM';
 	this.opts.event_target   = this.opts.event_target || document;
 	this.opts.timeout        = this.opts.timeout || this.DEFAULT_TIMEOUT; // 60 seconds default
-	this.opts.oauth_consumer = this.opts.oauth_consumer || null;
 	
 	this.setSource('SpazCore');
 	
@@ -10477,16 +11530,12 @@ function SpazTwit(username, password, opts) {
 	}
 }
 
-
+/**
+ * the default timeout value (60 seconds) 
+ */
 SpazTwit.prototype.DEFAULT_TIMEOUT = 1000*60;
 
 
-SpazTwit.prototype.getUsername = function() {
-	return this.username;
-};
-SpazTwit.prototype.getPassword = function() {
-	return this.password;
-};
 
 /**
  * retrieves the last status id retrieved for a given section
@@ -10708,21 +11757,6 @@ SpazTwit.prototype.setBaseURLByService= function(service) {
 
 
 
-/*
- * sets the username and password
- * @param username string
- * @param password string
-*/
-SpazTwit.prototype.setCredentials= function(username, password) {
-	this.username = username;
-	this.password = password;	
-};
-
-
-SpazTwit.prototype.setOAuthConsumer = function(consumer) {
-	this.opts.oauth_consumer = consumer;
-};
-
 
 /**
  * set the source string we will pass on updates
@@ -10798,11 +11832,11 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 	urls.trends_weekly		= "trends/weekly.json";
 	
 	//retweet
-	urls.retweet			= "statuses/retweet/{{ID}}.json"
-	urls.retweets			= "statuses/retweets/{{ID}}.json"
-	urls.retweeted_by_me	= "statuses/retweeted_by_me.json"
-	urls.retweeted_to_me	= "statuses/retweeted_to_me.json"
-	urls.retweets_of_me		= "statuses/retweets_of_me.json"
+	urls.retweet			= "statuses/retweet/{{ID}}.json";
+	urls.retweets			= "statuses/retweets/{{ID}}.json";
+	urls.retweeted_by_me	= "statuses/retweeted_by_me.json";
+	urls.retweeted_to_me	= "statuses/retweeted_to_me.json";
+	urls.retweets_of_me		= "statuses/retweets_of_me.json";
 
 	// search
 	if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER) {
@@ -10862,27 +11896,13 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 
 
 /*
- * checks the currently set username and password against the API. Can take
- * a username and password; will use this.username and this.password otherwise.
- * Calls this._processAuthenticatedUser() if successful
- * 
- * @param {string} username optional
- * @param {string} password optional
+ * Verify authentication credentials. 
 */
-SpazTwit.prototype.verifyCredentials = function(username, password, onSuccess, onFailure) {
+SpazTwit.prototype.verifyCredentials = function(onSuccess, onFailure) {
 	var url = this.getAPIURL('verify_credentials');
-	
-	if (!username) {
-		username = this.username;
-	}
-	if (!password) {
-		password = this.password;
-	}
 	
 	var opts = {
 		'url':url,
-		'username':username,
-		'password':password,
 		'process_callback': this._processAuthenticatedUser,
 		'success_event_type':'verify_credentials_succeeded',
 		'failure_event_type':'verify_credentials_failed',
@@ -10975,8 +11995,6 @@ SpazTwit.prototype.getHomeTimeline = function(since_id, count, page, processing_
 	var url = this.getAPIURL('home_timeline', data);
 	this._getTimeline({
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback'	: this._processHomeTimeline,
 		'success_callback':onSuccess,
 		'failure_callback':onFailure,
@@ -11034,8 +12052,6 @@ SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page, processi
 	var url = this.getAPIURL('friends_timeline', data);
 	this._getTimeline({
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback'	: this._processFriendsTimeline,
 		'success_callback':onSuccess,
 		'failure_callback':onFailure,
@@ -11093,8 +12109,6 @@ SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts,
 	var url = this.getAPIURL('replies_timeline', data);
 	this._getTimeline({
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback'	: this._processRepliesTimeline,
 		'success_callback':onSuccess,
 		'failure_callback':onFailure,
@@ -11152,8 +12166,6 @@ SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processin
 	var url = this.getAPIURL('dm_timeline', data);
 	this._getTimeline({
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback'	: this._processDMTimeline,
 		'success_callback':onSuccess,
 		'failure_callback':onFailure,
@@ -11190,8 +12202,6 @@ SpazTwit.prototype.getFavorites = function(page, processing_opts, onSuccess, onF
 
 	this._getTimeline({
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback'	: this._processFavoritesTimeline,
 		'success_callback':onSuccess,
 		'failure_callback':onFailure,
@@ -11247,8 +12257,6 @@ SpazTwit.prototype.getUserTimeline = function(id, count, page, onSuccess, onFail
 	
 	this._getTimeline({
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback'	: this._processUserTimeline,
 		'success_callback':opts.onSuccess,
 		'failure_callback':opts.onFailure,
@@ -11567,8 +12575,6 @@ SpazTwit.prototype._getTimeline = function(opts) {
 		'timeout':this.DEFAULT_TIMEOUT,
 		'url':null,
 		'data':null,
-		'username':null,
-		'password':null,
 		'process_callback':null,
 		'processing_opts':null,
 		'success_event_type':null,
@@ -11671,16 +12677,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
         },
         'beforeSend':function(xhr){
 			sc.helpers.dump("beforesend");
-			if (stwit.opts.oauth_consumer) {
-				var authHeader = consumer.getAuthHeader({
-					'method'    : opts.method,
-					'url'       : opts.url,
-					'parameters': stwit._convertParamsForOAuth(opts.data)
-				});
-				xhr.setRequestHeader('Authorization', authHeader);
-			} else if (opts.username && opts.password) {
-				xhr.setRequestHeader("Authorization", "Basic " + sc.helpers.Base64.encode(opts.username + ":" + opts.password));
-			}
+            xhr.setRequestHeader('Authorization', stwit.auth.signRequest(opts.method, opts.url, opts.data));
         },
         'type': 	opts.method,
         'url': 		opts.url,
@@ -11691,18 +12688,6 @@ SpazTwit.prototype._getTimeline = function(opts) {
 	return xhr;
 };
 
-/**
- * converts jq_style ajax params into the format used by the oAuth lib
- * @param {object} jq_style key/val params
- * @returns {array} array based params 
- */
-SpazTwit.prototype._convertParamsForOAuth = function(jq_style) {
-	var params = [];
-	for (var key in jq_style) {
-		params.push([ key, jq_style[key] ]);
-	}
-	return params;
-};
 
 
 /**
@@ -12038,8 +13023,6 @@ SpazTwit.prototype._callMethod = function(opts) {
 		'timeout':this.DEFAULT_TIMEOUT,
 		'url':null,
 		'data':null,
-		'username':null,
-		'password':null,
 		'process_callback':null,
 		'success_event_type':null,
 		'failure_event_type':null,
@@ -12122,16 +13105,7 @@ SpazTwit.prototype._callMethod = function(opts) {
 	    },
 	    'beforeSend':function(xhr){
 			sc.helpers.dump(opts.url + ' beforesend');
-			if (stwit.opts.oauth_consumer) {
-				var authHeader = consumer.getAuthHeader({
-					'method'    : opts.method,
-					'url'       : opts.url,
-					'parameters': this._convertParamsForOAuth(opts.data)
-				});
-				xhr.setRequestHeader('Authorization', authHeader);
-			} else if (opts.username && opts.password) {
-				xhr.setRequestHeader("Authorization", "Basic " + sc.helpers.Base64.encode(opts.username + ":" + opts.password));
-			}
+            xhr.setRequestHeader('Authorization', stwit.auth.signRequest(method, opts.url, opts.data));
 	    },
 	    'type': method,
 	    'url' : opts.url,
@@ -12151,8 +13125,6 @@ SpazTwit.prototype.getUser = function(user_id, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		// 'process_callback': this._processUserData,
 		'success_event_type':'get_user_succeeded',
 		'failure_event_type':'get_user_failed',
@@ -12175,8 +13147,6 @@ SpazTwit.prototype.getFriendsList = function() {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback': this._processFriendsList,
 		'success_event_type':'get_friendslist_succeeded',
 		'failure_event_type':'get_friendslist_failed',
@@ -12202,8 +13172,6 @@ SpazTwit.prototype.getFollowersList = function() {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback': this._processFollowersList,
 		'success_event_type':'get_followerslist_succeeded',
 		'failure_event_type':'get_followerslist_failed',
@@ -12277,8 +13245,6 @@ SpazTwit.prototype.addFriend = function(user_id, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'create_friendship_succeeded',
 		'failure_event_type':'create_friendship_failed',
 		'success_callback':onSuccess,
@@ -12299,8 +13265,6 @@ SpazTwit.prototype.removeFriend = function(user_id, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'destroy_friendship_succeeded',
 		'failure_event_type':'destroy_friendship_failed',
 		'success_callback':onSuccess,
@@ -12323,8 +13287,6 @@ SpazTwit.prototype.block = function(user_id, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'create_block_succeeded',
 		'failure_event_type':'create_block_failed',
 		'success_callback':onSuccess,
@@ -12345,8 +13307,6 @@ SpazTwit.prototype.unblock = function(user_id, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'destroy_block_succeeded',
 		'failure_event_type':'destroy_block_failed',
 		'success_callback':onSuccess,
@@ -12425,13 +13385,8 @@ SpazTwit.prototype.update = function(status, source, in_reply_to_status_id, onSu
 	}
 	data.status = status;
 	
-	var username = this.username;
-	var password = this.password;
-	
 	var opts = {
 		'url':url,
-		'username':username,
-		'password':password,
 		'data':data,
 		'process_callback': this._processUpdateReturn,
 		'success_callback':onSuccess,
@@ -12469,8 +13424,6 @@ SpazTwit.prototype.getOne = function(id, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback': this._processOneItem,
 		'success_event_type':'get_one_status_succeeded',
 		'success_callback':onSuccess,
@@ -12525,7 +13478,7 @@ SpazTwit.prototype.retweet = function(id, onSuccess, onFailure) {
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 /*
  * Gets up to 100 of the latest retweets of a tweet.
@@ -12549,7 +13502,7 @@ SpazTwit.prototype.getRetweets = function(id, count) {
 	};
 	
 	var xhr = this._getTimeline(opts);
-}
+};
 
 /*
  * Returns up to 200 of the most recent retweets by the user
@@ -12560,7 +13513,7 @@ SpazTwit.prototype.getRetweets = function(id, count) {
  */
  
 SpazTwit.prototype.retweetedByMe = function(since, max, count, page){
-	var params = {}
+	var params = {};
 	if(since != null){
 		params['since_id'] = since;
 	}
@@ -12587,7 +13540,7 @@ SpazTwit.prototype.retweetedByMe = function(since, max, count, page){
 	};
 	
 	var xhr = this._getTimeline(opts);
-}
+};
 
 /*
  * Returns up to 200 of the most recent retweets by the user's friends
@@ -12598,7 +13551,7 @@ SpazTwit.prototype.retweetedByMe = function(since, max, count, page){
  */
  
 SpazTwit.prototype.retweetedToMe = function(since, max, count, page){
-	var params = {}
+	var params = {};
 	if(since != null){
 		params['since_id'] = since;
 	}
@@ -12625,7 +13578,7 @@ SpazTwit.prototype.retweetedToMe = function(since, max, count, page){
 	};
 	
 	var xhr = this._getTimeline(opts);
-}
+};
 
 /*
  * Returns up to 200 of the most recent retweets of the user's tweets
@@ -12636,7 +13589,7 @@ SpazTwit.prototype.retweetedToMe = function(since, max, count, page){
  */
  
 SpazTwit.prototype.retweetsOfMe = function(since, max, count, page){
-	var params = {}
+	var params = {};
 	if(since != null){
 		params['since_id'] = since;
 	}
@@ -12663,7 +13616,7 @@ SpazTwit.prototype.retweetsOfMe = function(since, max, count, page){
 	};
 	
 	var xhr = this._getTimeline(opts);
-}
+};
 
 SpazTwit.prototype.favorite = function(id, onSuccess, onFailure) {
 	var data = {};
@@ -12673,8 +13626,6 @@ SpazTwit.prototype.favorite = function(id, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'create_favorite_succeeded',
 		'failure_event_type':'create_favorite_failed',
 		'success_callback':onSuccess,
@@ -12696,8 +13647,6 @@ SpazTwit.prototype.unfavorite = function(id, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'destroy_favorite_succeeded',
 		'failure_event_type':'destroy_favorite_failed',
 		'success_callback':onSuccess,
@@ -12724,8 +13673,6 @@ SpazTwit.prototype.updateLocation = function(location_str, onSuccess, onFailure)
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'update_location_succeeded',
 		'failure_event_type':'update_location_failed',
 		'success_callback':onSuccess,
@@ -12906,8 +13853,6 @@ SpazTwit.prototype.getSavedSearches = function(onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'new_saved_searches_data',
 		'failure_event_type':'error_saved_searches_data',
 		'success_callback':onSuccess,
@@ -12931,8 +13876,6 @@ SpazTwit.prototype.addSavedSearch = function(search_query, onSuccess, onFailure)
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'create_saved_search_succeeded',
 		'failure_event_type':'create_saved_search_failed',
 		'success_callback':onSuccess,
@@ -12958,8 +13901,6 @@ SpazTwit.prototype.removeSavedSearch = function(search_id, onSuccess, onFailure)
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'destroy_saved_search_succeeded',
 		'failure_event_type':'destroy_saved_search_failed',
 		'success_callback':onSuccess,
@@ -12997,8 +13938,6 @@ SpazTwit.prototype.getLists = function(user, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'get_lists_succeeded',
 		'failure_event_type':'get_lists_failed',
 		'success_callback':onSuccess,
@@ -13095,8 +14034,6 @@ SpazTwit.prototype.getListInfo = function(list, user, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'get_list_succeeded',
 		'failure_event_type':'get_list_failed',
 		'success_callback':onSuccess,
@@ -13130,8 +14067,6 @@ SpazTwit.prototype.getListTimeline = function(list, user, onSuccess, onFailure) 
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'get_list_timeline_succeeded',
 		'failure_event_type':'get_list_timeline_failed',
 		'success_callback':onSuccess,
@@ -13190,8 +14125,6 @@ SpazTwit.prototype.getListMembers = function(list, user) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'get_list_members_succeeded',
 		'failure_event_type':'get_list_members_failed',
 		'method':'GET',
@@ -13223,8 +14156,6 @@ SpazTwit.prototype.addList = function(list, visibility, description) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'create_list_succeeded',
 		'failure_event_type':'create_list_failed',
 		'success_callback':null,
@@ -13256,7 +14187,7 @@ SpazTwit.prototype.updateList = function(list, name, visibility, description){
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 /**
  * delete a list
@@ -13278,8 +14209,6 @@ SpazTwit.prototype.removeList = function(list, user) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'remove_list_succeeded',
 		'failure_event_type':'remove_list_failed',
 		'method':'DELETE'
@@ -13311,8 +14240,8 @@ SpazTwit.prototype.addUserToList = function(user, list, list_user) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
+		'success_event_type':'create_list_succeeded',
+		'failure_event_type':'create_list_failed',
 		'success_event_type':'add_list_user_succeeded',
 		'failure_event_type':'add_list_user_failed',
 		'data':data
@@ -13344,8 +14273,8 @@ SpazTwit.prototype.removeUserFromList = function(user, list, list_user) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
+		'success_event_type':'create_list_succeeded',
+		'failure_event_type':'create_list_failed',
 		'success_event_type':'remove_list_user_succeeded',
 		'failure_event_type':'remove_list_user_failed',
 		'data':data,
@@ -13377,7 +14306,7 @@ SpazTwit.prototype.listsSubscribedTo = function(user) {
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 SpazTwit.prototype.listMemberships = function(user) {
 	if(!user && !this.username) {
@@ -13400,7 +14329,7 @@ SpazTwit.prototype.listMemberships = function(user) {
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 SpazTwit.prototype.getListSubscribers = function(list, user){
 	if(!user && !this.username) {
@@ -13425,7 +14354,7 @@ SpazTwit.prototype.getListSubscribers = function(list, user){
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 SpazTwit.prototype.isSubscribed = function(list, list_user, user){
 	if(!user && !this.username) {
@@ -13451,7 +14380,7 @@ SpazTwit.prototype.isSubscribed = function(list, list_user, user){
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 SpazTwit.prototype.subscribe = function(list, user){
 	if(!user && !this.username) {
@@ -13476,7 +14405,7 @@ SpazTwit.prototype.subscribe = function(list, user){
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 SpazTwit.prototype.unsubscribe = function(list, user){
 	if(!user && !this.username) {
@@ -13502,7 +14431,7 @@ SpazTwit.prototype.unsubscribe = function(list, user){
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 SpazTwit.prototype.isMember = function(list, list_user, user){
 	if(!user && !this.username) {
@@ -13528,7 +14457,7 @@ SpazTwit.prototype.isMember = function(list, list_user, user){
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 
 /*
  * Marks a user as a spammer and blocks them
@@ -13551,7 +14480,7 @@ SpazTwit.prototype.reportSpam = function(user) {
 	};
 	
 	var xhr = this._callMethod(opts);
-}
+};
 /**
  *  
  */
