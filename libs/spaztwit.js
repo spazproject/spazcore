@@ -101,20 +101,18 @@ var SPAZCORE_SERVICEURL_WORDPRESS_TWITTER = 'https://twitter-api.wordpress.com/'
  * 'unfollow_failed'
  * 
  * 
- * @param username string
- * @param password string
+ * @param auth SpazAuth object used for authentication
  * @class SpazTwit
 */
-function SpazTwit(username, password, opts) {
+function SpazTwit(auth, opts) {
 	
-	this.username = username;
-	this.password = password;
+    this.auth = auth;
+    this.username = auth.username;
 	
 	this.opts                = opts || {};
 	this.opts.event_mode     = this.opts.event_mode || 'DOM';
 	this.opts.event_target   = this.opts.event_target || document;
 	this.opts.timeout        = this.opts.timeout || this.DEFAULT_TIMEOUT; // 60 seconds default
-	this.opts.oauth_consumer = this.opts.oauth_consumer || null;
 	
 	this.setSource('SpazCore');
 	
@@ -151,12 +149,6 @@ function SpazTwit(username, password, opts) {
 SpazTwit.prototype.DEFAULT_TIMEOUT = 1000*60;
 
 
-SpazTwit.prototype.getUsername = function() {
-	return this.username;
-};
-SpazTwit.prototype.getPassword = function() {
-	return this.password;
-};
 
 /**
  * retrieves the last status id retrieved for a given section
@@ -378,21 +370,6 @@ SpazTwit.prototype.setBaseURLByService= function(service) {
 
 
 
-/*
- * sets the username and password
- * @param username string
- * @param password string
-*/
-SpazTwit.prototype.setCredentials= function(username, password) {
-	this.username = username;
-	this.password = password;	
-};
-
-
-SpazTwit.prototype.setOAuthConsumer = function(consumer) {
-	this.opts.oauth_consumer = consumer;
-};
-
 
 /**
  * set the source string we will pass on updates
@@ -532,27 +509,13 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 
 
 /*
- * checks the currently set username and password against the API. Can take
- * a username and password; will use this.username and this.password otherwise.
- * Calls this._processAuthenticatedUser() if successful
- * 
- * @param {string} username optional
- * @param {string} password optional
+ * Verify authentication credentials. 
 */
-SpazTwit.prototype.verifyCredentials = function(username, password, onSuccess, onFailure) {
+SpazTwit.prototype.verifyCredentials = function(onSuccess, onFailure) {
 	var url = this.getAPIURL('verify_credentials');
-	
-	if (!username) {
-		username = this.username;
-	}
-	if (!password) {
-		password = this.password;
-	}
 	
 	var opts = {
 		'url':url,
-		'username':username,
-		'password':password,
 		'process_callback': this._processAuthenticatedUser,
 		'success_event_type':'verify_credentials_succeeded',
 		'failure_event_type':'verify_credentials_failed',
@@ -645,8 +608,6 @@ SpazTwit.prototype.getHomeTimeline = function(since_id, count, page, processing_
 	var url = this.getAPIURL('home_timeline', data);
 	this._getTimeline({
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback'	: this._processHomeTimeline,
 		'success_callback':onSuccess,
 		'failure_callback':onFailure,
@@ -704,8 +665,6 @@ SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page, processi
 	var url = this.getAPIURL('friends_timeline', data);
 	this._getTimeline({
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback'	: this._processFriendsTimeline,
 		'success_callback':onSuccess,
 		'failure_callback':onFailure,
@@ -763,8 +722,6 @@ SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts,
 	var url = this.getAPIURL('replies_timeline', data);
 	this._getTimeline({
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback'	: this._processRepliesTimeline,
 		'success_callback':onSuccess,
 		'failure_callback':onFailure,
@@ -822,8 +779,6 @@ SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processin
 	var url = this.getAPIURL('dm_timeline', data);
 	this._getTimeline({
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback'	: this._processDMTimeline,
 		'success_callback':onSuccess,
 		'failure_callback':onFailure,
@@ -860,8 +815,6 @@ SpazTwit.prototype.getFavorites = function(page, processing_opts, onSuccess, onF
 
 	this._getTimeline({
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback'	: this._processFavoritesTimeline,
 		'success_callback':onSuccess,
 		'failure_callback':onFailure,
@@ -917,8 +870,6 @@ SpazTwit.prototype.getUserTimeline = function(id, count, page, onSuccess, onFail
 	
 	this._getTimeline({
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback'	: this._processUserTimeline,
 		'success_callback':opts.onSuccess,
 		'failure_callback':opts.onFailure,
@@ -1237,8 +1188,6 @@ SpazTwit.prototype._getTimeline = function(opts) {
 		'timeout':this.DEFAULT_TIMEOUT,
 		'url':null,
 		'data':null,
-		'username':null,
-		'password':null,
 		'process_callback':null,
 		'processing_opts':null,
 		'success_event_type':null,
@@ -1341,16 +1290,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
         },
         'beforeSend':function(xhr){
 			sc.helpers.dump("beforesend");
-			if (stwit.opts.oauth_consumer) {
-				var authHeader = consumer.getAuthHeader({
-					'method'    : opts.method,
-					'url'       : opts.url,
-					'parameters': stwit._convertParamsForOAuth(opts.data)
-				});
-				xhr.setRequestHeader('Authorization', authHeader);
-			} else if (opts.username && opts.password) {
-				xhr.setRequestHeader("Authorization", "Basic " + sc.helpers.Base64.encode(opts.username + ":" + opts.password));
-			}
+            xhr.setRequestHeader('Authorization', stwit.auth.signRequest(opts.method, opts.url, opts.data));
         },
         'type': 	opts.method,
         'url': 		opts.url,
@@ -1361,18 +1301,6 @@ SpazTwit.prototype._getTimeline = function(opts) {
 	return xhr;
 };
 
-/**
- * converts jq_style ajax params into the format used by the oAuth lib
- * @param {object} jq_style key/val params
- * @returns {array} array based params 
- */
-SpazTwit.prototype._convertParamsForOAuth = function(jq_style) {
-	var params = [];
-	for (var key in jq_style) {
-		params.push([ key, jq_style[key] ]);
-	}
-	return params;
-};
 
 
 /**
@@ -1708,8 +1636,6 @@ SpazTwit.prototype._callMethod = function(opts) {
 		'timeout':this.DEFAULT_TIMEOUT,
 		'url':null,
 		'data':null,
-		'username':null,
-		'password':null,
 		'process_callback':null,
 		'success_event_type':null,
 		'failure_event_type':null,
@@ -1792,16 +1718,7 @@ SpazTwit.prototype._callMethod = function(opts) {
 	    },
 	    'beforeSend':function(xhr){
 			sc.helpers.dump(opts.url + ' beforesend');
-			if (stwit.opts.oauth_consumer) {
-				var authHeader = consumer.getAuthHeader({
-					'method'    : opts.method,
-					'url'       : opts.url,
-					'parameters': this._convertParamsForOAuth(opts.data)
-				});
-				xhr.setRequestHeader('Authorization', authHeader);
-			} else if (opts.username && opts.password) {
-				xhr.setRequestHeader("Authorization", "Basic " + sc.helpers.Base64.encode(opts.username + ":" + opts.password));
-			}
+            xhr.setRequestHeader('Authorization', stwit.auth.signRequest(method, opts.url, opts.data));
 	    },
 	    'type': method,
 	    'url' : opts.url,
@@ -1821,8 +1738,6 @@ SpazTwit.prototype.getUser = function(user_id, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		// 'process_callback': this._processUserData,
 		'success_event_type':'get_user_succeeded',
 		'failure_event_type':'get_user_failed',
@@ -1845,8 +1760,6 @@ SpazTwit.prototype.getFriendsList = function() {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback': this._processFriendsList,
 		'success_event_type':'get_friendslist_succeeded',
 		'failure_event_type':'get_friendslist_failed',
@@ -1872,8 +1785,6 @@ SpazTwit.prototype.getFollowersList = function() {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback': this._processFollowersList,
 		'success_event_type':'get_followerslist_succeeded',
 		'failure_event_type':'get_followerslist_failed',
@@ -1947,8 +1858,6 @@ SpazTwit.prototype.addFriend = function(user_id, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'create_friendship_succeeded',
 		'failure_event_type':'create_friendship_failed',
 		'success_callback':onSuccess,
@@ -1969,8 +1878,6 @@ SpazTwit.prototype.removeFriend = function(user_id, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'destroy_friendship_succeeded',
 		'failure_event_type':'destroy_friendship_failed',
 		'success_callback':onSuccess,
@@ -1993,8 +1900,6 @@ SpazTwit.prototype.block = function(user_id, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'create_block_succeeded',
 		'failure_event_type':'create_block_failed',
 		'success_callback':onSuccess,
@@ -2015,8 +1920,6 @@ SpazTwit.prototype.unblock = function(user_id, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'destroy_block_succeeded',
 		'failure_event_type':'destroy_block_failed',
 		'success_callback':onSuccess,
@@ -2095,13 +1998,8 @@ SpazTwit.prototype.update = function(status, source, in_reply_to_status_id, onSu
 	}
 	data.status = status;
 	
-	var username = this.username;
-	var password = this.password;
-	
 	var opts = {
 		'url':url,
-		'username':username,
-		'password':password,
 		'data':data,
 		'process_callback': this._processUpdateReturn,
 		'success_callback':onSuccess,
@@ -2139,8 +2037,6 @@ SpazTwit.prototype.getOne = function(id, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'process_callback': this._processOneItem,
 		'success_event_type':'get_one_status_succeeded',
 		'success_callback':onSuccess,
@@ -2343,8 +2239,6 @@ SpazTwit.prototype.favorite = function(id, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'create_favorite_succeeded',
 		'failure_event_type':'create_favorite_failed',
 		'success_callback':onSuccess,
@@ -2366,8 +2260,6 @@ SpazTwit.prototype.unfavorite = function(id, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'destroy_favorite_succeeded',
 		'failure_event_type':'destroy_favorite_failed',
 		'success_callback':onSuccess,
@@ -2394,8 +2286,6 @@ SpazTwit.prototype.updateLocation = function(location_str, onSuccess, onFailure)
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'update_location_succeeded',
 		'failure_event_type':'update_location_failed',
 		'success_callback':onSuccess,
@@ -2576,8 +2466,6 @@ SpazTwit.prototype.getSavedSearches = function(onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'new_saved_searches_data',
 		'failure_event_type':'error_saved_searches_data',
 		'success_callback':onSuccess,
@@ -2601,8 +2489,6 @@ SpazTwit.prototype.addSavedSearch = function(search_query, onSuccess, onFailure)
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'create_saved_search_succeeded',
 		'failure_event_type':'create_saved_search_failed',
 		'success_callback':onSuccess,
@@ -2628,8 +2514,6 @@ SpazTwit.prototype.removeSavedSearch = function(search_id, onSuccess, onFailure)
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'destroy_saved_search_succeeded',
 		'failure_event_type':'destroy_saved_search_failed',
 		'success_callback':onSuccess,
@@ -2667,8 +2551,6 @@ SpazTwit.prototype.getLists = function(user, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'get_lists_succeeded',
 		'failure_event_type':'get_lists_failed',
 		'success_callback':onSuccess,
@@ -2765,8 +2647,6 @@ SpazTwit.prototype.getListInfo = function(list, user, onSuccess, onFailure) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'get_list_succeeded',
 		'failure_event_type':'get_list_failed',
 		'success_callback':onSuccess,
@@ -2800,8 +2680,6 @@ SpazTwit.prototype.getListTimeline = function(list, user, onSuccess, onFailure) 
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'get_list_timeline_succeeded',
 		'failure_event_type':'get_list_timeline_failed',
 		'success_callback':onSuccess,
@@ -2860,8 +2738,6 @@ SpazTwit.prototype.getListMembers = function(list, user) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'get_list_members_succeeded',
 		'failure_event_type':'get_list_members_failed',
 		'method':'GET',
@@ -2893,8 +2769,6 @@ SpazTwit.prototype.addList = function(list, visibility, description) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'create_list_succeeded',
 		'failure_event_type':'create_list_failed',
 		'success_callback':null,
@@ -2948,8 +2822,6 @@ SpazTwit.prototype.removeList = function(list, user) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
 		'success_event_type':'remove_list_succeeded',
 		'failure_event_type':'remove_list_failed',
 		'method':'DELETE'
@@ -2981,8 +2853,8 @@ SpazTwit.prototype.addUserToList = function(user, list, list_user) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
+		'success_event_type':'create_list_succeeded',
+		'failure_event_type':'create_list_failed',
 		'success_event_type':'add_list_user_succeeded',
 		'failure_event_type':'add_list_user_failed',
 		'data':data
@@ -3014,8 +2886,8 @@ SpazTwit.prototype.removeUserFromList = function(user, list, list_user) {
 	
 	var opts = {
 		'url':url,
-		'username':this.username,
-		'password':this.password,
+		'success_event_type':'create_list_succeeded',
+		'failure_event_type':'create_list_failed',
 		'success_event_type':'remove_list_user_succeeded',
 		'failure_event_type':'remove_list_user_failed',
 		'data':data,
