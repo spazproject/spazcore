@@ -110,11 +110,10 @@ var SPAZCORE_SERVICEURL_WORDPRESS_TWITTER = 'https://twitter-api.wordpress.com/'
 */
 function SpazTwit(opts) {
 	
-	this.auth = auth;
-	this.username = auth.username;
-	
 	this.opts                = opts || {};
 	this.auth                = opts.auth;
+	this.username            = opts.auth.username;
+
 	this.opts.event_mode     = this.opts.event_mode || 'DOM';
 	this.opts.event_target   = this.opts.event_target || document;
 	this.opts.timeout        = this.opts.timeout || this.DEFAULT_TIMEOUT; // 60 seconds default
