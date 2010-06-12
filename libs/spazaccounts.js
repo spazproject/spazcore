@@ -132,32 +132,28 @@ SpazAccounts.prototype.initAccounts	= function() {
 
 /**
  * add a new account
- * @param {string} username the username
- * @param {string} password the password
  * @param {type} type the type of account
+ * @param {string} auth serialized SpazAuth object for this account
  * @returns {object} the account object just added
  */
-SpazAccounts.prototype.add = function(username, password, type) {
+SpazAccounts.prototype.add = function(type, auth) {
 	
 	if (!type) {
 		sch.error("Type must be set");
 		return false;
 	}
-	
-	var username = username.toLowerCase();
-	var id = this.generateID();
-	this._accounts.push({
-		'id':id,
-		'username':username,
-		'password':password,
-		'type':type,
-		'meta':{}
-	});
+
+	var account = {
+		id: this.generateID(),
+		type: type,
+		auth: auth,
+		meta: {}
+	};
+
+    this._accounts.push(account);
 	this.save();
-	
-	sch.debug("Added new user:"+id);
-	
-	return this.get(id);
+
+	return account;
 };
 
 
@@ -204,7 +200,7 @@ SpazAccounts.prototype.getByUsername = function(username) {
 	var matches = [];
 
 	for (var i=0; i < this._accounts.length; i++) {
-		if (this._accounts[i].username === username) {
+		if (this._accounts[i].auth.username === username) {
 			matches.push(this._accounts[i]);
 		}
 	};
@@ -221,7 +217,7 @@ SpazAccounts.prototype.getByUsernameAndType = function(username, type) {
 	var matches = [];
 
 	for (var i=0; i < this._accounts.length; i++) {
-		if (this._accounts[i].username === username && this._accounts[i].type === type) {
+		if (this._accounts[i].auth.username === username && this._accounts[i].type === type) {
 			matches.push(this._accounts[i]);
 		}
 	};
