@@ -71,6 +71,8 @@ var SPAZCORE_SERVICEURL_WORDPRESS_TWITTER = 'https://twitter-api.wordpress.com/'
  * 'update_failed' (data)
  * 'get_user_succeeded' (data)
  * 'get_user_failed' (data)
+ * 'search_users_succeeded'
+ * 'search_users_failed'
  * 'get_one_status_succeeded' (data)
  * 'get_one_status_failed' (data)
  * 'new_search_timeline_data' (data)
@@ -110,10 +112,10 @@ function SpazTwit(username, password, opts) {
 	this.username = username;
 	this.password = password;
 	
-	this.opts                = opts || {};
-	this.opts.event_mode     = this.opts.event_mode || 'DOM';
-	this.opts.event_target   = this.opts.event_target || document;
-	this.opts.timeout        = this.opts.timeout || this.DEFAULT_TIMEOUT; // 60 seconds default
+	this.opts				 = opts || {};
+	this.opts.event_mode	 = this.opts.event_mode || 'DOM';
+	this.opts.event_target	 = this.opts.event_target || document;
+	this.opts.timeout		 = this.opts.timeout || this.DEFAULT_TIMEOUT; // 60 seconds default
 	this.opts.oauth_consumer = this.opts.oauth_consumer || null;
 	
 	this.setSource('SpazCore');
@@ -160,7 +162,7 @@ SpazTwit.prototype.getPassword = function() {
 
 /**
  * retrieves the last status id retrieved for a given section
- * @param {string} section  use one of the defined constants (ex. SPAZCORE_SECTION_HOME)
+ * @param {string} section	use one of the defined constants (ex. SPAZCORE_SECTION_HOME)
  * @return {integer} the last id retrieved for this section
  */
 SpazTwit.prototype.getLastId   = function(section) {
@@ -169,8 +171,8 @@ SpazTwit.prototype.getLastId   = function(section) {
 
 /**
  * sets the last status id retrieved for a given section
- * @param {string} section  use one of the defined constants (ex. SPAZCORE_SECTION_HOME)
- * @param {integer} id  the new last id retrieved for this section
+ * @param {string} section	use one of the defined constants (ex. SPAZCORE_SECTION_HOME)
+ * @param {integer} id	the new last id retrieved for this section
  */
 SpazTwit.prototype.setLastId   = function(section, id) {
 	this.data[section].lastid = parseInt(id, 10);
@@ -183,35 +185,35 @@ SpazTwit.prototype.initializeData = function() {
 	*/
 	this.data = {};
 	this.data[SPAZCORE_SECTION_HOME] = {
-		'lastid':   1,
+		'lastid':	1,
 		'items':   [],
 		'newitems':[],
 		'max':200,
 		'min_age':5*60
 	};
 	this.data[SPAZCORE_SECTION_FRIENDS] = {
-		'lastid':   1,
+		'lastid':	1,
 		'items':   [],
 		'newitems':[],
 		'max':200,
 		'min_age':5*60
 	};
 	this.data[SPAZCORE_SECTION_REPLIES] = {
-		'lastid':   1,
+		'lastid':	1,
 		'items':   [],
 		'newitems':[],
 		'max':50,
 		'min_age':5*60
 	};
 	this.data[SPAZCORE_SECTION_DMS] = {
-		'lastid':   1,
+		'lastid':	1,
 		'items':   [],
 		'newitems':[],
 		'max':50,
 		'min_age':5*60
 	};
 	this.data[SPAZCORE_SECTION_FAVORITES] = {
-		'lastid':   1,
+		'lastid':	1,
 		'items':   [],
 		'newitems':[],
 		'max':100,
@@ -352,7 +354,7 @@ SpazTwit.prototype.setBaseURL= function(newurl) {
 
 /**
  * sets the base URL by the service type
- * @param {string} service  see SPAZCORE_SERVICE_* 
+ * @param {string} service	see SPAZCORE_SERVICE_* 
  */
 SpazTwit.prototype.setBaseURLByService= function(service) {
 	
@@ -415,49 +417,52 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 
 
 
-    // Timeline URLs
-	urls.public_timeline    = "statuses/public_timeline.json";
-	urls.friends_timeline   = "statuses/friends_timeline.json";
+	// Timeline URLs
+	urls.public_timeline	= "statuses/public_timeline.json";
+	urls.friends_timeline	= "statuses/friends_timeline.json";
 	urls.home_timeline		= "statuses/home_timeline.json";
-	urls.user_timeline      = "statuses/user_timeline.json";
-	urls.replies_timeline   = "statuses/replies.json";
+	urls.user_timeline		= "statuses/user_timeline.json";
+	urls.replies_timeline	= "statuses/replies.json";
 	urls.show				= "statuses/show/{{ID}}.json";
-	urls.favorites          = "favorites.json";
-	urls.user_favorites     = "favorites/{{ID}}.json"; // use this to retrieve favs of a user other than yourself
-	urls.dm_timeline        = "direct_messages.json";
-	urls.dm_sent            = "direct_messages/sent.json";
-	urls.friendslist        = "statuses/friends.json";
-	urls.followerslist      = "statuses/followers.json";
+	urls.favorites			= "favorites.json";
+	urls.user_favorites		= "favorites/{{ID}}.json"; // use this to retrieve favs of a user other than yourself
+	urls.dm_timeline		= "direct_messages.json";
+	urls.dm_sent			= "direct_messages/sent.json";
+	urls.friendslist		= "statuses/friends.json";
+	urls.followerslist		= "statuses/followers.json";
+	urls.featuredlist		= "statuses/featured.json";
+
+	// User URLS
+	urls.search_users		= "users/search.json";
 	urls.show_user			= "users/show/{{ID}}.json";
-	urls.featuredlist       = "statuses/featured.json";
 
 	// Action URLs
-	urls.update           	= "statuses/update.json";
-	urls.destroy_status   	= "statuses/destroy/{{ID}}.json";
-	urls.friendship_create  = "friendships/create/{{ID}}.json";
-	urls.friendship_destroy	= "friendships/destroy/{{ID}}.json";
+	urls.update				= "statuses/update.json";
+	urls.destroy_status		= "statuses/destroy/{{ID}}.json";
+	urls.friendship_create	= "friendships/create/{{ID}}.json";
+	urls.friendship_destroy = "friendships/destroy/{{ID}}.json";
 	urls.block_create		= "blocks/create/{{ID}}.json";
 	urls.block_destroy		= "blocks/destroy/{{ID}}.json";
-	urls.follow             = "notifications/follow/{{ID}}.json";
+	urls.follow				= "notifications/follow/{{ID}}.json";
 	urls.unfollow			= "notifications/leave/{{ID}}.json";
-	urls.favorites_create 	= "favorites/create/{{ID}}.json";
+	urls.favorites_create	= "favorites/create/{{ID}}.json";
 	urls.favorites_destroy	= "favorites/destroy/{{ID}}.json";
-	urls.saved_searches_create 	= "saved_searches/create.json";
-	urls.saved_searches_destroy	= "saved_searches/destroy/{{ID}}.json";
+	urls.saved_searches_create	= "saved_searches/create.json";
+	urls.saved_searches_destroy = "saved_searches/destroy/{{ID}}.json";
 	urls.verify_credentials = "account/verify_credentials.json";
-	urls.ratelimit_status   = "account/rate_limit_status.json";
+	urls.ratelimit_status	= "account/rate_limit_status.json";
 	urls.update_profile		= "account/update_profile.json";
 	urls.saved_searches		= "saved_searches.json";
 	urls.report_spam		= "report_spam.json";
 
-    // User lists URLs
-	urls.lists              = "{{USER}}/lists.json";
-	urls.lists_list         = "{{USER}}/lists/{{SLUG}}.json";
-	urls.lists_memberships  = "{{USER}}/lists/memberships.json";
-	urls.lists_timeline     = "{{USER}}/lists/{{SLUG}}/statuses.json";
-	urls.lists_members      = "{{USER}}/{{SLUG}}/members.json";
+	// User lists URLs
+	urls.lists				= "{{USER}}/lists.json";
+	urls.lists_list			= "{{USER}}/lists/{{SLUG}}.json";
+	urls.lists_memberships	= "{{USER}}/lists/memberships.json";
+	urls.lists_timeline		= "{{USER}}/lists/{{SLUG}}/statuses.json";
+	urls.lists_members		= "{{USER}}/{{SLUG}}/members.json";
 	urls.lists_check_member = "{{USER}}/{{SLUG}}/members/{{ID}}.json";
-	urls.lists_subscribers  = "{{USER}}/{{SLUG}}/subscribers.json";
+	urls.lists_subscribers	= "{{USER}}/{{SLUG}}/subscribers.json";
 	urls.lists_check_subscriber = "{{USER}}/{{SLUG}}/subscribers/{{ID}}.json";
 	urls.lists_subscriptions = "{{USER}}/lists/subscriptions.json";
 
@@ -482,7 +487,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 	}
 
 	// misc
-	urls.test 			  	= "help/test.json";
+	urls.test				= "help/test.json";
 	urls.downtime_schedule	= "help/downtime_schedule.json";
 
 	
@@ -495,20 +500,20 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 		
 	}
 
-    // Token replacement for user lists
-    if (urls[key].indexOf('{{USER}}') > - 1) {
-        if (urldata && typeof(urldata) === 'object') {
-            urls[key] = urls[key].replace('{{USER}}', urldata.user);
-        }
-    }
+	// Token replacement for user lists
+	if (urls[key].indexOf('{{USER}}') > - 1) {
+		if (urldata && typeof(urldata) === 'object') {
+			urls[key] = urls[key].replace('{{USER}}', urldata.user);
+		}
+	}
 
-    if (urls[key].indexOf('{{SLUG}}') > -1) {
-        if (urldata && typeof(urldata) === 'object') {
-            urls[key] = urls[key].replace('{{SLUG}}', urldata.slug);
-        }
-    }
+	if (urls[key].indexOf('{{SLUG}}') > -1) {
+		if (urldata && typeof(urldata) === 'object') {
+			urls[key] = urls[key].replace('{{SLUG}}', urldata.slug);
+		}
+	}
 
-    if (urls[key]) {
+	if (urls[key]) {
 	
 		if (urldata && typeof urldata !== "string") {
 			urldata = '?'+jQuery.param(urldata);
@@ -521,10 +526,10 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 		} else {
 			return this._postProcessURL(this.baseurl + urls[key] + urldata);
 		}
-        
-    } else {
-        return false;
-    }
+		
+	} else {
+		return false;
+	}
 
 };
 
@@ -607,7 +612,7 @@ SpazTwit.prototype.getPublicTimeline = function(onSuccess, onFailure) {
  * Initiates retrieval of the home timeline (all the people you are following)
  * 
  * @param {integer} since_id Value > 1 is passed as since_id, value < -1 is
- *        made positive and passed as max_id, default value is 1
+ *		  made positive and passed as max_id, default value is 1
  * @param {integer} count default is 200 
  * @param {integer} page default is null (ignored if null)
  */
@@ -726,7 +731,7 @@ SpazTwit.prototype._processFriendsTimeline = function(ret_items, opts, processin
 
 
 /**
- *  
+ *	
  */
 SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts, onSuccess, onFailure) {	
 	if (!page) { page = null;}
@@ -786,7 +791,7 @@ SpazTwit.prototype._processRepliesTimeline = function(ret_items, opts, processin
 };
 
 /**
- *  
+ *	
  */
 SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processing_opts, onSuccess, onFailure) {
 	if (!page) { page = null;}
@@ -844,7 +849,7 @@ SpazTwit.prototype._processDMTimeline = function(ret_items, opts, processing_opt
 };
 
 /**
- *  
+ *	
  */
 SpazTwit.prototype.getFavorites = function(page, processing_opts, onSuccess, onFailure) {	
 	if (!page) { page = null;}
@@ -900,7 +905,7 @@ SpazTwit.prototype.getUserTimeline = function(id, count, page, onSuccess, onFail
 	}
 
 	var data = {};
-	data['id']    = opts.id;
+	data['id']	  = opts.id;
 	data['count'] = opts.count;
 	if (opts.since_id) {
 		if (opts.since_id < -1) {
@@ -998,11 +1003,11 @@ SpazTwit.prototype.getCombinedTimeline = function(com_opts, onSuccess, onFailure
 SpazTwit.prototype.search = function(query, since_id, results_per_page, page, lang, geocode, onSuccess, onFailure) {
 	if (!page) { page = 1;}
 	// if (!since_id) {
-	// 	if (this.data[SPAZCORE_SECTION_SEARCH].lastid && this.data[SPAZCORE_SECTION_SEARCH].lastid > 1) {
-	// 		since_id = this.data[SPAZCORE_SECTION_SEARCH].lastid;
-	// 	} else {
-	// 		since_id = 1;
-	// 	}
+	//	if (this.data[SPAZCORE_SECTION_SEARCH].lastid && this.data[SPAZCORE_SECTION_SEARCH].lastid > 1) {
+	//		since_id = this.data[SPAZCORE_SECTION_SEARCH].lastid;
+	//	} else {
+	//		since_id = 1;
+	//	}
 	// }
 	if (!results_per_page) {
 		results_per_page = 50;
@@ -1010,10 +1015,10 @@ SpazTwit.prototype.search = function(query, since_id, results_per_page, page, la
 	
 	
 	var data = {};
-	data['q']        = query;
-	data['rpp']      = results_per_page;
+	data['q']		 = query;
+	data['rpp']		 = results_per_page;
 	// data['since_id'] = since_id;
-	data['page']     = page;
+	data['page']	 = page;
 	if (lang) {
 		data['lang'] = lang;
 	}
@@ -1094,14 +1099,14 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, opts, proces
 
 
 		var search_info = {
-			'since_id'         : search_result.since_id,
-			'max_id'           : search_result.max_id,
-			'refresh_url'      : search_result.refresh_url,
+			'since_id'		   : search_result.since_id,
+			'max_id'		   : search_result.max_id,
+			'refresh_url'	   : search_result.refresh_url,
 			'results_per_page' : search_result.results_per_page,
-			'next_page'        : search_result.next_page,
-			'completed_in'     : search_result.completed_in,
-			'page'             : search_result.page,
-			'query'            : search_result.query
+			'next_page'		   : search_result.next_page,
+			'completed_in'	   : search_result.completed_in,
+			'page'			   : search_result.page,
+			'query'			   : search_result.query
 		};
 		
 		if (opts.success_callback) {
@@ -1255,14 +1260,14 @@ SpazTwit.prototype._getTimeline = function(opts) {
 	
 	var xhr = jQuery.ajax({
 		'timeout' :opts.timeout,
-        'complete':function(xhr, msg){
-            sc.helpers.dump(opts.url + ' complete:'+msg);
+		'complete':function(xhr, msg){
+			sc.helpers.dump(opts.url + ' complete:'+msg);
 			if (msg === 'timeout') {
 				// jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
 				stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':xhr, 'msg':msg});				
 			}
-        },
-        'error':function(xhr, msg, exc) {
+		},
+		'error':function(xhr, msg, exc) {
 			sc.helpers.dump(opts.url + ' error:"'+msg+'"');
 			if (msg.toLowerCase().indexOf('timeout') !== -1) {
 				stwit.triggerEvent(document, opts.failure_event_type, {'url':opts.url, 'xhr':null, 'msg':msg});
@@ -1288,8 +1293,8 @@ SpazTwit.prototype._getTimeline = function(opts) {
 					
 				}
 	
-	        } else {
-                sc.helpers.dump("Error:Unknown from "+opts['url']);
+			} else {
+				sc.helpers.dump("Error:Unknown from "+opts['url']);
 				if (opts.failure_callback) {
 					opts.failure_callback(null, msg, exc);
 				}
@@ -1298,7 +1303,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
 					stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':xhr, 'msg':'Unknown Error'});
 					
 				}
-            }
+			}
 			// jQuery().trigger('spaztwit_ajax_error', [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
 			stwit.triggerEvent('spaztwit_ajax_error', {'url':opts.url, 'xhr':xhr, 'msg':msg});
 			
@@ -1313,8 +1318,8 @@ SpazTwit.prototype._getTimeline = function(opts) {
 				}
 			}
 			
-        },
-        'success':function(data) {
+		},
+		'success':function(data) {
 			// sc.helpers.dump("Success! \n\n" + data);
 			sc.helpers.dump(opts.url + ' success!'+" data:"+data);
 			
@@ -1339,23 +1344,23 @@ SpazTwit.prototype._getTimeline = function(opts) {
 				// jQuery().trigger(opts.success_event_type, [data]);
 				stwit.triggerEvent(opts.success_event_type, data);
 			}			
-        },
-        'beforeSend':function(xhr){
+		},
+		'beforeSend':function(xhr){
 			sc.helpers.dump("beforesend");
 			if (stwit.opts.oauth_consumer) {
 				var authHeader = consumer.getAuthHeader({
-					'method'    : opts.method,
-					'url'       : opts.url,
+					'method'	: opts.method,
+					'url'		: opts.url,
 					'parameters': stwit._convertParamsForOAuth(opts.data)
 				});
 				xhr.setRequestHeader('Authorization', authHeader);
 			} else if (opts.username && opts.password) {
 				xhr.setRequestHeader("Authorization", "Basic " + sc.helpers.Base64.encode(opts.username + ":" + opts.password));
 			}
-        },
-        'type': 	opts.method,
-        'url': 		opts.url,
-        'data': 	opts.data,
+		},
+		'type':		opts.method,
+		'url':		opts.url,
+		'data':		opts.data,
 		'dataType':'text'
 	});
 	
@@ -1529,7 +1534,7 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
  * Adds an array of items to the .items property of the appropriate section, then
  * removes dupes, extras, and optionally sorts the section items
  * @param {string} section_name
- * @param {array}  arr  an array of items
+ * @param {array}  arr	an array of items
  * @param {function}  sortfunc - optional 
  */
 SpazTwit.prototype._addToSectionItems = function(section_name, arr, sortfunc) {
@@ -1733,12 +1738,12 @@ SpazTwit.prototype._callMethod = function(opts) {
 	
 	var xhr = jQuery.ajax({
 		'timeout' :this.opts.timeout,
-	    'complete':function(xhr, msg){
-	        sc.helpers.dump(opts.url + ' complete:'+msg);
-	    },
-	    'error':function(xhr, msg, exc) {
+		'complete':function(xhr, msg){
+			sc.helpers.dump(opts.url + ' complete:'+msg);
+		},
+		'error':function(xhr, msg, exc) {
 			sc.helpers.dump(opts.url + ' error:'+msg);
-	        if (xhr) {
+			if (xhr) {
 				if (!xhr.readyState < 4) {
 					sc.helpers.dump("Error:"+xhr.status+" from "+opts['url']);
 					if (xhr.responseText) {
@@ -1758,8 +1763,8 @@ SpazTwit.prototype._callMethod = function(opts) {
 					stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':xhr, 'msg':msg});
 				}
 	
-	        } else {
-	            sc.helpers.dump("Error:Unknown from "+opts['url']);
+			} else {
+				sc.helpers.dump("Error:Unknown from "+opts['url']);
 				if (opts.failure_callback) {
 					opts.failure_callback(null, msg, exc);
 				}
@@ -1768,11 +1773,11 @@ SpazTwit.prototype._callMethod = function(opts) {
 					stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':null, 'msg':'Unknown Error'});
 
 				}
-	        }
+			}
 			// jQuery().trigger('spaztwit_ajax_error', [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
 			stwit.triggerEvent('spaztwit_ajax_error', {'url':opts.url, 'xhr':xhr, 'msg':msg});
-	    },
-	    'success':function(data) {
+		},
+		'success':function(data) {
 			sc.helpers.dump(opts.url + ' success');
 			data = sc.helpers.deJSON(data);
 			if (opts.process_callback) {
@@ -1790,22 +1795,22 @@ SpazTwit.prototype._callMethod = function(opts) {
 				stwit.triggerEvent(opts.success_event_type, data);
 				
 			}
-	    },
-	    'beforeSend':function(xhr){
+		},
+		'beforeSend':function(xhr){
 			sc.helpers.dump(opts.url + ' beforesend');
 			if (stwit.opts.oauth_consumer) {
 				var authHeader = consumer.getAuthHeader({
-					'method'    : opts.method,
-					'url'       : opts.url,
+					'method'	: opts.method,
+					'url'		: opts.url,
 					'parameters': this._convertParamsForOAuth(opts.data)
 				});
 				xhr.setRequestHeader('Authorization', authHeader);
 			} else if (opts.username && opts.password) {
 				xhr.setRequestHeader("Authorization", "Basic " + sc.helpers.Base64.encode(opts.username + ":" + opts.password));
 			}
-	    },
-	    'type': method,
-	    'url' : opts.url,
+		},
+		'type': method,
+		'url' : opts.url,
 		'data': opts.data,
 		'dataType':'text'
 	});
@@ -1835,6 +1840,24 @@ SpazTwit.prototype.getUser = function(user_id, onSuccess, onFailure) {
 	/*
 		Perform a request and get true or false back
 	*/
+	var xhr = this._callMethod(opts);
+};
+
+
+
+SpazTwit.prototype.searchUsers = function(query, onSuccess, onFailure) {
+	var url = this.getAPIURL('search_users');
+
+	var opts = {
+		'url':url,
+		'username':this.username,
+		'password':this.password,
+		'process_callback':this._processUserList,
+		'success_event_type':'search_users_succeeded',
+		'failure_event_type':'search_users_failed',
+		'method':'GET'
+	};
+
 	var xhr = this._callMethod(opts);
 };
 
@@ -2053,7 +2076,7 @@ SpazTwit.prototype.follow = function(user_id, onSuccess, onFailure) { // to add 
 		Perform a request and get true or false back
 	*/
 	var xhr = this._callMethod(opts);
-    
+	
 };
 
 SpazTwit.prototype.unfollow = function(user_id, onSuccess, onFailure) { // to remove notification
@@ -2077,7 +2100,7 @@ SpazTwit.prototype.unfollow = function(user_id, onSuccess, onFailure) { // to re
 		Perform a request and get true or false back
 	*/
 	var xhr = this._callMethod(opts);
-    
+	
 };
 
 
@@ -2558,10 +2581,10 @@ SpazTwit.prototype.removeExtraElements = function(items, max, remove_from_top) {
 		
 		if (!remove_from_top) {
 			sc.helpers.dump("array length is " + items.length + " > " + max + "; removing last " + diff + " entries");
-	        items.splice(diff * -1, diff);
+			items.splice(diff * -1, diff);
 		} else {
 			sc.helpers.dump("array length is " + items.length + " > " + max + "; removing first " + diff + " entries");
-	        items.splice(0, diff);
+			items.splice(0, diff);
 		}
 	}
 	
@@ -2659,11 +2682,11 @@ SpazTwit.prototype.getLists = function(user, onSuccess, onFailure) {
 	if (!user && !this.username) {
 		return;
 	} else if (!user) {
-	    user = this.username;
+		user = this.username;
 	}
 
 	var url = this.getAPIURL('lists', {
-	    'user':user
+		'user':user
 	});
 	
 	var opts = {
@@ -2689,7 +2712,7 @@ SpazTwit.prototype.getLists = function(user, onSuccess, onFailure) {
  */
 SpazTwit.prototype._processUserLists = function(section_name, ret_items, opts, processing_opts) {
   
-    if (!processing_opts) { processing_opts = {}; }
+	if (!processing_opts) { processing_opts = {}; }
 
 	if (ret_items.length > 0){
 		/*
@@ -2760,7 +2783,7 @@ SpazTwit.prototype.getListInfo = function(list, user, onSuccess, onFailure) {
 	user = user || this.username;
 
 	var url = this.getAPIURL('lists_list', {
-	    'user':user,
+		'user':user,
 		'slug':list
 	});
 	
@@ -2795,7 +2818,7 @@ SpazTwit.prototype.getListTimeline = function(list, user, onSuccess, onFailure) 
 	user = user || this.username;
 
 	var url = this.getAPIURL('lists_timeline', {
-	    'user':user,
+		'user':user,
 		'slug':list
 	});
 	
@@ -2855,7 +2878,7 @@ SpazTwit.prototype.getListMembers = function(list, user) {
 	user = user || this.username;
 
 	var url = this.getAPIURL('lists_members', {
-	    'user':user,
+		'user':user,
 		'slug':list
 	});
 	
@@ -2878,8 +2901,8 @@ SpazTwit.prototype.getListMembers = function(list, user) {
 
 /**
  * create a new list for the authenticated user
- * @param {string} list  The list name
- * @param {string} visibility   "public" or "private"
+ * @param {string} list	 The list name
+ * @param {string} visibility	"public" or "private"
  * @param {string} [description]  The list description
  */
 SpazTwit.prototype.addList = function(list, visibility, description) {
@@ -2931,7 +2954,7 @@ SpazTwit.prototype.updateList = function(list, name, visibility, description){
 
 /**
  * delete a list
- * @param {string} list  The list name 
+ * @param {string} list	 The list name 
  */
 SpazTwit.prototype.removeList = function(list, user) {
 	
@@ -3224,7 +3247,7 @@ SpazTwit.prototype.reportSpam = function(user) {
 	var xhr = this._callMethod(opts);
 }
 /**
- *  
+ *	
  */
 SpazTwit.prototype.triggerEvent = function(type, data) {
 	var target = this.opts.event_target || document;
@@ -3236,7 +3259,7 @@ SpazTwit.prototype.triggerEvent = function(type, data) {
 		data = [data];
 		jQuery(target).trigger(type, data);
 	} else {
-		sc.helpers.trigger(type, target, data);	
+		sc.helpers.trigger(type, target, data); 
 	}
 	
 };
@@ -3254,85 +3277,85 @@ if (sc) {
 * EXAMPLES OF JS OBJECTS RETURNED BY TWITTER
 * /statuses/public_timeline.json
 	{
-        "user": {
-            "followers_count": 1144,
-            "description": "フツーですよ。",
-            "url": "http:\/\/camellia.jottit.com\/",
-            "profile_image_url": "http:\/\/s3.amazonaws.com\/twitter_production\/profile_images\/66954592\/20081210071932_normal.jpg",
-            "protected": false,
-            "location": "あかし",
-            "screen_name": "camellia",
-            "name": "かめ",
-            "id": "6519832"
-        },
-        "text": "@sugatch おはよう、すがっち！ *Tw*",
-        "truncated": false,
-        "favorited": false,
-        "in_reply_to_user_id": 10116882,
-        "created_at": "Sat Jan 17 00:53:27 +0000 2009",
-        "source": "<a href=\"http:\/\/cheebow.info\/chemt\/archives\/2007\/04\/twitterwindowst.html\">Twit<\/a>",
-        "in_reply_to_status_id": 1125158879,
-        "id": "1125159824"
-    }
+		"user": {
+			"followers_count": 1144,
+			"description": "フツーですよ。",
+			"url": "http:\/\/camellia.jottit.com\/",
+			"profile_image_url": "http:\/\/s3.amazonaws.com\/twitter_production\/profile_images\/66954592\/20081210071932_normal.jpg",
+			"protected": false,
+			"location": "あかし",
+			"screen_name": "camellia",
+			"name": "かめ",
+			"id": "6519832"
+		},
+		"text": "@sugatch おはよう、すがっち！ *Tw*",
+		"truncated": false,
+		"favorited": false,
+		"in_reply_to_user_id": 10116882,
+		"created_at": "Sat Jan 17 00:53:27 +0000 2009",
+		"source": "<a href=\"http:\/\/cheebow.info\/chemt\/archives\/2007\/04\/twitterwindowst.html\">Twit<\/a>",
+		"in_reply_to_status_id": 1125158879,
+		"id": "1125159824"
+	}
 * 
 * 
 * From authenticated /statuses/friends_timeline.json
 * {
-    "text": "@elazar I don't know about the pony - but a lot of that is in CSS3 - only browsers are crap ;)",
-    "user": {
-        "description": "PHP Windows Geek (not Oxymoron)",
-        "profile_image_url": "http:\/\/s3.amazonaws.com\/twitter_production\/profile_images\/25760052\/headshot_normal.jpg",
-        "url": "http:\/\/elizabethmariesmith.com",
-        "name": "auroraeosrose",
-        "protected": false,
-        "screen_name": "auroraeosrose",
-        "followers_count": 242,
-        "location": "",
-        "id": 8854222 
-    },
-    "in_reply_to_screen_name": "elazar",
-    "in_reply_to_user_id": 9105122,
-    "truncated": false,
-    "favorited": false,
-    "in_reply_to_status_id": 1125164128,
-    "created_at": "Sat Jan 17 00:59:04 +0000 2009",
-    "id": 1125170241,
-    "source": "<a href=\"http:\/\/twitterfox.net\/\">TwitterFox<\/a>"
+	"text": "@elazar I don't know about the pony - but a lot of that is in CSS3 - only browsers are crap ;)",
+	"user": {
+		"description": "PHP Windows Geek (not Oxymoron)",
+		"profile_image_url": "http:\/\/s3.amazonaws.com\/twitter_production\/profile_images\/25760052\/headshot_normal.jpg",
+		"url": "http:\/\/elizabethmariesmith.com",
+		"name": "auroraeosrose",
+		"protected": false,
+		"screen_name": "auroraeosrose",
+		"followers_count": 242,
+		"location": "",
+		"id": 8854222 
+	},
+	"in_reply_to_screen_name": "elazar",
+	"in_reply_to_user_id": 9105122,
+	"truncated": false,
+	"favorited": false,
+	"in_reply_to_status_id": 1125164128,
+	"created_at": "Sat Jan 17 00:59:04 +0000 2009",
+	"id": 1125170241,
+	"source": "<a href=\"http:\/\/twitterfox.net\/\">TwitterFox<\/a>"
  }
 * 
 * 
 * From authenticated /direct_messages.json
 * 
 * {
-    "recipient_screen_name": "funkatron",
-    "created_at": "Fri Jan 16 13:43:16 +0000 2009",
-    "recipient_id": 65583,
-    "sender_id": 808824,
-    "sender": {
-        "description": "Impoverished Ph.D. student at the Indiana University School of Informatics",
-        "screen_name": "kmakice",
-        "followers_count": 671,
-        "url": "http:\/\/www.blogschmog.net",
-        "name": "Kevin Makice",
-        "protected": false,
-        "location": "Bloomington, Indiana",
-        "id": 808824,
-        "profile_image_url": "http:\/\/s3.amazonaws.com\/twitter_production\/profile_images\/69221803\/2009avatar_normal.jpg"
-    },
-    "sender_screen_name": "kmakice",
-    "id": 51212447,
-    "recipient": {
-        "description": "Supernerd, Dad, Webapp security dude, Spaz developer, webmonkey, designer, musician, ego-ho. See also: @funkalinks",
-        "screen_name": "funkatron",
-        "followers_count": 1143,
-        "url": "http:\/\/funkatron.com",
-        "name": "Ed Finkler",
-        "protected": false,
-        "location": "iPhone: 40.423752,-86.907547",
-        "id": 65583,
-        "profile_image_url": "http:\/\/s3.amazonaws.com\/twitter_production\/profile_images\/67512037\/cat_with_hat_and_monocle_normal.jpg"
-    },
-    "text": "[REDACTED]"
+	"recipient_screen_name": "funkatron",
+	"created_at": "Fri Jan 16 13:43:16 +0000 2009",
+	"recipient_id": 65583,
+	"sender_id": 808824,
+	"sender": {
+		"description": "Impoverished Ph.D. student at the Indiana University School of Informatics",
+		"screen_name": "kmakice",
+		"followers_count": 671,
+		"url": "http:\/\/www.blogschmog.net",
+		"name": "Kevin Makice",
+		"protected": false,
+		"location": "Bloomington, Indiana",
+		"id": 808824,
+		"profile_image_url": "http:\/\/s3.amazonaws.com\/twitter_production\/profile_images\/69221803\/2009avatar_normal.jpg"
+	},
+	"sender_screen_name": "kmakice",
+	"id": 51212447,
+	"recipient": {
+		"description": "Supernerd, Dad, Webapp security dude, Spaz developer, webmonkey, designer, musician, ego-ho. See also: @funkalinks",
+		"screen_name": "funkatron",
+		"followers_count": 1143,
+		"url": "http:\/\/funkatron.com",
+		"name": "Ed Finkler",
+		"protected": false,
+		"location": "iPhone: 40.423752,-86.907547",
+		"id": 65583,
+		"profile_image_url": "http:\/\/s3.amazonaws.com\/twitter_production\/profile_images\/67512037\/cat_with_hat_and_monocle_normal.jpg"
+	},
+	"text": "[REDACTED]"
 }
 * 
 * 
@@ -3340,37 +3363,37 @@ if (sc) {
 * From http://search.twitter.com/search.json?q=javascript
 * 
 * {
-    "results": [
-        {
-            "text": "Updated the Wiki page on JavaScript development to reflect latest changes in Orbeon Forms. http:\/\/tinyurl.com\/axtu5u",
-            "to_user_id": null,
-            "from_user": "orbeon",
-            "id": 1125204181,
-            "from_user_id": 279624,
-            "iso_language_code": "en",
-            "profile_image_url": "http:\/\/s3.amazonaws.com\/twitter_production\/profile_images\/53169511\/Picture_1_normal.png",
-            "created_at": "Sat, 17 Jan 2009 01:14:11 +0000"
-        },
-        {
-            "text": "when I close my eyes I dream in javascript",
-            "to_user_id": null,
-            "from_user": "apuritz",
-            "id": 1125196059,
-            "from_user_id": 95155,
-            "iso_language_code": "en",
-            "profile_image_url": "http:\/\/s3.amazonaws.com\/twitter_production\/profile_images\/55159511\/images_normal.jpeg",
-            "created_at": "Sat, 17 Jan 2009 01:10:11 +0000"
-        }
-        // more results deleted
-    ],
-    "since_id": 0,
-    "max_id": 1125204181,
-    "refresh_url": "?since_id=1125204181&q=javascript",
-    "results_per_page": 15,
-    "next_page": "?page=2&max_id=1125204181&q=javascript",
-    "completed_in": 0.015077,
-    "page": 1,
-    "query": "javascript"
+	"results": [
+		{
+			"text": "Updated the Wiki page on JavaScript development to reflect latest changes in Orbeon Forms. http:\/\/tinyurl.com\/axtu5u",
+			"to_user_id": null,
+			"from_user": "orbeon",
+			"id": 1125204181,
+			"from_user_id": 279624,
+			"iso_language_code": "en",
+			"profile_image_url": "http:\/\/s3.amazonaws.com\/twitter_production\/profile_images\/53169511\/Picture_1_normal.png",
+			"created_at": "Sat, 17 Jan 2009 01:14:11 +0000"
+		},
+		{
+			"text": "when I close my eyes I dream in javascript",
+			"to_user_id": null,
+			"from_user": "apuritz",
+			"id": 1125196059,
+			"from_user_id": 95155,
+			"iso_language_code": "en",
+			"profile_image_url": "http:\/\/s3.amazonaws.com\/twitter_production\/profile_images\/55159511\/images_normal.jpeg",
+			"created_at": "Sat, 17 Jan 2009 01:10:11 +0000"
+		}
+		// more results deleted
+	],
+	"since_id": 0,
+	"max_id": 1125204181,
+	"refresh_url": "?since_id=1125204181&q=javascript",
+	"results_per_page": 15,
+	"next_page": "?page=2&max_id=1125204181&q=javascript",
+	"completed_in": 0.015077,
+	"page": 1,
+	"query": "javascript"
 }
 * 
 * 
