@@ -342,6 +342,12 @@
 		String
 	*/
 	module('Helpers:String');
+
+    test("extractScreenNames", function() {
+        var input = "@user1 @user2 @user3 @user4 @user5";
+        var output = ["user1", "user2", "user3", "user4", "user5"];
+        same(sc.helpers.extractScreenNames(input), output);
+    });
 	
 	test("striptags", function() {
 		var input = "<strong>Funky</strong>";
