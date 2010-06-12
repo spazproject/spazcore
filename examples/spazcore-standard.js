@@ -1,4 +1,4 @@
-/*********** Built 2010-06-09 22:23:18 EDT ***********/
+/*********** Built 2010-06-12 13:12:33 CDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -9010,6 +9010,7 @@ function SpazBasicAuth() {
  */
 SpazBasicAuth.prototype.authorize = function(username, password) {
     this.username = username;
+    this.password = password;
     this.authHeader = "Basic " + sc.helpers.Base64.encode(username + ":" + password);
 };
 
@@ -9021,6 +9022,35 @@ SpazBasicAuth.prototype.authorize = function(username, password) {
 SpazBasicAuth.prototype.signRequest = function() {
     return this.authHeader;
 };
+
+/**
+  * Load basic auth credentials from a serialized string
+  *
+  * @param {string} pickle the serialized data string returned by save()
+  * @returns {boolean} true if successfully loaded
+  * @class SpazBasicAuth
+  */
+SpazBasicAuth.prototype.load = function(pickle) {
+    var credentials = pickle.split(':', 2);
+    if (credentials.length != 2) {
+        sch.error("Invalid basic auth pickle: " + pickle);
+        return false;
+    }
+
+    this.authorize(credentials[0], credentials[1]);
+    return true;
+};
+
+/**
+  * Save basic auth credentials into a serialized string
+  *
+  * @returns {string} serialized string
+  * @class SpazBasicAuth
+  */
+SpazBasicAuth.prototype.save = function() {
+    return this.username + ":" + this.password;
+};
+
 
 /**
  * Construct a new OAuth authentication object.
@@ -9078,18 +9108,29 @@ SpazOAuth.prototype.authorize = function(username, password) {
     });
 
     if (accessToken != null) {
-        this.accessToken = accessToken;
-        this.signingCredentials = {
-            consumerKey: this.opts.consumerKey,
-            consumerSecret: this.opts.consumerSecret,
-            token: accessToken.key,
-            tokenSecret: accessToken.secret
-        };
+        this.setAccessToken(accessToken.key, accessToken.secret);
         return true;
     } else {
         return false;
     }
 };
+
+/**
+  * Set the access token
+  *
+  * @param {string} key
+  * @param {string} secret
+  * @class SpazOAuth
+  */
+SpazOAuth.prototype.setAccessToken = function(key, secret) {
+    this.accessToken = {key: key, secret: secret};
+    this.signingCredentials = {
+        consumerKey: this.opts.consumerKey,
+        consumerSecret: this.opts.consumerSecret,
+        token: key,
+        tokenSecret: secret
+    };
+}
 
 /**
  * Sign a HTTP request and return oAuth header
@@ -9111,6 +9152,35 @@ SpazOAuth.prototype.signRequest = function(method, url, parameters) {
     }, this.signingCredentials);
 
     return OAuth.getAuthorizationHeader(this.realm, param);
+};
+
+/**
+  * Load OAuth credentials from a serialized string
+  *
+  * @param {string} pickle the serialized string returned by save()
+  * @returns {boolean} true if successfully loaded
+  * @class SpazOAuth
+  */
+SpazOAuth.prototype.load = function(pickle) {
+    var credentials = pickle.split(':', 3);
+    if (credentials.length != 3) {
+        sch.error("Invalid oauth pickle: " + pickle);
+        return false;
+    }
+
+    this.username = credentials[0];
+    this.setAccessToken(credentials[1], credentials[2]);
+    return true;
+};
+
+/**
+  * Save OAuth credentials to a serialized string
+  *
+  * @returns {string} serialized string
+  * @class SpazOAuth
+  */
+SpazOAuth.prototype.save = function() {
+    return this.username + ":" + this.accessToken.key + ":" + this.accessToken.secret;
 };
 
 /**
