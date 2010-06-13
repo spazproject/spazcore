@@ -101,6 +101,10 @@ var SPAZCORE_SERVICEURL_WORDPRESS_TWITTER = 'https://twitter-api.wordpress.com/'
  * 'unfollow_failed'
  * 'ratelimit_status_succeeded'
  * 'ratelimit_status_failed'
+ * 'destroy_status_succeeded'
+ * 'destroy_status_failed'
+ * 'destroy_dm_succeeded'
+ * 'destroy_dm_failed'
  * 
  * 
  * @param {Object} opts various options
@@ -113,11 +117,11 @@ var SPAZCORE_SERVICEURL_WORDPRESS_TWITTER = 'https://twitter-api.wordpress.com/'
 function SpazTwit(opts) {
 	
 	this.opts = sch.defaults({
-		auth:null,
-		username:null,
-		event_mode:'DOM',
-		event_target:document,
-		timeout:this.DEFAULT_TIMEOUT
+		auth:         null,
+		username:     null,
+		event_mode:   'DOM',
+		event_target: document,
+		timeout:      this.DEFAULT_TIMEOUT
 	}, opts);
 	
 	
@@ -426,6 +430,8 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 	// Action URLs
 	urls.update           	= "statuses/update.json";
 	urls.destroy_status   	= "statuses/destroy/{{ID}}.json";
+	urls.dm_new             = "direct_messages/new.json";
+	urls.dm_destroy         = "direct_messages/destroy/{{ID}}.json";
 	urls.friendship_create  = "friendships/create/{{ID}}.json";
 	urls.friendship_destroy	= "friendships/destroy/{{ID}}.json";
 	urls.block_create		= "blocks/create/{{ID}}.json";
@@ -2040,8 +2046,55 @@ SpazTwit.prototype._processUpdateReturn = function(data, opts) {
 	this._processTimeline(SPAZCORE_SECTION_HOME, [data], opts);
 };
 
-SpazTwit.prototype.destroy = function(id) {};
-SpazTwit.prototype.destroyDirectMessage = function(id) {};
+/**
+ * destroy/delete a status
+ * @param {Number|String} id the id of the status 
+ */
+SpazTwit.prototype.destroy = function(id, onSuccess, onFailure) {
+	var data = {};
+	data['id'] = id;
+	
+	var url = this.getAPIURL('destroy_status', data);
+	
+	var opts = {
+		'url':url,
+		'data':data,
+		'success_event_type':'destroy_status_succeeded',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
+		'failure_event_type':'destroy_status_failed'
+	};
+
+	/*
+		Perform a request and get true or false back
+	*/
+	var xhr = this._callMethod(opts);
+};
+
+/**
+ * destroy/delete a direct message
+ * @param {Number|String} id the id of the status 
+ */
+SpazTwit.prototype.destroyDirectMessage = function(id, onSuccess, onFailure) {
+	var data = {};
+	data['id'] = id;
+	
+	var url = this.getAPIURL('dm_destroy', data);
+	
+	var opts = {
+		'url':url,
+		'data':data,
+		'success_event_type':'destroy_dm_succeeded',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
+		'failure_event_type':'destroy_dm_failed'
+	};
+
+	/*
+		Perform a request and get true or false back
+	*/
+	var xhr = this._callMethod(opts);
+};
 
 
 SpazTwit.prototype.getOne = function(id, onSuccess, onFailure) {
