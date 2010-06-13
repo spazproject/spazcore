@@ -36,7 +36,7 @@
 
 		if ( !(account_id = prefs.get('account_id')) ) {
 			if(auth.authorize('spaztest', 'poopatron5000')) {
-				account_id = accts.add(SPAZCORE_ACCOUNT_TWITTER, auth.save()).id;
+				account_id = accts.add('spaztest', auth.save(), SPAZCORE_ACCOUNT_TWITTER).id;
 				prefs.set('account_id', account_id);
 			} else {
 				alert('could not authenticate');
