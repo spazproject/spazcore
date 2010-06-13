@@ -99,6 +99,8 @@ var SPAZCORE_SERVICEURL_WORDPRESS_TWITTER = 'https://twitter-api.wordpress.com/'
  * 'follow_failed'
  * 'unfollow_succeeded'
  * 'unfollow_failed'
+ * 'ratelimit_status_succeeded'
+ * 'ratelimit_status_failed'
  * 
  * 
  * @param {Object} opts various options
@@ -110,13 +112,16 @@ var SPAZCORE_SERVICEURL_WORDPRESS_TWITTER = 'https://twitter-api.wordpress.com/'
 */
 function SpazTwit(opts) {
 	
-	this.opts                = opts || {};
-	this.auth                = opts.auth;
-	this.username            = opts.auth.username;
-
-	this.opts.event_mode     = this.opts.event_mode || 'DOM';
-	this.opts.event_target   = this.opts.event_target || document;
-	this.opts.timeout        = this.opts.timeout || this.DEFAULT_TIMEOUT; // 60 seconds default
+	this.opts = sch.defaults({
+		auth:null,
+		username:null,
+		event_mode:'DOM',
+		event_target:document,
+		timeout:this.DEFAULT_TIMEOUT
+	}, opts);
+	
+	
+	this.auth                = this.opts.auth;
 	
 	this.setSource('SpazCore');
 	
@@ -375,6 +380,10 @@ SpazTwit.prototype.setBaseURLByService= function(service) {
 };
 
 
+SpazTwit.prototype.setCredentials = function(auth_obj) {
+	this.auth = auth_obj;
+	this.username = this.auth.username;
+};
 
 
 /**
@@ -2311,8 +2320,30 @@ SpazTwit.prototype.updateProfile = function(name, email, url, location, descript
 
 
 
+/**
+ * get the current rate limit status
+ * @param {Function} onSuccess callback for success 
+ * @param {Function} onFailure callback for failure 
+ */
+SpazTwit.prototype.getRateLimitStatus = function(onSuccess, onFailure) {
+	
+	var url = this.getAPIURL('ratelimit_status');
+	
+	var opts = {
+		'method':'GET',
+		'url':url,
+		'success_event_type':'ratelimit_status_succeeded',
+		'failure_event_type':'ratelimit_status_failed',
+		'success_callback':onSuccess,
+		'failure_callback':onFailure
+	};
 
-SpazTwit.prototype.getRateLimitStatus = function() {};
+	/*
+		Perform a request and get true or false back
+	*/
+	var xhr = this._callMethod(opts);
+	
+};
 
 SpazTwit.prototype.test = function() {};
 
