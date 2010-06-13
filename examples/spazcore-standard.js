@@ -1,4 +1,4 @@
-/*********** Built 2010-06-12 13:12:33 CDT ***********/
+/*********** Built 2010-06-12 22:00:30 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -8756,32 +8756,28 @@ SpazAccounts.prototype.initAccounts	= function() {
 
 /**
  * add a new account
- * @param {string} username the username
- * @param {string} password the password
  * @param {type} type the type of account
+ * @param {string} auth serialized SpazAuth object for this account
  * @returns {object} the account object just added
  */
-SpazAccounts.prototype.add = function(username, password, type) {
+SpazAccounts.prototype.add = function(type, auth) {
 	
 	if (!type) {
 		sch.error("Type must be set");
 		return false;
 	}
-	
-	var username = username.toLowerCase();
-	var id = this.generateID();
-	this._accounts.push({
-		'id':id,
-		'username':username,
-		'password':password,
-		'type':type,
-		'meta':{}
-	});
+
+	var account = {
+		id: this.generateID(),
+		type: type,
+		auth: auth,
+		meta: {}
+	};
+
+    this._accounts.push(account);
 	this.save();
-	
-	sch.debug("Added new user:"+id);
-	
-	return this.get(id);
+
+	return account;
 };
 
 
@@ -8828,7 +8824,7 @@ SpazAccounts.prototype.getByUsername = function(username) {
 	var matches = [];
 
 	for (var i=0; i < this._accounts.length; i++) {
-		if (this._accounts[i].username === username) {
+		if (this._accounts[i].auth.username === username) {
 			matches.push(this._accounts[i]);
 		}
 	};
@@ -8845,7 +8841,7 @@ SpazAccounts.prototype.getByUsernameAndType = function(username, type) {
 	var matches = [];
 
 	for (var i=0; i < this._accounts.length; i++) {
-		if (this._accounts[i].username === username && this._accounts[i].type === type) {
+		if (this._accounts[i].auth.username === username && this._accounts[i].type === type) {
 			matches.push(this._accounts[i]);
 		}
 	};
@@ -8949,11 +8945,14 @@ SpazAccounts.prototype.setMeta = function(id, key, value) {
  * Currently supports both Basic and oAuth.
  */
 
+var SPAZCORE_AUTHTYPE_BASIC  = 'basic';
+var SPAZCORE_AUTHTYPE_OAUTH  = 'oauth';
+
 var SPAZAUTH_SERVICES = {
-    'statusnet': {
+    SPAZCORE_ACCOUNT_STATUSNET: {
         authType: 'basic'
     },
-    'identica': {
+    SPAZCORE_ACCOUNT_IDENTICA: {
         authType: 'basic'
     },
     'default': {
@@ -8975,9 +8974,9 @@ function SpazAuth(service) {
     }
 
     switch (serviceInfo.authType) {
-        case 'oauth':
+        case SPAZCORE_AUTHTYPE_OAUTH:
             return new SpazOAuth(service, serviceInfo);
-        case 'basic':
+        case SPAZCORE_AUTHTYPE_BASIC:
             return new SpazBasicAuth();
         default:
             return new SpazBasicAuth();
@@ -12162,11 +12161,10 @@ var SPAZCORE_SERVICEURL_WORDPRESS_TWITTER = 'https://twitter-api.wordpress.com/'
 */
 function SpazTwit(opts) {
 	
-	this.auth = auth;
-	this.username = auth.username;
-	
 	this.opts                = opts || {};
 	this.auth                = opts.auth;
+	this.username            = opts.auth.username;
+
 	this.opts.event_mode     = this.opts.event_mode || 'DOM';
 	this.opts.event_target   = this.opts.event_target || document;
 	this.opts.timeout        = this.opts.timeout || this.DEFAULT_TIMEOUT; // 60 seconds default
@@ -15321,32 +15319,70 @@ var sc;
  * platform-specific definitions for prefs lib 
  */
 
-/**
- * this requires the cookies library <http://code.google.com/p/cookies/> 
- */
-SpazPrefs.prototype.load = function() {
-	var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
-	var prefsval = jaaulde.utils.cookies.get(cookie_key);
+
+if (!window.localStorage) { // if localStorage is not available, we fall back to cookies. Ick
+	/**
+	 * this requires the cookies library <http://code.google.com/p/cookies/> 
+	 */
+	SpazPrefs.prototype.load = function() {
+		var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
+		var prefsval = jaaulde.utils.cookies.get(cookie_key);
 		
-	if (prefsval) {
-		sch.debug('prefsval exists');
-		for (var key in prefsval) {
-			sc.helpers.dump('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
-			this._prefs[key] = prefsval[key];
+		if (prefsval) {
+			sch.debug('prefsval exists');
+			for (var key in prefsval) {
+				sc.helpers.dump('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
+				this._prefs[key] = prefsval[key];
+			}
+		} else { // init the file
+			sch.debug('prefsval does not exist; saving with defaults');
+			this.save();
 		}
-	} else { // init the file
-		sch.debug('prefsval does not exist; saving with defaults');
-		this.save();
-	}
-};
+	};
 
-/**
- * this requires the cookies library <http://code.google.com/p/cookies/> 
- */
-SpazPrefs.prototype.save = function() {
-	var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
-	jaaulde.utils.cookies.set(cookie_key, this._prefs);
-	sch.debug('stored prefs in cookie');
-};
+	/**
+	 * this requires the cookies library <http://code.google.com/p/cookies/> 
+	 */
+	SpazPrefs.prototype.save = function() {
+		var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
+		jaaulde.utils.cookies.set(cookie_key, this._prefs);
+		sch.debug('stored prefs in cookie');
+	};
+	
+} else {
 
+	SpazPrefs.prototype.load = function() {
+		var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
+		var prefsjson = window.localStorage.getItem(cookie_key);
+		
+		if (prefsjson) {
+			var prefsval = sch.deJSON(prefsjson);
+			sch.debug('prefsval exists');
+			for (var key in prefsval) {
+				sc.helpers.dump('Copying loaded pref "' + key + '":"' + prefsval[key] + '" (' + typeof(prefsval[key]) + ')');
+				this._prefs[key] = prefsval[key];
+			}
+		} else { // init the file
+			sch.debug('prefsval does not exist; saving with defaults');
+			this.save();
+		}
+	};
 
+	/**
+	 * this requires the cookies library <http://code.google.com/p/cookies/> 
+	 */
+	SpazPrefs.prototype.save = function() {
+		var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
+		try {
+			window.localStorage.setItem(cookie_key, sch.enJSON(this._prefs));
+			sch.debug('stored prefs in localStorage');
+		} catch (e) {
+			if (e == QUOTA_EXCEEDED_ERR) {
+				sch.error('LocalStorage quota exceeded!');
+			}
+		}
+
+	};
+	
+
+}
