@@ -27,9 +27,8 @@
 		
 		Spaz.AccountPrefs.init = function() {
 			
-			this.spaz_acc = new SpazAccounts();
-
-
+			this.prefs    = new SpazPrefs();
+			this.spaz_acc = new SpazAccounts(this.prefs);
 
 
 			this.metavals = [
@@ -254,8 +253,6 @@
 			
 			
 		}
-	
-		
 		
 		
 		Spaz.AccountPrefs.add = function(username, password, type) {
@@ -288,205 +285,6 @@
 			}
 		}
 		
-		/*
-			initialize bindings on DOMReady
-		*/
-		// $().ready( function() {
-		// 		
-		// 	/*
-		// 		bind [+] button to popup
-		// 	*/
-		// 	$('#add_button').click(function() {
-		// 		
-		// 		$('#ok').unbind('click');
-		// 		$('#cancel').unbind('click');
-		// 		
-		// 		
-		// 		$.openDOMWindow({ 
-		// 	        windowSourceID:'#account-details' 
-		// 	    }); 
-		// 	
-		// 		/*
-		// 			populate form
-		// 		*/
-		// 		
-		// 		$('#id_edit').val('');
-		// 		$('#username').val('');
-		// 		$('#password').val('');
-		// 		$('#account-type').val(SPAZCORE_ACCOUNT_TWITTER);
-		// 		
-		// 		/*
-		// 			populate meta
-		// 		*/
-		// 		for (var i=0; i < that.metavals.length; i++) {
-		// 			if (that.checkboxes.indexOf(that.metavals[i]) !== -1) { // is a checkbox
-		// 				$('#'+that.metavals[i]).attr('checked', false);
-		// 			} else {
-		// 				$('#'+that.metavals[i]).val('')
-		// 			}
-		// 			
-		// 		};
-		// 	
-		// 		/*
-		// 			bind add button
-		// 		*/
-		// 		$('#ok').bind('click', function() {
-		// 			var newaccid = add_account(
-		// 				$('#username').val(),
-		// 				$('#password').val(),
-		// 				$('#account-type').val()
-		// 			).id;
-		// 			for (var i=0; i < that.metavals.length; i++) {
-		// 				if (that.checkboxes.indexOf(that.metavals[i]) !== -1) { // is a checkbox
-		// 					var val = !!($('#'+that.metavals[i]+':checked').length) || false;
-		// 				} else {
-		// 					var val = $('#'+that.metavals[i]).val();
-		// 				}
-		// 				that.spaz_acc.setMeta(editedaccid, that.metavals[i], val);
-		// 			};
-		// 
-		// 			
-		// 			$.closeDOMWindow({
-		// 				windowSourceID:'#account-details'
-		// 			});
-		// 		});
-		// 	
-		// 		/*
-		// 			bind cancel button
-		// 		*/
-		// 		$('#cancel').bind('click', function() {
-		// 			$.closeDOMWindow({
-		// 				windowSourceID:'#account-details'
-		// 			});
-		// 		});
-		// 	});
-		// 	
-		// 	/*
-		// 		bind the [-] button
-		// 	*/
-		// 	$('#del_button').click(function() {
-		// 		var id = ui_getSelectedId();
-		// 		if (id) {
-		// 			var deleted = that.spaz_acc.remove(id);
-		// 			$('option[value="'+id+'"]').remove();
-		// 		} else {
-		// 			sch.error('Nothing selected to delete');
-		// 		}
-		// 	});
-		// 	
-		// 	
-		// 	/*
-		// 		bind the [edit] button to modal
-		// 	*/
-		// 	$('#edit_button').click(function() {
-		// 		
-		// 		$('#ok').unbind('click');
-		// 		$('#cancel').unbind('click');
-		// 		
-		// 		
-		// 		var id = ui_getSelectedId();
-		// 		if (id) {
-		// 			var editing = that.spaz_acc.get(id);
-		// 
-		// 			$.openDOMWindow({ 
-		// 		        windowSourceID:'#account-details' 
-		// 		    }); 				
-		// 
-		// 			/*
-		// 				populate form
-		// 			*/
-		// 			
-		// 			$('#id_edit').val(editing.id);
-		// 			$('#username').val(editing.username);
-		// 			$('#password').val(editing.password);
-		// 			$('#account-type').val(editing.type);
-		// 			
-		// 			/*
-		// 				populate meta
-		// 			*/
-		// 			for (var i=0; i < that.metavals.length; i++) {
-		// 				var val = that.spaz_acc.getMeta(editing.id, that.metavals[i]);
-		// 				if (that.checkboxes.indexOf(that.metavals[i]) !== -1) { // is a checkbox
-		// 					$('#'+that.metavals[i]).attr('checked', !!(val));
-		// 				} else {
-		// 					$('#'+that.metavals[i]).val(that.spaz_acc.getMeta(editing.id, that.metavals[i]))
-		// 				}
-		// 				
-		// 			};
-		// 			
-		// 
-		// 			/*
-		// 				bind save button
-		// 			*/
-		// 			$('#ok').click(function() {
-		// 				var editedaccid = edit_account(
-		// 					$('#id_edit').val(),
-		// 					{
-		// 						'username':$('#username').val(),
-		// 						'password':$('#password').val(),
-		// 						'type':$('#account-type').val()
-		// 					}
-		// 				).id;
-		// 
-		// 				for (var i=0; i < that.metavals.length; i++) {
-		// 					if (that.checkboxes.indexOf(that.metavals[i]) !== -1) {
-		// 						var val = !!($('#'+that.metavals[i]+':checked').length) || false;
-		// 					} else {
-		// 						var val = $('#'+that.metavals[i]).val();
-		// 					}
-		// 					that.spaz_acc.setMeta(editedaccid, that.metavals[i], val);
-		// 				};
-		// 				
-		// 				$.closeDOMWindow({
-		// 					windowSourceID:'#editForm'
-		// 				});
-		// 			});
-		// 
-		// 			/*
-		// 				bind cancel button
-		// 			*/
-		// 			$('#cancel').click(function() {
-		// 				$.closeDOMWindow({
-		// 					windowSourceID:'#account-details'
-		// 				});
-		// 			});
-		// 			
-		// 
-		// 		} else {
-		// 			sch.error('Nothing selected to edit');
-		// 		}
-		// 		
-		// 		
-		// 	});
-		// 
-		// 	/*
-		// 		if "custom" is set for type, showthe api-base-url row
-		// 	*/
-		// 	$('#account-type').change(function(){
-		// 		if ($('#account-type').val() === 'custom') {
-		// 			$("#twitter-api-base-url-row").show();
-		// 		} else {
-		// 			$('#twitter-api-base-url-row').hide();
-		// 		}
-		// 	})
-		// 	
-		// 	/*
-		// 		initalize with some data
-		// 	*/
-		// 	var accobj = add_account('testuser', 'fakepassword', SPAZCORE_ACCOUNT_TWITTER);
-		// 	accobj = add_account('testuser', 'fakepassword', SPAZCORE_ACCOUNT_IDENTICA);
-		// 	accobj = add_account('blammo', 'fakepassword', SPAZCORE_ACCOUNT_STATUSNET);
-		// 	
-		// 	
-		// 	/*
-		// 		hide some junk
-		// 	*/
-		// 	$('#account-details').hide();
-		// 	$('#twitter-api-base-url-row').hide();
-		// 	
-		// 	
-		// });
-		// 
 		
 		$().ready(function(){
 			Spaz.AccountPrefs.init();

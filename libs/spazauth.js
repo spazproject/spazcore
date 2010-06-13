@@ -3,11 +3,14 @@
  * Currently supports both Basic and oAuth.
  */
 
+var SPAZCORE_AUTHTYPE_BASIC  = 'basic';
+var SPAZCORE_AUTHTYPE_OAUTH  = 'oauth';
+
 var SPAZAUTH_SERVICES = {
-    'statusnet': {
+    SPAZCORE_ACCOUNT_STATUSNET: {
         authType: 'basic'
     },
-    'identica': {
+    SPAZCORE_ACCOUNT_IDENTICA: {
         authType: 'basic'
     },
     'default': {
@@ -29,9 +32,9 @@ function SpazAuth(service) {
     }
 
     switch (serviceInfo.authType) {
-        case 'oauth':
+        case SPAZCORE_AUTHTYPE_OAUTH:
             return new SpazOAuth(service, serviceInfo);
-        case 'basic':
+        case SPAZCORE_AUTHTYPE_BASIC:
             return new SpazBasicAuth();
         default:
             return new SpazBasicAuth();
