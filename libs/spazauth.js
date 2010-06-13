@@ -6,16 +6,16 @@
 var SPAZCORE_AUTHTYPE_BASIC  = 'basic';
 var SPAZCORE_AUTHTYPE_OAUTH  = 'oauth';
 
-var SPAZAUTH_SERVICES = {
-    SPAZCORE_ACCOUNT_STATUSNET: {
-        authType: 'basic'
-    },
-    SPAZCORE_ACCOUNT_IDENTICA: {
-        authType: 'basic'
-    },
-    'default': {
-        authType: 'basic'
-    }
+var SPAZAUTH_SERVICES = {};
+
+SPAZAUTH_SERVICES[SPAZCORE_ACCOUNT_STATUSNET] = {
+	'authType': SPAZCORE_AUTHTYPE_BASIC
+};
+SPAZAUTH_SERVICES[SPAZCORE_ACCOUNT_IDENTICA] = {
+	'authType': SPAZCORE_AUTHTYPE_BASIC
+};
+SPAZAUTH_SERVICES['default'] = {
+	'authType': SPAZCORE_AUTHTYPE_BASIC
 };
 
 /**
@@ -64,11 +64,13 @@ function SpazBasicAuth() {
  * @param {string} username
  * @param {string} password
  * @class SpazBasicAuth
+ * @return {Boolean} true. ALWAYS returns true!
  */
 SpazBasicAuth.prototype.authorize = function(username, password) {
     this.username = username;
     this.password = password;
     this.authHeader = "Basic " + sc.helpers.Base64.encode(username + ":" + password);
+	return true;
 };
 
 /**
@@ -187,7 +189,7 @@ SpazOAuth.prototype.setAccessToken = function(key, secret) {
         token: key,
         tokenSecret: secret
     };
-}
+};
 
 /**
  * Sign a HTTP request and return oAuth header
