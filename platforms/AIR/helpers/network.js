@@ -20,130 +20,86 @@ var sc, air;
  *  url:'',
  * 	extra:{...}
  * 
+ * 
+ * mostly taken from http://carefulweb.com/blog/2008/06/24/upload-server-adobe-air-and-javascript/
+ * 
  * }
  */
-sc.helpers.HTTPUploadFile = function(opts) {
+sc.helpers.HTTPUploadFile = function(opts, onSuccess, onFailure) {
 
-	function getContentType(fileType){
-		switch (fileType) {
-			  case "JPG": return "image/jpeg";
-			 case "JPEG": return "image/jpeg";
-			  case "PNG": return "image/png";
-			  case "GIF": return "image/gif";
-				 default: return "image/jpeg";
+	function callback_for_upload_progress(event) { 
+
+	    var pct = Math.ceil( ( event.bytesLoaded / event.bytesTotal ) * 100 ); 
+	    air.trace('Uploaded ' + pct.toString() + '%');
+		
+		if (opts.onProgress) {
+			opts.onProgress({
+				'bytesLoaded':event.bytesLoaded,
+				'bytesLoaded':event.bytesTotal,
+				'percentage':pct
+			});
 		}
 	}
 
-
-	/**
-	 * Multipart File Upload Request Helper Function
-	 *
-	 * A function to help prepare URLRequest object for uploading.
-	 * The script works without FileReference.upload().
-	 *
-	 * @author FreeWizard
-	 *
-	 * Function Parameters:
-	 * void PrepareMultipartRequest(URLRequest request, ByteArray file_bytes,
-	 *								string field_name = "file", string native_path = "C:\FILE",
-	 *								object data_before = {}, object data_after = {});
-	 *
-	 * Sample JS Code:
-	 * <script>
-	 * var request = new air.URLRequest('http://example.com/upload.php');
-	 * var loader = new air.URLLoader();
-	 * var file = new air.File('C:\\TEST.TXT'); //use file.browseForOpen() on ur wish
-	 * var stream = new air.FileStream();
-	 * var buf = new air.ByteArray();
-	 * var extra = {
-	 *	   "id": "abcd"
-	 *	   };
-	 * stream.open(file, air.FileMode.READ);
-	 * stream.readBytes(buf);
-	 * MultipartRequest(request, buf, 'myfile', file.nativePath, extra);
-	 * loader.load(request);
-	 * </script>
-	 *
-	 * Sample PHP Code:
-	 * <?php
-	 * $id = $_POST['id'];
-	 * move_uploaded_file($_FILES['myfile']['tmp_name'], '/opt/blahblah');
-	 * ?>\
-	 * @link http://rollingcode.org/blog/2007/11/file-upload-with-urlrequest-in-air.html
-	 */
-	function prepareMultipartRequest(request, file_bytes, file_type, field_name, native_path, data_before, data_after) {
-		var boundary = '---------------------------1076DEAD1076DEAD1076DEAD';
-		var header1 = '';
-		var header2 = '\r\n';
-		var header1_bytes = new air.ByteArray();
-		var header2_bytes = new air.ByteArray();
-		var body_bytes = new air.ByteArray();
-		var n;
-		if (!field_name) { field_name = 'file'; }
-		if (!file_type) {file_type = 'application/octet-stream';}
-		if (!native_path) {native_path = 'C:\\FILE';}
-		if (!data_before) {data_before = {};}
-		if (!data_after) {data_after = {};}
-		for (n in data_before) {
-			header1 += '--' + boundary + '\r\n' +
-					   'Content-Disposition: form-data; name="' + n + '"\r\n\r\n'+
-					    data_before[n] + '\r\n';
+	function callback_for_upload_finish(event) {
+		air.trace('File upload complete');
+		air.trace(event.data); // output of server response to AIR dev console
+		if (onSuccess) {
+			onSuccess(event.data);
 		}
-		header1 += '--' + boundary + '\r\n' +
-				   'Content-Disposition: form-data; name="' + field_name + '"; filename="' + native_path + '"\r\n' +
-				   'Content-Type: ' + file_type + '\r\n\r\n';
-		for (n in data_after) {
-			header2 += '--' + boundary + '\r\n' +
-					   'Content-Disposition: form-data; name="' + n + '"\r\n\r\n' +
-					   data_after[n] + '\r\n';
-		}
-		header2 += '--' + boundary + '--';
-		header1_bytes.writeMultiByte(header1, "ascii");
-		header2_bytes.writeMultiByte(header2, "ascii");
-		body_bytes.writeBytes(header1_bytes, 0, header1_bytes.length);
-		body_bytes.writeBytes(file_bytes, 0, file_bytes.length);
-		body_bytes.writeBytes(header2_bytes, 0, header2_bytes.length);
-		request.method = air.URLRequestMethod.POST;
-		request.contentType = 'multipart/form-data; boundary='+boundary;
-		request.data = body_bytes;
 	}
 
-
-
-	var field_name = opts.field_name || 'media';
+	var field_name   = opts.field_name || 'media';
 	var content_type = opts.content_type || null;
-
-	var file   = new air.File(opts.file_url); //use file.browseForOpen() on ur wish
-	var stream = new air.FileStream();
-	var buf    = new air.ByteArray();
-
-
-
-	stream.open(file, air.FileMode.READ);
-	stream.readBytes(buf);
-
-
-
 	
-	if (!content_type) {
-		content_type = getContentType(file.extension.toUpperCase());
+	var uploading_file = new air.File(opts.file_url);
+	
+	var key;
+
+	// creating POST request variables (like in html form fields)
+	var variables = new air.URLVariables();
+
+	if (opts.username) {
+		variables.username = opts.username;
+	}
+
+	if (opts.password) {
+		variables.password = opts.password;
 	}
 	
-	var request = new air.URLRequest(opts.url);
-	prepareMultipartRequest(request, buf, content_type, field_name, file.nativePath, opts.extra);
-
-	var loader = new air.URLLoader();
-	if (opts.onComplete) {
-		loader.addEventListener(air.Event.COMPLETE, opts.onComplete);
-	}
-	if (opts.onStart) {
-		loader.addEventListener(air.Event.OPEN, opts.onStart);
+	if (opts.extra) {
+		for(key in opts.extra) {
+			variables[key] = opts.extra[key];
+		}
 	}
 	
-	loader.load(request);
+	var headers = [];
+	if (opts.headers) {
+		for(key in opts.headers) {
+			sch.error(key);
+			sch.error(opts.headers[key]);
+			headers.push( new air.URLRequestHeader(key, opts.headers[key]) );
+		}
+	}
+	
 
+	// set params for http request
+	var tmpRequest = new air.URLRequest(opts.url);
+	tmpRequest.authenticate = false;
+	tmpRequest.method = air.URLRequestMethod.POST;
+	tmpRequest.contentType = 'multipart/form-data';
+	tmpRequest.requestHeaders = headers;
+	
+	// assigning variables to request
+	tmpRequest.data = variables;
 
+	// attach events for displaying progress bar and upload complete
+	uploading_file.addEventListener(air.ProgressEvent.PROGRESS, callback_for_upload_progress);
+	uploading_file.addEventListener(air.DataEvent.UPLOAD_COMPLETE_DATA, callback_for_upload_finish); 
 
+	// doing upload request to server
+	uploading_file.upload(tmpRequest, field_name, false);
+	
 
 };
 

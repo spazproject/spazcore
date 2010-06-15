@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>AIR File Upload Example</title>
+	<meta name="generator" content="TextMate http://macromates.com/">
+	<meta name="author" content="Ed Finkler">
+	<!-- Date: 2010-06-14 -->
+	
+	<script src="js/jquery-1.4.2.min.js" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="js/air/AIRAliases.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/air/AIRIntrospector.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/air/spazcore-air.js" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="auth_config.js" type="text/javascript" charset="utf-8"></script>
+	
+	<script type="text/javascript" charset="utf-8">
+		jQuery(document).ready(function(){
+			
+			var username = 'spaztest';
+			var password = 'REDACTED';
+			var url      = 'http://api.twitpic.com/2/upload.json';
+			
+			var twitpic_api_key = '3d8f511397248dc913193a6195c4a018';
+			
+			SpazAuth.addService(SPAZCORE_ACCOUNT_TWITTER, {
+	            authType: SPAZCORE_AUTHTYPE_OAUTH,
+	            consumerKey: SPAZCORE_CONSUMERKEY_TWITTER,
+	            consumerSecret: SPAZCORE_CONSUMERSECRET_TWITTER,
+	            accessURL: 'https://twitter.com/oauth/access_token'
+	        });
+			
+			var auth  = new SpazAuth(SPAZCORE_ACCOUNT_TWITTER);
+			auth.authorize(username, password);
+			
+			/*
+				verify these credentials
+			*/
+			var twit = new SpazTwit({'auth':auth});
+			twit.verifyCredentials();
+			
+			
+			jQuery('#choose_a_file').click(function() {
+				var file = new air.File();
+				var filter = new runtime.Array(new air.FileFilter("Jpgs", "*.jpg"));
+				
+				file.addEventListener(air.Event.SELECT, function(event){
+					
+					// var account = accts.get(account_id);
+					// auth.load(account.auth);
+					var auth_header = auth.signRequest('GET', 'https://api.twitter.com/1/account/verify_credentials.json');
+					
+					sch.error(auth_header);
+					
+					sc.helpers.HTTPUploadFile(
+						{
+							'file_url':event.target.url,
+							'url':url,
+							'source':'Spaz',
+							'source_url':'http://getspaz.com',
+							'extra': {
+								'key':twitpic_api_key,
+								'message':"testing!!!"
+							},
+							'headers': {
+								'X-Auth-Service-Provider':'https://api.twitter.com/1/account/verify_credentials.json',
+								'X-Verify-Credentials-Authorization':auth_header
+							}
+						});
+				});
+			
+				try {
+					file.browseForOpen("Open file", filter);
+				} catch(e) {}
+			});
+			
+		});
+	</script>
+	
+</head>
+<body>
+    <label for="choose_a_file">Choose a file</label><input type="button" name="choose_a_file" value="..." id="choose_a_file">
+    
+    
+</body>
+</html>
