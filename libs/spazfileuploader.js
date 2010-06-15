@@ -46,6 +46,7 @@ function SpazFileUploader(opts) {
 	this.successEvent = opts.successEvent || sc.events.fileUploadSuccess;
 	this.failureEvent = opts.failureEvent || sc.events.fileUploadFailure;
 	this.eventTarget  = opts.eventTarget  || document;
+	this.auth         = opts.auth         || null;
 	
 	this.apis = this.getAPIs();
 
@@ -284,6 +285,7 @@ SpazFileUploader.prototype.getAPIKey = function() {
 		return this.api.api_key;
 	} else {
 		sch.error('Must set the API before getting API key');
+		return null;
 	}
 };
 
@@ -370,7 +372,8 @@ SpazFileUploader.prototype.uploadFile = function(post_url, file_url, opts) {
 			'extra'   : extraParams,
 			'url'     : post_url,
 			'file_url': file_url,
-			'platform': platformOpts
+			'platform': platformOpts,
+			'auth'    : this.auth
 		},
 		function(event) {
 			sch.debug('UPLOAD SUCCESS, PROCESSING');
