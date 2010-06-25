@@ -108,6 +108,24 @@ SpazFilterChain.prototype.process = function(input) {
 	return input;
 };
 
+/**
+ * like process, but takes an array and processes each item through the filter chain
+ * @param {Array} input_array the input array
+ * @returns {Array} the processed array
+ */
+SpazFilterChain.prototype.processArray = function(input_array) {
+	var filter_obj;
+	
+	for (var i=0; i < input_array.length; i++) {
+		for (var k=0; k < this._filters.length; k++) {
+			filter_obj = this._filters[k];
+			sch.debug('Calling filter '+filter_obj.label);
+			input_array[i] = filter_obj.func(input_array[i]);
+		}
+	}
+	
+	return input_array;
+};
 
 /**
  * find the array index of a given filter
