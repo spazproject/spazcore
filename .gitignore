@@ -2,3 +2,4 @@
 *.kpf
 docs
 builds/*.js
+examples/auth_config.js

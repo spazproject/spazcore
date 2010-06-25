@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>SpazCore Example Shell</title>
+	
+	<!-- Load required vendor libs -->
+	<script src="../vendors/jquery-1.4.2.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore base lib -->
+	<script src="spazcore-standard.js"></script>
+	
+	<script src="../incubator/libs/spazfilterchain.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/jquery.oembed.js" type="text/javascript" charset="utf-8"></script>
+	
+	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	
+	<style type="text/css" media="screen">
+	
+		#filtered {
+			margin:2em;
+		}
+	
+		div.item {
+			background:#EEEECC;
+			border:1px solid #666;
+			padding:1em;
+			margin:.5em;
+		}
+		
+		div.item img {
+			max-width:95%;
+		}
+	</style>
+	
+	<script type="text/javascript" charset="utf-8">
+		$(document).ready(function(){
+			
+			/*
+				create filter chain object
+			*/
+			var fc = new SpazFilterChain();
+			
+			/*
+				add filter methods
+			*/
+			fc.addFilter('oembed', function(input) {
+				var elid = sch.UUID();
+				input = '<span id="'+elid+'">'+input+'</span>';
+				input +='\n<script>jQuery("#'+elid+' a").oembed(null, {"embedMethod": "append"})<\/script>';
+				return input;
+			});
+			fc.addFilter('nl2br', function(input) {
+				input = sch.nl2br(input);
+				return input;
+			});
+			fc.addFilter('autolink', function(input) {
+				input = sch.makeClickable(input);
+				return input;
+			});
+			
+			/*
+				build array of strings
+			*/
+			var items = [
+				'<a href="http://vimeo.com/3108686" class="oembed">Vimeo Video</a>',
+				'ILaLaLaLuvJoeM Take off your clothes for me clothes for me.....@joeymcintyre http://twitpic.com/1zo5nx',
+				'tea_us kekerasan dalam dbsk(?) XD http://twitpic.com/1zo5o0',
+				'sorayamunzer RT @siteladygagabr: http://twitpic.com/1zo3o4 - Ansioso por mais pics e vídeos da apresentação. *--*',
+				'lu_baahy axei esse dia taoo lindoo..! *-* http://twitpic.com/1zo5nz',
+				's04tky あんだけ寝たのにスッキリしねーペプシストロングショットで気付け http://twitpic.com/1zo5nt',
+				'ddl_always RT @Demimyair: @ddlovatobr http://twitpic.com/1zo55p - [AAAAAAAAAAAAAAAAA] LINDO, LINDO, LINDO MT LINDO MSM *-*',
+				'visionics93 会社に着いたらマサが壊れていた。すまない。 @painwiser http://twitpic.com/1zo5nm',
+				'tiencodevries voetbalkijken in #kraggenburg http://twitpic.com/1zo5nv',
+				'TheAbbyTravis @MSchmidtStudios http://twitpic.com/1zmt1t - You will make a friend of horror and mortal terror.....',
+				'KUROKOLOVE ちゃっくぅ〜♪また綺麗なおねえさんと RT @chuck_jp: チャックがラジオに？！w RT @gon3net @chuck_jp ＲＫＫラジオのさんさんラジオアシスタントよしみんちゃんです #chuckjp http://twitpic.com/1zo19v',
+				'madartificer @mynina09 @mandorida @soph1st #커피맛있당_ 회사에선 이런 느낌? http://twitpic.com/1zo5mu http://bit.ly/aP84UR',
+				'HappyHippie1209 RT @iwatashingo 非常にピンクい http://twitpic.com/1znspz',
+				'colorsign break in a better light http://twitpic.com/1zo5ns',
+				'Kanbanyadesu おはようございます。日本やりましたね!!! 昨晩~今朝は六本木のパブリックビューイングて観戦してきました。 最高に盛り上がってましたよ！！！ 又眠れない日が増えましたが、頑張って応援しましょう^-^ http://twitpic.com/1zo5no',
+				'flameneghini Amei esta foto!! http://twitpic.com/1zo5nr',
+				'DebooraQueiima @Chris_annie http://twitpic.com/1znzwe - asuahsuahsuahsuh\' Eita Chriiiis Quee Presentão Heem Amigaa',
+				'mungobah Planes flying over while I rest on lounge chair, reading plant identification book... http://twitpic.com/1zo5nn',
+				'ErikaLMoon @pathetic_model http://twitpic.com/1zmhn0 - YOUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU!! I WAS SQUEALING THE WHOLE TIME I WAS SCROLLING D',
+				'LilttleCBeadles @mandyrain11 ill dm u my other twitter its on that twitpic',
+				'Wikia abandonment rate mapped against page load time: http://www.flickr.com/photos/crucially/3716344792/ #velocityconf #devops',
+				'An extraordinary collection of old propaganda posters - http://ow.ly/226nP (via @boagworld)',
+				'From flickr: helm_01: alvaro tapia hidalgo has added a photo to the pool: www.alvarotapia.com http://bit.ly/9oYcfO',
+				'Yahoo: Flickr bekommt ein Update spendiert: http://weg.is/1bgg',
+				'@itsaleon jajaja , bueno me haré famosa, pero dame tu direccion de flickr !! :)',
+				'Las Vegas 050: thewunderbar posted a photo: http://bit.ly/biOhth #lasvegas',
+				'Iven: http://www.flickr.com/photos/ernani_costa/4731947010/',
+				'manda mto na make *-* http://www.flickr.com/photos/may-makeup/',
+				'rt @anacavagnoli pra inspirar o casal @maestrobilly @mellancia http://bit.ly/9XJYQc // Genial, me deixou ainda com mais vontade!! adorei!',
+				'If you are going to the Del Mar Fair, please vote for my pic "First Sunset" for the People\'s Choice Award. Many Thanks! http://bit.ly/aBKkHs',
+				'the new flickr interface is terrible. it\'s gone from cluttered to more cluttered. #flickr #fail',
+				'Yahoo: Flickr bekommt ein Update spendiert http://weg.is/1bgg via @netzwelt #yahoo #flickr',
+				'Just uploaded Steele Creek Moonset to Flickr http://www.flickr.com/photos/gregbooher/4731948782/',
+				'A little snapshot of that: http://www.flickr.com/photos/yerialc/4731285409/',
+				'Be sure to check out some photos from our fundraiser Mystery May Madness at Fishcake on our Flickr page! http://fb.me/B5TlixzO',
+				'#potd - The Owl at Salmonier Nature Park - http://flic.kr/p/8d9rfS - #flickr #photography',
+				'se não for a perfeição chega perto http://farm5.static.flickr.com/4051/4708000361_65e4c9489c.jpg',
+				'#uru  Aduana Paysandú | #Flickr - Photo Sharing! http://goo.gl/iRcv',
+				'WAKE UP IN THE MORNING FEELING LIKE A HIPSTER. PUT ON MY GLASSES AND MY PLAID SHIRT IM GUNNA CHECK MY FLICKR.... http://tumblr.com/xskc4bwp5',
+				'Check out this SlideShare presentation : jQuery Essentials http://slidesha.re/XB4Hc # jQuery',
+				'@MissMoura Vai colocar o conteúdo da palestra no Slideshare?',
+				'slideshare http://post.ly/kfPJ',
+				'RT @Geri_Montoya Breathtaking... RT @writinginrain: Check out this SlideShare presentation : Beautiful landscape 2 http://slidesha.re/9v4DTX',
+				'http://bit.ly/aQN8cT GDC 2010 에서 롭 팔도가 강연했던 Blizzard Design Process 이 번역 되었네요. 번역해주신 분께 감사를..',
+				'Eu estou o dia todo via 3G no Nokia, mas assim que subir pro slideshare, envio o link. Meu nick é o mesmo lá.',
+				'Pls RT: Check out a SlideShare video of redpepper\'s Kirklands Social Media Case Study. It\'s pretty amazing. http://slidesha.re/aoZtwJ',
+				'Breathtaking... RT @writinginrain: Check out this SlideShare presentation : Beautiful landscape 2 http://slidesha.re/9v4DTX',
+				'RT @writinginrain: Check out this SlideShare presentation : Beautiful wild flowers http://slidesha.re/am1tBi',
+				'RT @writinginrain: Check out this SlideShare presentation : Beautiful Nature http://slidesha.re/6TjDg',
+				'Just uploaded \'CREAM Biomass2CleanEnergy\' to SlideShare. http://slidesha.re/9z3EiM',
+				'So very beautiful... RT @writinginrain: Check out this SlideShare presentation : Beautiful Lily Flowers http://slidesha.re/LhuuZ',
+				'25 Beautiful Photos from our beautiful World - http://ow.ly/22xTa rt @TrendyDC @artfanatic411',
+				'Pls RT: Check out a SlideShare video of redpepper\'s Kirklands Social Media Case Study. It\'s pretty amazing. http://slidesha.re/aoZtwJ',
+				'25 Beautiful Photos from our beautiful World - http://ow.ly/22xTa rt @TrendyDC @artfanatic411 @tonystevens4',
+				'Good stuff on XML Sitemaps: RT @SearchMojo: Here\'s the slides from today\'s webinar on Slideshare! http://slidesha.re/beC2qi',
+				'*sigh....* RT @writinginrain: Check out this SlideShare presentation : Beautiful World http://slidesha.re/12pwbB',
+				'http://bit.ly/aQN8cT GDC 2010 에서 롭 팔도가 강연했던 Blizzard Design Process 이 번역 되었네요. 번역해주신 분께 감사를..',
+				'Publiquei os slides da minha palestra "Pra você, desenvolver software é atividade intelectual?" - http://bit.ly/cBUfm3 #AgileBrazil',
+				'Resultados de la http://www.slideshare.net/plumacandente/encuesta-datanalisis-mayo-2010 última encuesta de Datanálisis.'
+			];
+			
+			/*
+				process array of strings
+			*/
+			items = fc.processArray(items);
+			
+			/*
+				append processed strings to DOM
+			*/
+			for (var i=0; i < items.length; i++) {
+				$('<div class="item">'+items[i]+'</div>').appendTo('body');
+			}
+		});
+	</script>
+	
+</head>
+
+<body>
+	
+	<div id="readme">This example takes an array of text (copied from Twitter) and processes them with a filter chain. The filter chain is just a series of methods called on the input passed, modifying the input, and returning it. You can dynamically add, remove, and reorder the filters, so this allows for dynamic, customizable processing. In Spaz, the user could write their own filters (in their user.js file) to adjust how their timelines are processed -- adding previews, removing posts they don't want, and so on.<p></p>
+		This example parses links, usernames, and hashtags, and shows media previews using oEmbed.
+		</div>
+	
+	<div id="filtered"></div>
+
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+	<head>
+		<title>movement test</title>
+	
+	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	
+	<style type="text/css" media="screen">
+	
+		#timeline {
+			width: 500px;
+			position:absolute;
+			top:   35px;
+			bottom:10px;
+			border:4px solid #999;
+			overflow:auto;
+		}
+	
+		.ui-selected {
+			background:#FFFFCC;
+		}
+		
+		.entry {
+			padding: 5px;
+			margin:  5px;
+			border:  1px solid black;
+		}
+		
+	</style>
+	
+	<script src="../vendors/jquery-1.4.2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../vendors/shortcut.js" type="text/javascript" charset="utf-8"></script>
+	<script src="spazcore-standard.js" type="text/javascript" charset="utf-8"></script>
+	
+	<script type="text/javascript" charset="utf-8">
+
+		SpazTimelineNav = function(opts) {
+			
+			var thisNav = this;
+			
+			opts = sch.defaults({
+				'timeline_id'   :'timeline',
+				'selected_class':'ui-selected',
+				'entry_class'   :'entry',
+				'scroll_offset':200,
+				'keyup':'up',
+				'keydown':'down'
+			}, opts);
+			
+			this.selected_class = opts.selected_class;
+			this.timeline_id    = opts.timeline_id;
+			this.entry_class    = opts.entry_class;
+			this.scroll_offset  = opts.scroll_offset;
+			this.keyup			= opts.keyup;
+			this.keydown		= opts.keydown;
+
+
+			this.reset = function() {
+				this.jqtl      = jQuery('#'+this.timeline_id);
+				this.jqentries = jQuery('.'+this.entry_class, jqtl);
+				
+				/*
+					bind keyboard shortcuts
+				*/
+				sch.key_add(this.keyup, function() { this.move('up'); });
+				sch.key_add(this.keydown, function() { this.move('down'); });
+				
+				/*
+					add numbers for fun
+				*/
+				this.jqentries.each(function(i) {
+					this.innerHTML = i+':'+this.innerHTML;
+				});
+			};
+
+			/**
+			 *  
+			 */
+			this.setTimelineId = function(tlid) {
+				if (tlid.indexOf('#') === 0) {
+					tlid = tlid.replace('#', '');
+				}
+				this.timeline_id = tlid;
+			};
+
+			this.setSelectedClass = function(sel_class) {
+				if (sel_class.indexOf('.') === 0) {
+					sel_class = sel_class.replace('.', '');
+				}
+				this.selected_class = sel_class;
+			};
+
+			this.setEntryClass = function(entry_class) {
+				if (entry_class.indexOf('.') === 0) {
+					entry_class = entry_class.replace('.', '');
+				}
+				this.entry_class = entry_class;
+			};
+
+			/**
+			 *  
+			 */
+			this.move = function(dir) {
+				
+				var thisNav = this;
+				
+				// sch.debug(dir);
+				
+				var i_first = 0;
+				var i_last  = this.jqentries.length-1;
+				var i_sel   = -1;
+				
+				/*
+					find selected
+				*/
+				this.jqentries.each(function(i) {
+					if (jQuery(this).is('.'+thisNav.selected_class)) {
+						i_sel = i;
+						return false;
+					}
+				});
+
+				// sch.debug("first:\t"+i_first);
+				// sch.debug("last:\t"+i_last);
+				// sch.debug("old selected:\t"+i_sel);
+				
+				switch(dir) {
+					
+					case 'up':
+						
+						if (i_sel < 0 || i_sel > i_last) {
+							i_sel = i_last;
+							// sch.debug('start at bottom!');
+						} else if (i_sel === i_first) {
+							i_sel = i_sel; // do not wrap!
+							// sch.debug('do not wrap!');
+						} else {
+							i_sel--;
+							// sch.debug('move down!');
+						}
+						
+						
+						break;
+					
+					case 'down':
+
+						if (i_sel < 0 || i_sel > i_last) {
+							i_sel = i_first;
+							// sch.debug('start at top!');
+						} else if (i_sel === i_last) {
+							i_sel = i_sel; // do not wrap!
+							// sch.debug('do not wrap!');
+						} else {
+							i_sel++;
+							// sch.debug('move up!');
+						}
+					
+						break;
+						
+					default:
+						break;
+						
+				}
+
+				select(this.jqentries.get(i_sel));
+				
+				// sch.debug("new selected:\t"+i_sel);
+				
+			};
+			
+			
+			/**
+			 * selects a given element by applying a class 
+			 */
+			this.select = function(element) {
+				/*
+					Deselect all
+				*/
+				this.jqentries.removeClass(this.selected_class);
+				
+				/*
+					select passed element
+				*/
+				jQuery(element).addClass(this.selected_class);
+				
+				this.reveal(element);
+			};
+			
+			/**
+			 * if necessary, scrolls the container to reveal the passed element
+			 */
+			this.reveal = function(element) {
+				
+				sch.debug('====================================');
+				
+				var jqel = jQuery(element);
+				
+				/*
+					first, figure out if element is visible in porthole
+				*/
+				var viewport_bottom    = parseInt(this.jqtl.innerHeight(), 10);
+				var selected_bottom    = parseInt(jqel.position().top + jqel.height(), 10);
+				var viewport_top       = parseInt(this.jqtl.position().top, 10);
+				var selected_top       = parseInt(jqel.position().top, 10);
+				var viewport_height    = parseInt(this.jqtl.outerHeight(), 10);
+				var selected_height    = parseInt(jqel.outerHeight(), 10);
+				var viewport_scrolltop = parseInt(this.jqtl.scrollTop(), 10);
+				var selected_offset    = parseInt(jqel.offset().top, 10);
+				
+
+				sch.debug('viewport_bottom:'+viewport_bottom);
+				sch.debug('selected_bottom:'+selected_bottom);
+				sch.debug('viewport_top   :'+viewport_top);
+				sch.debug('selected_top   :'+selected_top);
+				sch.debug('viewport_height   :'+viewport_height);
+				sch.debug('selected_height   :'+selected_height);
+				sch.debug("viewport_scrolltop:"+viewport_scrolltop);
+				sch.debug("selected_offset.top:"+selected_offset);
+
+				/*
+					below the fold
+				*/
+				var diff;
+				if ( selected_height+selected_top > viewport_bottom ) {
+					sch.debug("el.bottom is > tl.bottom");
+					diff = (viewport_height - viewport_top - selected_bottom) * -1;
+					this.jqtl.scrollTop(viewport_scrolltop + diff);
+				}
+
+				/*
+					above the fold
+				*/
+				if ( selected_top < 0 ) {
+					sch.debug("el.top is < tl.top");
+					diff = selected_top * -1;
+					this.jqtl.scrollTop(viewport_scrolltop - diff);
+				}
+				
+				sch.debug("New scrolltop:"+this.jqtl.scrollTop());
+				
+				
+			};
+			
+			
+			this.reset();
+			
+		};
+		
+		
+		
+		jQuery().ready(function() {
+
+			tlNav = SpazTimelineNav();
+			
+			jQuery('#move-up').bind('click', function(e) {
+				tlNav.move('up');
+			});
+			jQuery('#move-down').bind('click', function(e) {
+				tlNav.move('down');
+			});
+			
+			
+		});
+		
+	</script>
+	
+	
+	</head>
+	
+	<body>
+		
+		<input type="button" name="move-up" value="&#x2191;" id="move-up">
+		<input type="button" name="move-down" value="&#x2193;" id="move-down">
+		
+		<div id="timeline">
+			<div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+			</div>
+			<div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante. Duis scelerisque eleifend metus. Sed non odio id odio varius rutrum. Pellentesque congue commodo lacus. In semper pede lacinia felis. Morbi mollis molestie lorem. Morbi suscipit libero. Quisque ut erat sit amet elit aliquam nonummy. Donec tortor. Aliquam gravida ullamcorper pede. Praesent eros. Sed fringilla ligula sed odio pharetra imperdiet. Integer aliquet quam vitae nibh. Nam pretium, neque non congue vulputate, odio odio vehicula augue, sit amet gravida pede massa ac lectus. Curabitur a libero vitae dui sagittis aliquet. Ut suscipit. Curabitur accumsan sem a urna. Ut elit pede, vulputate sed, feugiat quis, congue sed, lacus.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+			</div>
+			<div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+				<div class="entry">
+					Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus nisl dolor, pulvinar id, pharetra a, egestas nec, ante.
+				</div>
+			</div>
+
+		</div>
+	</body>
+</html>

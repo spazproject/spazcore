@@ -48,7 +48,7 @@ SpazPrefs.prototype.load = function() {
 };
 
 SpazPrefs.prototype.save = function() {
-	var jsonPrefs = sch.enJSON(Spaz.Prefs.preferences);
+	var jsonPrefs = sch.enJSON(this._prefs);
 	sch.debug(jsonPrefs);
 
 	var filename = this.id || SPAZCORE_PREFS_AIR_FILENAME;

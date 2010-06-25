@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>SpazCore Example Shell</title>
+	
+	<!-- Load required vendor libs -->
+	<script src="../vendors/jquery-1.4.2.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore base lib -->
+	<script src="spazcore-standard.js"></script>
+	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	
+	
+	<!-- if this is missing, will not work!! -->
+	<script src="auth_config.js" type="text/javascript" charset="utf-8"></script>
+	
+	
+	<script type="text/javascript" charset="utf-8">
+	$(document).ready(function() {
+		
+		SpazAuth.addService(SPAZCORE_ACCOUNT_TWITTER, {
+            authType: SPAZCORE_AUTHTYPE_OAUTH,
+            consumerKey: SPAZCORE_CONSUMERKEY_TWITTER,
+            consumerSecret: SPAZCORE_CONSUMERSECRET_TWITTER,
+            accessURL: 'https://twitter.com/oauth/access_token'
+        });
+
+		var prefs = new SpazPrefs();
+		prefs.load();
+		var accts = new SpazAccounts(prefs);
+		var auth  = new SpazAuth(SPAZCORE_ACCOUNT_TWITTER);
+
+		if ( !(account_id = prefs.get('account_id')) ) {
+			if(auth.authorize('spaztest', 'poopatron5000')) {
+				account_id = accts.add('spaztest', auth.save(), SPAZCORE_ACCOUNT_TWITTER).id;
+				prefs.set('account_id', account_id);
+			} else {
+				alert('could not authenticate');
+			}
+		}
+		
+		var account = accts.get(account_id);
+		auth.load(account.auth);
+		var twit    = new SpazTwit({'auth':auth});
+
+		twit.getHomeTimeline(null, 200, null, null, renderTimeline, function(){
+			$('#timeline').append("<h3>Error loading timeline!</h3>");
+		});
+
+
+		function renderTimeline(timeline) {
+            var html = "";
+            timeline.forEach(function(tweet) {
+                html += "<h4>";
+                html += "<strong>" + tweet.user.screen_name + ":</strong>";
+                html += tweet.text;
+                html += "</h4>";
+            });
+            $('#timeline').empty().append(html);
+        };
+	});
+	</script>
+	
+</head>
+
+<body>
+	<div id="timeline"></div>
+
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>AIR File Upload Example</title>
+	<meta name="generator" content="TextMate http://macromates.com/">
+	<meta name="author" content="Ed Finkler">
+	<!-- Date: 2010-06-14 -->
+	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" charset="utf-8">
+	
+	<style type="text/css" media="screen">
+		label {
+			font-size:10pt;
+			font-weight:bold;
+			width:100px;
+			padding-right:5px;
+			text-align:right;
+			display:inline-block;
+		}
+		
+		input[type="text"], input[type="password"] {
+			width:300px;
+			font-size:10pt;
+		}
+	</style>
+
+	<script src="js/air/AIRAliases.js" type="text/javascript" charset="utf-8"></script>
+
+	<script src="auth_config.js" type="text/javascript" charset="utf-8"></script>	
+	<script src="js/jquery-1.4.2.min.js" type="text/javascript" charset="utf-8"></script>	
+	<script src="js/air/spazcore-air.js" type="text/javascript" charset="utf-8"></script>
+	
+	
+	
+	<script type="text/javascript" charset="utf-8">
+
+		var console = {
+			'log':air.trace
+		};
+		
+		SpazAuth.addService(SPAZCORE_ACCOUNT_TWITTER, {
+			authType: SPAZCORE_AUTHTYPE_OAUTH,
+			consumerKey: SPAZCORE_CONSUMERKEY_TWITTER,
+			consumerSecret: SPAZCORE_CONSUMERSECRET_TWITTER,
+			accessURL: 'https://twitter.com/oauth/access_token'
+	    });
+
+		var auth   = new SpazAuth(SPAZCORE_ACCOUNT_TWITTER);
+		
+		jQuery(document).ready(function(){
+
+			jQuery('#login').click(function() {
+				
+				sch.error('clicked!');
+				
+				var result = auth.authorize(jQuery('#username').val(), jQuery('#password').val());
+
+				sch.error(auth.accessToken);
+
+				if (result) {
+			        jQuery('#result').html("<div>Access token key: " + auth.accessToken.key + "</div> \
+											<div>Access token secret: " + auth.accessToken.secret + "</div>");
+					jQuery('#file_upload').show();
+			    } else {
+			        jQuery('#result').html("<h3>Failed!</h3>");
+			    }
+				
+			});
+
+			jQuery('#choose_a_file').click(function() {
+				var file = new air.File();
+				var filter = new runtime.Array(new air.FileFilter("Jpgs", "*.jpg"));
+				
+				file.addEventListener(air.Event.SELECT, function(event){
+					var twit = new SpazTwit({'auth':auth});
+					var auth_header = twit.getEchoHeader();
+					sch.error(auth_header);
+					
+					sc.helpers.HTTPUploadFile({
+							'file_url':event.target.url,
+							'url':jQuery('#upload_url').val(),
+							'extra': {
+								'key':jQuery('#api_key').val(),
+								'message':jQuery('#message').val(),
+								'source':'Spaz',
+								'source_url':'http://getspaz.com'
+							},
+							'headers': {
+								'X-Auth-Service-Provider':'https://api.twitter.com/1/account/verify_credentials.json',
+								'X-Verify-Credentials-Authorization':auth_header
+							}
+						},
+						function(event_data) { // onSuccess
+							alert("Success!\n"+event_data);
+						},
+						function(event) { // onFailure
+							alert("Error!\n"+event.text);
+						}
+					);
+				});
+			
+				try {
+					file.browseForOpen("Open JPG file", filter);
+				} catch(e) {}
+			});
+			
+		});
+	</script>
+	
+</head>
+<body>
+	
+	<fieldset id="authenticate" class="">
+		<legend>Login for Twitter credentials</legend>
+		<div><label for="username">Username</label><input type="text" name="username" value="" id="username"></div>
+		<div><label for="password">Password</label><input type="password" name="password" value="" id="password"></div>
+		<input type="button" name="login" value="Login" id="login">
+		
+		<div id="result">
+			
+		</div>
+		
+	</fieldset>
+	
+	<fieldset id="file_upload" class="" style="display:none">
+		<legend>File Upload</legend>
+		
+		<div><label for="upload_url">Upload URL</label><input type="text" name="upload_url" value="http://api.twitpic.com/2/upload.json" id="upload_url"></div>
+		<div><label for="api_key">API Key</label><input type="text" name="api_key" value="3d8f511397248dc913193a6195c4a018" id="api_key"></div>
+		
+		<div><label for="message">Message</label><input type="text" name="message" value="Testing!!!" id="message"></div>
+		
+		<div><label for="choose_a_file">Choose JPG</label><input type="button" name="choose_a_file" value="..." id="choose_a_file"></div>
+		
+	</fieldset>
+
+    
+    
+</body>
+</html>

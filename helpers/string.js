@@ -29,8 +29,8 @@ sc.helpers.containsScreenName = function(str, sn) {
 	
 };
 
-sc.helpers.extractScreenNames = function(str) {
-	var re_uname = /(^|\s|\(\[?|,|\.|)?@([a-zA-Z0-9_]+)([^a-zA-Z0-9_]|$)/gi;
+sc.helpers.extractScreenNames = function(str, tpl) {
+	var re_uname = /(^|\s|\(\[|,|\.|\()@([a-zA-Z0-9_]+)([^a-zA-Z0-9_]|$)/gi;
 	var usernames = [];
 	var ms = [];
 	while (ms = re_uname.exec(str))
