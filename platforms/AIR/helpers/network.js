@@ -19,9 +19,8 @@ var sc, air;
  *  file_url:'',
  *  url:'',
  * 	extra:{...}
+ *  headers:{...}
  * 
- * 
- * mostly taken from http://carefulweb.com/blog/2008/06/24/upload-server-adobe-air-and-javascript/
  * 
  * }
  */
@@ -30,7 +29,7 @@ sc.helpers.HTTPUploadFile = function(opts, onSuccess, onFailure) {
 	function callback_for_upload_progress(event) { 
 
 	    var pct = Math.ceil( ( event.bytesLoaded / event.bytesTotal ) * 100 ); 
-	    air.trace('Uploaded ' + pct.toString() + '%');
+	    sch.error('Uploaded ' + pct.toString() + '%');
 		
 		if (opts.onProgress) {
 			opts.onProgress({
@@ -42,19 +41,38 @@ sc.helpers.HTTPUploadFile = function(opts, onSuccess, onFailure) {
 	}
 
 	function callback_for_upload_finish(event) {
-		air.trace('File upload complete');
-		air.trace(event.data); // output of server response to AIR dev console
+		sch.error('File upload complete');
+		sch.error(event.data); // output of server response to AIR dev console
 		if (onSuccess) {
 			onSuccess(event.data);
 		}
 	}
+	
+    function callback_for_error(event) {
+        sch.error('IOError!');
+        if (onError) {
+            onError(event);
+        }
+    }
 
-	var field_name   = opts.field_name || 'media';
-	var content_type = opts.content_type || null;
+    opts = sch.defaults({
+        'method':'POST',
+        'content_type':'multipart/form-data',
+        'field_name':'media',
+        'file_url':null,
+        'url':null,
+        'extra':null,
+        'headers':null,
+        'username':null,
+        'password':null,
+    }, opts);
+
+	var field_name   = opts.field_name;
+	var content_type = opts.content_type;
 	
 	var uploading_file = new air.File(opts.file_url);
 	
-	var key;
+
 
 	// creating POST request variables (like in html form fields)
 	var variables = new air.URLVariables();
@@ -66,7 +84,8 @@ sc.helpers.HTTPUploadFile = function(opts, onSuccess, onFailure) {
 	if (opts.password) {
 		variables.password = opts.password;
 	}
-	
+
+	var key;	
 	if (opts.extra) {
 		for(key in opts.extra) {
 			variables[key] = opts.extra[key];
@@ -76,8 +95,6 @@ sc.helpers.HTTPUploadFile = function(opts, onSuccess, onFailure) {
 	var headers = [];
 	if (opts.headers) {
 		for(key in opts.headers) {
-			sch.error(key);
-			sch.error(opts.headers[key]);
 			headers.push( new air.URLRequestHeader(key, opts.headers[key]) );
 		}
 	}
@@ -86,17 +103,17 @@ sc.helpers.HTTPUploadFile = function(opts, onSuccess, onFailure) {
 	// set params for http request
 	var tmpRequest = new air.URLRequest(opts.url);
 	tmpRequest.authenticate = false;
-	tmpRequest.method = air.URLRequestMethod.POST;
-	tmpRequest.contentType = 'multipart/form-data';
+	tmpRequest.method = opts.method;
+	tmpRequest.contentType = opts.content_type;
 	tmpRequest.requestHeaders = headers;
-	
-	// assigning variables to request
 	tmpRequest.data = variables;
 
 	// attach events for displaying progress bar and upload complete
 	uploading_file.addEventListener(air.ProgressEvent.PROGRESS, callback_for_upload_progress);
 	uploading_file.addEventListener(air.DataEvent.UPLOAD_COMPLETE_DATA, callback_for_upload_finish); 
-
+    uploading_file.addEventListener(air.SecurityErrorEvent.SECURITY_ERROR, callback_for_error);
+    uploading_file.addEventListener(air.IOErrorEvent.IO_ERROR, callback_for_error);
+    
 	// doing upload request to server
 	uploading_file.upload(tmpRequest, field_name, false);
 	
