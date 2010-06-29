@@ -561,11 +561,11 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 	urls.trends_weekly		= "trends/weekly.json";
 	
 	//retweet
-	urls.retweet			= "statuses/retweet/{{ID}}.json"
-	urls.retweets			= "statuses/retweets/{{ID}}.json"
-	urls.retweeted_by_me	= "statuses/retweeted_by_me.json"
-	urls.retweeted_to_me	= "statuses/retweeted_to_me.json"
-	urls.retweets_of_me		= "statuses/retweets_of_me.json"
+	urls.retweet			= "statuses/retweet/{{ID}}.json";
+	urls.retweets			= "statuses/retweets/{{ID}}.json";
+	urls.retweeted_by_me	= "statuses/retweeted_by_me.json";
+	urls.retweeted_to_me	= "statuses/retweeted_to_me.json";
+	urls.retweets_of_me		= "statuses/retweets_of_me.json";
 
 	// search
 	if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER) {
@@ -1730,7 +1730,13 @@ SpazTwit.prototype._processUser = function(item, section_name) {
  * returns the header string for oAuth Echo usage
  */
 SpazTwit.prototype.getEchoHeader = function(opts) {
-	var url = this.getAPIURL('verify_credentials');
+	var url;
+	if (opts && opts.verify_url) {
+		url = opts.verify_url;
+	} else {
+		url = this.getAPIURL('verify_credentials');
+	}
+	
 	var method = 'GET';
 
 	var auth_header = this.auth.signRequest(method, url, null);
