@@ -96,7 +96,7 @@ SpazAccounts.prototype.setAll = function(accounts_array) {
 	this._accounts = accounts_array;
 	this.save();
 	sch.debug("Saved these accounts:");
-	for (var i=0; i < this_accounts.length; i++) {
+	for (var i=0; i < this._accounts.length; i++) {
 		sch.debug(this._accounts[x].id);
 	};
 };
