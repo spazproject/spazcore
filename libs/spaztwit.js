@@ -1405,8 +1405,13 @@ SpazTwit.prototype._getTimeline = function(opts) {
 			}			
         },
         'beforeSend':function(xhr){
-			sc.helpers.dump("beforesend");
-            xhr.setRequestHeader('Authorization', stwit.auth.signRequest(opts.method, opts.url, opts.data));
+			sc.helpers.dump(opts.url + ' beforesend');
+			if (stwit.auth) {
+				sch.debug('signing request');
+				xhr.setRequestHeader('Authorization', stwit.auth.signRequest(opts.method, opts.url, opts.data));
+			} else {
+				sch.debug('NOT signing request -- no auth object provided');
+			}
         },
         'type': 	opts.method,
         'url': 		opts.url,
@@ -1851,7 +1856,12 @@ SpazTwit.prototype._callMethod = function(opts) {
 	    },
 	    'beforeSend':function(xhr){
 			sc.helpers.dump(opts.url + ' beforesend');
-            xhr.setRequestHeader('Authorization', stwit.auth.signRequest(method, opts.url, opts.data));
+			if (stwit.auth) {
+				sch.debug('signing request');
+				xhr.setRequestHeader('Authorization', stwit.auth.signRequest(method, opts.url, opts.data));
+			} else {
+				sch.debug('NOT signing request -- no auth object provided');
+			}
 	    },
 	    'type': method,
 	    'url' : opts.url,
