@@ -1,0 +1,144 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>SpazCore Example Shell</title>
+	
+	<!-- Load required vendor libs -->
+	<script src="../vendors/jquery-1.4.2.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore base lib -->
+	<script src="spazcore-standard.js"></script>
+	
+	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	
+	<style type="text/css" media="screen">
+		#container {
+			width: 320px;
+			height:480px;
+			overflow: auto;
+			position:absolute;
+			top:100px;
+			left:200px;
+			border:1px solid blue;
+		}
+		ol {
+			margin: 0px;
+			padding:0px;
+		}
+		ol>li{
+			background:#FFFFCC;
+			padding:5px;
+			margin: 5px;
+		}
+
+		ol>li.hidden{
+			background:#CCCCFF;
+		}
+	
+	</style>
+	
+	<script type="text/javascript" charset="utf-8">
+	$(document).ready( function() {
+		
+		var content = 'it\'s a beautiful summer day, so my kids are doing what comes naturally to kids on a day like this: sitting inside watching "guys and dolls."';
+		
+		$('#container>ol>li').each(function(i) {
+			$(this).attr('id', i+1).addClass('hidden');
+		});
+		
+		$('#container').scroll(function(e){
+			var port_top    = $(this).position().top;
+			var port_height = $(this).height();
+			var port_bottom = $(this).height() + port_top;
+			console.log('port_top:'+port_top);
+			console.log('port_bottom:'+port_bottom);
+			
+			$('#container>ol>li').each(function(i) {
+				var $el       = $(this);
+				var el_top    = $el.offset().top - port_top;
+				var el_height = $el.outerHeight();
+				var el_bottom = el_top + el_height;
+				
+				$(this).html('top:'+el_top+'<br>\n'+'height:'+el_height+'<br>\n'+'bottom:'+el_bottom+'<br>\n'+content);
+				
+				if (el_top < 0 || el_bottom > port_height) {
+					$el.addClass('hidden');
+				} else if (port_top < el_bottom) {
+					$el.removeClass('hidden');
+				}
+			});
+		});
+		
+		$('#container').trigger('scroll');
+		$('#container').trigger('scroll');
+		
+	});
+	</script>
+</head>
+
+<body>
+	
+
+	<div id="container">
+		<ol>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+		</ol>
+		
+		
+	</div>
+
+</body>
+</html>
