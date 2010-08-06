@@ -63,15 +63,21 @@ function SpazBasicAuth() {
  *
  * @param {string} username
  * @param {string} password
+ * @param {function} [onComplete] a callback to fire when complete. Currently just passed TRUE all the time; for compatibility with oAuth need for callbacks
  * @class SpazBasicAuth
  * @return {Boolean} true. ALWAYS returns true!
  */
-SpazBasicAuth.prototype.authorize = function(username, password) {
+SpazBasicAuth.prototype.authorize = function(username, password, onComplete) {
     this.username = username;
     this.password = password;
     this.authHeader = "Basic " + sc.helpers.Base64.encode(username + ":" + password);
+    
+    if (onComplete) {
+        onComplete.call(this, true);
+    }
 	return true;
 };
+
 
 /**
  * Returns the authentication header
@@ -125,13 +131,19 @@ function SpazOAuth(realm, options) {
 
 /**
  * Authorize access to the service by fetching an OAuth access token.
- *
+ * 
  * @param {string} username
  * @param {string} password
+ * @param {function} [onComplete] a callback to fire on complete. If this is set, the request is asynchronous
  * @returns {boolean} true if authorization successful, otherwise false
  * @class SpazOAuth
  */
-SpazOAuth.prototype.authorize = function(username, password) {
+SpazOAuth.prototype.authorize = function(username, password, onComplete) {
+	
+	var that = this;
+	
+	var async_mode = false;
+	
     this.username = username;
 
     // Fill in xAuth parameters
@@ -148,31 +160,117 @@ SpazOAuth.prototype.authorize = function(username, password) {
         parameters: parameters
     }, this.opts);
 
+	if (onComplete) {
+		async_mode = true;
+	}
+
     // Perform request to fetch access token
     var accessToken = null;
-    jQuery.ajax({
-        async: false,
-        type: 'post',
-        url: this.opts.accessURL,
-        data: parameters,
-        success: function(data, textStatus) {
-            var results = OAuth.decodeForm(data);
-            accessToken = {};
-            accessToken.key = OAuth.getParameter(results, 'oauth_token');
-            accessToken.secret = OAuth.getParameter(results, 'oauth_token_secret');
-        },
-        error: function(req, textStatus, error) {
-            sch.error("Failed to fetch oAuth access token: " + req.responseText);
-        }
-    });
+	jQuery.ajax({
+		async: async_mode,
+		type: 'post',
+		url: this.opts.accessURL,
+		data: parameters,
+		dataType: 'text',
+		success: function(data, textStatus, xhr) {
 
-    if (accessToken != null) {
-        this.setAccessToken(accessToken.key, accessToken.secret);
-        return true;
-    } else {
-        return false;
-    }
+			sch.error(xhr);
+
+			sch.error("xhr.responseText:" + xhr.responseText);
+			sch.error("xhr.responseXML:" + xhr.responseXML);
+			sch.error('getAllResponseHeaders:n' + xhr.getAllResponseHeaders());
+
+
+			sch.error("OAuth Data return");
+			sch.error(sch.enJSON(data));
+
+			var results = OAuth.decodeForm(data);
+			sch.error("results");
+			sch.error(sch.enJSON(results));
+			accessToken = {};
+			accessToken.key = OAuth.getParameter(results, 'oauth_token');
+			accessToken.secret = OAuth.getParameter(results, 'oauth_token_secret');
+			
+			that.setAccessToken(accessToken.key, accessToken.secret);
+			
+			if (onComplete) {
+				onComplete.call(this, true, accessToken);
+			}
+
+		},
+		error: function(req, textStatus, error) {
+			sch.error("Failed to fetch oAuth access token: " + req.responseText);
+
+			if (onComplete) {
+				onComplete.call(this, false);
+			}
+			
+		},
+		complete: function(xhr, textStatus) {
+			sch.error('COMPLETE:');
+			sch.error("xhr.responseText:" + xhr.responseText);
+			sch.error("xhr.responseXML:" + xhr.responseXML);
+			sch.error('getAllResponseHeaders:n' + xhr.getAllResponseHeaders());
+
+		},
+		beforeSend: function(xhr) {
+			xhr.setRequestHeader('Accept-Encoding', 'none');
+
+		}
+
+	});
+	
+	if (async_mode !== true) {
+		if (accessToken != null) {
+			return true;
+	    } else {
+			return false;
+		}
+	} else {
+		return null;
+	}
+	// var request = new Ajax.Request(this.opts.accessURL, {
+	// 	'asynchronous':true,
+	// 	'method':'post',
+	// 	'parameters':parameters,
+	// 	'onSuccess': function(xhr, foo) {
+	// 		sch.error('onSuccess=====================================================');
+	// 		var data = xhr.responseText;
+	// 		sch.error('foo');
+	// 		sch.error(foo);
+	// 		sch.error(xhr);
+	// 	
+	// 		sch.error("xhr.responseText:"+xhr.responseText);
+	// 		sch.error("xhr.responseXML:"+xhr.responseXML);
+	// 		sch.error('getAllResponseHeaders:\n'+xhr.getAllResponseHeaders());		
+	// 	
+	// 		sch.error("OAuth Data return");
+	// 		sch.error(data);
+	// 	
+	//             var results = OAuth.decodeForm(data);
+	// 		sch.error("results");
+	// 		sch.error(sch.enJSON(results));
+	//             accessToken = {};
+	//             accessToken.key = OAuth.getParameter(results, 'oauth_token');
+	//             accessToken.secret = OAuth.getParameter(results, 'oauth_token_secret');
+	// 		sch.error('==============================================================');
+	// 		if (accessToken != null) {
+	// 			that.setAccessToken(accessToken.key, accessToken.secret);
+	// 			onComplete(true);
+	// 	    } else {
+	// 			onComplete(false);
+	// 		}
+	// 	},
+	// 	'onFailure': function(xhr) {
+	// 		sch.error('onFailure=====================================================');
+	// 		sch.error("xhr.responseText:"+xhr.responseText);
+	// 		sch.error('getAllResponseHeaders:\n'+xhr.getAllResponseHeaders());
+	// 		sch.error('==============================================================');
+	// 		onComplete(false);
+	// 	}
+	// });
 };
+
 
 /**
   * Set the access token
