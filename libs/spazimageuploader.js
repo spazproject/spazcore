@@ -11,7 +11,13 @@ var sc, DOMParser, jQuery;
 
 
 /**
- * An image uploader library for SpazCore 
+ * An image uploader library for SpazCore. Probably this will supercede spazfileuploader.js
+ * @param {object} [opts] options hash
+ * @param {object} [opts.auth_obj] A SpazAuth object that's filled with proper authentication info
+ * @param {string} [opts.username] a username, in case we're doing that kind of thing
+ * @param {string} [opts.password] a password, in case we're doing that kind of thing
+ * @param {string} [opts.auth_method] the method of authentication: 'echo' or 'basic'. Default is 'echo'
+ * @param {object} [opts.extra] Extra params to pass in the upload request
  */
 var SpazImageUploader = function(opts) {
     if (opts) {
@@ -22,6 +28,12 @@ var SpazImageUploader = function(opts) {
 
 /**
  * this lets us set options after instantiation 
+ * @param {object} opts options hash
+ * @param {object} [opts.auth_obj] A SpazAuth object that's filled with proper authentication info
+ * @param {string} [opts.username] a username, in case we're doing that kind of thing
+ * @param {string} [opts.password] a password, in case we're doing that kind of thing
+ * @param {string} [opts.auth_method] the method of authentication: 'echo' or 'basic'. Default is 'echo'
+ * @param {object} [opts.extra] Extra params to pass in the upload request
  */
 SpazImageUploader.prototype.setOpts = function(opts) {
     this.opts = sch.defaults({
@@ -33,11 +45,12 @@ SpazImageUploader.prototype.setOpts = function(opts) {
     }, opts);
 };
 
-/*
-	parseResponse should return one of these key/val pairs:
-	- {'url':'http://foo.bar/XXXX'}
-	- {'error':'Error message'}
-*/
+/**
+ * a hash of service objects. Each object has a URL endpoint, a parseResponse callback, and an optional "extra" set of params to pass on upload
+ *	parseResponse should return one of these key/val pairs:
+ *	- {'url':'http://foo.bar/XXXX'}
+ *	- {'error':'Error message'}
+ */
 SpazImageUploader.prototype.services = {
 	'drippic' : {
 		'url' : 'http://drippic.com/drippic2/upload',
@@ -72,7 +85,7 @@ SpazImageUploader.prototype.services = {
 		'url'  : 'http://api.pikchur.com/simple/upload',
 		'extra': {
 			'api_key':'MzTrvEd/uPNjGDabr539FA',
-			'source':'Spaz'
+			'source':'NjMw'
 		},
 		'parseResponse': function(data) {
 			var parser=new DOMParser();
@@ -80,7 +93,7 @@ SpazImageUploader.prototype.services = {
 	
 			var status;
 			var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
-			status = rspAttr.getNamedItem("stat").nodeValue;
+			status = rspAttr.getNamedItem("status").nodeValue;
 			
 			if (status == 'ok') {
 				var mediaurl = $(xmldoc).find('mediaurl').text();
@@ -189,7 +202,9 @@ SpazImageUploader.prototype.services = {
 	}
 };
 
-
+/**
+ * Retrieves the auth_header 
+ */
 SpazImageUploader.prototype.getAuthHeader = function() {
 	
 	var opts = sch.defaults({
@@ -215,16 +230,18 @@ SpazImageUploader.prototype.getAuthHeader = function() {
 };
 
 
-
+/**
+ * this actually does the upload. Well, really it preps the data and uses sc.helpers.HTTPFileUpload 
+ */
 SpazImageUploader.prototype.upload = function() {
 
 	var opts = sch.defaults({
 		extra:{}
 	}, this.opts);
 
-    alert(sch.enJSON(this.services)+"\n=======================\n"+sch.enJSON(opts));
-
 	var srvc = this.services[opts.service];
+
+    sch.error(sch.enJSON(opts)+"\n=======================\n"+sch.enJSON(srvc));
 
 	/*
 		file url
