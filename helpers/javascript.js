@@ -37,6 +37,10 @@ sc.helpers.isNumber = function(chk) {
 	http://www.breakingpar.com/bkp/home.nsf/0/87256B280015193F87256C720080D723
 */
 sc.helpers.isArray = function(obj) {
+	if (!obj || !obj.constructor) { // short-circuit this if it's falsey
+		return false;
+	}
+	
 	if (obj.constructor.toString().indexOf("Array") === -1) {
 		return false;
 	} else {
