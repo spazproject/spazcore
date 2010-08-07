@@ -67,15 +67,13 @@ SpazImageUploader.prototype.services = {
 				var mediaurl = $(xmldoc).find('mediaurl').text();
 				return {'url':mediaurl};
 			} else {
-				var errAttributes;
+				var errMsg;
 				if (xmldoc.getElementsByTagName("err")[0]) {
-					errAttributes = xmldoc.getElementsByTagName("err")[0].attributes;
+					errMsg = xmldoc.getElementsByTagName("err")[0].childNodes[0].nodeValue;
 				} else {
-					errAttributes = xmldoc.getElementsByTagName("error")[0].attributes;
+					errMsg = xmldoc.getElementsByTagName("error")[0].childNodes[0].nodeValue;
 				}
 				
-				sch.error(errAttributes);
-				errMsg = errAttributes.getNamedItem("msg").nodeValue;
 				sch.error(errMsg);
 				return {'error':errMsg};
 			}
@@ -93,7 +91,13 @@ SpazImageUploader.prototype.services = {
 	
 			var status;
 			var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
-			status = rspAttr.getNamedItem("status").nodeValue;
+			if (rspAttr.getNamedItem("status")) {
+				status = rspAttr.getNamedItem("status").nodeValue;
+			} else if(rspAttr.getNamedItem("stat")) {
+				status = rspAttr.getNamedItem("stat").nodeValue;
+			} else {
+				status = 'fuck I wish they would use the same goddamn nodenames';
+			}
 			
 			if (status == 'ok') {
 				var mediaurl = $(xmldoc).find('mediaurl').text();
@@ -225,7 +229,7 @@ SpazImageUploader.prototype.getAuthHeader = function() {
 		auth_header = twit.getEchoHeader(opts.getEchoHeaderOpts);
 
 	} else {
-		auth_header = "Basic " + Base64.encode(user + ":" + pass);
+		auth_header = opts.auth_obj.signRequest(); // returns basic auth header
 	}
 	
 	sch.error(auth_header);
@@ -286,9 +290,12 @@ SpazImageUploader.prototype.upload = function() {
 		auth_header = this.getAuthHeader();
 	}
 	
+	sch.error(auth_header);
 	if (auth_header.indexOf('Basic ') === 0) {
-		opts.username = this.opts.username;
-		opts.password = this.opts.password;
+		
+		opts.username = this.opts.auth_obj.getUsername();
+		opts.password = this.opts.auth_obj.getPassword();
+
 	} else {
 		opts.headers = {
 			'X-Auth-Service-Provider': verify_url,
