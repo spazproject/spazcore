@@ -43,13 +43,21 @@ sc.helpers.HTTPUploadFile = function(opts, onSuccess, onFailure) {
 	var url        = opts.url      || null;
 	var field_name = opts.field_name || 'media';
 	var content_type = opts.content_type || 'img';
-	
+
 	if (opts.extra) {
 		for (key in opts.extra) {
 			val = opts.extra[key];
 			postparams.push({ 'key' :key, 'data':val, contentType:'text/plain' });
 		}
 	}
+	
+	if (opts.username) {
+		postparams.push({ 'key' :'username', 'data':opts.username, contentType:'text/plain' });
+	}
+	if (opts.password) {
+		postparams.push({ 'key' :'password', 'data':opts.password, contentType:'text/plain' });
+	}
+	
 	
 	if (opts.platform) {
 		var sceneAssistant = opts.platform.sceneAssistant;
