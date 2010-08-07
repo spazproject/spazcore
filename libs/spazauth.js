@@ -117,6 +117,15 @@ SpazBasicAuth.prototype.save = function() {
 };
 
 
+SpazBasicAuth.prototype.getUsername = function() {
+	return this.username;
+}
+
+SpazBasicAuth.prototype.getPassword = function() {
+	return this.password;
+}
+
+
 /**
  * Construct a new OAuth authentication object.
  *
