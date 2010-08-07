@@ -113,39 +113,43 @@ SpazImageUploader.prototype.services = {
 			}
 		}
 	},
-    'yfrog' : {
-        'url' : 'http://yfrog.com/api/xauth_upload',
-        'extra': {
-            'key':'579HINUYe8d826dd61808f2580cbda7f13433310'
-        },
-        'parseResponse': function(data) {
-            
-            var parser=new DOMParser();
-            xmldoc = parser.parseFromString(data,"text/xml");
-    
-            var status;
-            var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
-            status = rspAttr.getNamedItem("stat").nodeValue;
-            
-            if (status == 'ok') {
-                var mediaurl = $(xmldoc).find('mediaurl').text();
-                return {'url':mediaurl};
-            } else {
-                var errAttributes;
-                if (xmldoc.getElementsByTagName("err")[0]) {
-                    errAttributes = xmldoc.getElementsByTagName("err")[0].attributes;
-                } else {
-                    errAttributes = xmldoc.getElementsByTagName("error")[0].attributes;
-                }
-                
-                sch.error(errAttributes);
-                errMsg = errAttributes.getNamedItem("msg").nodeValue;
-                sch.error(errMsg);
-                return {'error':errMsg};
-            }
-            
-        }
-    },
+	/*
+		Removed yfrog for now because their oAuth Echo stuff never seems to work.
+		Not sure if it's my code or theirs
+	*/
+    // 'yfrog' : {
+    //     'url' : 'http://yfrog.com/api/xauth_upload',
+    //     'extra': {
+    //         'key':'579HINUYe8d826dd61808f2580cbda7f13433310'
+    //     },
+    //     'parseResponse': function(data) {
+    //         
+    //         var parser=new DOMParser();
+    //         xmldoc = parser.parseFromString(data,"text/xml");
+    // 
+    //         var status;
+    //         var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
+    //         status = rspAttr.getNamedItem("stat").nodeValue;
+    //         
+    //         if (status == 'ok') {
+    //             var mediaurl = $(xmldoc).find('mediaurl').text();
+    //             return {'url':mediaurl};
+    //         } else {
+    //             var errAttributes;
+    //             if (xmldoc.getElementsByTagName("err")[0]) {
+    //                 errAttributes = xmldoc.getElementsByTagName("err")[0].attributes;
+    //             } else {
+    //                 errAttributes = xmldoc.getElementsByTagName("error")[0].attributes;
+    //             }
+    //             
+    //             sch.error(errAttributes);
+    //             errMsg = errAttributes.getNamedItem("msg").nodeValue;
+    //             sch.error(errMsg);
+    //             return {'error':errMsg};
+    //         }
+    //         
+    //     }
+    // },
 	'twitpic' : {
 		'url' : 'http://api.twitpic.com/2/upload.json',
 		'extra': {
@@ -241,8 +245,6 @@ SpazImageUploader.prototype.upload = function() {
 
 	var srvc = this.services[opts.service];
 
-    sch.error(sch.enJSON(opts)+"\n=======================\n"+sch.enJSON(srvc));
-
 	/*
 		file url
 	*/
@@ -254,8 +256,15 @@ SpazImageUploader.prototype.upload = function() {
 	var onSuccess;
 	if (srvc.parseResponse) {
 		onSuccess = function(data) {
-			var rs = srvc.parseResponse.call(srvc, data);
-			return opts.onSuccess(rs);
+			if (sch.isString(data)) {
+				var rs = srvc.parseResponse.call(srvc, data);
+				return opts.onSuccess(rs);
+			} else if (data && data.responseString) { // webOS will return an object, not just the response string
+				var rs = srvc.parseResponse.call(srvc, data.responseString);
+				return opts.onSuccess(rs);
+			} else { // I dunno what it is; just pass it to the callback
+				return opts.onSuccess(data);
+			}
 		};
 	} else {
 		onSuccess = opts.onSuccess;
@@ -287,8 +296,6 @@ SpazImageUploader.prototype.upload = function() {
 		};
 		
 	}
-	
-	sch.error(sch.enJSON(opts));
 	
 	sc.helpers.HTTPUploadFile(opts, onSuccess, opts.onFailure);
 	

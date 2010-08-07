@@ -28,7 +28,7 @@ cat libs/spazcore.js \
 	libs/spazaccounts.js \
 	libs/spazauth.js \
 	libs/spazimageurl.js \
-	libs/spazphotomailer.js \
+	libs/spazimageuploader.js \
 	libs/spazprefs.js \
 	libs/spazshorttext.js \
 	libs/spazshorturl.js \

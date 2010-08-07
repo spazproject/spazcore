@@ -26,7 +26,19 @@ sc.helpers.HTTPUploadFile = function(opts, onSuccess, onFailure) {
 	
 	sch.debug('in HTTPUploadFile ================!!!!!!!!!!!!!!');
 	
-	var key, val, postparams = [];
+	opts = sch.defaults({
+        'method':'POST',
+        'content_type':'img',
+        'field_name':'media',
+        'file_url':null,
+        'url':null,
+        'extra':null,
+        'headers':null,
+        'username':null,
+        'password':null
+    }, opts);
+	
+	var key, val, postparams = [], customHttpHeaders = [];
 	var file_url   = opts.file_url || null;
 	var url        = opts.url      || null;
 	var field_name = opts.field_name || 'media';
@@ -46,6 +58,13 @@ sc.helpers.HTTPUploadFile = function(opts, onSuccess, onFailure) {
 		return;
 	}
 	
+	var headers = [];
+	if (opts.headers) {
+		for(key in opts.headers) {
+			customHttpHeaders.push( key + ': ' + opts.headers[key] );
+		}
+	}
+	
 	sch.debug('OPTS =============');
 	sch.debug(opts);
 	sch.debug('OPTS.EXTRA =============');
@@ -59,6 +78,15 @@ sc.helpers.HTTPUploadFile = function(opts, onSuccess, onFailure) {
 	sch.debug('sceneAssistant =============');
 	sch.debug(sceneAssistant);
 
+	var onSuccessCheck = function(resp) {
+		if (resp.completed) { // we're actually done
+			onSuccess(resp); 
+		} else { // fire a progress event
+			jQuery(document).trigger('spazcore_upload_progress', [resp]);
+		}
+	};
+
+
 	
 	sceneAssistant.controller.serviceRequest('palm://com.palm.downloadmanager/', {
 		method: 'upload', 
@@ -69,10 +97,10 @@ sc.helpers.HTTPUploadFile = function(opts, onSuccess, onFailure) {
 			'fileName'   : file_url,
 			'postParameters': postparams,
 			cookies      : {}, // optional
-			customHttpHeaders: [], // optional
+			customHttpHeaders: customHttpHeaders, // optional
 			subscribe    : true 
 		},
-		'onSuccess' : onSuccess,
+		'onSuccess' : onSuccessCheck,
 		'onFailure' : onFailure
 	 });
 };
