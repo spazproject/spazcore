@@ -1,4 +1,4 @@
-/*********** Built 2010-07-28 21:57:28 EDT ***********/
+/*********** Built 2010-07-29 09:40:27 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -7924,7 +7924,7 @@ SpazImageUploader.prototype.services = {
 		'url'  : 'http://api.pikchur.com/simple/upload',
 		'extra': {
 			'api_key':'MzTrvEd/uPNjGDabr539FA',
-			'source':'Spaz'
+			'source':'NjMw'
 		},
 		'parseResponse': function(data) {
 			var parser=new DOMParser();
@@ -7932,7 +7932,7 @@ SpazImageUploader.prototype.services = {
 	
 			var status;
 			var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
-			status = rspAttr.getNamedItem("stat").nodeValue;
+			status = rspAttr.getNamedItem("status").nodeValue;
 			
 			if (status == 'ok') {
 				var mediaurl = $(xmldoc).find('mediaurl').text();

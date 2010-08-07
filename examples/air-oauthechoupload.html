@@ -83,16 +83,13 @@
 				file.addEventListener(air.Event.SELECT, function(event){
                     
                     var service = jQuery('#upload_service').val();
-                    alert(service);
-                    
+
 				    image_uploader.setOpts({
 				        'auth_obj': auth,
 				        'service' : service,
 				        'file_url': event.target.url,
 				        'extra': {
-							'message':jQuery('#message').val(),
-							'source':'SpazCore Echo Upload Test',
-							'source_url':'http://getspaz.com'
+							'message':jQuery('#message').val()
 						},
 						'onSuccess':function(event_data) { // onSuccess
 							alert("Success!\n"+event_data);
