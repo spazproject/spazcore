@@ -514,7 +514,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 			urldata = '';
 		}
 		
-		if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER && (key === 'search' || key === 'trends')) {
+		if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER && (key === 'search')) {
 			return this._postProcessURL(urls[key] + urldata);
 		} else {
 			return this._postProcessURL(this.baseurl + urls[key] + urldata);
@@ -524,100 +524,6 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
         return false;
     }
 
-	// Action URLs
-	urls.update				= "statuses/update.json";
-	urls.destroy_status		= "statuses/destroy/{{ID}}.json";
-	urls.friendship_create	= "friendships/create/{{ID}}.json";
-	urls.friendship_destroy = "friendships/destroy/{{ID}}.json";
-	urls.block_create		= "blocks/create/{{ID}}.json";
-	urls.block_destroy		= "blocks/destroy/{{ID}}.json";
-	urls.follow				= "notifications/follow/{{ID}}.json";
-	urls.unfollow			= "notifications/leave/{{ID}}.json";
-	urls.favorites_create	= "favorites/create/{{ID}}.json";
-	urls.favorites_destroy	= "favorites/destroy/{{ID}}.json";
-	urls.saved_searches_create	= "saved_searches/create.json";
-	urls.saved_searches_destroy = "saved_searches/destroy/{{ID}}.json";
-	urls.verify_credentials = "account/verify_credentials.json";
-	urls.ratelimit_status	= "account/rate_limit_status.json";
-	urls.update_profile		= "account/update_profile.json";
-	urls.saved_searches		= "saved_searches.json";
-	urls.report_spam		= "report_spam.json";
-
-	// User lists URLs
-	urls.lists				= "{{USER}}/lists.json";
-	urls.lists_list			= "{{USER}}/lists/{{SLUG}}.json";
-	urls.lists_memberships	= "{{USER}}/lists/memberships.json";
-	urls.lists_timeline		= "{{USER}}/lists/{{SLUG}}/statuses.json";
-	urls.lists_members		= "{{USER}}/{{SLUG}}/members.json";
-	urls.lists_check_member = "{{USER}}/{{SLUG}}/members/{{ID}}.json";
-	urls.lists_subscribers	= "{{USER}}/{{SLUG}}/subscribers.json";
-	urls.lists_check_subscriber = "{{USER}}/{{SLUG}}/subscribers/{{ID}}.json";
-	urls.lists_subscriptions = "{{USER}}/lists/subscriptions.json";
-
-	//trends
-	urls.trends				= "trends.json";
-	urls.trends_current		= "trends/current.json";
-	urls.trends_daily		= "trends/daily.json";
-	urls.trends_weekly		= "trends/weekly.json";
-	
-	//retweet
-	urls.retweet			= "statuses/retweet/{{ID}}.json";
-	urls.retweets			= "statuses/retweets/{{ID}}.json";
-	urls.retweeted_by_me	= "statuses/retweeted_by_me.json";
-	urls.retweeted_to_me	= "statuses/retweeted_to_me.json";
-	urls.retweets_of_me		= "statuses/retweets_of_me.json";
-
-	// search
-	if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER) {
-		urls.search				= "http://search.twitter.com/search.json";
-	} else {
-		urls.search				= "search.json";
-	}
-
-	// misc
-	urls.test				= "help/test.json";
-	urls.downtime_schedule	= "help/downtime_schedule.json";
-
-	
-	if (urls[key].indexOf('{{ID}}') > -1) {
-		if (typeof(urldata) === 'string') {
-			urls[key] = urls[key].replace('{{ID}}', urldata);
-		} else if (urldata && typeof(urldata) === 'object') {
-			urls[key] = urls[key].replace('{{ID}}', urldata.id);
-		}
-		
-	}
-
-	// Token replacement for user lists
-	if (urls[key].indexOf('{{USER}}') > - 1) {
-		if (urldata && typeof(urldata) === 'object') {
-			urls[key] = urls[key].replace('{{USER}}', urldata.user);
-		}
-	}
-
-	if (urls[key].indexOf('{{SLUG}}') > -1) {
-		if (urldata && typeof(urldata) === 'object') {
-			urls[key] = urls[key].replace('{{SLUG}}', urldata.slug);
-		}
-	}
-
-	if (urls[key]) {
-	
-		if (urldata && typeof urldata !== "string") {
-			urldata = '?'+jQuery.param(urldata);
-		} else {
-			urldata = '';
-		}
-		
-		if (this.baseurl === SPAZCORE_SERVICEURL_TWITTER && (key === 'search' || key === 'trends')) {
-			return this._postProcessURL(urls[key] + urldata);
-		} else {
-			return this._postProcessURL(this.baseurl + urls[key] + urldata);
-		}
-		
-	} else {
-		return false;
-	}
 
 };
 
