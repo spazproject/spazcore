@@ -10,6 +10,7 @@ var SPAZCORE_ACCOUNT_WORDPRESS	= 'wordpress.com';
 var SPAZCORE_ACCOUNT_TUMBLR		= 'tumblr';
 var SPAZCORE_ACCOUNT_FACEBOOK	= 'facebook';
 var SPAZCORE_ACCOUNT_FRIENDFEED	= 'friendfeed';
+var SPAZCORE_ACCOUNT_CUSTOM 	= 'custom';
 
 /**
  * This creates a new SpazAccounts object, and optionally associates it with an existing preferences object

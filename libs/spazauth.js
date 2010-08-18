@@ -12,7 +12,10 @@ SPAZAUTH_SERVICES[SPAZCORE_ACCOUNT_STATUSNET] = {
 	'authType': SPAZCORE_AUTHTYPE_BASIC
 };
 SPAZAUTH_SERVICES[SPAZCORE_ACCOUNT_IDENTICA] = {
-	'authType': SPAZCORE_AUTHTYPE_BASIC
+    'authType': SPAZCORE_AUTHTYPE_BASIC
+};
+SPAZAUTH_SERVICES[SPAZCORE_ACCOUNT_CUSTOM] = {
+    'authType': SPAZCORE_AUTHTYPE_BASIC
 };
 SPAZAUTH_SERVICES['default'] = {
 	'authType': SPAZCORE_AUTHTYPE_BASIC
@@ -119,11 +122,11 @@ SpazBasicAuth.prototype.save = function() {
 
 SpazBasicAuth.prototype.getUsername = function() {
 	return this.username;
-}
+};
 
 SpazBasicAuth.prototype.getPassword = function() {
 	return this.password;
-}
+};
 
 
 /**
