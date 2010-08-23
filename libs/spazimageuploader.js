@@ -33,6 +33,7 @@ var SpazImageUploader = function(opts) {
  * @param {string} [opts.username] a username, in case we're doing that kind of thing
  * @param {string} [opts.password] a password, in case we're doing that kind of thing
  * @param {string} [opts.auth_method] the method of authentication: 'echo' or 'basic'. Default is 'echo'
+ * @param {string} [opts.statusnet_api_base] the api base URL for statusnet, if that service is used
  * @param {object} [opts.extra] Extra params to pass in the upload request
  */
 SpazImageUploader.prototype.setOpts = function(opts) {
@@ -41,8 +42,21 @@ SpazImageUploader.prototype.setOpts = function(opts) {
         'auth_obj':null,
         'username':null,
         'password':null,
-        'auth_method':'echo' // 'echo' or 'basic'
+        'auth_method':'echo', // 'echo' or 'basic'
+		'statusnet_api_base':null // only used by statusnet
     }, opts);
+};
+
+/**
+ * returns an array of labels for the services 
+ * @return array
+ */
+SpazImageUploader.prototype.getServiceLabels = function() {
+	var labels = [];
+	for(var key in this.services) {
+		labels.push(key);
+	}
+	return labels;
 };
 
 /**
@@ -207,6 +221,67 @@ SpazImageUploader.prototype.services = {
 			}
 			
 		}
+	},
+	'identi.ca' : {
+		'url'  : 'http://identi.ca/api/statusnet/media/upload',
+		'parseResponse': function(data) {
+			
+			var parser=new DOMParser();
+			xmldoc = parser.parseFromString(data,"text/xml");
+
+			var status;
+			var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
+			status = rspAttr.getNamedItem("stat").nodeValue;
+			
+			if (status == 'ok') {
+				var mediaurl = $(xmldoc).find('mediaurl').text();
+				return {'url':mediaurl};
+			} else {
+				var errMsg;
+				if (xmldoc.getElementsByTagName("err")[0]) {
+					errMsg = xmldoc.getElementsByTagName("err")[0].childNodes[0].nodeValue;
+				} else {
+					errMsg = xmldoc.getElementsByTagName("error")[0].childNodes[0].nodeValue;
+				}
+				
+				sch.error(errMsg);
+				return {'error':errMsg};
+			}
+		}
+	},
+	'statusnet' : {
+		'url'  : '/statusnet/media/upload',
+		'prepForUpload':function() {
+			if (this.opts.statusnet_api_base) {
+				this.services.statusnet.url = this.opts.statusnet_api_base + this.services.statusnet.url;
+			} else {
+				sch.error('opts.statusnet_api_base must be set to use statusnet uploader service');
+			}
+		},
+		'parseResponse':function(data) {
+			var parser=new DOMParser();
+			xmldoc = parser.parseFromString(data,"text/xml");
+
+			var status;
+			var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
+			status = rspAttr.getNamedItem("stat").nodeValue;
+			
+			if (status == 'ok') {
+				var mediaurl = $(xmldoc).find('mediaurl').text();
+				return {'url':mediaurl};
+			} else {
+				var errMsg;
+				if (xmldoc.getElementsByTagName("err")[0]) {
+					errMsg = xmldoc.getElementsByTagName("err")[0].childNodes[0].nodeValue;
+				} else {
+					errMsg = xmldoc.getElementsByTagName("error")[0].childNodes[0].nodeValue;
+				}
+				
+				sch.error(errMsg);
+				return {'error':errMsg};
+			}
+			
+		}
 	}
 };
 
@@ -246,8 +321,12 @@ SpazImageUploader.prototype.upload = function() {
 	var opts = sch.defaults({
 		extra:{}
 	}, this.opts);
-
+	
 	var srvc = this.services[opts.service];
+
+	if (srvc.prepForUpload) {
+		srvc.prepForUpload.call(this);
+	}
 
 	/*
 		file url
@@ -257,14 +336,14 @@ SpazImageUploader.prototype.upload = function() {
 		opts.extra = jQuery.extend(opts.extra, srvc.extra);
 	}
 	
-	var onSuccess;
+	var onSuccess, rs;
 	if (srvc.parseResponse) {
 		onSuccess = function(data) {
 			if (sch.isString(data)) {
-				var rs = srvc.parseResponse.call(srvc, data);
+				rs = srvc.parseResponse.call(srvc, data);
 				return opts.onSuccess(rs);
 			} else if (data && data.responseString) { // webOS will return an object, not just the response string
-				var rs = srvc.parseResponse.call(srvc, data.responseString);
+				rs = srvc.parseResponse.call(srvc, data.responseString);
 				return opts.onSuccess(rs);
 			} else { // I dunno what it is; just pass it to the callback
 				return opts.onSuccess(data);
