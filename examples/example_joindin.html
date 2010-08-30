@@ -129,9 +129,13 @@
             return sHTML;
         }
 
-		function showResponse(data) {
+		function showResponse(data, format) {
 			sch.debug(data);
-			json = FormatJSON(data); //sch.enJSON(data);
+			
+			if( format == null )
+			    format = true;
+			    
+			json = format ? FormatJSON(data) : data; //sch.enJSON(data);
 			$('#api-response').html(json);
 		}
 
@@ -146,7 +150,7 @@
 			 get event listing failed
 		*/
 		var failure = function(xhr, msg, exc) {
-			showResponse(msg);
+			showResponse(msg, false);
 			
 			$('#notice').html('Error');
 			$('#notice').attr('class', 'error');

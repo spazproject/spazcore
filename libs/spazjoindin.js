@@ -20,22 +20,25 @@ var sc, DOMParser, jQuery, sch;
 if (!sc.events) { sc.events = {}; }
 sc.events.joindinMethodSuccess		= 'joindinMethodSuccess';
 sc.events.joindinMethodFailure		= 'joindinMethodFailure';
+//EVENTS
 sc.events.joindinEventListingSuccess = 'joindinEventListingSuccess';
 sc.events.joindinEventListingFailure = 'joindinEventListingFailure';
 sc.events.joindinEventDetailSuccess = 'joindinEventDetailSuccess';
 sc.events.joindinEventDetailFailure = 'joindinEventDetailFailure';
-sc.events.joindinAddEventSuccess = 'joindinAddEventSuccess';
-sc.events.joindinAddEventFailure = 'joindinAddEventFailure';
 sc.events.joindinGetEventTalksSuccess = 'joindinGetEventTalksSuccess';
 sc.events.joindinGetEventTalksFailure = 'joindinGetEventTalksFailure';
-sc.events.joindinAddCommentSuccess = 'joindinAddCommentSuccess';
-sc.events.joindinAddCommentFailure = 'joindinAddCommentFailure';
-sc.events.joindinAttendEventSuccess = 'joindinAttendEventSuccess';
-sc.events.joindinAttendEventFailure = 'joindinAttendEventFailure';
 sc.events.joindinGetEventCommentsSuccess = 'joindinGetEventCommentsSuccess';
 sc.events.joindinGetEventCommentsFailure = 'joindinGetEventCommentsFailure';
 sc.events.joindinAddEventTrackSuccess = 'joindinAddEventTrackSuccess';
 sc.events.joindinAddEventTrackFailure = 'joindinAddEventTrackFailure';
+//TALKS
+sc.events.joindinGetTalkDetailSuccess = 'joinedinGetTalkDetailSuccess';
+sc.events.joindinGetTalkDetailFailure = 'joinedinGetTalkDetailFailure';
+sc.events.joindinGetTalkCommentsSuccess = 'joinedinGetTalkCommentsSuccess';
+sc.events.joindinGetTalkCommentsFailure = 'joinedinGetTalkCommentsFailure';
+//COMMENTS
+//USER
+//SITE
 
 /**
  * @constructor
@@ -46,19 +49,14 @@ sc.events.joindinAddEventTrackFailure = 'joindinAddEventTrackFailure';
  * @param {DOMElement} [opts.eventTarget] what to target triggered events with. default is the document element
  */
 function SpazJoindIn(opts) {
-	
-	/*
-		set defaults
-	*/
 	opts = sch.defaults({
-        'username'    : null,
-        'password'    : null,
-        'baseURL'     : 'http://www.joind.in/api',
-        'eventTarget' : document
+        username: null,
+        password: null,
+        baseURL: 'http://test.joind.in/api',
+        eventTarget: document
 	}, opts);
 	
-	this.username = opts.lang;
-	this.password = opts.format;
+	this.setCredentials(opts.username, opts.password);
 	this.baseURL  = opts.baseURL;
     this.eventTarget = opts.eventTarget;
 }
@@ -106,6 +104,11 @@ SpazJoindIn.prototype.getURL = function(namespace) {
 	return url;
 };
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// EVENTS ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /**
  * Method ot get details on a specific event
  * @param {Object} opts options for the method call
@@ -122,10 +125,7 @@ SpazJoindIn.prototype.getEventDetail = function(opts) {
         onFailure: null
     }, opts);
 
-    if( !opts.event_id )
-        throw new Error("Invalid Request, Requires Event Detail");
-
-    this.callMethod({
+    this._callMethod({
         namespace: 'event',
         action: {
             type: 'getdetail',
@@ -161,7 +161,7 @@ SpazJoindIn.prototype.addEvent = function(opts) {
         onFailure: null
     }, opts);
 
-    this.callMethod({
+    this._callMethod({
         namespace: 'event',
         action: {
             type: 'addevent',
@@ -189,7 +189,7 @@ SpazJoindIn.prototype.getEventTalks = function(opts) {
         onFailure: null
     }, opts);
 
-    this.callMethod({
+    this._callMethod({
         namespace: 'event',
         action: {
             type: 'gettalks',
@@ -221,7 +221,7 @@ SpazJoindIn.prototype.getEventListing = function(opts) {
 		onFailure    : null  // callback on failure
 	}, opts);
 
-    this.callMethod({
+    this._callMethod({
         namespace: 'event',
         action: {
             type: 'getlist',
@@ -237,45 +237,6 @@ SpazJoindIn.prototype.getEventListing = function(opts) {
     });
 };
 
-/**
- * Method to mark the current user as attending an event
- * @param {Object} opts
- * @param {integer} opts.eid ID of the talk to attend
- * @param {function} opts.onSuccess
- * @param {function} opts.onFailure
- */
-SpazJoindIn.prototype.attendEvent = function(opts) {
-    opts = sch.defaults({
-        eid: null,
-        onSuccess: null,
-        onFailure: null
-    }, opts);
-
-    this.callMethod({
-        namespace: 'event',
-        action: {
-            type: 'attend',
-            data: {
-                eid: opts.eid
-            }
-        },
-        auth: true,
-        successEvent: sc.events.joindinAttendEventSuccess,
-        failureEvent: sc.events.joindinAttendEventFailure,
-        onSuccess: opts.onSuccess,
-        onFailure: opts.onFailure
-    });
-};
-
-/**
- * Method to add comment to an event
- * @param {Object} opts
- * @param {integer} opts.event_id
- * @param {string} opts.comment
- * @param {function} [opts.onSuccess]
- * @param {function} [opts.onFailure]
- */
-
 
  /**
   * Get all comments associated with an event
@@ -284,14 +245,14 @@ SpazJoindIn.prototype.attendEvent = function(opts) {
   * @param {function} [opts.onSuccess]
   * @param {function} [opts.onFailure]
   */
- SpazJoindIn.prototype.getEventComments = function(opts) {
+SpazJoindIn.prototype.getEventComments = function(opts) {
      opts = sch.defaults({
          event_id: null,
          onSuccess: null,
          onFailure: null
      }, opts);
 
-     this.callMethod({
+     this._callMethod({
          namespace: 'event',
          action: {
              type: 'getcomments',
@@ -307,10 +268,75 @@ SpazJoindIn.prototype.attendEvent = function(opts) {
      });
  };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// TALKS /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ /**
+  * Get the details for given talk number
+  * @param {Object} opts options for the method call
+  * @param {integer} [opts.talk_id] ID number of the talk to fetch
+  * @param {function} [opts.onSuccess]
+  * @param {function} [opts.onFailure]
+  */
+SpazJoindIn.prototype.getTalkDetail = function(opts) {
+    opts = sch.defaults({
+        talk_id: null,
+        onSuccess: null,
+        onFailure: null
+    }, opts);
+
+    this._callMethod({
+        namespace: 'talk',
+        action: {
+            type: 'getdetail',
+            data: {
+                talk_id: opts.talk_id
+            }
+        },
+        auth: false,
+        successEvent: sc.events.joindinGetTalkDetailSuccess,
+        failureEvent: sc.events.joindinGetTalkDetailFailure,
+        onSuccess: opts.onSuccess,
+        onFailure: opts.onFailure
+    });
+};
+
+
+ /**
+  * Get all comments associated with a talk
+  * @param {Object} opts options for the method call
+  * @param {integer} [opts.talk_id] ID number of the talk to fetch
+  * @param {function} [opts.onSuccess]
+  * @param {function} [opts.onFailure]
+  */
+SpazJoindIn.prototype.getTalkComments = function(opts) {
+    opts = sch.defaults({
+        talk_id: null,
+        onSuccess: null,
+        onFailure: null
+    }, opts);
+
+    this._callMethod({
+        namespace: 'talk',
+        action: {
+            type: 'getcomments',
+            data: {
+                talk_id: opts.talk_id
+            }
+        },
+        auth: false,
+        successEvent: sc.events.joindinGetTalkCommentsSuccess,
+        failureEvent: sc.events.joindinGetTalkCommentsFailure,
+        onSuccess: opts.onSuccess,
+        onFailure: opts.onFailure
+    });
+};
+
 /**
- * a general purpose method for calling API methods via ajax and raising
- * events on success/failure. callbacks can optionally be set for success
- * or failure as well
+ * a general purpose method for calling API methods via ajax and raising events on success/failure. callbacks can 
+ * optionally be set for success or failure as well
+ *
  * @param {Object} opts options for the method call
  * @param {string} opts.namespace the namespace being used (e.g. event)
  * @param {string} opts.action request action object
@@ -321,17 +347,17 @@ SpazJoindIn.prototype.attendEvent = function(opts) {
  * @param {function} [opts.onFailure] a callback function called on failure. takes args xhr, msg, exc
  * 
  */
-SpazJoindIn.prototype.callMethod = function(opts) {
+SpazJoindIn.prototype._callMethod = function(opts) {
 	var that = this;
 	
 	opts = sch.defaults({
-		'namespace'    : '',
-        'action'       : {},
-        'auth'         : false,
-		'successEvent' : sc.events.joindinMethodSuccess,
-		'failureEvent' : sc.events.joindinMethodFailure,
-		'onSuccess'    : null, // callback on success
-		'onFailure'    : null  // callback on failure
+		namespace: '',
+        action: {},
+        auth: false,
+		successEvent: sc.events.joindinMethodSuccess,
+		failureEvent: sc.events.joindinMethodFailure,
+		onSuccess: null, // callback on success
+		onFailure: null  // callback on failure
 	}, opts);
 	
 	var url = this.getURL(opts.namespace);
