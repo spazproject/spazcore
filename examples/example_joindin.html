@@ -1,0 +1,287 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>SpazCore Example JoindIn</title>
+	
+	<!-- Load required vendor libs -->
+	<script src="../vendors/jquery-1.4.2.js" type="text/javascript" charset="utf-8"></script>
+
+	<!-- Load SpazCore base lib -->
+
+	<script src="./spazcore-standard.js"></script>
+    <script src="../libs/spazjoindin.js"></script>
+	
+	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<style type="text/css">
+		#notice {
+    	    font-family: Monospace;
+        	font-size:   10pt;
+        	text-align: center;
+		}
+		#notice.error {
+			background-color: #f33;
+			display: block;
+		}
+		#notice.success {
+			background-color: #af7;
+			display: block;
+		}
+		#notice.hidden {
+			display: none;
+		}
+		
+		#api-response {
+    	    font-family: Monospace;
+        	font-size:   10pt;
+        	overflow:    auto;
+        	white-space: pre-wrap;
+		}
+	</style>
+	
+	<script type="text/javascript" charset="utf-8">
+		sc.setDumpLevel(5);
+        
+        function FormatJSON(oData, sIndent) {
+            
+            function RealTypeOf(v) {
+              if (typeof(v) == "object") {
+                if (v === null) return "null";
+                if (v.constructor == (new Array).constructor) return "array";
+                if (v.constructor == (new Date).constructor) return "date";
+                if (v.constructor == (new RegExp).constructor) return "regex";
+                return "object";
+              }
+              return typeof(v);
+            }
+            
+            if (arguments.length < 2) {
+                var sIndent = "";
+            }
+            var sIndentStyle = "    ";
+            var sDataType = RealTypeOf(oData);
+
+            // open object
+            if (sDataType == "array") {
+                if (oData.length == 0) {
+                    return "[]";
+                }
+                var sHTML = "[";
+            } else {
+                var iCount = 0;
+                $.each(oData, function() {
+                    iCount++;
+                    return;
+                });
+                if (iCount == 0) { // object is empty
+                    return "{}";
+                }
+                var sHTML = "{";
+            }
+
+            // loop through items
+            var iCount = 0;
+            $.each(oData, function(sKey, vValue) {
+                if (iCount > 0) {
+                    sHTML += ",";
+                }
+                if (sDataType == "array") {
+                    sHTML += ("\n" + sIndent + sIndentStyle);
+                } else {
+                    sHTML += ("\n" + sIndent + sIndentStyle + "\"" + sKey + "\"" + ": ");
+                }
+
+                // display relevant data type
+                switch (RealTypeOf(vValue)) {
+                    case "array":
+                    case "object":
+                        sHTML += FormatJSON(vValue, (sIndent + sIndentStyle));
+                        break;
+                    case "boolean":
+                    case "number":
+                        sHTML += vValue.toString();
+                        break;
+                    case "null":
+                        sHTML += "null";
+                        break;
+                    case "string":
+                        sHTML += ("\"" + vValue + "\"");
+                        break;
+                    default:
+                        sHTML += ("TYPEOF: " + typeof(vValue));
+                }
+
+                // loop
+                iCount++;
+            });
+
+            // close object
+            if (sDataType == "array") {
+                sHTML += ("\n" + sIndent + "]");
+            } else {
+                sHTML += ("\n" + sIndent + "}");
+            }
+
+            // return
+            return sHTML;
+        }
+
+		function showResponse(data) {
+			sch.debug(data);
+			json = FormatJSON(data); //sch.enJSON(data);
+			$('#api-response').html(json);
+		}
+
+        var success = function(data, textStatus) {
+            showResponse(data);
+
+            $('#notice').html('Success!');
+            $('#notice').attr('class', 'notice');
+        };
+		
+        /*
+			 get event listing failed
+		*/
+		var failure = function(xhr, msg, exc) {
+			showResponse(msg);
+			
+			$('#notice').html('Error');
+			$('#notice').attr('class', 'error');
+		};
+		
+		//END INIT
+		
+		var joindin = new SpazJoindIn({
+        });
+
+		$().ready(function() {
+		    
+		    $('#clear').click(function() {
+		        $('#api-response').html('');
+		        $('#notice').html('');
+		        $('#notice').attr('class', '');
+		    });
+		    
+		    $('#action').change(function() {
+		        $('#all_filters').children().hide();
+		        $('#' + $(this).val() + "-filters").show();
+		    });
+		    $('#action').change();
+		    
+		    $('#fire').click(function() {
+		        switch( $('#action').val() ) {
+		            case 'event_listing':
+		            
+		                joindin.getEventListing({
+		                    type: $('#event_listing_type').val(),
+		                    onSuccess: success,
+		                    onFailure: failure
+		                });
+		            
+		                break;
+		            case 'event_detail':
+
+    		            joindin.getEventDetail({
+		                    event_id: $('#event_detail_event_id').val(),
+		                    onSuccess: success,
+		                    onFailure: failure
+		                });
+		                break;
+		                
+		            case 'get_event_talks':
+
+    		            joindin.getEventTalks({
+		                    event_id: $('#get_event_talks_event_id').val(),
+		                    onSuccess: success,
+		                    onFailure: failure
+		                });
+		                break;
+		                
+		            case 'attend_event':
+		            case 'get_event_comments':
+
+    		            joindin.getEventComments({
+		                    event_id: $('#get_event_comments_event_id').val(),
+		                    onSuccess: success,
+		                    onFailure: failure
+		                });
+		                break;
+		            
+		            default:
+		                $('#notice').html('Event Not Implemented');
+		                $('#notice').attr('class','error');
+		        }
+		    });
+		    
+		});
+		
+	</script>
+	
+</head>
+
+<body>
+	<h1>SpazCore Joind.In Example</h1>
+    
+    <form id="filter">
+        <select name="action" id="action">
+            <option value="event_listing">Event Listing</option>
+            <option value="event_detail">Event Detail</option>
+            <option value="get_event_talks">Get Event Talks</option>
+            <option value="attend_event">Attend Event</option>
+            <option value="get_event_comments">Get Event Comments</option>
+        </select>
+        
+        <div id="all_filters">
+            <div id="event_listing-filters">
+                <label>
+                    Type:
+                    <select name="event_listing_type" id="event_listing_type">
+                        <option value="hot">hot</option>
+                        <option value="upcoming">upcoming</option>
+                        <option value="past">past</option>
+                    </select>
+                </label>
+            </div>
+            <div id="event_detail-filters">
+                <label>
+                    Event ID:
+                    <input type="text" name="event_detail_event_id" id="event_detail_event_id" value="" />
+                </label>
+            </div>
+            <div id="get_event_talks-filters">
+                <label>
+                    Event ID:
+                    <input type="text" name="get_event_talks_event_id" id="get_event_talks_event_id" value="" />
+                </label>
+            </div>
+            <div id="attend_event-filters">
+                To Be Implemented...
+            </div>
+            <div id="get_event_comments-filters">
+                <label>
+                    Event ID:
+                    <input type="text" name="get_event_comments_event_id" id="get_event_comments_event_id" value="" />
+                </label>
+            </div>
+        </div>
+        
+        <br /><br />
+        
+        <input type="button" name="fire" value="Fire Event" id="fire" />
+        <input type="button" name="clear" value="Clear" id="clear" />
+    </form>
+	
+	<div id="notice" class="hidden"></div>
+    
+	<fieldset id="" class="">
+		<legend>Response</legend>
+		<div id="api-response"></div>
+	</fieldset>
+
+	
+
+</body>
+</html>
