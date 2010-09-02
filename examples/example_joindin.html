@@ -203,12 +203,29 @@
 		                    onFailure: failure
 		                });
 		                break;
-		                
-		            case 'attend_event':
+		            
 		            case 'get_event_comments':
 
     		            joindin.getEventComments({
 		                    event_id: $('#get_event_comments_event_id').val(),
+		                    onSuccess: success,
+		                    onFailure: failure
+		                });
+		                break;
+		            
+		            case 'get_talk_detail':
+		                
+    		            joindin.getTalkDetail({
+		                    talk_id: $('#get_talk_detail_talk_id').val(),
+		                    onSuccess: success,
+		                    onFailure: failure
+		                });
+		                break;
+		            
+		            case 'get_talk_comments':
+
+    		            joindin.getTalkComments({
+		                    talk_id: $('#get_talk_detail_talk_id').val(),
 		                    onSuccess: success,
 		                    onFailure: failure
 		                });
@@ -236,6 +253,8 @@
             <option value="get_event_talks">Get Event Talks</option>
             <option value="attend_event">Attend Event</option>
             <option value="get_event_comments">Get Event Comments</option>
+            <option value="get_talk_detail">Get Talk Detail</option>
+            <option value="get_talk_comments">Get Talk Comments</option>
         </select>
         
         <div id="all_filters">
@@ -268,6 +287,18 @@
                 <label>
                     Event ID:
                     <input type="text" name="get_event_comments_event_id" id="get_event_comments_event_id" value="" />
+                </label>
+            </div>
+            <div id="get_talk_detail-filters">
+                <label>
+                    Talk ID:
+                    <input type="text" name="get_talk_detail_talk_id" id="get_talk_detail_talk_id" value="" />
+                </label>
+            </div>
+            <div id="get_talk_comments-filters">
+                <label>
+                    Talk ID:
+                    <input type="text" name="get_talk_comments_talk_id" id="get_talk_comments_talk_id" value="" />
                 </label>
             </div>
         </div>
