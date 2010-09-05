@@ -347,6 +347,10 @@
         var input = "@user1 @user2 @user3 @user4 @user5";
         var output = ["user1", "user2", "user3", "user4", "user5"];
         same(sc.helpers.extractScreenNames(input), output);
+
+        var input = "@techjunky79, @germboy @badkittyapp hah! Those guys do fine work–we have @foo different aims @foooddd. @foop Glad you like how we @_flazo___ do things.";
+        var output = ["techjunky79","germboy","badkittyapp", "foo", "foooddd", "foop", "_flazo___"];
+        same(sc.helpers.extractScreenNames(input), output);
     });
 	
 	test("striptags", function() {
