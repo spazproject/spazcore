@@ -1351,13 +1351,18 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 
 	if (ret_items.length > 0){
 		
+		var proc_items = [];
 		
 		/*
 			we process each item, adding some attributes and generally making it cool
 		*/
 		for (var k=0; k<ret_items.length; k++) {
-			ret_items[k] = this._processItem(ret_items[k], section_name);
+			if (ret_items[k]) {
+				proc_items.push(this._processItem(ret_items[k], section_name));
+			}
 		}
+		ret_items = proc_items;
+		proc_items = null;
 
 
 		/*
@@ -2971,8 +2976,6 @@ SpazTwit.prototype.addUserToList = function(user, list, list_user) {
 	
 	var opts = {
 		'url':url,
-		'success_event_type':'create_list_succeeded',
-		'failure_event_type':'create_list_failed',
 		'success_event_type':'add_list_user_succeeded',
 		'failure_event_type':'add_list_user_failed',
 		'data':data
@@ -3192,18 +3195,22 @@ SpazTwit.prototype.isMember = function(list, list_user, user){
 
 /*
  * Marks a user as a spammer and blocks them
+ * @param {integer} user_id a user_id (not a screen name!)
+ * @param {function} onSuccess callback
+ * @param {function} onFailure callback
  */
- 
-SpazTwit.prototype.reportSpam = function(user) {
+SpazTwit.prototype.reportSpam = function(user_id, onSuccess, onFailure) {
 	var url = this.getAPIURL('report_spam');
 	
 	var data = {};
-	data['screen_name'] = user;
+	data['user_id'] = user_id;
 	
 	var opts = {
 		'url':url,
 		'username': this.username,
 		'password': this.password,
+		'success_callback': onSuccess,
+		'failure_callback': onFailure,
 		'success_event_type':'report_spam_succeeded',
 		'failure_event_type':'report_spam_failed',
 		'method':'POST',
