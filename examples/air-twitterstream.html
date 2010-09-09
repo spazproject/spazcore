@@ -15,14 +15,19 @@
 
 <body>
     <h1>TwitterStream example</h1>
-    <h3>Let's try authenticating with Twitter!</h3>
 
-    <label for="username">username:</label><input type="text" name="username" value="" id="username">
-    <label for="password">password:</label><input type="password" name="password" value="" id="password">
-    <button id="auth">Authenticate!</button>
+    <div id="authform">
+        <div><label for="username">username:</label><input type="text" name="username" value="" id="username"></div>
+        <div><label for="password">password:</label><input type="password" name="password" value="" id="password"></div>
+        <div><button id="auth">Authenticate via xAuth!</button></div>
+        <div id="results"></div>
+    </div>
+    
 
-    <div id="results"></div>
-    <div id="timeline" style="display: none;"><button id="loadTimeline">Connect to stream!</button></div>
+    <div id="timeline" style="display: none;">
+        <button id="loadTimeline">Connect to stream!</button>
+        <p>Streamed content will show in console</p>
+    </div>
 
 	<script type="text/javascript" charset="utf-8">
         SpazAuth.addService(SPAZCORE_ACCOUNT_TWITTER, {
@@ -48,23 +53,33 @@
             }
         });
 
-        function renderTimeline(timeline) {
-            var html = "";
-            timeline.forEach(function(tweet) {
-                html += "<h4>";
-                html += "<strong>" + tweet.user.screen_name + ":</strong>";
-                html += tweet.text;
-                html += "</h4>";
-            });
-            $('#timeline').empty().append(html);
-        };
+        // function renderTimeline(timeline) {
+        //     var html = "";
+        //     timeline.forEach(function(tweet) {
+        //         html += "<h4>";
+        //         html += "<strong>" + tweet.user.screen_name + ":</strong>";
+        //         html += tweet.text;
+        //         html += "</h4>";
+        //     });
+        //     $('#timeline').empty().append(html);
+        // };
 
         $('#loadTimeline').click(function() {
             // Load OAuth from serialized string
             var auth = new SpazAuth('twitter');
             auth.load(authPickle);
+            
+            jQuery('#authform').hide();
 
-            var sts = new SpazTwitterStream({'auth':auth});
+            var sts = new SpazTwitterStream({
+                'auth':auth,
+                'onData':function(data) {
+                    sch.error(data);
+                    var uuid = sc.helpers.UUID();
+                    jQuery('#timeline').prepend("<div id='"+uuid+"' style='display:none'>"+sch.htmlentities(data)+"<hr></div>");
+                    jQuery('#'+uuid).fadeIn(200);
+                }
+            });
             sts.connect();
         });
     </script>

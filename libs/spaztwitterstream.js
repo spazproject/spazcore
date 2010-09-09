@@ -81,8 +81,10 @@ var SpazTwitterStream = function(opts) {
 			streamBuffer += buffer;
 			sch.debug("streamBuffer:"+streamBuffer);
 			parts = streamBuffer.split(/\n/);
+			sch.debug("parts:"+parts);
 			var lastElement = parts.pop();
 			for (var i=0; i < parts.length; i++) {
+				sch.debug('parts['+i+']:'+parts[i]);
 				if (that.opts.onData) {
 					that.opts.onData.call(this, parts[i]);
 				}
