@@ -36,7 +36,6 @@ sc.helpers.extractScreenNames = function(str, tpl) {
 	var ms = [];
 	while (ms = re_uname.exec(str))
 	{
-		console.log(ms);
 		/*
 			sometimes we can end up with a null instead of a blank string,
 			so we need to force the issue in javascript.
