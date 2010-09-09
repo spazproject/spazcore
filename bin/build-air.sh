@@ -38,6 +38,7 @@ cat libs/spazcore.js \
 	libs/spaztimeline.js \
 	libs/spaztmdb.js \
 	libs/spaztwit.js \
+	libs/spaztwitterstream.js \
 	platforms/AIR/helpers/file.js \
 	platforms/AIR/helpers/sys.js \
 	platforms/AIR/helpers/network.js \
