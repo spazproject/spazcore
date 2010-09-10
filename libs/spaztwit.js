@@ -3219,6 +3219,69 @@ SpazTwit.prototype.reportSpam = function(user_id, onSuccess, onFailure) {
 	
 	var xhr = this._callMethod(opts);
 };
+
+
+
+SpazTwit.prototype.openUserStream = function(onData, onFailure) {
+	var that = this;
+
+	/*
+		close existing stream
+	*/
+	this.closeUserStream();
+	
+	/*
+		open new stream
+	*/
+	this.userstream = new SpazTwitterStream({
+		'auth'   : this.auth,
+		'onData' : function(data) {
+			
+			data = sch.trim(data);
+			if (data) {
+				sch.error('new data:'+data);
+				item = sch.deJSON(data);
+				
+				if (item.source && item.user && item.text) { // is "normal" status
+					var item = that._processItem(item, SPAZCORE_SECTION_HOME);
+					if (onData) {
+						onData(item);
+					}
+				}
+
+				if (item.recipient_id) { // is DM
+					var item = that._processItem(item, SPAZCORE_SECTION_HOME);
+					if (onData) {
+						onData(item);
+					}
+				}
+				
+			}
+		}
+	});
+	this.userstream.connect();
+	return this.userstream;
+};
+
+
+SpazTwit.prototype.closeUserStream = function() {
+	if (this.userstream) {
+		sch.error('userstream exist… disconnecting');
+		this.userstream.disconnect();
+		this.userstream = null;
+	}
+};
+
+
+SpazTwit.prototype.userStreamExists = function() {
+	if (this.userstream) {
+		return true;
+	}
+	return false;
+};
+
+
+
 /**
  *  
  */
