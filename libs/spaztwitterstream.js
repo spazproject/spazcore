@@ -43,7 +43,7 @@ var SpazTwitterStream = function(opts) {
 	}
 
 	function errorReceived(e) {
-		sch.debugReceived("errorReceived");
+		sch.error("errorReceived in stream");
 		sch.debug(e);
 		if (that.opts.onError) {
 			that.opts.onError.call(this, e);
