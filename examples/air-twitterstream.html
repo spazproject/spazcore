@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	
+	<script src="js/air/AIRAliases.js" type="text/javascript" charset="utf-8"></script>
+
+	
+    <script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="js/air/spazcore-air.js"></script>
+	<script src="auth_config.js" type="text/javascript" charset="utf-8"></script>
+    
+</head>
+
+<body>
+    <h1>TwitterStream example</h1>
+
+    <div id="authform">
+        <div><label for="username">username:</label><input type="text" name="username" value="" id="username"></div>
+        <div><label for="password">password:</label><input type="password" name="password" value="" id="password"></div>
+        <div><button id="auth">Authenticate via xAuth!</button></div>
+        <div id="results"></div>
+    </div>
+    
+
+    <div id="timeline" style="display: none;">
+        <button id="loadTimeline">Connect to stream!</button>
+        <p>Streamed content will show in console</p>
+    </div>
+
+	<script type="text/javascript" charset="utf-8">
+        SpazAuth.addService(SPAZCORE_ACCOUNT_TWITTER, {
+            authType: SPAZCORE_AUTHTYPE_OAUTH,
+            consumerKey: SPAZCORE_CONSUMERKEY_TWITTER,
+            consumerSecret: SPAZCORE_CONSUMERSECRET_TWITTER,
+            accessURL: 'https://twitter.com/oauth/access_token'
+        });
+
+        var authPickle;
+        $('#auth').click(function() {
+            var auth = new SpazAuth('twitter');
+            var result = auth.authorize($('#username').val(), $('#password').val());
+            if (result) {
+                $('#results').append("<h3>Access token key: " + auth.accessToken.key + "</h3>");
+                $('#results').append("<h3>Access token secret: " + auth.accessToken.secret + "</h3>");
+                $('#timeline').show();
+
+                // Try saving OAuth to a string
+                authPickle = auth.save();
+            } else {
+                $('#results').append("<h3>Failed!</h3>");
+            }
+        });
+
+        // function renderTimeline(timeline) {
+        //     var html = "";
+        //     timeline.forEach(function(tweet) {
+        //         html += "<h4>";
+        //         html += "<strong>" + tweet.user.screen_name + ":</strong>";
+        //         html += tweet.text;
+        //         html += "</h4>";
+        //     });
+        //     $('#timeline').empty().append(html);
+        // };
+
+        $('#loadTimeline').click(function() {
+            // Load OAuth from serialized string
+            var auth = new SpazAuth('twitter');
+            auth.load(authPickle);
+            
+            jQuery('#authform').hide();
+
+            var sts = new SpazTwitterStream({
+                'auth':auth,
+                'onData':function(data) {
+                    sch.error(data);
+                    var uuid = sc.helpers.UUID();
+                    jQuery('#timeline').prepend("<div id='"+uuid+"' style='display:none'>"+sch.htmlentities(data)+"<hr></div>");
+                    jQuery('#'+uuid).fadeIn(200);
+                }
+            });
+            sts.connect();
+        });
+    </script>
+</body>
+</html>
