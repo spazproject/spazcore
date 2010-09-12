@@ -43,7 +43,7 @@ var SpazTwitterStream = function(opts) {
 	}
 
 	function errorReceived(e) {
-		sch.debugReceived("errorReceived");
+		sch.error("errorReceived in stream");
 		sch.debug(e);
 		if (that.opts.onError) {
 			that.opts.onError.call(this, e);
@@ -75,8 +75,7 @@ var SpazTwitterStream = function(opts) {
 			isReading = true;
 		}
 		
-		// pump the JSON pieces through -- due to actionscript to javascript
-		// encoding issues, we have to wrap them funnily
+		// pump the JSON pieces through
 		if ((toRead > 0) && (amountRead > 0)) {
 			streamBuffer += buffer;
 			sch.debug("streamBuffer:"+streamBuffer);

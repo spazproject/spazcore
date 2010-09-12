@@ -30,8 +30,8 @@ sc.helpers.addListener = function(target, event_type, handler, scope, use_captur
 		sch.warn('use_capture no longer supported!');
 	}
 	
-	sch.error('listening for '+event_type);
-	sch.error('on target nodeName:'+target.nodeName);
+	sch.debug('listening for '+event_type);
+	sch.debug('on target nodeName:'+target.nodeName);
 	
 	jQuery(target).bind(event_type, handler);
 	
@@ -52,8 +52,8 @@ sc.helpers.addListener = function(target, event_type, handler, scope, use_captur
  */
 sc.helpers.removeListener = function(target, event_type, handler, use_capture) {
 
-	sch.error('removing listener for '+event_type);
-	sch.error('on target nodeName:'+target.nodeName);
+	sch.debug('removing listener for '+event_type);
+	sch.debug('on target nodeName:'+target.nodeName);
 
 	if (use_capture) {
 		sch.warn('use_capture no longer supported!');
