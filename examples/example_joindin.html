@@ -176,6 +176,14 @@
 		    $('#action').change();
 		    
 		    $('#fire').click(function() {
+		        
+		        joindin.setBaseURL($('#url').val());
+		        
+		        if( $('#user').val() == '' && $('#pass').val() == '' )
+		            joindin.clearCredentials();
+		        else
+		            joindin.setCredentials($('#user').val(), sc.helpers.MD5($('#pass').val()));
+
 		        switch( $('#action').val() ) {
 		            case 'event_listing':
 		            
@@ -231,6 +239,55 @@
 		                });
 		                break;
 		            
+
+		            case 'get_user_detail':
+
+    		            joindin.getUserDetail({
+		                    uid: $('#get_user_detail_uid').val(),
+		                    onSuccess: success,
+		                    onFailure: failure
+		                });
+		                break;
+	            
+		            case 'get_user_comments':
+
+    		            joindin.validateUser({
+		                    username: $('#get_user_comments_username').val(),
+    		                type: $('#get_user_comments_type').val(),
+		                    onSuccess: success,
+		                    onFailure: failure
+		                });
+		                break;
+		            
+		            case 'validate_user':
+
+    		            joindin.validateUser({
+		                    uid: $('#validate_user_uid').val(),
+    		                pass: sc.helpers.MD5($('#validate_user_pass').val()),
+		                    onSuccess: success,
+		                    onFailure: failure
+		                });
+		                break;
+	            
+		            case 'get_speaker_profile':
+
+    		            joindin.getSpeakerProfile({
+		                    spid: $('#get_speaker_profile_spid').val(),
+		                    onSuccess: success,
+		                    onFailure: failure
+		                });
+		                break;
+		            
+		            case 'get_site_status':
+
+    		            joindin.getSiteStatus({
+		                    test_string: $('#get_site_status_test_string').val(),
+		                    onSuccess: success,
+		                    onFailure: failure
+		                });
+		                break;
+		            
+		            
 		            default:
 		                $('#notice').html('Event Not Implemented');
 		                $('#notice').attr('class','error');
@@ -247,14 +304,41 @@
 	<h1>SpazCore Joind.In Example</h1>
     
     <form id="filter">
+        
+        <label>
+            Base URL:
+            <input type="text" name="url" id="url" value="http://test.joind.in/api" />
+        </label> <br />
+        <label>
+            User:
+            <input type="text" name="user" id="user" />
+        </label> <br />
+        <label>
+            Pass:
+            <input type="password" name="pass" id="pass" />
+        </label> <br />
+        
         <select name="action" id="action">
-            <option value="event_listing">Event Listing</option>
-            <option value="event_detail">Event Detail</option>
-            <option value="get_event_talks">Get Event Talks</option>
-            <option value="attend_event">Attend Event</option>
-            <option value="get_event_comments">Get Event Comments</option>
-            <option value="get_talk_detail">Get Talk Detail</option>
-            <option value="get_talk_comments">Get Talk Comments</option>
+            <optgroup label="Events">
+                <option value="event_listing">Event Listing</option>
+                <option value="event_detail">Event Detail</option>
+                <option value="get_event_talks">Get Event Talks</option>
+                <option value="attend_event">Attend Event</option>
+                <option value="get_event_comments">Get Event Comments</option>
+            </optgroup>
+            <optgroup label="Talks">
+                <option value="get_talk_detail">Get Talk Detail</option>
+                <option value="get_talk_comments">Get Talk Comments</option>
+            </optgroup>
+            <optgroup label="User">
+                <option value="get_user_detail">Get User Detail</option>
+                <option value="get_user_comments">Get User Comments</option>
+                <option value="validate_user">Validate User</option>
+                <option value="get_speaker_profile">Get Speaker Profile</option>
+            </optgroup>
+            <optgroup label="Site">
+                <option value="get_site_status">Get Site Status</option>
+            </optgroup>
         </select>
         
         <div id="all_filters">
@@ -299,6 +383,48 @@
                 <label>
                     Talk ID:
                     <input type="text" name="get_talk_comments_talk_id" id="get_talk_comments_talk_id" value="" />
+                </label>
+            </div>
+            <div id="get_user_detail-filters">
+                <label>
+                    UID:
+                    <input type="text" name="get_user_detail_uid" id="get_user_detail_uid" value="" />
+                </label>
+            </div>
+            <div id="get_user_comments-filters">
+                <label>
+                    Username:
+                    <input type="text" name="get_user_comments_username" id="get_user_comments_username" value="" />
+                </label>
+                <label>
+                    Type:
+                    <select name="get_user_comments_type" id="get_user_comments_type">
+                        <option value="">All</option>
+                        <option value="event">Event</option>
+                        <option value="talk">Talk</option>
+                    </select>
+                </label>
+            </div>
+            <div id="validate_user-filters">
+                <label>
+                    Username:
+                    <input type="text" name="validate_user_uid" id="validate_user_uid" value="" />
+                </label>
+                <label>
+                    Password:
+                    <input type="password" name="validate_user_pass" id="validate_user_pass" value="" />
+                </label>
+            </div>
+            <div id="get_speaker_profile-filters">
+                <label>
+                    SPID:
+                    <input type="text" name="get_speaker_profile_spid" id="get_speaker_profile_spid" value="" />
+                </label>
+            </div>
+            <div id="get_site_status-filters">
+                <label>
+                    Test String:
+                    <input type="text" name="get_site_status_test_string" id="get_site_status_test_string" value="" />
                 </label>
             </div>
         </div>
