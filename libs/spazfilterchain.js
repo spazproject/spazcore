@@ -8,10 +8,22 @@
  * 
  * @constructor 
  */
-var SpazFilterChain = function () {
+var SpazFilterChain = function (opts) {
 	
+	opts = sch.defaults({
+		filters:null
+	}, opts);
+
 	this._filters = [];
 	
+	/*
+		if we have filters, process them
+	*/
+	if (opts.filters) {
+		for (var i=0; i < opts.filters.length; i++) {
+			this.addFilter(opts.filters[i].label, opts.filters[i].func);
+		}
+	}
 };
 
 /**
@@ -121,9 +133,14 @@ SpazFilterChain.prototype.processArray = function(input_array) {
 			filter_obj = this._filters[k];
 			sch.debug('Calling filter '+filter_obj.label);
 			input_array[i] = filter_obj.func(input_array[i]);
+			if (input_array[i] === null) {
+				break;
+			}
 		}
 	}
 	
+	// remove stuff set to null, so we can use filters that remove items by returning null;
+	input_array = _.compact(input_array);
 	return input_array;
 };
 

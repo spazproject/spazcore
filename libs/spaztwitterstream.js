@@ -10,7 +10,7 @@ var SpazTwitterStream = function(opts) {
 	
 	this.opts = sch.defaults({
 		'auth'		: null,
-		'userstream_url': "https://betastream.twitter.com/2b/user.json",
+		'userstream_url': "https://userstream.twitter.com/2/user.json",
 		'onData'		: null,
 		'onError'		: null
 	}, opts);
