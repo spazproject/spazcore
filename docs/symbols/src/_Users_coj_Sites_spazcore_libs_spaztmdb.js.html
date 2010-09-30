@@ -1,0 +1,289 @@
+<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"> <style>
+	.KEYW {color: #933;}
+	.COMM {color: #bbb; font-style: italic;}
+	.NUMB {color: #393;}
+	.STRN {color: #393;}
+	.REGX {color: #339;}
+	.line {border-right: 1px dotted #666; color: #666; font-style: normal;}
+	</style></head><body><pre><span class='line'>  1</span> <span class="COMM">/*jslint 
+<span class='line'>  2</span> browser: true,
+<span class='line'>  3</span> nomen: false,
+<span class='line'>  4</span> debug: true,
+<span class='line'>  5</span> forin: true,
+<span class='line'>  6</span> undef: true,
+<span class='line'>  7</span> white: false,
+<span class='line'>  8</span> onevar: false 
+<span class='line'>  9</span>  */</span><span class="WHIT">
+<span class='line'> 10</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">sc</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">DOMParser</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">jQuery</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">sch</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 11</span> </span><span class="WHIT"> 
+<span class='line'> 12</span> </span><span class="COMM">/**
+<span class='line'> 13</span>  * A library to interact with the API for theMovieDB.org 
+<span class='line'> 14</span>  * @see &lt;a href="http://api.themoviedb.org/2.1/">The API docs&lt;/a>
+<span class='line'> 15</span>  */</span><span class="WHIT">
+<span class='line'> 16</span> 
+<span class='line'> 17</span> </span><span class="COMM">/**
+<span class='line'> 18</span>  * events raised here 
+<span class='line'> 19</span>  */</span><span class="WHIT">
+<span class='line'> 20</span> </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">sc.events</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT"> </span><span class="NAME">sc.events</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 21</span> </span><span class="NAME">sc.events.tmdbMethodSuccess</span><span class="WHIT">		</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'tmdbMethodSuccess'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 22</span> </span><span class="NAME">sc.events.tmdbMethodFailure</span><span class="WHIT">		</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'tmdbMethodFailure'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 23</span> </span><span class="NAME">sc.events.tmdbMovieSearchSuccess</span><span class="WHIT">		</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'tmdbMovieSearchSuccess'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 24</span> </span><span class="NAME">sc.events.tmdbMovieSearchFailure</span><span class="WHIT">		</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'tmdbMovieSearchFailure'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 25</span> </span><span class="NAME">sc.events.tmdbMovieIMDBLookupSuccess</span><span class="WHIT">	</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'tmdbMovieIMDBLookupSuccess'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 26</span> </span><span class="NAME">sc.events.tmdbMovieIMDBLookupFailure</span><span class="WHIT">	</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'tmdbMovieIMDBLookupFailure'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 27</span> </span><span class="NAME">sc.events.tmdbMovieGetInfoSuccess</span><span class="WHIT">		</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'tmdbMovieGetInfoSuccess'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 28</span> </span><span class="NAME">sc.events.tmdbMovieGetInfoFailure</span><span class="WHIT">		</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'tmdbMovieGetInfoFailure'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 29</span> </span><span class="NAME">sc.events.tmdbMovieGetImagesSuccess</span><span class="WHIT">		</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'tmdbMovieGetImagesSuccess'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 30</span> </span><span class="NAME">sc.events.tmdbMovieGetImagesFailure</span><span class="WHIT">		</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'tmdbMovieGetImagesFailure'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 31</span> </span><span class="NAME">sc.events.tmdbPersonSearchSuccess</span><span class="WHIT">		</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'tmdbPersonSearchSuccess'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 32</span> </span><span class="NAME">sc.events.tmdbPersonSearchFailure</span><span class="WHIT">		</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'tmdbPersonSearchFailure'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 33</span> </span><span class="NAME">sc.events.tmdbPersonGetInfoSuccess</span><span class="WHIT">		</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'tmdbPersonGetInfoSuccess'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 34</span> </span><span class="NAME">sc.events.tmdbPersonGetInfoFailure</span><span class="WHIT">		</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'tmdbPersonGetInfoFailure'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 35</span> </span><span class="NAME">sc.events.tmdbHashGetInfoSuccess</span><span class="WHIT">		</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'tmdbHashGetInfoSuccess'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 36</span> </span><span class="NAME">sc.events.tmdbHashGetInfoFailure</span><span class="WHIT">		</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'tmdbHashGetInfoFailure'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 37</span> 
+<span class='line'> 38</span> 
+<span class='line'> 39</span> 
+<span class='line'> 40</span> </span><span class="COMM">/**
+<span class='line'> 41</span>  * @constructor
+<span class='line'> 42</span>  * @param {Object} opts
+<span class='line'> 43</span>  * @param {string} opts.apikey the api key
+<span class='line'> 44</span>  * @param {string} [opts.lang] a language code. default is 'en'
+<span class='line'> 45</span>  * @param {string} [opts.format] the data format to return. default is 'json'
+<span class='line'> 46</span>  * @param {DOMElement} [opts.eventTarget] what to target triggered events with. default is the document element
+<span class='line'> 47</span>  */</span><span class="WHIT">
+<span class='line'> 48</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">SpazTMDB</span><span class="PUNC">(</span><span class="NAME">opts</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 49</span> </span><span class="WHIT">	
+<span class='line'> 50</span> 	</span><span class="COMM">/*
+<span class='line'> 51</span> 		set defaults
+<span class='line'> 52</span> 	*/</span><span class="WHIT">
+<span class='line'> 53</span> </span><span class="WHIT">	</span><span class="NAME">opts</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">sch.defaults</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 54</span> </span><span class="WHIT">		</span><span class="STRN">'apikey'</span><span class="PUNC">:</span><span class="KEYW">null</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 55</span> </span><span class="WHIT">		</span><span class="STRN">'lang'</span><span class="WHIT">  </span><span class="PUNC">:</span><span class="STRN">'en'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 56</span> </span><span class="WHIT">		</span><span class="STRN">'format'</span><span class="PUNC">:</span><span class="STRN">'json'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 57</span> </span><span class="WHIT">		</span><span class="STRN">'eventTarget'</span><span class="PUNC">:</span><span class="NAME">document</span><span class="WHIT">
+<span class='line'> 58</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">opts</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 59</span> </span><span class="WHIT">	
+<span class='line'> 60</span> 	</span><span class="NAME">this.apikey</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">opts.apikey</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 61</span> </span><span class="WHIT">	</span><span class="NAME">this.lang</span><span class="WHIT">   </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">opts.lang</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 62</span> </span><span class="WHIT">	</span><span class="NAME">this.format</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">opts.format</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 63</span> </span><span class="WHIT">	</span><span class="NAME">this.eventTarget</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">opts.eventTarget</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 64</span> </span><span class="WHIT">	
+<span class='line'> 65</span> 	</span><span class="NAME">this.baseURL</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'http://api.themoviedb.org/2.1/'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 66</span> </span><span class="WHIT">		
+<span class='line'> 67</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 68</span> 
+<span class='line'> 69</span> </span><span class="COMM">/**
+<span class='line'> 70</span>  * Sets the API key
+<span class='line'> 71</span>  * @param {string} apikey the api key used to access the API 
+<span class='line'> 72</span>  */</span><span class="WHIT">
+<span class='line'> 73</span> </span><span class="NAME">SpazTMDB.prototype.setAPIKey</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">apikey</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 74</span> </span><span class="WHIT">	</span><span class="NAME">this.apikey</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">apikey</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 75</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 76</span> 
+<span class='line'> 77</span> </span><span class="COMM">/**
+<span class='line'> 78</span>  * Gets the API key
+<span class='line'> 79</span>  * @returns {string} the api key that was previously set 
+<span class='line'> 80</span>  */</span><span class="WHIT">
+<span class='line'> 81</span> </span><span class="NAME">SpazTMDB.prototype.getAPIKey</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 82</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">this.apikey</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 83</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 84</span> 
+<span class='line'> 85</span> </span><span class="COMM">/**
+<span class='line'> 86</span>  * Search for movies by title
+<span class='line'> 87</span>  * @param {string} value the value passed to the search method
+<span class='line'> 88</span>  * @param {function} [onSuccess] a callback 
+<span class='line'> 89</span>  * @param {function} [onFailure] a callback 
+<span class='line'> 90</span>  */</span><span class="WHIT">
+<span class='line'> 91</span> </span><span class="NAME">SpazTMDB.prototype.movieSearch</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">value</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">onSuccess</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">onFailure</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 92</span> </span><span class="WHIT">	</span><span class="NAME">this.callMethod</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 93</span> </span><span class="WHIT">		</span><span class="STRN">'method'</span><span class="PUNC">:</span><span class="STRN">'Movie.search'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 94</span> </span><span class="WHIT">		</span><span class="STRN">'value'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="NAME">value</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 95</span> </span><span class="WHIT">		</span><span class="STRN">'successEvent'</span><span class="PUNC">:</span><span class="NAME">sc.events.tmdbMovieSearchSuccess</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 96</span> </span><span class="WHIT">		</span><span class="STRN">'failureEvent'</span><span class="PUNC">:</span><span class="NAME">sc.events.tmdbMovieSearchFailure</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 97</span> </span><span class="WHIT">		</span><span class="STRN">'onSuccess'</span><span class="PUNC">:</span><span class="NAME">onSuccess</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 98</span> </span><span class="WHIT">		</span><span class="STRN">'onFailure'</span><span class="PUNC">:</span><span class="NAME">onFailure</span><span class="WHIT">
+<span class='line'> 99</span> </span><span class="WHIT"> 	</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>100</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>101</span> 
+<span class='line'>102</span> 
+<span class='line'>103</span> 
+<span class='line'>104</span> </span><span class="COMM">/**
+<span class='line'>105</span>  * Get info for a movie
+<span class='line'>106</span>  * @param {string|number} id The id of the movie (numeric)
+<span class='line'>107</span>  * @param {function} [onSuccess] a callback 
+<span class='line'>108</span>  * @param {function} [onFailure] a callback 
+<span class='line'>109</span>  */</span><span class="WHIT">
+<span class='line'>110</span> </span><span class="NAME">SpazTMDB.prototype.movieInfo</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">id</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">onSuccess</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">onFailure</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>111</span> </span><span class="WHIT">	</span><span class="NAME">this.callMethod</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>112</span> </span><span class="WHIT">		</span><span class="STRN">'method'</span><span class="PUNC">:</span><span class="STRN">'Movie.getInfo'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>113</span> </span><span class="WHIT">		</span><span class="STRN">'value'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="NAME">id</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>114</span> </span><span class="WHIT">		</span><span class="STRN">'successEvent'</span><span class="PUNC">:</span><span class="NAME">sc.events.tmdbMovieGetInfoSuccess</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>115</span> </span><span class="WHIT">		</span><span class="STRN">'failureEvent'</span><span class="PUNC">:</span><span class="NAME">sc.events.tmdbMovieGetInfoFailure</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>116</span> </span><span class="WHIT">		</span><span class="STRN">'onSuccess'</span><span class="PUNC">:</span><span class="NAME">onSuccess</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>117</span> </span><span class="WHIT">		</span><span class="STRN">'onFailure'</span><span class="PUNC">:</span><span class="NAME">onFailure</span><span class="WHIT">
+<span class='line'>118</span> </span><span class="WHIT"> 	</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>119</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>120</span> 
+<span class='line'>121</span> 
+<span class='line'>122</span> 
+<span class='line'>123</span> </span><span class="COMM">/**
+<span class='line'>124</span>  * Get images for a movie
+<span class='line'>125</span>  * @param {string|number} id The id of the movie (numeric)
+<span class='line'>126</span>  * @param {function} [onSuccess] a callback 
+<span class='line'>127</span>  * @param {function} [onFailure] a callback 
+<span class='line'>128</span>  */</span><span class="WHIT">
+<span class='line'>129</span> </span><span class="NAME">SpazTMDB.prototype.movieImages</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">id</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">onSuccess</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">onFailure</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>130</span> </span><span class="WHIT">	</span><span class="NAME">this.callMethod</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>131</span> </span><span class="WHIT">		</span><span class="STRN">'method'</span><span class="PUNC">:</span><span class="STRN">'Movie.getImages'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>132</span> </span><span class="WHIT">		</span><span class="STRN">'value'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="NAME">id</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>133</span> </span><span class="WHIT">		</span><span class="STRN">'successEvent'</span><span class="PUNC">:</span><span class="NAME">sc.events.tmdbMovieGetInfoSuccess</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>134</span> </span><span class="WHIT">		</span><span class="STRN">'failureEvent'</span><span class="PUNC">:</span><span class="NAME">sc.events.tmdbMovieGetInfoFailure</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>135</span> </span><span class="WHIT">		</span><span class="STRN">'onSuccess'</span><span class="PUNC">:</span><span class="NAME">onSuccess</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>136</span> </span><span class="WHIT">		</span><span class="STRN">'onFailure'</span><span class="PUNC">:</span><span class="NAME">onFailure</span><span class="WHIT">
+<span class='line'>137</span> </span><span class="WHIT"> 	</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>138</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>139</span> 
+<span class='line'>140</span> 
+<span class='line'>141</span> 
+<span class='line'>142</span> </span><span class="COMM">/**
+<span class='line'>143</span>  * Lookup a movie by IMDB id
+<span class='line'>144</span>  * @param {string} id The IMDB id of the movie. ex "tt0137523"
+<span class='line'>145</span>  * @param {function} [onSuccess] a callback 
+<span class='line'>146</span>  * @param {function} [onFailure] a callback 
+<span class='line'>147</span>  */</span><span class="WHIT">
+<span class='line'>148</span> </span><span class="NAME">SpazTMDB.prototype.movieInfoIMDB</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">id</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">onSuccess</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">onFailure</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>149</span> </span><span class="WHIT">	</span><span class="NAME">this.callMethod</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>150</span> </span><span class="WHIT">		</span><span class="STRN">'method'</span><span class="PUNC">:</span><span class="STRN">'Movie.imdbLookup'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>151</span> </span><span class="WHIT">		</span><span class="STRN">'value'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="NAME">id</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>152</span> </span><span class="WHIT">		</span><span class="STRN">'successEvent'</span><span class="PUNC">:</span><span class="NAME">sc.events.tmdbMovieIMDBLookupSuccess</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>153</span> </span><span class="WHIT">		</span><span class="STRN">'failureEvent'</span><span class="PUNC">:</span><span class="NAME">sc.events.tmdbMovieIMDBLookupFailure</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>154</span> </span><span class="WHIT">		</span><span class="STRN">'onSuccess'</span><span class="PUNC">:</span><span class="NAME">onSuccess</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>155</span> </span><span class="WHIT">		</span><span class="STRN">'onFailure'</span><span class="PUNC">:</span><span class="NAME">onFailure</span><span class="WHIT">
+<span class='line'>156</span> </span><span class="WHIT"> 	</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>157</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>158</span> 
+<span class='line'>159</span> 
+<span class='line'>160</span> 
+<span class='line'>161</span> </span><span class="COMM">/**
+<span class='line'>162</span>  * Search for a person
+<span class='line'>163</span>  * @param {string|number} id The id of the person (numeric)
+<span class='line'>164</span>  * @param {function} [onSuccess] a callback 
+<span class='line'>165</span>  * @param {function} [onFailure] a callback 
+<span class='line'>166</span>  */</span><span class="WHIT">
+<span class='line'>167</span> </span><span class="NAME">SpazTMDB.prototype.personInfo</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">id</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">onSuccess</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">onFailure</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>168</span> </span><span class="WHIT">	</span><span class="NAME">this.callMethod</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>169</span> </span><span class="WHIT">		</span><span class="STRN">'method'</span><span class="PUNC">:</span><span class="STRN">'Person.getInfo'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>170</span> </span><span class="WHIT">		</span><span class="STRN">'value'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="NAME">id</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>171</span> </span><span class="WHIT">		</span><span class="STRN">'successEvent'</span><span class="PUNC">:</span><span class="NAME">sc.events.tmdbPersonGetInfoSuccess</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>172</span> </span><span class="WHIT">		</span><span class="STRN">'failureEvent'</span><span class="PUNC">:</span><span class="NAME">sc.events.tmdbPersonGetInfoFailure</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>173</span> </span><span class="WHIT">		</span><span class="STRN">'onSuccess'</span><span class="PUNC">:</span><span class="NAME">onSuccess</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>174</span> </span><span class="WHIT">		</span><span class="STRN">'onFailure'</span><span class="PUNC">:</span><span class="NAME">onFailure</span><span class="WHIT">
+<span class='line'>175</span> </span><span class="WHIT"> 	</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>176</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>177</span> 
+<span class='line'>178</span> 
+<span class='line'>179</span> 
+<span class='line'>180</span> </span><span class="COMM">/**
+<span class='line'>181</span>  * Search for a person
+<span class='line'>182</span>  * @param {string} name The name to search for
+<span class='line'>183</span>  * @param {function} [onSuccess] a callback 
+<span class='line'>184</span>  * @param {function} [onFailure] a callback 
+<span class='line'>185</span>  */</span><span class="WHIT">
+<span class='line'>186</span> </span><span class="NAME">SpazTMDB.prototype.personSearch</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">name</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">onSuccess</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">onFailure</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>187</span> </span><span class="WHIT">	</span><span class="NAME">this.callMethod</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>188</span> </span><span class="WHIT">		</span><span class="STRN">'method'</span><span class="PUNC">:</span><span class="STRN">'Person.search'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>189</span> </span><span class="WHIT">		</span><span class="STRN">'value'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="NAME">name</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>190</span> </span><span class="WHIT">		</span><span class="STRN">'successEvent'</span><span class="PUNC">:</span><span class="NAME">sc.events.tmdbPersonSearchSuccess</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>191</span> </span><span class="WHIT">		</span><span class="STRN">'failureEvent'</span><span class="PUNC">:</span><span class="NAME">sc.events.tmdbPersonSearchFailure</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>192</span> </span><span class="WHIT">		</span><span class="STRN">'onSuccess'</span><span class="PUNC">:</span><span class="NAME">onSuccess</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>193</span> </span><span class="WHIT">		</span><span class="STRN">'onFailure'</span><span class="PUNC">:</span><span class="NAME">onFailure</span><span class="WHIT">
+<span class='line'>194</span> </span><span class="WHIT"> 	</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>195</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>196</span> 
+<span class='line'>197</span> 
+<span class='line'>198</span> 
+<span class='line'>199</span> 
+<span class='line'>200</span> </span><span class="COMM">/**
+<span class='line'>201</span>  * Get movie info by file hash
+<span class='line'>202</span>  * @param {string} hash The hash corresponding to the movie
+<span class='line'>203</span>  * @param {function} [onSuccess] a callback 
+<span class='line'>204</span>  * @param {function} [onFailure] a callback 
+<span class='line'>205</span>  * @see &lt;a href="http://trac.opensubtitles.org/projects/opensubtitles/wiki/HashSourceCodes">Hash Source Codes&lt;/a>
+<span class='line'>206</span>  */</span><span class="WHIT">
+<span class='line'>207</span> </span><span class="NAME">SpazTMDB.prototype.movieInfoHash</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">hash</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">onSuccess</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">onFailure</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>208</span> </span><span class="WHIT">	</span><span class="NAME">this.callMethod</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>209</span> </span><span class="WHIT">		</span><span class="STRN">'method'</span><span class="PUNC">:</span><span class="STRN">'Hash.getInfo'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>210</span> </span><span class="WHIT">		</span><span class="STRN">'value'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="NAME">hash</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>211</span> </span><span class="WHIT">		</span><span class="STRN">'successEvent'</span><span class="PUNC">:</span><span class="NAME">sc.events.tmdbHashGetInfoSuccess</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>212</span> </span><span class="WHIT">		</span><span class="STRN">'failureEvent'</span><span class="PUNC">:</span><span class="NAME">sc.events.tmdbHashGetInfoFailure</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>213</span> </span><span class="WHIT">		</span><span class="STRN">'onSuccess'</span><span class="PUNC">:</span><span class="NAME">onSuccess</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>214</span> </span><span class="WHIT">		</span><span class="STRN">'onFailure'</span><span class="PUNC">:</span><span class="NAME">onFailure</span><span class="WHIT">
+<span class='line'>215</span> </span><span class="WHIT"> 	</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>216</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>217</span> 
+<span class='line'>218</span> 
+<span class='line'>219</span> 
+<span class='line'>220</span> 
+<span class='line'>221</span> 
+<span class='line'>222</span> 
+<span class='line'>223</span> </span><span class="COMM">/**
+<span class='line'>224</span>  * Method to construct an API URL from the passed method and value strings
+<span class='line'>225</span>  * @param {string} method the string for this parameter. See API docs for list
+<span class='line'>226</span>  * @param {string} value the value we're passing to the API method. This will be encoded using encodeURIComponent() 
+<span class='line'>227</span>  * @returns {string} the URL string
+<span class='line'>228</span>  */</span><span class="WHIT">
+<span class='line'>229</span> </span><span class="NAME">SpazTMDB.prototype.getURL</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">method</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">value</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>230</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">url</span><span class="WHIT">  </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">this.baseURL</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">method</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">"/"</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">this.lang</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">"/"</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">this.format</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">"/"</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">this.apikey</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">"/"</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">encodeURIComponent</span><span class="PUNC">(</span><span class="NAME">value</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>231</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">url</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>232</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>233</span> 
+<span class='line'>234</span> 
+<span class='line'>235</span> 
+<span class='line'>236</span> 
+<span class='line'>237</span> </span><span class="COMM">/**
+<span class='line'>238</span>  * a general purpose method for calling API methods via ajax and raising
+<span class='line'>239</span>  * events on success/failure. callbacks can optionally be set for success
+<span class='line'>240</span>  * or failure as well
+<span class='line'>241</span>  * @param {Object} opts options for the method call
+<span class='line'>242</span>  * @param {string} opts.method the method to call
+<span class='line'>243</span>  * @param {string} opts.value value passed to method
+<span class='line'>244</span>  * @param {string} [opts.successEvent] the type of event to raise on success. default is {@link sc.events.tmdbMethodSuccess}
+<span class='line'>245</span>  * @param {string} [opts.failureEvent] the type of event to raise on failure. default is {@link sc.events.tmdbMethodFailure}
+<span class='line'>246</span>  * @param {function} [opts.onSuccess] a callback function called on success. takes args data, textStatus
+<span class='line'>247</span>  * @param {function} [opts.onFailure] a callback function called on failure. takes args xhr, msg, exc
+<span class='line'>248</span>  * 
+<span class='line'>249</span>  */</span><span class="WHIT">
+<span class='line'>250</span> </span><span class="NAME">SpazTMDB.prototype.callMethod</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">opts</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>251</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">that</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>252</span> </span><span class="WHIT">	
+<span class='line'>253</span> 	</span><span class="NAME">opts</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">sch.defaults</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>254</span> </span><span class="WHIT">		</span><span class="STRN">'method'</span><span class="WHIT">      </span><span class="PUNC">:</span><span class="STRN">'Movie.search'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>255</span> </span><span class="WHIT">		</span><span class="STRN">'value'</span><span class="WHIT">       </span><span class="PUNC">:</span><span class="STRN">'Road House'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>256</span> </span><span class="WHIT">		</span><span class="STRN">'successEvent'</span><span class="PUNC">:</span><span class="NAME">sc.events.tmdbMethodSuccess</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>257</span> </span><span class="WHIT">		</span><span class="STRN">'failureEvent'</span><span class="PUNC">:</span><span class="NAME">sc.events.tmdbMethodFailure</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>258</span> </span><span class="WHIT">		</span><span class="STRN">'onSuccess'</span><span class="WHIT">   </span><span class="PUNC">:</span><span class="KEYW">null</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="COMM">// callback on success</span><span class="WHIT">
+<span class='line'>259</span> </span><span class="WHIT">		</span><span class="STRN">'onFailure'</span><span class="WHIT">   </span><span class="PUNC">:</span><span class="KEYW">null</span><span class="WHIT">  </span><span class="COMM">// callback on failure</span><span class="WHIT">
+<span class='line'>260</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">opts</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>261</span> </span><span class="WHIT">	
+<span class='line'>262</span> 	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">url</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">this.getURL</span><span class="PUNC">(</span><span class="NAME">opts.method</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">opts.value</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>263</span> </span><span class="WHIT">	
+<span class='line'>264</span> 	</span><span class="NAME">jQuery.ajax</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>265</span> </span><span class="WHIT">		</span><span class="STRN">'url'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="NAME">url</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>266</span> </span><span class="WHIT">		</span><span class="STRN">'type'</span><span class="PUNC">:</span><span class="STRN">'GET'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>267</span> </span><span class="WHIT">		</span><span class="STRN">'success'</span><span class="PUNC">:</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">data</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">textStatus</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>268</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">opts.onSuccess</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>269</span> </span><span class="WHIT">				</span><span class="NAME">opts.onSuccess.call</span><span class="PUNC">(</span><span class="NAME">that</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">data</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">textStatus</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>270</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>271</span> </span><span class="WHIT">			</span><span class="NAME">sch.trigger</span><span class="PUNC">(</span><span class="NAME">opts.successEvent</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">that.eventTarget</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">data</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>272</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>273</span> </span><span class="WHIT">		</span><span class="STRN">'error'</span><span class="PUNC">:</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">xhr</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">msg</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">exc</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>274</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">opts.onFailure</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>275</span> </span><span class="WHIT">				</span><span class="NAME">opts.onFailure.call</span><span class="PUNC">(</span><span class="NAME">that</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">xhr</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">msg</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">exc</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>276</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>277</span> </span><span class="WHIT">			</span><span class="NAME">sch.trigger</span><span class="PUNC">(</span><span class="NAME">opts.failure</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">that.eventTarget</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="STRN">'url'</span><span class="PUNC">:</span><span class="NAME">url</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'xhr'</span><span class="PUNC">:</span><span class="NAME">xhr</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'msg'</span><span class="PUNC">:</span><span class="NAME">msg</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>278</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>279</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>280</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>281</span> 
+<span class='line'>282</span> </span></pre></body></html>

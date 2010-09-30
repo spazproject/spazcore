@@ -1,0 +1,452 @@
+<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"> <style>
+	.KEYW {color: #933;}
+	.COMM {color: #bbb; font-style: italic;}
+	.NUMB {color: #393;}
+	.STRN {color: #393;}
+	.REGX {color: #339;}
+	.line {border-right: 1px dotted #666; color: #666; font-style: normal;}
+	</style></head><body><pre><span class='line'>  1</span> <span class="COMM">/*jslint 
+<span class='line'>  2</span> browser: true,
+<span class='line'>  3</span> nomen: false,
+<span class='line'>  4</span> debug: true,
+<span class='line'>  5</span> forin: true,
+<span class='line'>  6</span> undef: true,
+<span class='line'>  7</span> white: false,
+<span class='line'>  8</span> onevar: false 
+<span class='line'>  9</span>  */</span><span class="WHIT">
+<span class='line'> 10</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">sc</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">DOMParser</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">jQuery</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 11</span> 
+<span class='line'> 12</span> 
+<span class='line'> 13</span> </span><span class="COMM">/**
+<span class='line'> 14</span>  * A file uploader class for SpazCore 
+<span class='line'> 15</span>  */</span><span class="WHIT">
+<span class='line'> 16</span> 
+<span class='line'> 17</span> </span><span class="COMM">/**
+<span class='line'> 18</span>  * Events used by this library 
+<span class='line'> 19</span>  */</span><span class="WHIT">
+<span class='line'> 20</span> </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">sc.events</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT"> </span><span class="NAME">sc.events</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 21</span> </span><span class="NAME">sc.events.fileUploadStart</span><span class="WHIT">	</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'fileUploadStart'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 22</span> </span><span class="NAME">sc.events.fileUploadSuccess</span><span class="WHIT">	</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'fileUploadSuccess'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 23</span> </span><span class="NAME">sc.events.fileUploadFailure</span><span class="WHIT">	</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'fileUploadFailure'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 24</span> 
+<span class='line'> 25</span> 
+<span class='line'> 26</span> 
+<span class='line'> 27</span> </span><span class="COMM">/**
+<span class='line'> 28</span>  * A File uploader class
+<span class='line'> 29</span>  * 
+<span class='line'> 30</span>  * opts = {
+<span class='line'> 31</span>  *   api:'',
+<span class='line'> 32</span>  *   startEvent:'',
+<span class='line'> 33</span>  *   successEvent:'',
+<span class='line'> 34</span>  *   failureEvent:'',
+<span class='line'> 35</span>  *   eventTarget:DOMElement
+<span class='line'> 36</span>  * } 
+<span class='line'> 37</span>  * @constructor
+<span class='line'> 38</span>  */</span><span class="WHIT">
+<span class='line'> 39</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">SpazFileUploader</span><span class="PUNC">(</span><span class="NAME">opts</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 40</span> 
+<span class='line'> 41</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">opts</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT"> </span><span class="NAME">opts</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 42</span> </span><span class="WHIT">		
+<span class='line'> 43</span> 	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">opts.api</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 44</span> </span><span class="WHIT">		</span><span class="NAME">this.setAPI</span><span class="PUNC">(</span><span class="NAME">opts.api</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 45</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 46</span> </span><span class="WHIT">	</span><span class="NAME">this.startEvent</span><span class="WHIT">   </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">opts.startEvent</span><span class="WHIT">   </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">sc.events.fileUploadStart</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 47</span> </span><span class="WHIT">	</span><span class="NAME">this.successEvent</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">opts.successEvent</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">sc.events.fileUploadSuccess</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 48</span> </span><span class="WHIT">	</span><span class="NAME">this.failureEvent</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">opts.failureEvent</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">sc.events.fileUploadFailure</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 49</span> </span><span class="WHIT">	</span><span class="NAME">this.eventTarget</span><span class="WHIT">  </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">opts.eventTarget</span><span class="WHIT">  </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">document</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 50</span> </span><span class="WHIT">	</span><span class="NAME">this.auth</span><span class="WHIT">         </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">opts.auth</span><span class="WHIT">         </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 51</span> </span><span class="WHIT">	
+<span class='line'> 52</span> 	</span><span class="NAME">this.apis</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">this.getAPIs</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 53</span> 
+<span class='line'> 54</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 55</span> 
+<span class='line'> 56</span> </span><span class="COMM">/**
+<span class='line'> 57</span>  * returns an array of API labels
+<span class='line'> 58</span>  * @return array 
+<span class='line'> 59</span>  */</span><span class="WHIT">
+<span class='line'> 60</span> </span><span class="NAME">SpazFileUploader.prototype.getAPILabels</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 61</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">labels</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 62</span> </span><span class="WHIT">	</span><span class="KEYW">for</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">key</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">this.getAPIs</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 63</span> </span><span class="WHIT">		</span><span class="NAME">labels.push</span><span class="PUNC">(</span><span class="NAME">key</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 64</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 65</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">labels</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 66</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 67</span> 
+<span class='line'> 68</span> 
+<span class='line'> 69</span> </span><span class="COMM">/**
+<span class='line'> 70</span>  * This builds the apis hash and returns it. All API stuff is defined inside here
+<span class='line'> 71</span>  */</span><span class="WHIT">
+<span class='line'> 72</span> </span><span class="NAME">SpazFileUploader.prototype.getAPIs</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 73</span> 
+<span class='line'> 74</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">thisSFU</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 75</span> 
+<span class='line'> 76</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">apis</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 77</span> </span><span class="WHIT">	    </span><span class="STRN">'drippic'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 78</span> </span><span class="WHIT">			</span><span class="STRN">'upload_url'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'http://drippic.com/drippic/upload'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 79</span> </span><span class="WHIT">		    </span><span class="STRN">'post_url'</span><span class="WHIT">   </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'http://drippic.com/drippic/upload/tweet'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 80</span> </span><span class="WHIT">			</span><span class="STRN">'processResult'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">event</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">apiobj</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 81</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">loader</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">event.target</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 82</span> </span><span class="WHIT">				
+<span class='line'> 83</span> 				</span><span class="NAME">sch.debug</span><span class="PUNC">(</span><span class="STRN">'PROCESSING: EVENT'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 84</span> </span><span class="WHIT">				</span><span class="NAME">sch.debug</span><span class="PUNC">(</span><span class="NAME">event</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 85</span> 
+<span class='line'> 86</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">parser</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">DOMParser</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 87</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">xmldoc</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">parser.parseFromString</span><span class="PUNC">(</span><span class="NAME">event.data</span><span class="PUNC">,</span><span class="STRN">"text/xml"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 88</span> 
+<span class='line'> 89</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">rspAttr</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">xmldoc.getElementsByTagName</span><span class="PUNC">(</span><span class="STRN">"rsp"</span><span class="PUNC">)</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">attributes</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 90</span> </span><span class="WHIT">				</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">rspAttr.getNamedItem</span><span class="PUNC">(</span><span class="STRN">"stat"</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">nodeValue</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'ok'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'> 91</span> </span><span class="WHIT">				</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 92</span> </span><span class="WHIT">					</span><span class="NAME">returnobj</span><span class="PUNC">[</span><span class="STRN">'mediaurl'</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">jQuery</span><span class="PUNC">(</span><span class="NAME">xmldoc</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">find</span><span class="PUNC">(</span><span class="STRN">'mediaurl'</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">text</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 93</span> </span><span class="WHIT">				</span><span class="PUNC">}</span><span class="WHIT"> 
+<span class='line'> 94</span> 				</span><span class="KEYW">else</span><span class="WHIT">
+<span class='line'> 95</span> </span><span class="WHIT">				</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 96</span> </span><span class="WHIT">					</span><span class="NAME">returnobj</span><span class="PUNC">[</span><span class="STRN">'errMsg'</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">jQuery</span><span class="PUNC">(</span><span class="NAME">xmldoc</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">find</span><span class="PUNC">(</span><span class="STRN">'error'</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">text</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 97</span> </span><span class="WHIT">				</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 98</span> </span><span class="WHIT">				</span><span class="NAME">sch.debug</span><span class="PUNC">(</span><span class="NAME">returnobj</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 99</span> </span><span class="WHIT">				</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">returnobj</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>100</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>101</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>102</span> </span><span class="WHIT">		</span><span class="STRN">'pikchur'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>103</span> </span><span class="WHIT">		    </span><span class="STRN">'upload_url'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'http://api.pikchur.com/simple/upload'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>104</span> </span><span class="WHIT">		    </span><span class="STRN">'post_url'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'http://api.pikchur.com/simple/uploadAndPost'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>105</span> </span><span class="WHIT">			</span><span class="STRN">'api_key_field'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'api_key'</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="COMM">// setting this to non-empty means we MUST set an api key</span><span class="WHIT">
+<span class='line'>106</span> </span><span class="WHIT">			</span><span class="STRN">'processResult'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">event</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">apiobj</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>107</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">loader</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">event.target</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>108</span> </span><span class="WHIT">				
+<span class='line'>109</span> 				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">returnobj</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>110</span> 
+<span class='line'>111</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">parser</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">DOMParser</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>112</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">xmldoc</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">parser.parseFromString</span><span class="PUNC">(</span><span class="NAME">loader.data</span><span class="PUNC">,</span><span class="STRN">"text/xml"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>113</span> 
+<span class='line'>114</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">rspAttr</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">xmldoc.getElementsByTagName</span><span class="PUNC">(</span><span class="STRN">"rsp"</span><span class="PUNC">)</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">attributes</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>115</span> </span><span class="WHIT">				</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">rspAttr.getNamedItem</span><span class="PUNC">(</span><span class="STRN">"stat"</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">nodeValue</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'ok'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>116</span> </span><span class="WHIT">				</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>117</span> </span><span class="WHIT">					</span><span class="NAME">returnobj</span><span class="PUNC">[</span><span class="STRN">'mediaurl'</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">jQuery</span><span class="PUNC">(</span><span class="NAME">xmldoc</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">find</span><span class="PUNC">(</span><span class="STRN">'mediaurl'</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">text</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>118</span> </span><span class="WHIT">				</span><span class="PUNC">}</span><span class="WHIT"> 
+<span class='line'>119</span> 				</span><span class="KEYW">else</span><span class="WHIT">
+<span class='line'>120</span> </span><span class="WHIT">				</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>121</span> </span><span class="WHIT">					</span><span class="NAME">returnobj</span><span class="PUNC">[</span><span class="STRN">'errAttributes'</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">xmldoc.getElementsByTagName</span><span class="PUNC">(</span><span class="STRN">"err"</span><span class="PUNC">)</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">attributes</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>122</span> </span><span class="WHIT">					</span><span class="NAME">returnobj</span><span class="PUNC">[</span><span class="STRN">'errMsg'</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">errAttributes.getNamedItem</span><span class="PUNC">(</span><span class="STRN">"msg"</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">nodeValue</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>123</span> </span><span class="WHIT">				</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>124</span> </span><span class="WHIT">				</span><span class="NAME">sch.debug</span><span class="PUNC">(</span><span class="NAME">returnobj</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>125</span> </span><span class="WHIT">				</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">returnobj</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>126</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>127</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>128</span> </span><span class="WHIT">		</span><span class="STRN">'yfrog'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>129</span> </span><span class="WHIT">		    </span><span class="STRN">'upload_url'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'http://yfrog.com/api/upload'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>130</span> </span><span class="WHIT">		    </span><span class="STRN">'post_url'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'http://yfrog.com/api/uploadAndPost'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>131</span> </span><span class="WHIT">			</span><span class="STRN">'processResult'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">event</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">apiobj</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>132</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">loader</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">event.target</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>133</span> 
+<span class='line'>134</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">parser</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">DOMParser</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>135</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">xmldoc</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">parser.parseFromString</span><span class="PUNC">(</span><span class="NAME">loader.data</span><span class="PUNC">,</span><span class="STRN">"text/xml"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>136</span> 
+<span class='line'>137</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">rspAttr</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">xmldoc.getElementsByTagName</span><span class="PUNC">(</span><span class="STRN">"rsp"</span><span class="PUNC">)</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">attributes</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>138</span> </span><span class="WHIT">				</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">rspAttr.getNamedItem</span><span class="PUNC">(</span><span class="STRN">"stat"</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">nodeValue</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'ok'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>139</span> </span><span class="WHIT">				</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>140</span> </span><span class="WHIT">					</span><span class="NAME">returnobj</span><span class="PUNC">[</span><span class="STRN">'mediaurl'</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">jQuery</span><span class="PUNC">(</span><span class="NAME">xmldoc</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">find</span><span class="PUNC">(</span><span class="STRN">'mediaurl'</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">text</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>141</span> </span><span class="WHIT">				</span><span class="PUNC">}</span><span class="WHIT"> 
+<span class='line'>142</span> 				</span><span class="KEYW">else</span><span class="WHIT">
+<span class='line'>143</span> </span><span class="WHIT">				</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>144</span> </span><span class="WHIT">					</span><span class="NAME">returnobj</span><span class="PUNC">[</span><span class="STRN">'errAttributes'</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">xmldoc.getElementsByTagName</span><span class="PUNC">(</span><span class="STRN">"err"</span><span class="PUNC">)</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">attributes</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>145</span> </span><span class="WHIT">					</span><span class="NAME">returnobj</span><span class="PUNC">[</span><span class="STRN">'errMsg'</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">errAttributes.getNamedItem</span><span class="PUNC">(</span><span class="STRN">"msg"</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">nodeValue</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>146</span> </span><span class="WHIT">				</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>147</span> </span><span class="WHIT">				</span><span class="NAME">sch.debug</span><span class="PUNC">(</span><span class="NAME">returnobj</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>148</span> </span><span class="WHIT">				</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">returnobj</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>149</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>150</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>151</span> </span><span class="WHIT">	    </span><span class="STRN">'twitpic'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>152</span> </span><span class="WHIT">			</span><span class="STRN">'upload_url'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'http://twitpic.com/api/upload'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>153</span> </span><span class="WHIT">		    </span><span class="STRN">'post_url'</span><span class="WHIT">   </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'http://twitpic.com/api/uploadAndPost'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>154</span> </span><span class="WHIT">			</span><span class="STRN">'processResult'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">event</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">apiobj</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>155</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">loader</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">event.target</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>156</span> </span><span class="WHIT">				
+<span class='line'>157</span> 				</span><span class="NAME">sch.debug</span><span class="PUNC">(</span><span class="STRN">'PROCESSING: EVENT'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>158</span> </span><span class="WHIT">				</span><span class="NAME">sch.debug</span><span class="PUNC">(</span><span class="NAME">event</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>159</span> 
+<span class='line'>160</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">parser</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">DOMParser</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>161</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">xmldoc</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">parser.parseFromString</span><span class="PUNC">(</span><span class="NAME">event.data</span><span class="PUNC">,</span><span class="STRN">"text/xml"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>162</span> 
+<span class='line'>163</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">rspAttr</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">xmldoc.getElementsByTagName</span><span class="PUNC">(</span><span class="STRN">"rsp"</span><span class="PUNC">)</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">attributes</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>164</span> </span><span class="WHIT">				</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">rspAttr.getNamedItem</span><span class="PUNC">(</span><span class="STRN">"stat"</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">nodeValue</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'ok'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>165</span> </span><span class="WHIT">				</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>166</span> </span><span class="WHIT">					</span><span class="NAME">returnobj</span><span class="PUNC">[</span><span class="STRN">'mediaurl'</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">jQuery</span><span class="PUNC">(</span><span class="NAME">xmldoc</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">find</span><span class="PUNC">(</span><span class="STRN">'mediaurl'</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">text</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>167</span> </span><span class="WHIT">				</span><span class="PUNC">}</span><span class="WHIT"> 
+<span class='line'>168</span> 				</span><span class="KEYW">else</span><span class="WHIT">
+<span class='line'>169</span> </span><span class="WHIT">				</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>170</span> </span><span class="WHIT">					</span><span class="NAME">returnobj</span><span class="PUNC">[</span><span class="STRN">'errAttributes'</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">xmldoc.getElementsByTagName</span><span class="PUNC">(</span><span class="STRN">"err"</span><span class="PUNC">)</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">attributes</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>171</span> </span><span class="WHIT">					</span><span class="NAME">returnobj</span><span class="PUNC">[</span><span class="STRN">'errMsg'</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">errAttributes.getNamedItem</span><span class="PUNC">(</span><span class="STRN">"msg"</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">nodeValue</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>172</span> </span><span class="WHIT">				</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>173</span> </span><span class="WHIT">				</span><span class="NAME">sch.debug</span><span class="PUNC">(</span><span class="NAME">returnobj</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>174</span> </span><span class="WHIT">				</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">returnobj</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>175</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>176</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>177</span> </span><span class="WHIT">	    </span><span class="STRN">'posterous'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>178</span> </span><span class="WHIT">			</span><span class="STRN">'upload_url'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'http://posterous.com/api/upload'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>179</span> </span><span class="WHIT">		    </span><span class="STRN">'post_url'</span><span class="WHIT">   </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'http://posterous.com/api/uploadAndPost'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>180</span> </span><span class="WHIT">			</span><span class="STRN">'processResult'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">event</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">apiobj</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>181</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">loader</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">event.target</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>182</span> </span><span class="WHIT">				
+<span class='line'>183</span> 				</span><span class="NAME">sch.debug</span><span class="PUNC">(</span><span class="STRN">'PROCESSING: EVENT'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>184</span> </span><span class="WHIT">				</span><span class="NAME">sch.debug</span><span class="PUNC">(</span><span class="NAME">event</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>185</span> 
+<span class='line'>186</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">parser</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">DOMParser</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>187</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">xmldoc</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">parser.parseFromString</span><span class="PUNC">(</span><span class="NAME">event.data</span><span class="PUNC">,</span><span class="STRN">"text/xml"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>188</span> 
+<span class='line'>189</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">rspAttr</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">xmldoc.getElementsByTagName</span><span class="PUNC">(</span><span class="STRN">"rsp"</span><span class="PUNC">)</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">attributes</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>190</span> </span><span class="WHIT">				</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">rspAttr.getNamedItem</span><span class="PUNC">(</span><span class="STRN">"stat"</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">nodeValue</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'ok'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>191</span> </span><span class="WHIT">				</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>192</span> </span><span class="WHIT">					</span><span class="NAME">returnobj</span><span class="PUNC">[</span><span class="STRN">'mediaurl'</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">jQuery</span><span class="PUNC">(</span><span class="NAME">xmldoc</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">find</span><span class="PUNC">(</span><span class="STRN">'mediaurl'</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">text</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>193</span> </span><span class="WHIT">				</span><span class="PUNC">}</span><span class="WHIT"> 
+<span class='line'>194</span> 				</span><span class="KEYW">else</span><span class="WHIT">
+<span class='line'>195</span> </span><span class="WHIT">				</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>196</span> </span><span class="WHIT">					</span><span class="NAME">returnobj</span><span class="PUNC">[</span><span class="STRN">'errAttributes'</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">xmldoc.getElementsByTagName</span><span class="PUNC">(</span><span class="STRN">"err"</span><span class="PUNC">)</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">attributes</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>197</span> </span><span class="WHIT">					</span><span class="NAME">returnobj</span><span class="PUNC">[</span><span class="STRN">'errMsg'</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">errAttributes.getNamedItem</span><span class="PUNC">(</span><span class="STRN">"msg"</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">nodeValue</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>198</span> </span><span class="WHIT">				</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>199</span> </span><span class="WHIT">				</span><span class="NAME">sch.debug</span><span class="PUNC">(</span><span class="NAME">returnobj</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>200</span> </span><span class="WHIT">				</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">returnobj</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>201</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>202</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>203</span> </span><span class="WHIT">		</span><span class="STRN">'twitgoo'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>204</span> </span><span class="WHIT">			</span><span class="STRN">'upload_url'</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'http://twitgoo.com/api/upload'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>205</span> </span><span class="WHIT">			</span><span class="STRN">'post_url'</span><span class="WHIT">   </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'http://twitgoo.com/api/uploadAndPost'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>206</span> </span><span class="WHIT">			</span><span class="STRN">'processResult'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">event</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">apiobj</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>207</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">loader</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">event.target</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>208</span> 
+<span class='line'>209</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">parser</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">DOMParser</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>210</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">xmldoc</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">parser.parseFromString</span><span class="PUNC">(</span><span class="NAME">loader.data</span><span class="PUNC">,</span><span class="STRN">"text/xml"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>211</span> 
+<span class='line'>212</span> </span><span class="WHIT">				</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">rspAttr</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">xmldoc.getElementsByTagName</span><span class="PUNC">(</span><span class="STRN">"rsp"</span><span class="PUNC">)</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">attributes</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>213</span> </span><span class="WHIT">				</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">rspAttr.getNamedItem</span><span class="PUNC">(</span><span class="STRN">"stat"</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">nodeValue</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'ok'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>214</span> </span><span class="WHIT">				</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>215</span> </span><span class="WHIT">					</span><span class="NAME">returnobj</span><span class="PUNC">[</span><span class="STRN">'mediaurl'</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">jQuery</span><span class="PUNC">(</span><span class="NAME">xmldoc</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">find</span><span class="PUNC">(</span><span class="STRN">'mediaurl'</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">text</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>216</span> </span><span class="WHIT">				</span><span class="PUNC">}</span><span class="WHIT"> 
+<span class='line'>217</span> 				</span><span class="KEYW">else</span><span class="WHIT">
+<span class='line'>218</span> </span><span class="WHIT">				</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>219</span> </span><span class="WHIT">					</span><span class="NAME">returnobj</span><span class="PUNC">[</span><span class="STRN">'errAttributes'</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">xmldoc.getElementsByTagName</span><span class="PUNC">(</span><span class="STRN">"err"</span><span class="PUNC">)</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">attributes</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>220</span> </span><span class="WHIT">					</span><span class="NAME">returnobj</span><span class="PUNC">[</span><span class="STRN">'errMsg'</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">errAttributes.getNamedItem</span><span class="PUNC">(</span><span class="STRN">"msg"</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">nodeValue</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>221</span> </span><span class="WHIT">				</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>222</span> </span><span class="WHIT">				</span><span class="NAME">sch.debug</span><span class="PUNC">(</span><span class="NAME">returnobj</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>223</span> </span><span class="WHIT">				</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">returnobj</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>224</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>225</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="COMM">//,</span><span class="WHIT">
+<span class='line'>226</span> </span><span class="WHIT">		</span><span class="COMM">/*
+<span class='line'>227</span> 			Not sure if we should continue to support tweetphoto; API is complex
+<span class='line'>228</span> 		*/</span><span class="WHIT">
+<span class='line'>229</span> </span><span class="WHIT">		</span><span class="COMM">// 'tweetphoto': {</span><span class="WHIT">
+<span class='line'>230</span> </span><span class="WHIT">		</span><span class="COMM">// 	'upload_url' : 'http://tweetphotoapi.com/api/tpapi.svc/upload2',</span><span class="WHIT">
+<span class='line'>231</span> </span><span class="WHIT">		</span><span class="COMM">// 	'api_key_field': 'TPAPIKEY', // this means we need to set the api key</span><span class="WHIT">
+<span class='line'>232</span> </span><span class="WHIT">		</span><span class="COMM">// 	'onBeforeSend' : function(extraParams, api.upload_url, file_url) {</span><span class="WHIT">
+<span class='line'>233</span> </span><span class="WHIT">		</span><span class="COMM">// 	</span><span class="WHIT">
+<span class='line'>234</span> </span><span class="WHIT">		</span><span class="COMM">// 	},</span><span class="WHIT">
+<span class='line'>235</span> </span><span class="WHIT">		</span><span class="COMM">// 	'processResult': function(event, apiobj) {</span><span class="WHIT">
+<span class='line'>236</span> </span><span class="WHIT">		</span><span class="COMM">// 		var loader = event.target;</span><span class="WHIT">
+<span class='line'>237</span> </span><span class="WHIT">		</span><span class="COMM">// </span><span class="WHIT">
+<span class='line'>238</span> </span><span class="WHIT">		</span><span class="COMM">// 		var parser=new DOMParser();</span><span class="WHIT">
+<span class='line'>239</span> </span><span class="WHIT">		</span><span class="COMM">// 		var xmldoc = parser.parseFromString(loader.data,"text/xml");</span><span class="WHIT">
+<span class='line'>240</span> </span><span class="WHIT">		</span><span class="COMM">// </span><span class="WHIT">
+<span class='line'>241</span> </span><span class="WHIT">		</span><span class="COMM">// 		if (jQuery(xmldoc).find('Status').text().toLowerCase() === 'ok')</span><span class="WHIT">
+<span class='line'>242</span> </span><span class="WHIT">		</span><span class="COMM">// 		{</span><span class="WHIT">
+<span class='line'>243</span> </span><span class="WHIT">		</span><span class="COMM">// 			var mediaurl = jQuery(xmldoc).find('MediaUrl').text();</span><span class="WHIT">
+<span class='line'>244</span> </span><span class="WHIT">		</span><span class="COMM">// 		} </span><span class="WHIT">
+<span class='line'>245</span> </span><span class="WHIT">		</span><span class="COMM">// 		else</span><span class="WHIT">
+<span class='line'>246</span> </span><span class="WHIT">		</span><span class="COMM">// 		{</span><span class="WHIT">
+<span class='line'>247</span> </span><span class="WHIT">		</span><span class="COMM">// 			sch.error('There was an error uploading to TweetPhoto')</span><span class="WHIT">
+<span class='line'>248</span> </span><span class="WHIT">		</span><span class="COMM">// 			var errAttributes = xmldoc.getElementsByTagName("err")[0].attributes;</span><span class="WHIT">
+<span class='line'>249</span> </span><span class="WHIT">		</span><span class="COMM">// 			var errMsg = errAttributes.getNamedItem("msg").nodeValue;</span><span class="WHIT">
+<span class='line'>250</span> </span><span class="WHIT">		</span><span class="COMM">// 		}</span><span class="WHIT">
+<span class='line'>251</span> </span><span class="WHIT">		</span><span class="COMM">// 	}	</span><span class="WHIT">
+<span class='line'>252</span> </span><span class="WHIT">		</span><span class="COMM">// }</span><span class="WHIT">
+<span class='line'>253</span> </span><span class="WHIT">		
+<span class='line'>254</span> 	</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>255</span> 
+<span class='line'>256</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">apis</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>257</span> 
+<span class='line'>258</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>259</span> 
+<span class='line'>260</span> </span><span class="COMM">/**
+<span class='line'>261</span>  * Pass the api you want to use as a string
+<span class='line'>262</span>  * @param {string} apilabel 
+<span class='line'>263</span>  */</span><span class="WHIT">
+<span class='line'>264</span> </span><span class="NAME">SpazFileUploader.prototype.setAPI</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">apilabel</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>265</span> </span><span class="WHIT">	</span><span class="NAME">this.api</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">this.apis</span><span class="PUNC">[</span><span class="NAME">apilabel</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>266</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>267</span> 
+<span class='line'>268</span> </span><span class="COMM">/**
+<span class='line'>269</span>  * some services require an api key or app identifier. This sets that.
+<span class='line'>270</span>  * @param {string} api_key
+<span class='line'>271</span>  */</span><span class="WHIT">
+<span class='line'>272</span> </span><span class="NAME">SpazFileUploader.prototype.setAPIKey</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">api_key</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>273</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">this.api</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>274</span> </span><span class="WHIT">		</span><span class="NAME">this.api.api_key</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">api_key</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>275</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>276</span> </span><span class="WHIT">		</span><span class="NAME">sch.error</span><span class="PUNC">(</span><span class="STRN">'Must set the API before setting API key'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>277</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>278</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>279</span> 
+<span class='line'>280</span> </span><span class="COMM">/**
+<span class='line'>281</span>  * some services require an api key or app identifier. This sets that.
+<span class='line'>282</span>  * @param {string} api_key
+<span class='line'>283</span>  */</span><span class="WHIT">
+<span class='line'>284</span> </span><span class="NAME">SpazFileUploader.prototype.getAPIKey</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>285</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">this.api</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>286</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">this.api.api_key</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>287</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>288</span> </span><span class="WHIT">		</span><span class="NAME">sch.error</span><span class="PUNC">(</span><span class="STRN">'Must set the API before getting API key'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>289</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>290</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>291</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>292</span> 
+<span class='line'>293</span> </span><span class="COMM">/**
+<span class='line'>294</span>  * opts = {
+<span class='line'>295</span>  *   'api':'', // use if not set already
+<span class='line'>296</span>  *   'username':'xxx',
+<span class='line'>297</span>  *   'password':'xxx',
+<span class='line'>298</span>  *   'source':'xxx',
+<span class='line'>299</span>  *   'message':''
+<span class='line'>300</span>  *   
+<span class='line'>301</span>  * } 
+<span class='line'>302</span>  * 
+<span class='line'>303</span>  * This uploads a file located at the given file_url. It uses the
+<span class='line'>304</span>  * sc.helpers.HTTPUploadFile as defined for your given platform.  Events are
+<span class='line'>305</span>  * raised as set in the constructor on start, success and failure.
+<span class='line'>306</span>  * 
+<span class='line'>307</span>  * Note that in the webOS implementation, success events are raised every time
+<span class='line'>308</span>  * progress is reported, NOT just when completion happens. Check for the
+<span class='line'>309</span>  * "completed" boolean property in the response object. This may change in the
+<span class='line'>310</span>  * future.
+<span class='line'>311</span>  * 
+<span class='line'>312</span>  * @param {string} post_url  the url we're uploading the file to
+<span class='line'>313</span>  * @param {string} file_url  the local url of the file we're uploading
+<span class='line'>314</span>  * @param {object} opts  a set of key/val pairs
+<span class='line'>315</span>  */</span><span class="WHIT">
+<span class='line'>316</span> </span><span class="NAME">SpazFileUploader.prototype.uploadFile</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">post_url</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">file_url</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">opts</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>317</span> 
+<span class='line'>318</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">api</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">api_key</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>319</span> 
+<span class='line'>320</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">thisSFU</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>321</span> 
+<span class='line'>322</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">opts.api</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>323</span> </span><span class="WHIT">		</span><span class="NAME">api</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">this.apis.api</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>324</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">this.api</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>325</span> </span><span class="WHIT">		</span><span class="NAME">api</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">this.api</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>326</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>327</span> </span><span class="WHIT">		</span><span class="NAME">sch.error</span><span class="PUNC">(</span><span class="STRN">'Must set the API before uploading'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>328</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>329</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>330</span> </span><span class="WHIT">	
+<span class='line'>331</span> 	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">username</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">opts.username</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>332</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">password</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">opts.password</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>333</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">source</span><span class="WHIT">   </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">opts.source</span><span class="WHIT">   </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>334</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">message</span><span class="WHIT">  </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">opts.message</span><span class="WHIT">  </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>335</span> </span><span class="WHIT">	
+<span class='line'>336</span> 	</span><span class="COMM">/*
+<span class='line'>337</span> 		platform opts are for platform-specific options. For now we're using
+<span class='line'>338</span> 		this because webOS requires the scene controller to call the service
+<span class='line'>339</span> 		request, so we pass a reference to the scene assistant
+<span class='line'>340</span> 	*/</span><span class="WHIT">
+<span class='line'>341</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">platformOpts</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">opts.platform</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>342</span> 
+<span class='line'>343</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">onStart</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">opts.onStart</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>344</span> 
+<span class='line'>345</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">extraParams</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>346</span> </span><span class="WHIT">		</span><span class="STRN">"username"</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">username</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>347</span> </span><span class="WHIT">		</span><span class="STRN">"password"</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">password</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>348</span> </span><span class="WHIT">		</span><span class="STRN">"source"</span><span class="PUNC">:</span><span class="WHIT">   </span><span class="NAME">source</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>349</span> </span><span class="WHIT">		</span><span class="STRN">"message"</span><span class="PUNC">:</span><span class="WHIT">  </span><span class="NAME">message</span><span class="WHIT">
+<span class='line'>350</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>351</span> </span><span class="WHIT">	
+<span class='line'>352</span> 	</span><span class="COMM">/**
+<span class='line'>353</span> 	 * if we have an API key field, then we need the api key 
+<span class='line'>354</span> 	 */</span><span class="WHIT">
+<span class='line'>355</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">api.api_key_field</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>356</span> </span><span class="WHIT">		</span><span class="NAME">extraParams</span><span class="PUNC">[</span><span class="NAME">api.api_key_field</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">this.getAPIKey</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>357</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>358</span> 
+<span class='line'>359</span> </span><span class="WHIT">	</span><span class="COMM">/*
+<span class='line'>360</span> 		A callback in case we need to massage the data before upload
+<span class='line'>361</span> 	*/</span><span class="WHIT">
+<span class='line'>362</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">api.onBeforeSend</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>363</span> </span><span class="WHIT">		</span><span class="NAME">api.onBeforeSend.call</span><span class="PUNC">(</span><span class="NAME">api</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">extraParams</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">api.upload_url</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">file_url</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>364</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>365</span> </span><span class="WHIT">	
+<span class='line'>366</span> 	</span><span class="COMM">/*
+<span class='line'>367</span> 		trigger upload start event
+<span class='line'>368</span> 	*/</span><span class="WHIT">
+<span class='line'>369</span> </span><span class="WHIT">	</span><span class="NAME">sc.helpers.triggerCustomEvent</span><span class="PUNC">(</span><span class="NAME">thisSFU.startEvent</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">thisSFU.eventTarget</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>370</span> </span><span class="WHIT">	
+<span class='line'>371</span> 	</span><span class="COMM">// upload the file</span><span class="WHIT">
+<span class='line'>372</span> </span><span class="WHIT">	</span><span class="NAME">sc.helpers.HTTPUploadFile</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>373</span> </span><span class="WHIT">			</span><span class="STRN">'extra'</span><span class="WHIT">   </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">extraParams</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>374</span> </span><span class="WHIT">			</span><span class="STRN">'url'</span><span class="WHIT">     </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">post_url</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>375</span> </span><span class="WHIT">			</span><span class="STRN">'file_url'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">file_url</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>376</span> </span><span class="WHIT">			</span><span class="STRN">'platform'</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">platformOpts</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>377</span> </span><span class="WHIT">			</span><span class="STRN">'auth'</span><span class="WHIT">    </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">this.auth</span><span class="WHIT">
+<span class='line'>378</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>379</span> </span><span class="WHIT">		</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">event</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>380</span> </span><span class="WHIT">			</span><span class="NAME">sch.debug</span><span class="PUNC">(</span><span class="STRN">'UPLOAD SUCCESS, PROCESSING'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>381</span> </span><span class="WHIT">			</span><span class="COMM">/*
+<span class='line'>382</span> 				For now we're not using the processResult methods, as the 
+<span class='line'>383</span> 				implementation can vary by platform. For now, process response
+<span class='line'>384</span> 				externally.
+<span class='line'>385</span> 			*/</span><span class="WHIT">
+<span class='line'>386</span> </span><span class="WHIT">			</span><span class="COMM">// var data = api.processResult.call(thisSFU, event, api);</span><span class="WHIT">
+<span class='line'>387</span> </span><span class="WHIT">			</span><span class="COMM">// sch.debug(data);</span><span class="WHIT">
+<span class='line'>388</span> </span><span class="WHIT">			</span><span class="NAME">sc.helpers.triggerCustomEvent</span><span class="PUNC">(</span><span class="NAME">thisSFU.successEvent</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">thisSFU.eventTarget</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">event</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>389</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>390</span> </span><span class="WHIT">		</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">event</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>391</span> </span><span class="WHIT">			</span><span class="NAME">sch.debug</span><span class="PUNC">(</span><span class="STRN">'UPLOAD FAILURE, PROCESSING'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>392</span> </span><span class="WHIT">			</span><span class="COMM">/*
+<span class='line'>393</span> 				For now we're not using the processResult methods, as the 
+<span class='line'>394</span> 				implementation can vary by platform. For now, process response
+<span class='line'>395</span> 				externally.
+<span class='line'>396</span> 			*/</span><span class="WHIT">
+<span class='line'>397</span> </span><span class="WHIT">			</span><span class="COMM">// var data = api.processResult.call(thisSFU, event, api);</span><span class="WHIT">
+<span class='line'>398</span> </span><span class="WHIT">			</span><span class="COMM">// sch.debug(data);</span><span class="WHIT">
+<span class='line'>399</span> </span><span class="WHIT">			</span><span class="NAME">sc.helpers.triggerCustomEvent</span><span class="PUNC">(</span><span class="NAME">thisSFU.failureEvent</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">thisSFU.eventTarget</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">event</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>400</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>401</span> </span><span class="WHIT">	</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>402</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>403</span> 
+<span class='line'>404</span> 
+<span class='line'>405</span> 
+<span class='line'>406</span> </span><span class="COMM">/**
+<span class='line'>407</span>  * a wrapper for uploadFile that uses the post_url from the API definition 
+<span class='line'>408</span>  */</span><span class="WHIT">
+<span class='line'>409</span> </span><span class="NAME">SpazFileUploader.prototype.uploadAndPost</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">file_url</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">opts</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>410</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">api</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>411</span> </span><span class="WHIT">	
+<span class='line'>412</span> 	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">opts.api</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>413</span> </span><span class="WHIT">		</span><span class="NAME">api</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">this.apis.api</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>414</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">this.api</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>415</span> </span><span class="WHIT">		</span><span class="NAME">api</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">this.api</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>416</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>417</span> </span><span class="WHIT">		</span><span class="NAME">sch.error</span><span class="PUNC">(</span><span class="STRN">'Must set the API before uploading'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>418</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>419</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>420</span> </span><span class="WHIT">	
+<span class='line'>421</span> 	</span><span class="NAME">this.uploadFile</span><span class="PUNC">(</span><span class="NAME">api.post_url</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">file_url</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">opts</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>422</span> </span><span class="WHIT">	
+<span class='line'>423</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>424</span> 
+<span class='line'>425</span> </span><span class="COMM">/**
+<span class='line'>426</span>  * a wrapper for uploadFile that uses the upload_url from the API definition 
+<span class='line'>427</span>  */</span><span class="WHIT">
+<span class='line'>428</span> </span><span class="NAME">SpazFileUploader.prototype.upload</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">file_url</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">opts</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>429</span> </span><span class="WHIT">	
+<span class='line'>430</span> 	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">api</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>431</span> </span><span class="WHIT">	
+<span class='line'>432</span> 	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">opts.api</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>433</span> </span><span class="WHIT">		</span><span class="NAME">api</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">this.apis.api</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>434</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">this.api</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>435</span> </span><span class="WHIT">		</span><span class="NAME">api</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">this.api</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>436</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>437</span> </span><span class="WHIT">		</span><span class="NAME">sch.error</span><span class="PUNC">(</span><span class="STRN">'Must set the API before uploading'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>438</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>439</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>440</span> </span><span class="WHIT">	
+<span class='line'>441</span> 	</span><span class="NAME">this.uploadFile</span><span class="PUNC">(</span><span class="NAME">api.upload_url</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">file_url</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">opts</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>442</span> </span><span class="WHIT">	
+<span class='line'>443</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>444</span> 
+<span class='line'>445</span> </span></pre></body></html>

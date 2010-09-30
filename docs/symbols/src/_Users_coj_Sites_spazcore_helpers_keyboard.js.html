@@ -1,0 +1,57 @@
+<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"> <style>
+	.KEYW {color: #933;}
+	.COMM {color: #bbb; font-style: italic;}
+	.NUMB {color: #393;}
+	.STRN {color: #393;}
+	.REGX {color: #339;}
+	.line {border-right: 1px dotted #666; color: #666; font-style: normal;}
+	</style></head><body><pre><span class='line'>  1</span> <span class="COMM">/*jslint 
+<span class='line'>  2</span> browser: true,
+<span class='line'>  3</span> nomen: false,
+<span class='line'>  4</span> debug: true,
+<span class='line'>  5</span> forin: true,
+<span class='line'>  6</span> undef: true,
+<span class='line'>  7</span> white: false,
+<span class='line'>  8</span> onevar: false 
+<span class='line'>  9</span>  */</span><span class="WHIT">
+<span class='line'> 10</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">sc</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">DOMParser</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">shortcut</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 11</span> 
+<span class='line'> 12</span> </span><span class="COMM">/**
+<span class='line'> 13</span>  * this is really a wrapper for shortcut.add in shortcut.js 
+<span class='line'> 14</span>  * @param {string} shortcut The shortcut key combination should be specified in this format: Modifier[+Modifier..]+Key
+<span class='line'> 15</span>  * @param {Object} func	The function to be called when key is pressed
+<span class='line'> 16</span>  * @param {Object} opts A hash of options
+<span class='line'> 17</span>  * @param {string} [opts.type] The event type - can be 'keydown','keyup','keypress'. Default: 'keydown' 
+<span class='line'> 18</span>  * @param {Boolean} [opts.disable_in_input] If this is set to true, keyboard capture will be disabled in input and textarea fields. Default is TRUE
+<span class='line'> 19</span>  * @param {Object} [opts.target] The dom node that should be watched for the keyboard event. Default is the document element
+<span class='line'> 20</span>  * @param {Boolean} [opts.propagate] If the key event should propagate. Default is FALSE
+<span class='line'> 21</span>  * @param {Number} [opts.keycode] Watch for the given keycode
+<span class='line'> 22</span>  * @member sc.helpers
+<span class='line'> 23</span>  */</span><span class="WHIT">
+<span class='line'> 24</span> </span><span class="NAME">sc.helpers.key_add</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">keystroke</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">func</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">opts</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 25</span> </span><span class="WHIT">	</span><span class="NAME">opts</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">sch.defaults</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 26</span> </span><span class="WHIT">		</span><span class="STRN">'type'</span><span class="PUNC">:</span><span class="STRN">'keydown'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'> 27</span> </span><span class="WHIT">		</span><span class="STRN">'disable_in_input'</span><span class="PUNC">:</span><span class="STRN">'true'</span><span class="WHIT">
+<span class='line'> 28</span> 
+<span class='line'> 29</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">opts</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 30</span> </span><span class="WHIT">	
+<span class='line'> 31</span> 	</span><span class="NAME">shortcut.add</span><span class="PUNC">(</span><span class="NAME">keystroke</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">func</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">opts</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 32</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 33</span> 
+<span class='line'> 34</span> </span><span class="COMM">/**
+<span class='line'> 35</span>  * this is really a wrapper for shortcut.remove in shortcut.js 
+<span class='line'> 36</span>  * @member sc.helpers
+<span class='line'> 37</span>  */</span><span class="WHIT">
+<span class='line'> 38</span> </span><span class="NAME">sc.helpers.key_remove</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">keystroke</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 39</span> </span><span class="WHIT">	</span><span class="NAME">shortcut.remove</span><span class="PUNC">(</span><span class="NAME">keystroke</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 40</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 41</span> 
+<span class='line'> 42</span> </span><span class="COMM">/**
+<span class='line'> 43</span>  * @todo 
+<span class='line'> 44</span>  * @member sc.helpers
+<span class='line'> 45</span>  */</span><span class="WHIT">
+<span class='line'> 46</span> </span><span class="NAME">sc.helpers.getModKey</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 47</span> </span><span class="WHIT">	</span><span class="COMM">// get the primary modkey based on the OS</span><span class="WHIT">
+<span class='line'> 48</span> </span><span class="WHIT">	</span><span class="COMM">// if OS X, use 'Meta'</span><span class="WHIT">
+<span class='line'> 49</span> </span><span class="WHIT">	</span><span class="COMM">// if Win or Linux, use 'Ctrl'</span><span class="WHIT">
+<span class='line'> 50</span> </span><span class="PUNC">}</span><span class="PUNC">;</span></pre></body></html>

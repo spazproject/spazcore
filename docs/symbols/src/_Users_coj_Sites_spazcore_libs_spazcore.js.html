@@ -1,0 +1,137 @@
+<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"> <style>
+	.KEYW {color: #933;}
+	.COMM {color: #bbb; font-style: italic;}
+	.NUMB {color: #393;}
+	.STRN {color: #393;}
+	.REGX {color: #339;}
+	.line {border-right: 1px dotted #666; color: #666; font-style: normal;}
+	</style></head><body><pre><span class='line'>  1</span> <span class="COMM">/*jslint 
+<span class='line'>  2</span> browser: true,
+<span class='line'>  3</span> nomen: false,
+<span class='line'>  4</span> debug: true,
+<span class='line'>  5</span> forin: true,
+<span class='line'>  6</span> regexp: false,
+<span class='line'>  7</span> undef: true,
+<span class='line'>  8</span> white: false,
+<span class='line'>  9</span> onevar: false 
+<span class='line'> 10</span>  */</span><span class="WHIT">
+<span class='line'> 11</span> 
+<span class='line'> 12</span> </span><span class="COMM">/**
+<span class='line'> 13</span>  * SPAZCORE
+<span class='line'> 14</span>  * version 0.1.1
+<span class='line'> 15</span>  * 2009-08-06
+<span class='line'> 16</span>  * 
+<span class='line'> 17</span>  * License
+<span class='line'> 18</span>  * 
+<span class='line'> 19</span>  * Copyright (c) 2008-2009, Edward Finkler, Funkatron Productions
+<span class='line'> 20</span>  * 
+<span class='line'> 21</span>  * All rights reserved.
+<span class='line'> 22</span>  * 
+<span class='line'> 23</span>  * Redistribution and use in source and binary forms, with or without
+<span class='line'> 24</span>  * modification, are permitted provided that the following conditions are met:
+<span class='line'> 25</span>  * 
+<span class='line'> 26</span>  *         Redistributions of source code must retain the above copyright
+<span class='line'> 27</span>  *         notice, this list of conditions and the following disclaimer.
+<span class='line'> 28</span>  * 
+<span class='line'> 29</span>  *         Redistributions in binary form must reproduce the above
+<span class='line'> 30</span>  *         copyright notice, this list of conditions and the following
+<span class='line'> 31</span>  *         disclaimer in the documentation and/or other materials provided
+<span class='line'> 32</span>  *         with the distribution.
+<span class='line'> 33</span>  * 
+<span class='line'> 34</span>  *         Neither the name of Edward Finkler, Funkatron Productions nor
+<span class='line'> 35</span>  *         the names of its contributors may be used to endorse or promote
+<span class='line'> 36</span>  *         products derived from this software without specific prior written
+<span class='line'> 37</span>  *         permission.
+<span class='line'> 38</span>  * 
+<span class='line'> 39</span>  * 
+<span class='line'> 40</span>  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+<span class='line'> 41</span>  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+<span class='line'> 42</span>  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+<span class='line'> 43</span>  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+<span class='line'> 44</span>  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+<span class='line'> 45</span>  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+<span class='line'> 46</span>  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+<span class='line'> 47</span>  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+<span class='line'> 48</span>  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+<span class='line'> 49</span>  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+<span class='line'> 50</span>  * 
+<span class='line'> 51</span>  * 
+<span class='line'> 52</span>  * SpazCore includes code from other software projects. Their licenses follow:
+<span class='line'> 53</span>  * 
+<span class='line'> 54</span>  * date.js
+<span class='line'> 55</span>  * @copyright: Copyright (c) 2006-2008, Coolite Inc. (http://www.coolite.com/). All rights reserved.
+<span class='line'> 56</span>  * @license: Licensed under The MIT License. See license.txt and http://www.datejs.com/license/.
+<span class='line'> 57</span>  * 
+<span class='line'> 58</span>  * webtoolkit.info (hash libs, trim funcs, utf8 encoder/decoder)
+<span class='line'> 59</span>  * http://www.webtoolkit.info/
+<span class='line'> 60</span>  * As long as you leave the copyright notice of the original script, or link
+<span class='line'> 61</span>  * back to this website, you can use any of the content published on this
+<span class='line'> 62</span>  * website free of charge for any use: commercial or noncommercial.
+<span class='line'> 63</span>  */</span><span class="WHIT">
+<span class='line'> 64</span> </span><span class="WHIT"> 
+<span class='line'> 65</span> </span><span class="COMM">/**
+<span class='line'> 66</span>  * @namespace 
+<span class='line'> 67</span>  */</span><span class="WHIT">
+<span class='line'> 68</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">sc</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 69</span> 
+<span class='line'> 70</span> </span><span class="COMM">/**
+<span class='line'> 71</span>  * @namespace
+<span class='line'> 72</span>  */</span><span class="WHIT">
+<span class='line'> 73</span> </span><span class="NAME">sc.app</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 74</span> 
+<span class='line'> 75</span> </span><span class="COMM">/**
+<span class='line'> 76</span>  * @namespace
+<span class='line'> 77</span>  */</span><span class="WHIT">
+<span class='line'> 78</span> </span><span class="NAME">sc.helpers</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 79</span> 
+<span class='line'> 80</span> </span><span class="COMM">/**
+<span class='line'> 81</span>  * dump level for limiting what gets dumped to console 
+<span class='line'> 82</span>  */</span><span class="WHIT">
+<span class='line'> 83</span> </span><span class="NAME">sc.dumplevel</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">1</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 84</span> 
+<span class='line'> 85</span> </span><span class="COMM">/**
+<span class='line'> 86</span>  * method to set dump level 
+<span class='line'> 87</span>  */</span><span class="WHIT">
+<span class='line'> 88</span> </span><span class="NAME">sc.setDumpLevel</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">level</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 89</span> </span><span class="WHIT">	</span><span class="NAME">sc.dumplevel</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">parseInt</span><span class="PUNC">(</span><span class="NAME">level</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NUMB">10</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 90</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 91</span> 
+<span class='line'> 92</span> </span><span class="COMM">/**
+<span class='line'> 93</span>  * @namespace helper shortcuts 
+<span class='line'> 94</span>  * this lets us write "sch.method" instead of "sc.helpers.method"
+<span class='line'> 95</span>  * 
+<span class='line'> 96</span>  */</span><span class="WHIT">
+<span class='line'> 97</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">sch</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">sc.helpers</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 98</span> 
+<span class='line'> 99</span> 
+<span class='line'>100</span> </span><span class="NAME">sc.events</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>101</span> 
+<span class='line'>102</span> 
+<span class='line'>103</span> 
+<span class='line'>104</span> 
+<span class='line'>105</span> 
+<span class='line'>106</span> </span><span class="COMM">/**
+<span class='line'>107</span>  * Build the helpers
+<span class='line'>108</span>  * @depends ../helpers/datetime.js 
+<span class='line'>109</span>  * @depends ../helpers/event.js 
+<span class='line'>110</span>  * @depends ../helpers/javascript.js 
+<span class='line'>111</span>  * @depends ../helpers/json.js 
+<span class='line'>112</span>  * @depends ../helpers/location.js 
+<span class='line'>113</span>  * @depends ../helpers/string.js 
+<span class='line'>114</span>  * @depends ../helpers/sys.js 
+<span class='line'>115</span>  * @depends ../helpers/view.js 
+<span class='line'>116</span>  * @depends ../helpers/xml.js 
+<span class='line'>117</span>  * 
+<span class='line'>118</span>  * Build the libs
+<span class='line'>119</span>  * @depends spazcron.js
+<span class='line'>120</span>  * @depends spazlocker.js
+<span class='line'>121</span>  * @depends spazphotomailer.js
+<span class='line'>122</span>  * @depends spazpingfm.js
+<span class='line'>123</span>  * @depends spazprefs.js
+<span class='line'>124</span>  * @depends spazshorttext.js
+<span class='line'>125</span>  * @depends spazshorturl.js
+<span class='line'>126</span>  * @depends spaztemplate.js
+<span class='line'>127</span>  * @depends spaztimeline.js
+<span class='line'>128</span>  * @depends spaztwit.js
+<span class='line'>129</span>  */</span><span class="WHIT">
+<span class='line'>130</span> </span></pre></body></html>
