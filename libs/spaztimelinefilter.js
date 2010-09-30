@@ -1,7 +1,11 @@
 /**
  * This is a library to handle custom filtering of Twitter timelines based on
  * usernames and message content
- * 
+ * @constructor
+ * @param {Object} opts
+ * @param {string} opts.name name of filter
+ * @param {string} opts.type whitelist or blacklist (default)
+ * @deprecated
  */
 SpazTimelineFilter = function(opts) {
 	

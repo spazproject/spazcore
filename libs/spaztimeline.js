@@ -120,14 +120,6 @@ SpazTimeline.prototype.start = function() {
 	this.requestData();
 };
 
-/**
- * right now this does the same as start(), but could change in the future 
- */
-SpazTimeline.prototype.refresh = function() {
-	sch.debug('Refreshing timeline (prototype)');
-	this.requestData();
-};
-
 
 /**
  * This is the method that gets data from the model and calls addItems() on what is returned 

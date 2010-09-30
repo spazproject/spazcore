@@ -18,7 +18,8 @@ var sc;
  * @param {string} str  the string to check
  * @param {string} sn   the screen name to look for
  * @return {boolean} 
- */
+ * @member sc.helpers
+ */
 sc.helpers.containsScreenName = function(str, sn) {
 	
 	var re = new RegExp('(?:\\s|\\b|^[[:alnum:]]|^)@('+sn+')(?:\\s|\\b|$)', 'gi');
@@ -55,7 +56,8 @@ sc.helpers.extractScreenNames = function(str, tpl) {
 
 /**
  * find URLs within the given string 
- */
+ * @member sc.helpers
+ */
 sc.helpers.extractURLs = function(str) {
 	// var wwwlinks = /(^|\s)((https?|ftp)\:\/\/)?([a-z0-9+!*(),;?&=\$_.-]+(\:[a-z0-9+!*(),;?&=\$_.-]+)?@)?([✪a-z0-9-.]*)\.([a-z]{2,3})(\:[0-9]{2,5})?(\/([a-z0-9+\$_-]\.?)+)*\/?(\?[a-z+&\$_.-][a-z0-9;:@&%=+\/\$_.-]*)?(#[a-z_.-][a-z0-9+\$_.-]*)?(\s|$)/gi;
 	var wwwlinks = /(^|\s|\(|:)(((http(s?):\/\/)|(www\.))([\w✪]+[^\s\)<]+))/gi;
@@ -88,7 +90,8 @@ sc.helpers.extractURLs = function(str) {
  * @param {string} str
  * @param {object} map
  * @return {string}
- */
+ * @member sc.helpers
+ */
 sc.helpers.replaceMultiple = function(str, map) {
 	for (var key in map) {
 		str = str.replace(key, map[key]);
@@ -107,7 +110,8 @@ sc.helpers.replaceMultiple = function(str, map) {
  * @param {boolean} extra_code  a string that will be inserted verbatim into <a> tag
  * @param {integer} maxlen  the maximum length the link description can be (the string inside the <a></a> tag)
  * @return {string}
- */
+ * @member sc.helpers
+ */
 sc.helpers.autolink = function(str, type, extra_code, maxlen) {
 	if (!type) {
 		type = 'both';
@@ -228,7 +232,8 @@ sc.helpers.autolink = function(str, type, extra_code, maxlen) {
  * @param {string} str
  * @param {string} tpl  default is '<a href="http://twitter.com/#username#">@#username#</a>'
  * @return {string}
- */
+ * @member sc.helpers
+ */
 sc.helpers.autolinkTwitterScreenname = function(str, tpl) {
 	if (!tpl) {
 		tpl = '<a href="http://twitter.com/#username#">@#username#</a>';
@@ -267,7 +272,8 @@ sc.helpers.autolinkTwitterScreenname = function(str, tpl) {
  * @param {string} str
  * @param {string} tpl  default is '<a href="http://search.twitter.com/search?q=#hashtag_enc#">##hashtag#<a/>'
  * @return {string}
- */
+ * @member sc.helpers
+ */
 sc.helpers.autolinkTwitterHashtag = function(str, tpl) {
 	if (!tpl) {
 		tpl = '<a href="http://search.twitter.com/search?q=#hashtag_enc#">##hashtag#</a>';
@@ -319,7 +325,8 @@ sc.helpers.autolinkTwitterHashtag = function(str, tpl) {
  *  		'tpl':'' // should contain macros '#hashtag#' and '#hashtag_enc#'
  *  	}
  *  }
- */
+ * @member sc.helpers
+ */
 sc.helpers.makeClickable = function(str, opts) {
 	var autolink_type, autolink_extra_code, autolink_maxlen, screenname_tpl, hashtag_tpl;
 	
@@ -353,7 +360,8 @@ sc.helpers.makeClickable = function(str, opts) {
  * Simple html tag remover
  * @param {string} str
  * @return {string}
- */
+ * @member sc.helpers
+ */
 sc.helpers.stripTags = function(str) {
 	var re = /<[^>]*>/gim;
 	str = str.replace(re, '');
@@ -363,7 +371,8 @@ sc.helpers.stripTags = function(str) {
 
 /**
  * Converts the following entities into regular chars: &lt; &gt; &quot; &apos;
- */
+ * @member sc.helpers
+ */
 sc.helpers.fromHTMLSpecialChars = function(str) {
 	str = str.replace(/&lt;/gi, '<');
 	sc.helpers.dump(str);
@@ -623,12 +632,11 @@ sc.helpers._get_html_translation_table = function(table, quote_style) {
 *
 *  UTF-8 data encode / decode
 *  http://www.webtoolkit.info/
-*
+*  @namespace
 **/
- 
 sc.helpers.Utf8 = {
  
-	// public method for url encoding
+	/** @function public method for url encoding */
 	encode : function (string) {
 		string = string.replace(/\r\n/g,"\n");
 		var utftext = "";
@@ -655,7 +663,7 @@ sc.helpers.Utf8 = {
 		return utftext;
 	},
  
-	// public method for url decoding
+	/** @function public method for url decoding */
 	decode : function (utftext) {
 		var string = "";
 		var i = 0;
@@ -715,10 +723,58 @@ sc.helpers.rtrim = function (str, chars) {
 
 
 /**
+ * @param {string} input the input string
+ * @param {number} pad_length the length to pad the string
+ * @param {string} pad_string the string to pad with
+ * @param {string} pad_type STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH. Default is STR_PAD_RIGHT 
+ * @member sc.helpers
+ */
+sc.helpers.pad = function (input, pad_length, pad_string, pad_type) {
+    // http://kevin.vanzonneveld.net
+    // +   original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // + namespaced by: Michael White (http://getsprink.com)
+    // +      input by: Marco van Oort
+    // +   bugfixed by: Brett Zamir (http://brett-zamir.me)
+    // *     example 1: str_pad('Kevin van Zonneveld', 30, '-=', 'STR_PAD_LEFT');
+    // *     returns 1: '-=-=-=-=-=-Kevin van Zonneveld'
+    // *     example 2: str_pad('Kevin van Zonneveld', 30, '-', 'STR_PAD_BOTH');
+    // *     returns 2: '------Kevin van Zonneveld-----'
+
+    var half = '', pad_to_go;
+
+    var str_pad_repeater = function (s, len) {
+        var collect = '', i;
+
+        while (collect.length < len) {collect += s;}
+        collect = collect.substr(0,len);
+
+        return collect;
+    };
+
+    input += '';
+    pad_string = pad_string !== undefined ? pad_string : ' ';
+    
+    if (pad_type != 'STR_PAD_LEFT' && pad_type != 'STR_PAD_RIGHT' && pad_type != 'STR_PAD_BOTH') { pad_type = 'STR_PAD_RIGHT'; }
+    if ((pad_to_go = pad_length - input.length) > 0) {
+        if (pad_type == 'STR_PAD_LEFT') { input = str_pad_repeater(pad_string, pad_to_go) + input; }
+        else if (pad_type == 'STR_PAD_RIGHT') { input = input + str_pad_repeater(pad_string, pad_to_go); }
+        else if (pad_type == 'STR_PAD_BOTH') {
+            half = str_pad_repeater(pad_string, Math.ceil(pad_to_go/2));
+            input = half + input + half;
+            input = input.substr(0, pad_length);
+        }
+    }
+
+    return input;
+};
+
+
+/**
  * @param {string} str the string in which we're converting linebreaks
  * @param {string} [breaktag] the tag used to break up lines. defaults to <br>
  * @returns {string} the string with linebreaks converted to breaktags
- */
+ * @member sc.helpers
+ */
 sc.helpers.nl2br = function(str, breaktag) {
 	
 	breaktag = breaktag || '<br>';

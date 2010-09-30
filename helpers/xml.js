@@ -11,7 +11,7 @@ var sc, DOMParser;
 
 /**
  * Given a string, this returns an XMLDocument
- * @param {string} string
+ * @param {string} string an xml string
  * @return {XMLDocument}
  */
 sc.helpers.createXMLFromString = function (string) {

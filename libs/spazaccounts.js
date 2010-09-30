@@ -2,16 +2,49 @@
 /**
  * "constants" for account types 
  */
+/**
+ * @constant 
+ */
 var SPAZCORE_ACCOUNT_TWITTER	= 'twitter';
+/**
+ * @constant 
+ */
 var SPAZCORE_ACCOUNT_IDENTICA	= 'identi.ca';
+/**
+ * @constant 
+ */
 var SPAZCORE_ACCOUNT_STATUSNET	= 'StatusNet';
+/**
+ * @constant 
+ */
 var SPAZCORE_ACCOUNT_FLICKR		= 'flickr';
+/**
+ * @constant 
+ */
 var SPAZCORE_ACCOUNT_WORDPRESS	= 'wordpress.com';
+/**
+ * @constant 
+ */
 var SPAZCORE_ACCOUNT_WORDPRESS_TWITTER	= 'wordpress-twitter';
+/**
+ * @constant 
+ */
 var SPAZCORE_ACCOUNT_TUMBLR		= 'tumblr';
+/**
+ * @constant 
+ */
 var SPAZCORE_ACCOUNT_TUMBLR_TWITTER		= 'tumblr-twitter';
+/**
+ * @constant 
+ */
 var SPAZCORE_ACCOUNT_FACEBOOK	= 'facebook';
+/**
+ * @constant 
+ */
 var SPAZCORE_ACCOUNT_FRIENDFEED	= 'friendfeed';
+/**
+ * @constant 
+ */
 var SPAZCORE_ACCOUNT_CUSTOM 	= 'custom';
 
 /**

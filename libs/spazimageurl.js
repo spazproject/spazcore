@@ -1,5 +1,6 @@
 /**
  * a library to get direct image urls for various image hosting servces 
+ * @constructor
  */
 function SpazImageURL(args) {
 	

@@ -6,6 +6,7 @@
  * @param {string} [opts.entry_class] the class of an entry in the timeline. default is 'entry'
  * @param {string} [opts.keyup] the shortcut code for the up navigation. default is 'up' (the up arrow)
  * @param {string} [opts.keydown] the shortcut code for the down navigation. default is 'down' (the down arrow)
+ * @constructor
  */
 var SpazTimelineNav = function(opts) {
 	

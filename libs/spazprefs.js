@@ -9,12 +9,24 @@ onevar: false
  */
 var sc, Titanium, air, jQuery, Mojo;
 
+/**
+ * @constant 
+ */
 var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
 
+/**
+ * @constant 
+ */
 var SPAZCORE_PREFS_AIR_FILENAME = 'preferences.json';
 
+/**
+ * @constant 
+ */
 var SPAZCORE_PREFS_MOJO_COOKIENAME = 'preferences.json';
 
+/**
+ * @constant 
+ */
 var SPAZCORE_PREFS_STANDARD_COOKIENAME = 'preferences_json';
  
 /**
@@ -43,6 +55,7 @@ var SPAZCORE_PREFS_STANDARD_COOKIENAME = 'preferences_json';
  * 
  * @TODO we need to pull out the platform-specifc stuff into the /platforms/... hierarchy
  * @class SpazPrefs
+ * @constructor
  */
 function SpazPrefs(defaults, id, sanity_methods) {	
 

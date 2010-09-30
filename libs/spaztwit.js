@@ -24,27 +24,90 @@ var sc, jQuery, Mojo, use_palmhost_proxy;
 /**
  * various constant definitions
  */
+/**
+ * @constant 
+ */
 var SPAZCORE_SECTION_FRIENDS = 'friends';
+/**
+ * @constant 
+ */
 var SPAZCORE_SECTION_HOME = 'home';
+/**
+ * @constant 
+ */
 var SPAZCORE_SECTION_REPLIES = 'replies';
+/**
+ * @constant 
+ */
 var SPAZCORE_SECTION_DMS = 'dms';
+/**
+ * @constant 
+ */
 var SPAZCORE_SECTION_FAVORITES = 'favorites';
+/**
+ * @constant 
+ */
 var SPAZCORE_SECTION_COMBINED = 'combined';
+/**
+ * @constant 
+ */
 var SPAZCORE_SECTION_PUBLIC = 'public';
+/**
+ * @constant 
+ */
 var SPAZCORE_SECTION_SEARCH = 'search';
+/**
+ * @constant 
+ */
 var SPAZCORE_SECTION_USER = 'user-timeline';
+/**
+ * @constant 
+ */
 var SPAZCORE_SECTION_FRIENDLIST = 'friendslist';
+/**
+ * @constant 
+ */
 var SPAZCORE_SECTION_FOLLOWERSLIST = 'followerslist';
+/**
+ * @constant 
+ */
 var SPAZCORE_SECTION_USERLISTS = 'userlists';
 
+/**
+ * @constant 
+ */
 var SPAZCORE_SERVICE_TWITTER = 'twitter';
+/**
+ * @constant 
+ */
 var SPAZCORE_SERVICE_IDENTICA = 'identi.ca';
+/**
+ * @constant 
+ */
 var SPAZCORE_SERVICE_WORDPRESS_TWITTER = 'wordpress-twitter';
+/**
+ * @constant 
+ */
 var SPAZCORE_SERVICE_TUMBLR_TWITTER = 'tumblr-twitter';
+/**
+ * @constant 
+ */
 var SPAZCORE_SERVICE_CUSTOM = 'custom';
+/**
+ * @constant 
+ */
 var SPAZCORE_SERVICEURL_TWITTER = 'https://api.twitter.com/1/';
+/**
+ * @constant 
+ */
 var SPAZCORE_SERVICEURL_IDENTICA = 'https://identi.ca/api/';
+/**
+ * @constant 
+ */
 var SPAZCORE_SERVICEURL_WORDPRESS_TWITTER = 'https://twitter-api.wordpress.com/';
+/**
+ * @constant 
+ */
 var SPAZCORE_SERVICEURL_TUMBLR_TWITTER = 'http://www.tumblr.com/';
 
 
@@ -55,59 +118,60 @@ var SPAZCORE_SERVICEURL_TUMBLR_TWITTER = 'http://www.tumblr.com/';
  * 
  * jQuery events raised by this library
  * 
- * 'spaztwit_ajax_error'
- * 'new_public_timeline_data' (data)
- * 'new_friends_timeline_data' (data)
- * 'error_friends_timeline_data' (data)
- * 'new_replies_timeline_data' (data)
- * 'error_replies_timeline_data' (data)
- * 'new_dms_timeline_data' (data)
- * 'error_dms_timeline_data' (data)
- * 'new_combined_timeline_data' (data)
- * 'error_combined_timeline_data' (data)
- * 'new_favorites_timeline_data' (data)
- * 'error_favorites_timeline_data' (data)
- * 'verify_credentials_succeeded' (data)
- * 'verify_credentials_failed' (data)
- * 'update_succeeded' (data)
- * 'update_failed' (data)
- * 'get_user_succeeded' (data)
- * 'get_user_failed' (data)
- * 'get_one_status_succeeded' (data)
- * 'get_one_status_failed' (data)
- * 'new_search_timeline_data' (data)
- * 'error_search_timeline_data' (data)
- * 'new_trends_data' (data)
- * 'error_trends_data' (data)
- * 'new_saved_searches_data' (data)
- * 'error_saved_searches_data' (data)
- * 'create_saved_search_succeeded' (data)
- * 'create_saved_search_failed' (data)
- * 'destroy_saved_search_succeeded' (data)
- * 'destroy_saved_search_failed' (data)
- * 'create_favorite_succeeded'
- * 'create_favorite_failed'
- * 'destroy_favorite_succeeded'
- * 'destroy_favorite_failed'
- * 'create_friendship_succeeded'
- * 'create_friendship_failed'
- * 'destroy_friendship_succeeded'
- * 'destroy_friendship_failed'
- * 'create_block_succeeded'
- * 'create_block_failed'
- * 'destroy_block_succeeded'
- * 'destroy_block_failed'
- * 'follow_succeeded'
- * 'follow_failed'
- * 'unfollow_succeeded'
- * 'unfollow_failed'
- * 'ratelimit_status_succeeded'
- * 'ratelimit_status_failed'
- * 'destroy_status_succeeded'
- * 'destroy_status_failed'
- * 'destroy_dm_succeeded'
- * 'destroy_dm_failed'
- * 
+ * <ul>
+ *   <li>'spaztwit_ajax_error'</li>
+ *   <li>'new_public_timeline_data' (data)</li>
+ *   <li>'new_friends_timeline_data' (data)</li>
+ *   <li>'error_friends_timeline_data' (data)</li>
+ *   <li>'new_replies_timeline_data' (data)</li>
+ *   <li>'error_replies_timeline_data' (data)</li>
+ *   <li>'new_dms_timeline_data' (data)</li>
+ *   <li>'error_dms_timeline_data' (data)</li>
+ *   <li>'new_combined_timeline_data' (data)</li>
+ *   <li>'error_combined_timeline_data' (data)</li>
+ *   <li>'new_favorites_timeline_data' (data)</li>
+ *   <li>'error_favorites_timeline_data' (data)</li>
+ *   <li>'verify_credentials_succeeded' (data)</li>
+ *   <li>'verify_credentials_failed' (data)</li>
+ *   <li>'update_succeeded' (data)</li>
+ *   <li>'update_failed' (data)</li>
+ *   <li>'get_user_succeeded' (data)</li>
+ *   <li>'get_user_failed' (data)</li>
+ *   <li>'get_one_status_succeeded' (data)</li>
+ *   <li>'get_one_status_failed' (data)</li>
+ *   <li>'new_search_timeline_data' (data)</li>
+ *   <li>'error_search_timeline_data' (data)</li>
+ *   <li>'new_trends_data' (data)</li>
+ *   <li>'error_trends_data' (data)</li>
+ *   <li>'new_saved_searches_data' (data)</li>
+ *   <li>'error_saved_searches_data' (data)</li>
+ *   <li>'create_saved_search_succeeded' (data)</li>
+ *   <li>'create_saved_search_failed' (data)</li>
+ *   <li>'destroy_saved_search_succeeded' (data)</li>
+ *   <li>'destroy_saved_search_failed' (data)</li>
+ *   <li>'create_favorite_succeeded'</li>
+ *   <li>'create_favorite_failed'</li>
+ *   <li>'destroy_favorite_succeeded'</li>
+ *   <li>'destroy_favorite_failed'</li>
+ *   <li>'create_friendship_succeeded'</li>
+ *   <li>'create_friendship_failed'</li>
+ *   <li>'destroy_friendship_succeeded'</li>
+ *   <li>'destroy_friendship_failed'</li>
+ *   <li>'create_block_succeeded'</li>
+ *   <li>'create_block_failed'</li>
+ *   <li>'destroy_block_succeeded'</li>
+ *   <li>'destroy_block_failed'</li>
+ *   <li>'follow_succeeded'</li>
+ *   <li>'follow_failed'</li>
+ *   <li>'unfollow_succeeded'</li>
+ *   <li>'unfollow_failed'</li>
+ *   <li>'ratelimit_status_succeeded'</li>
+ *   <li>'ratelimit_status_failed'</li>
+ *   <li>'destroy_status_succeeded'</li>
+ *   <li>'destroy_status_failed'</li>
+ *   <li>'destroy_dm_succeeded'</li>
+ *   <li>'destroy_dm_failed'</li>
+ * </ul>
  * 
  * @param {Object} opts various options
  * @param {Object} [opts.auth] SpazAuth object
@@ -115,6 +179,7 @@ var SPAZCORE_SERVICEURL_TUMBLR_TWITTER = 'http://www.tumblr.com/';
  * @param {Object} [opts.event_target] the DOM element to target the event on. Defaults to document
  * @param {Number} [opts.timeout] length of time, in seconds, to timeout
  * @class SpazTwit
+ * @constructor
 */
 function SpazTwit(opts) {
 	
@@ -1956,11 +2021,28 @@ SpazTwit.prototype.removeFriend = function(user_id, onSuccess, onFailure) {
 
 };
 
+/**
+ * @param {string|number} target_id the target user id, or screen name if prefixed with a "@" 
+ * @param {string|number} [source_id] the surce user id, or screen name if prefixed with a "@" 
+ * @param {function} [onSuccess] success callback
+ * @param {function} [onFailure] failure callback
+ */
 SpazTwit.prototype.showFriendship = function(target_id, source_id, onSuccess, onFailure) {
 	var data = {};
-	data['target_id'] = target_id;
+	
+	if (sch.isString(target_id) && target_id.indexOf('@')===0) {
+		data['target_screen_name'] = target_id.substr(1);
+	} else {
+		data['target_id'] = target_id;
+	}
+	
 	if (source_id) {
-		data['source_id'] = source_id;
+		if (sch.isString(source_id) && source_id.indexOf('@')===0) {
+			data['source_screen_name'] = source_id.substr(1);
+		} else {
+			data['source_id'] = source_id;
+		}
+		
 	}
 	
 	

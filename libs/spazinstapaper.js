@@ -5,6 +5,7 @@
  * @param {object} opts options
  * @param {string} [opts.username] the username
  * @param {string} [opts.password] the password
+ * @constructor
 **/
 var SpazInstapaper = function(opts) {
 	this.opts = sch.defaults({

@@ -20,5 +20,6 @@ var sc;
  * 	extra:{...}
  * } 
  * @platformstub
- */
+ * @member sc.helpers
+ */
 sc.helpers.HTTPUploadFile = function(opts) {};

@@ -25,7 +25,7 @@ sc.events.fileUploadFailure	= 'fileUploadFailure';
 
 
 /**
- * Constructor
+ * A File uploader class
  * 
  * opts = {
  *   api:'',
@@ -34,6 +34,7 @@ sc.events.fileUploadFailure	= 'fileUploadFailure';
  *   failureEvent:'',
  *   eventTarget:DOMElement
  * } 
+ * @constructor
  */
 function SpazFileUploader(opts) {
 

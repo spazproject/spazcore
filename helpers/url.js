@@ -1,5 +1,6 @@
 /**
  * Takes a key/val pair object and returns a query string 
+ * @member sc.helpers 
  */
 sc.helpers.objectToQueryString = function(object) {
 	var query_string, key, val, pieces = [];

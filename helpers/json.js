@@ -12,6 +12,7 @@ var sc;
 /* A wrapper for JSON.parse() that correct Twitter issues and perform logging if JSON data could not be parsed
  * which will help to find out what is wrong
  * @param {String} text 
+ * @member sc.helpers
  */
 sc.helpers.deJSON = function(json)
  {
@@ -36,7 +37,8 @@ sc.helpers.deJSON = function(json)
 /**
  * really just a simple wrapper for JSON.stringify	
  * @param  any js construct
- */
+ * @member sc.helpers
+ */
 sc.helpers.enJSON = function(jsobj) {
 	return JSON.stringify(jsobj);
 };
@@ -61,6 +63,7 @@ sc.helpers.enJSON = function(jsobj) {
 /*
  This simple script converts XML (document of code) into a JSON object. It is the combination of 2
  'xml to json' great parsers (see below) which allows for both 'simple' and 'extended' parsing modes.
+ * @member sc.helpers
 */
 sc.helpers.xml2json = function(xml, extended) {
 	if (!xml) return {};

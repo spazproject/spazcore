@@ -11,6 +11,9 @@ onevar: false
  */
 var sc, jQuery;
 
+/**
+ * @constructor 
+ */
 function SpazPhotoMailer(opts) {
 
 	this.apis = this.getAPIs();

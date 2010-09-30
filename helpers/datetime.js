@@ -10,16 +10,16 @@ onevar: false
 var sc;
  
 /*
-* makes relative time out of "Sun Jul 08 19:01:12 +0000 2007" type string
-* Borrowed from Mike Demers (slightly altered)
-* https://twitter.pbwiki.com/RelativeTimeScripts
-* 
-* This requires date.js
-* http://www.datejs.com/
-* @param {string} time_value a string to convert into relative time
-* @param {object} [labels] labels for text portions of time descriptions
-* @param {boolean} [use_dateparse] Whether or not to use the Date.parse method to parse the time_value. Default is FALSE
-*/
+ * makes relative time out of "Sun Jul 08 19:01:12 +0000 2007" type string
+ * Borrowed from Mike Demers (slightly altered)
+ * https://twitter.pbwiki.com/RelativeTimeScripts
+ * 
+ * This requires date.js
+ * http://www.datejs.com/
+ * @param {string} time_value a string to convert into relative time
+ * @param {object} [labels] labels for text portions of time descriptions
+ * @param {boolean} [use_dateparse] Whether or not to use the Date.parse method to parse the time_value. Default is FALSE
+ */
 sc.helpers.getRelativeTime = function(time_value, labels, use_dateparse) {	
 	
 	var default_labels = {
@@ -69,13 +69,16 @@ sc.helpers.getRelativeTime = function(time_value, labels, use_dateparse) {
 	}
 };
 
-
+/**
+ * @member sc.helpers 
+ */
 sc.helpers.httpTimeToInt = function(entry_date, use_dateparse) {
 	return sc.helpers.dateToInt(entry_date, use_dateparse);
 };
 
 /**
  * this returns milliseconds, not seconds! 
+ * @member sc.helpers 
  */
 sc.helpers.dateToInt = function(entry_date, use_dateparse) {
 	var parsedDate = new Date();
@@ -90,7 +93,9 @@ sc.helpers.dateToInt = function(entry_date, use_dateparse) {
 	return parsedDate.getTime();
 };
 
-
+/**
+ * @member sc.helpers  
+ */
 sc.helpers.getTimeAsInt = function() {
 	var now = new Date();
 	return now.getTime();
