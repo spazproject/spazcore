@@ -1,6 +1,5 @@
 .DS_Store
 *.kpf
-docs
 builds/*.js
 builds/*.min.js
 examples/auth_config.js
