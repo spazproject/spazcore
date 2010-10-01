@@ -1349,7 +1349,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
 			
 			if (opts.processing_opts && opts.processing_opts.combined) {
 				sc.helpers.dump('adding to combined processing errors');
-				stwit.combined_errors.push( {'url':opts.url, 'xhr':xhr, 'msg':msg, 'section':opts.processing_opts.section} );
+				stwit.combined_errors.push( {'url':opts.url, 'xhr':null, 'msg':msg, 'section':opts.processing_opts.section} );
 				stwit.combined_finished[opts.processing_opts.section] = true;
 				sc.helpers.dump(stwit.combined_errors);
 				sc.helpers.dump(stwit.combined_finished);
