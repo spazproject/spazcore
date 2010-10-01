@@ -1310,7 +1310,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
         'error':function(xhr, msg, exc) {
 			sc.helpers.dump(opts.url + ' error:"'+msg+'"');
 			if (msg.toLowerCase().indexOf('timeout') !== -1) {
-				stwit.triggerEvent(document, opts.failure_event_type, {'url':opts.url, 'xhr':null, 'msg':msg});
+				stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':null, 'msg':msg});
 			} else if (xhr) {
 				if (!xhr.readyState < 4) {
 					sc.helpers.dump("Error:"+xhr.status+" from "+opts['url']);
@@ -1366,7 +1366,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
 			try {
 				data = sc.helpers.deJSON(data);
 			} catch(e) {
-				stwit.triggerEvent(document, opts.failure_event_type, {'url':opts.url, 'xhr':xhr, 'msg':'Error decoding data from server'});
+				stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':xhr, 'msg':'Error decoding data from server'});
 			}
 
 			if (opts.process_callback) {
