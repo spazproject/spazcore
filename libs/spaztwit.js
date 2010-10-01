@@ -1311,6 +1311,14 @@ SpazTwit.prototype._getTimeline = function(opts) {
 			sc.helpers.dump(opts.url + ' error:"'+msg+'"');
 			if (msg.toLowerCase().indexOf('timeout') !== -1) {
 				stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':null, 'msg':msg});
+				/*
+					don't fire the callback if this is part of a combined call
+				*/
+				if (!opts.processing_opts || !opts.processing_opts.combined) {
+					if (opts.failure_callback) {
+						opts.failure_callback(null, msg, exc);
+					}
+				}
 			} else if (xhr) {
 				if (!xhr.readyState < 4) {
 					sc.helpers.dump("Error:"+xhr.status+" from "+opts['url']);
@@ -1349,7 +1357,12 @@ SpazTwit.prototype._getTimeline = function(opts) {
 			
 			if (opts.processing_opts && opts.processing_opts.combined) {
 				sc.helpers.dump('adding to combined processing errors');
-				stwit.combined_errors.push( {'url':opts.url, 'xhr':null, 'msg':msg, 'section':opts.processing_opts.section} );
+				if (xhr && xhr.readyState > 3) {
+					stwit.combined_errors.push( {'url':opts.url, 'xhr':xhr, 'msg':msg, 'section':opts.processing_opts.section} );
+				} else {
+					stwit.combined_errors.push( {'url':opts.url, 'xhr':null, 'msg':msg, 'section':opts.processing_opts.section} );
+				}
+				
 				stwit.combined_finished[opts.processing_opts.section] = true;
 				sc.helpers.dump(stwit.combined_errors);
 				sc.helpers.dump(stwit.combined_finished);
