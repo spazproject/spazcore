@@ -992,13 +992,16 @@ SpazTwit.prototype._processUserTimeline = function(ret_items, opts, processing_o
  * 
  */
 SpazTwit.prototype.getCombinedTimeline = function(com_opts, onSuccess, onFailure) {
-	var home_count, friends_count, replies_count, dm_count, home_since, friends_since, dm_since, replies_since = null;
+	var home_count, friends_count, replies_count, dm_count, 
+		home_since, friends_since, dm_since, replies_since,
+		home_page, friends_page, dm_page, replies_page;
 
 	var opts = {
 		'combined':true
 	};
 	
 	if (com_opts) {
+		
 		if (com_opts.friends_count) {
 			friends_count = com_opts.friends_count;
 		}
@@ -1011,6 +1014,7 @@ SpazTwit.prototype.getCombinedTimeline = function(com_opts, onSuccess, onFailure
 		if (com_opts.dm_count) {
 			dm_count = com_opts.dm_count; // this is not used yet
 		}
+		
 		if (com_opts.home_since) {
 			home_since = com_opts.home_since;
 		}
@@ -1024,20 +1028,34 @@ SpazTwit.prototype.getCombinedTimeline = function(com_opts, onSuccess, onFailure
 			dm_since = com_opts.dm_since;
 		}
 		
+		if (com_opts.home_page) {
+			home_page = com_opts.home_page;
+		}
+		if (com_opts.friends_page) {
+			friends_page = com_opts.friends_page;
+		}
+		if (com_opts.replies_page) {
+			replies_page = com_opts.replies_page;
+		}
+		if (com_opts.dm_page) {
+			dm_page = com_opts.dm_page;
+		}
+		
 		/*
 			we might still only pass in friends_* opts, so we translate those to home_*
 		*/
 		if (!home_count) { home_count = friends_count; }
 		if (!home_since) { home_since = friends_since; }
+		if (!home_page) { home_page = friends_page; }
 		
 		if (com_opts.force) {
 			opts.force = true;
 		}
 	}
 	
-	this.getHomeTimeline(home_since, home_count, null, opts, onSuccess, onFailure);
-	this.getReplies(replies_since, replies_count, null, opts, onSuccess, onFailure);
-	this.getDirectMessages(dm_since, dm_count, null, opts, onSuccess, onFailure);
+	this.getHomeTimeline(home_since, home_count, home_page, opts, onSuccess, onFailure);
+	this.getReplies(replies_since, replies_count, replies_page, opts, onSuccess, onFailure);
+	this.getDirectMessages(dm_since, dm_count, dm_page, opts, onSuccess, onFailure);
 };
 
 
