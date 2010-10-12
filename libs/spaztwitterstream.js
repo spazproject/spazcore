@@ -8,19 +8,32 @@
 */
 var SpazTwitterStream = function(opts) {
 	var that = this;
+
+	var isReading    = false;
+	var amountRead   = 0;
+	var streamBuffer = '';
 	
 	this.opts = sch.defaults({
 		'auth'		: null,
 		'userstream_url': "https://userstream.twitter.com/2/user.json",
-		'onData'		: null,
-		'onError'		: null
+		'onData'	: null,
+		'onError'	: null
 	}, opts);
 	
 	this.stream = new air.URLStream;
+	
+	/**
+	 * holds timeout ID for reconnect timer 
+	 */
+	this.timeout;
 
 	this.connect = function() {
-		var amountRead   = 0;
-		var streamBuffer = "";
+		that.restartTimer();
+		
+		isReading    = false;		
+		amountRead   = 0;
+		streamBuffer = "";
+		
 		var request = createStreamRequest(that.opts.userstream_url, that.opts.auth);
 		that.stream = new air.URLStream();
 		that.stream.addEventListener(air.IOErrorEvent.IO_ERROR, errorReceived);
@@ -29,8 +42,29 @@ var SpazTwitterStream = function(opts) {
 	};
 
 	this.disconnect = function() {
+		if (that.timeout) {
+			clearTimeout(that.timeout);
+		}
+		
 		that.stream.close();
 		that.stream = null;
+	};
+	
+	this.restartTimer = function() {
+		sch.error('Restarting timer');
+		
+		if (this.timeout) {
+			clearTimeout(this.timeout);
+		}
+		
+		this.timeout = setTimeout(
+			function() {
+				sch.error('Reconnecting!');
+				that.disconnect();
+				that.connect();
+			},
+			90000 // 90 second timeout
+		);
 	};
 
 	function createStreamRequest(username, pass) {
@@ -45,19 +79,17 @@ var SpazTwitterStream = function(opts) {
 
 	function errorReceived(e) {
 		sch.error("errorReceived in stream");
-		sch.debug(e);
 		if (that.opts.onError) {
 			that.opts.onError.call(this, e);
 		}
 	}
 
 
-	var isReading    = false;
-	var amountRead   = 0;
-	var streamBuffer = '';	
 	function dataReceived(e) {
 		sch.debug("dataReceived");
 		sch.debug(e.toString());
+		
+		that.restartTimer();
 		
 		var toRead = e.bytesLoaded - amountRead;
 		sch.debug("toRead:"+toRead);
