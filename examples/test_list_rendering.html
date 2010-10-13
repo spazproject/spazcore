@@ -106,14 +106,14 @@
 	};
 
 	/**
-	 * remove item at given position
+	 * remove model item at given position
 	 */
 	SpazList.prototype.removeItem = function(pos) {
 		this.model.items.splice(pos,1);
 	};
 
 	/**
-	 * add an array of items 
+	 * add an array of items to the model
 	 */
 	SpazList.prototype.addItems = function(items) {
 		for (var i=0; i < items.length; i++) {
@@ -121,9 +121,9 @@
 			this.addItem(items[i]);
 		}
 		if (this.rendered.last === 0) {
-			this.render();
+			this.render(); // render if we haven't actually drawn anything yet
 		} else {
-			this.redraw();
+			this.redraw(); // redraw if we have
 		}
 		this._triggerScroll();
 	};
@@ -138,7 +138,7 @@
 	};
 	
 	/**
-	 * check if item exists 
+	 * check if item exists using the given comparison function
 	 */
 	SpazList.prototype.itemExists = function(item) {
 		for (var i=0; i < this.model.items.length; i++) {
@@ -150,7 +150,7 @@
 	};
 
 	/**
-	 * sort the model items 
+	 * sort the model items with the given array sort function
 	 */
 	SpazList.prototype.sortItems = function() {
 		this.model.items.sort(this.opts.sort_func);
@@ -209,6 +209,10 @@
 		return this.renderItems(0, this.model.items.length);
 	};
 
+	/**
+	 * redraws the currently rendered elements. This is called when we've
+	 * modified the model and need to update the html
+	 */
 	SpazList.prototype.redraw = function() {
 		this.saveScrollPosition();
 		this.sortItems();
@@ -262,7 +266,9 @@
 		this.renderNewItems(first_rend, last_rend, 'after');		
 	};
 	
-	
+	/**
+	 * appends or prepends rendered items onto the list 
+	 */
 	SpazList.prototype.renderNewItems = function(start, stop, place) {
 		if (place !== 'before') { place = 'after'; }
 		
@@ -270,14 +276,14 @@
 		
 		if (place === 'before') {
 			this.$container.prepend(html);
-			this._setRendered(start, null);
-			this.removeExcessAfter();
+			this._setRendered(start, null); // only the start value will change
+			this.removeExcessAfter(); // remove any excess elements 
 		}
 
 		if (place === 'after') {
 			this.$container.append(html);
-			this._setRendered(null, stop);
-			this.removeExcessBefore();
+			this._setRendered(null, stop); // only the stop value will change
+			this.removeExcessBefore(); // remove any excess elements
 		}
 	};
 
@@ -367,7 +373,9 @@
 		return [start, stop];
 	};
 
-
+	/**
+	 * this gets the count of elements above the viewport 
+	 */
 	SpazList.prototype.getHiddenBeforeCount = function() {
 		var idxs = this.getHiddenBeforeIndexes();
 		if (idxs[0] === -1) {
@@ -378,6 +386,9 @@
 	};
 
 
+	/**
+	 * this gets the count of elements below the viewport 
+	 */
 	SpazList.prototype.getHiddenAfterCount = function() {
 		var idxs = this.getHiddenAfterIndexes();
 		if (idxs[0] === -1) {
@@ -413,7 +424,11 @@
 	};
 
 
-	
+	/**
+	 * save the current position of the first element in the container. This
+	 * only needs to be done when items are loaded at the top, so the first
+	 * child should be correct
+	 */	
 	SpazList.prototype.saveScrollPosition = function() {
 		// this._savedScrollPostition = this.$container.scrollTop();
 		
@@ -425,7 +440,9 @@
 		}
 	};
 	
-	
+	/**
+	 * load the old scroll position, or rather *adjust* the scroll position so existing elements are in the same place 
+	 */
 	SpazList.prototype.loadScrollPosition = function() {
 		// this.$container.scrollTop(this._savedScrollPostition);
 
@@ -447,6 +464,8 @@
 	
 	/**
 	 * set the index values of what is currently rendered 
+	 * 
+	 * we could set these directly, but passing through here makes it easier to debug screwups
 	 */
 	SpazList.prototype._setRendered  = function(first, last) {
 		
@@ -468,14 +487,14 @@
 	SpazList.prototype._addOnScroll = function() {
 		var that = this;
 		
-
-		this.$container.bind('scroll.spazlist', function(e) {
-			this.lastScrollTop = this.currentScrollTop;
+		
+		this.$container.bind('scroll.spazlist', function(e) { // bind to a namespaced scroll event
+			this.lastScrollTop = this.currentScrollTop; // track our scrolltop
 			this.currentScrollTop = that.$container.scrollTop();
 			
 			var direction;
 			
-			if (this.currentScrollTop > this.lastScrollTop) {
+			if (this.currentScrollTop > this.lastScrollTop) { // we can see which direction we're headed
 				direction = 'down';
 			} else {
 				direction = 'up';
@@ -492,10 +511,7 @@
 				var el_height = $el.outerHeight();
 				var el_bottom = el_top + el_height;
 
-				// $(this).children('div.stats').remove();
-				// $(this).append('<div class="stats">top:'+el_top+'<br>\n'+'height:'+el_height+'<br>\n'+'bottom:'+el_bottom+'<br>\n</div>');
-
-				if (el_bottom < 1 || el_top > port_height) {
+				if (el_bottom < 1 || el_top > port_height) { // based on element and viewport, add or remove a class
 					$el.addClass('spazlist-hidden');
 				} else if (el_bottom > 0) {
 					$el.removeClass('spazlist-hidden');
@@ -505,6 +521,7 @@
 			// call for debugging
 			that.getVisibleIndexes();
 			
+			// call for debugging
 			jQuery('#model_len').val(that.model.items.length);
 
 			if (direction == 'up' && that.getHiddenBeforeCount() <= that.opts.render_threshold) { // no more rendered items before
@@ -527,11 +544,13 @@
 	};
 
 
+
+
 	$(document).ready( function() {
 
 		var list = new SpazList({
-			'container':'#container',
-			'item_renderer':function(d) {
+			'container':'#container', // selector for the list container
+			'item_renderer':function(d) { // a function that will render each item
 				var html = ' \
 					<div> \
 						<div class="user"><img src="'+d.user.profile_image_url+'"></div> \
@@ -541,8 +560,8 @@
 					</div>';
 				return html;
 			},
-			'sort_func' : function(a,b) { return b.id - a.id; },
-			'unique_id_field' : 'id',
+			'sort_func' : function(a,b) { return b.id - a.id; }, // how we sort stuff
+			'unique_id_field' : 'id' // this is the field we'll use to get a unique value
 			
 		});
 		
