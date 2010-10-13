@@ -6,139 +6,585 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
 	<title>SpazCore Example Shell</title>
-	
+
 	<!-- Load required vendor libs -->
 	<script src="../vendors/jquery-1.4.2.js" type="text/javascript" charset="utf-8"></script>
 
 	<!-- Load SpazCore base lib -->
 	<script src="spazcore-standard.js"></script>
-	
+
 	<link rel="stylesheet" href="css/base.css" type="text/css" media="screen" title="no title" charset="utf-8">
-	
+
 	<style type="text/css" media="screen">
-		#container {
-			width: 320px;
-			height:480px;
-			overflow: auto;
-			position:absolute;
-			top:100px;
-			left:200px;
-			border:1px solid blue;
+	#container {
+		width: 320px;
+		height:480px;
+		overflow: auto;
+		position:absolute;
+		top:100px;
+		left:200px;
+		border:1px solid blue;
+	}
+	#container>div {
+		background:#FFFFCC;
+		padding:5px;
+		margin: 5px;
+		overflow:hidden;
+		text-overflow: ellipsis;
+	}
+	#container>div>div.user {
+		float:right;
+	}
+	#container>div>div.id, #container>div>div.time {
+		font-size:9pt;
+		font-weight:bold;
+	}
+	div.hidden{
+		background:#CCCCFF;
+	}
+	input[type="text"] {
+		width:50px;
+	}
+
+	</style>
+
+	<script type="text/javascript" charset="utf-8">
+
+	/**
+	 * A library to handle rendering of a list
+	 * 
+	 * @constructor
+	 */
+	var SpazList = function(opts) {
+		this.opts = sch.defaults({
+			'container'       : '#container',
+			'item_renderer'	  : function(d) { return "<div>"+sch.enJSON(d)+"</div>"; },
+			'comparison_func' : function(a,b) { if (a.id === b.id) {return true;} return false; },
+			'sort_func'       : function(a,b) { return a.id - b.id; },
+			'unique_id_field' : 'id',
+			'max_render'      : 25,
+			'max_total_rendered' : 50,
+			'render_threshold': 5
+		}, opts);
+		
+		this.init();
+	};
+
+	/**
+	 * initialize stuff! 
+	 */
+	SpazList.prototype.init = function() {
+
+		this.$container = jQuery(this.opts.container);
+		this.model = {
+			'items':[]
+		};
+		this._removeOnScroll();
+		this._addOnScroll();
+		
+		this.rendered = {
+			'first':0,
+			'last' :0
+		};
+		this.visible = {
+			'first':0,
+			'last' :0
+		};
+		
+		this.lastScrollTop = 0;
+		this.currentScrollTop = 0;
+	};
+
+	/**
+	 * add an item to the list 
+	 * @todo support position param
+	 */
+	SpazList.prototype.addItem = function(item, position) {
+		if (!this.itemExists(item)) {
+			this.model.items.push(item);
 		}
-		ol {
-			margin: 0px;
-			padding:0px;
+	};
+
+	/**
+	 * remove item at given position
+	 */
+	SpazList.prototype.removeItem = function(pos) {
+		this.model.items.splice(pos,1);
+	};
+
+	/**
+	 * add an array of items 
+	 */
+	SpazList.prototype.addItems = function(items) {
+		for (var i=0; i < items.length; i++) {
+			sch.error(items[i]);
+			this.addItem(items[i]);
 		}
-		ol>li{
-			background:#FFFFCC;
-			padding:5px;
-			margin: 5px;
+		if (this.rendered.last === 0) {
+			this.render();
+		} else {
+			this.redraw();
+		}
+		this._triggerScroll();
+	};
+
+	/**
+	 * remove several items 
+	 */
+	SpazList.prototype.removeItems = function(start, end) {
+		var removed = this.mode.items.splice(start, start-end);
+		sch.error("removed:");
+		sch.error(removed);
+	};
+	
+	/**
+	 * check if item exists 
+	 */
+	SpazList.prototype.itemExists = function(item) {
+		for (var i=0; i < this.model.items.length; i++) {
+			if (this.opts.comparison_func(item, this.model.items[i])) {
+				return true;
+			}
+		}
+		return false;
+	};
+
+	/**
+	 * sort the model items 
+	 */
+	SpazList.prototype.sortItems = function() {
+		this.model.items.sort(this.opts.sort_func);
+	};
+
+
+	/**
+	 * render items between start and stop
+	 */
+	SpazList.prototype.renderItems = function(start, stop, force) {
+		var html = '', this_html = '';
+		var count = 0;
+		
+		sch.error("Rendering items '"+start+"' to '"+stop+"'");
+		
+		for (var i=start; i < stop && i < this.model.items.length; i++) {
+			this_html = "\n" + this.renderItem(this.model.items[i]);
+			html += jQuery(this_html).attr('data-spazlist-unique', this.model.items[i][this.opts.unique_id_field])[0].outerHTML;
+			count++;
+			if (!force && count >= this.opts.max_total_rendered) { // only render max
+				sch.error("Stop rendering because count is >= this.opts.max_render ("+this.opts.max_render+")");
+				break;
+			}
+		}
+		
+		sch.error(html);
+		
+		return html;
+	};
+	
+	/**
+	 * sort items, render, and put into container
+	 */
+	SpazList.prototype.render = function(start) {
+		start = start || 0;
+		var stop  = start + this.opts.max_total_rendered;
+		
+		this.sortItems();
+		
+		this.$container.html(this.renderItems(start, stop));
+		this._setRendered(start, stop-1);
+		this._triggerScroll();
+	};
+	
+	/**
+	 * render a single item 
+	 */
+	SpazList.prototype.renderItem = function(item) {
+		return this.opts.item_renderer.call(this, item);
+	};
+	
+	/**
+	 * render all items into an HTML string
+	 */
+	SpazList.prototype.renderAllItems = function() {
+		return this.renderItems(0, this.model.items.length);
+	};
+
+	SpazList.prototype.redraw = function() {
+		this.saveScrollPosition();
+		this.sortItems();
+		html = this.renderItems(this.rendered.first, this.rendered.last, true);
+		this.$container.html(html);
+		this.loadScrollPosition();
+	};
+	
+	/**
+	 * renders items at the top of the list 
+	 */
+	SpazList.prototype.renderItemsBefore = function() {
+		var last_rend = this.rendered.first;
+		var first_rend  = last_rend - this.opts.max_render;
+		if (first_rend < 0) { first_rend = 0; }
+
+		sch.error('BEFORE=================');
+		sch.error('first_rend:'+first_rend);
+		sch.error('last_rend:'+last_rend);
+
+		if (last_rend === first_rend) { // if they're equal, we're at the beginnig. skip
+			sch.error('skipping renderItemsBefore because last_rend === first_rend');
+			return;
+		}
+		
+		this.saveScrollPosition();
+		this.renderNewItems(first_rend, last_rend, 'before');
+		this.loadScrollPosition();
+	};
+
+
+
+	/**
+	 * renders items at the bottom of the list 
+	 */
+	SpazList.prototype.renderItemsAfter = function() {
+		var first_rend = this.rendered.last;
+		var last_rend  = first_rend + this.opts.max_render;
+		
+		if (last_rend > this.model.items.length-1) { last_rend = this.model.items.length-1; }
+		
+		sch.error('AFTER=================');
+		sch.error('first_rend:'+first_rend);
+		sch.error('last_rend:'+last_rend);
+		
+		if (last_rend === first_rend) { // if they're equal, we're at the end. skip
+			sch.error('skipping renderItemsAfter because last_rend === first_rend');
+			return;
 		}
 
-		ol>li.hidden{
-			background:#CCCCFF;
+		this.renderNewItems(first_rend, last_rend, 'after');		
+	};
+	
+	
+	SpazList.prototype.renderNewItems = function(start, stop, place) {
+		if (place !== 'before') { place = 'after'; }
+		
+		var html = this.renderItems(start, stop);
+		
+		if (place === 'before') {
+			this.$container.prepend(html);
+			this._setRendered(start, null);
+			this.removeExcessAfter();
 		}
+
+		if (place === 'after') {
+			this.$container.append(html);
+			this._setRendered(null, stop);
+			this.removeExcessBefore();
+		}
+	};
+
 	
-	</style>
 	
-	<script type="text/javascript" charset="utf-8">
-	$(document).ready( function() {
+	/**
+	 * remove excess stuff before 
+	 */
+	SpazList.prototype.removeExcessBefore = function() {
+		sch.error('Removing excess before');
+		$rendered_items = this.$container.children();
+		sch.error('$rendered_items.length:'+$rendered_items.length);
+		if ($rendered_items.length > this.opts.max_total_rendered) {
+			
+			// remove the first (max_render) items
+			for (var i=0; i < this.opts.max_render; i++) {
+				jQuery($rendered_items[i]).remove();
+				this._setRendered(this.rendered.first+1);
+			}
+		}				
+	};
+	
+	
+	/**
+	 * remove excess stuff after 
+	 */
+	SpazList.prototype.removeExcessAfter = function() {
+		$rendered_items = this.$container.children();
+		if ($rendered_items.length > this.opts.max_total_rendered) {
+			var min = (this.opts.max_total_rendered - this.opts.max_render);
+			// remove the first (max_render) items
+			for(var i = $rendered_items.length-1; i >= min; i--) {
+				jQuery($rendered_items[i]).remove();
+				this._setRendered(null, this.rendered.last-1);
+			}			
+		}
+	};
+	
+	/**
+	 * get an array with the start and stop indexes of what is currently visible 
+	 */
+	SpazList.prototype.getVisibleIndexes = function() {
+		var $items = this.$container.children();
+		var start = 0, stop = $items.length-1;
 		
-		var content = 'it\'s a beautiful summer day, so my kids are doing what comes naturally to kids on a day like this: sitting inside watching "guys and dolls."';
+		var hit_visible = false;
+		for (var i=0; i < $items.length; i++) {
+			var is_hidden = jQuery($items[i]).hasClass('spazlist-hidden');
+			if (!is_hidden && hit_visible === false) {
+				hit_visible = true;
+				start = i;
+				stop  = i;
+			} else if (!is_hidden && hit_visible === true) {
+				stop  = i;
+			} else if (is_hidden && hit_visible === true) {
+				break;
+			}
+		}
 		
-		$('#container>ol>li').each(function(i) {
-			$(this).attr('id', i+1).addClass('hidden');
-		});
+		// debugging stuff
+		$('#visible').val([start, stop]);
 		
-		$('#container').scroll(function(e){
+		
+		return [start, stop];
+	};
+	
+	/**
+	 * get an array with the start and stop indexes of what is hidden BEFORE the visible items  
+	 */
+	SpazList.prototype.getHiddenBeforeIndexes = function() {
+		var $items = this.$container.children();
+		var start = -1, stop = -1;
+		for (var i=0; i < $items.length; i++) {
+			if (jQuery($items[i]).hasClass('spazlist-hidden')) {
+				if (start == -1) {
+					start = i;
+				}
+				stop = i;
+			} else {
+				break;
+			}
+		}
+		
+		// debugging stuff
+		$('#before').val([start, stop]);
+		
+		return [start, stop];
+	};
+
+
+	SpazList.prototype.getHiddenBeforeCount = function() {
+		var idxs = this.getHiddenBeforeIndexes();
+		if (idxs[0] === -1) {
+			return 0;
+		} else {
+			return idxs[1] - idxs[0];
+		}
+	};
+
+
+	SpazList.prototype.getHiddenAfterCount = function() {
+		var idxs = this.getHiddenAfterIndexes();
+		if (idxs[0] === -1) {
+			return 0;
+		} else {
+			return idxs[1] - idxs[0];
+		}
+	};
+
+
+	/**
+	 * get an array with the start and stop indexes of what is hidden AFTER the visible items  
+	 */
+	SpazList.prototype.getHiddenAfterIndexes = function() {
+		var $items = this.$container.children();
+		var start = -1, stop = -1;
+		for (var i=$items.length-1; i >= 0; i--) {
+			if (jQuery($items[i]).hasClass('spazlist-hidden')) {
+				start = i;
+				if (stop == -1) {
+					stop = i;
+				}
+			} else {
+				break;
+			}
+		}
+		
+		// debugging stuff
+		$('#after').val([start, stop]);
+		
+		
+		return [start, stop];
+	};
+
+
+	
+	SpazList.prototype.saveScrollPosition = function() {
+		// this._savedScrollPostition = this.$container.scrollTop();
+		
+		var $oldFirst, offset_before;
+		$oldFirst	  = this.$container.children().first();
+		if ($oldFirst.length > 0) {
+			this._savedScrollPostitionId = $oldFirst.attr('data-spazlist-unique');
+		    this._savedScrollPostition = $oldFirst.offset().top;
+		}
+	};
+	
+	
+	SpazList.prototype.loadScrollPosition = function() {
+		// this.$container.scrollTop(this._savedScrollPostition);
+
+		var new_jq = this.$container.children('[data-spazlist-unique="'+this._savedScrollPostitionId+'"]');
+		if (this._savedScrollPostition && new_jq.length > 0) {
+			
+			var offset_after = new_jq.offset().top;
+			var offset_diff = Math.abs(this._savedScrollPostition - offset_after);
+			this.$container.scrollTop( this.$container.scrollTop() + offset_diff );
+		}
+	};
+
+	/**
+	 * trigger a scroll event on the container 
+	 */
+	SpazList.prototype._triggerScroll = function() {
+		this.$container.trigger('scroll');
+	};
+	
+	/**
+	 * set the index values of what is currently rendered 
+	 */
+	SpazList.prototype._setRendered  = function(first, last) {
+		
+		if ( sch.isNumber(first) && first >= 0 ) {
+			this.rendered.first = first;
+		}
+		if ( sch.isNumber(last) && last >= 0 ) {
+			this.rendered.last = last;
+		}
+		
+		// debugging stuff
+		$('#rendered').val([this.rendered.first, this.rendered.last]);
+		
+	};
+	
+	/**
+	 * add the scroll event handler 
+	 */
+	SpazList.prototype._addOnScroll = function() {
+		var that = this;
+		
+
+		this.$container.bind('scroll.spazlist', function(e) {
+			this.lastScrollTop = this.currentScrollTop;
+			this.currentScrollTop = that.$container.scrollTop();
+			
+			var direction;
+			
+			if (this.currentScrollTop > this.lastScrollTop) {
+				direction = 'down';
+			} else {
+				direction = 'up';
+			}
+			
+			
 			var port_top    = $(this).position().top;
 			var port_height = $(this).height();
 			var port_bottom = $(this).height() + port_top;
-			console.log('port_top:'+port_top);
-			console.log('port_bottom:'+port_bottom);
-			
-			$('#container>ol>li').each(function(i) {
+
+			that.$container.children().each(function(i) {
 				var $el       = $(this);
 				var el_top    = $el.offset().top - port_top;
 				var el_height = $el.outerHeight();
 				var el_bottom = el_top + el_height;
-				
-				$(this).html('top:'+el_top+'<br>\n'+'height:'+el_height+'<br>\n'+'bottom:'+el_bottom+'<br>\n'+content);
-				
-				if (el_top < 0 || el_bottom > port_height) {
-					$el.addClass('hidden');
-				} else if (port_top < el_bottom) {
-					$el.removeClass('hidden');
+
+				// $(this).children('div.stats').remove();
+				// $(this).append('<div class="stats">top:'+el_top+'<br>\n'+'height:'+el_height+'<br>\n'+'bottom:'+el_bottom+'<br>\n</div>');
+
+				if (el_bottom < 1 || el_top > port_height) {
+					$el.addClass('spazlist-hidden');
+				} else if (el_bottom > 0) {
+					$el.removeClass('spazlist-hidden');
 				}
 			});
+
+			// call for debugging
+			that.getVisibleIndexes();
+			
+			jQuery('#model_len').val(that.model.items.length);
+
+			if (direction == 'up' && that.getHiddenBeforeCount() <= that.opts.render_threshold) { // no more rendered items before
+				that.renderItemsBefore();
+			}
+
+			if (direction == 'down' && that.getHiddenAfterCount() <= that.opts.render_threshold) { // no more rendered items after
+				that.renderItemsAfter();
+			}
 		});
 		
-		$('#container').trigger('scroll');
-		$('#container').trigger('scroll');
+		
+	};
+	
+	/**
+	 * remove the scroll event handler 
+	 */
+	SpazList.prototype._removeOnScroll = function() {
+		this.$container.unbind('scroll.spazlist');
+	};
+
+
+	$(document).ready( function() {
+
+		var list = new SpazList({
+			'container':'#container',
+			'item_renderer':function(d) {
+				var html = ' \
+					<div> \
+						<div class="user"><img src="'+d.user.profile_image_url+'"></div> \
+						<div class="id">'+d.id+'</div> \
+						<div class="text">'+d.text+'</div> \
+						<div class="time">'+sch.getRelativeTime(d.created_at)+'</div> \
+					</div>';
+				return html;
+			},
+			'sort_func' : function(a,b) { return b.id - a.id; },
+			'unique_id_field' : 'id',
+			
+		});
+		
+		$('#loadMore').click(function(e) {
+			var twit = new SpazTwit();
+			twit.search(
+				'Hip Hop Awards', null, 100, null, null, null,
+				function(data) {
+					list.addItems(data);
+					jQuery('#model_len').val(list.model.items.length);
+				},
+				function(xhr, msg, exc) {
+					sch.error('Problem getting data');
+				}
+			);
+		});
+		
+		// click once to start us off
+		$('#loadMore').trigger('click');
 		
 	});
-	</script>
+
+
+</script>
 </head>
 
 <body>
-	
+
 
 	<div id="container">
-		<ol>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-		</ol>
-		
-		
 	</div>
+	
+	<button id="loadMore">Load More</button>
+	<label for="rendered">Rendered</label><input type="text" name="rendered" value="" id="rendered"> |
+	<label for="before">before</label><input type="text" name="before" value="" id="before"> |
+	<label for="after">after</label><input type="text" name="after" value="" id="after"> |
+	<label for="visible">visible</label><input type="text" name="visible" value="" id="visible">
+	<label for="model_len">model #</label><input type="text" name="model_len" value="" id="model_len">
+	
+	
+	
+	
 
 </body>
 </html>
