@@ -1071,7 +1071,7 @@ SpazTwit.prototype.search = function(query, since_id, results_per_page, page, la
 	// 	}
 	// }
 	if (!results_per_page) {
-		results_per_page = 50;
+		results_per_page = 100;
 	}
 	
 	
