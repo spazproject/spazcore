@@ -27,9 +27,14 @@ var SpazTwitterStream = function(opts) {
 	 */
 	this.timeout;
 
+	/**
+	 * 
+	 * @function 
+	 */
 	this.connect = function() {
 		that.restartTimer();
 		
+		// reset these values on connection
 		isReading    = false;		
 		amountRead   = 0;
 		streamBuffer = "";
@@ -41,6 +46,10 @@ var SpazTwitterStream = function(opts) {
 		that.stream.load(request);
 	};
 
+	/**
+	 * 
+	 * @function 
+	 */
 	this.disconnect = function() {
 		if (that.timeout) {
 			clearTimeout(that.timeout);
@@ -50,6 +59,10 @@ var SpazTwitterStream = function(opts) {
 		that.stream = null;
 	};
 	
+	/**
+	 * 
+	 * @function 
+	 */
 	this.restartTimer = function() {
 		sch.error('Restarting timer');
 		
