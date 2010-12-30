@@ -27,6 +27,11 @@ sc.helpers.dump = function(obj, level, cb) {
 		return;
 	}
 	
+	if (sc.helpers.isString(obj)) {
+		obj = sch.truncate(obj, SPAZCORE_DUMP_MAXLEN, '…[TRUNC]');
+	}
+	
+	
 	if (sc.helpers.isString(obj) || sc.helpers.isNumber(obj) || !obj) {
 		dumper = Mojo.Log.info;
 	} else {

@@ -76,7 +76,10 @@ var SPAZCORE_DUMPLEVEL_ERROR   = 1;
  */
 var SPAZCORE_DUMPLEVEL_NONE    = 0; // this means "never ever dump anything!"
 
-
+/**
+ * @constant 
+ */
+var SPAZCORE_DUMP_MAXLEN = 512;
 
 
 
@@ -181,6 +184,9 @@ sc.helpers.error = function(obj) {
  * @member sc.helpers
  */
 sc.helpers.dump = function(obj, level, cb) {
+	if (sc.helpers.isString(obj)) {
+		obj = sch.truncate(obj, SPAZCORE_DUMP_MAXLEN, '…[TRUNC]');
+	}
 	console.log(obj);
 	if (cb) {
 		cb(obj, level);

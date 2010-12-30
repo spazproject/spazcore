@@ -35,6 +35,10 @@ sc.helpers.dump = function(obj, level, cb) {
 	}
 	
 	if (sc.helpers.isString(obj)) {
+		obj = sch.truncate(obj, SPAZCORE_DUMP_MAXLEN, '…[TRUNC]');
+	}
+	
+	if (sc.helpers.isString(obj)) {
 		dumper(obj);
 	} else if(sc.helpers.isNumber(obj)) {
 		dumper(obj.toString());
