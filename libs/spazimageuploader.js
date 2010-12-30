@@ -79,7 +79,7 @@ SpazImageUploader.prototype.services = {
 			status = rspAttr.getNamedItem("stat").nodeValue;
 			
 			if (status == 'ok') {
-				var mediaurl = $(xmldoc).find('mediaurl').text();
+				var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue; 
 				return {'url':mediaurl};
 			} else {
 				var errMsg;
@@ -115,7 +115,7 @@ SpazImageUploader.prototype.services = {
 			}
 			
 			if (status == 'ok') {
-				var mediaurl = $(xmldoc).find('mediaurl').text();
+				var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue;
 				return {'url':mediaurl};
 			} else {
 				var errAttributes;
@@ -151,7 +151,7 @@ SpazImageUploader.prototype.services = {
     //         status = rspAttr.getNamedItem("stat").nodeValue;
     //         
     //         if (status == 'ok') {
-    //             var mediaurl = $(xmldoc).find('mediaurl').text();
+    //             var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue; 
     //             return {'url':mediaurl};
     //         } else {
     //             var errAttributes;
@@ -205,7 +205,7 @@ SpazImageUploader.prototype.services = {
 			status = rspAttr.getNamedItem("status").nodeValue;
 
 			if (status == 'ok') {
-				var mediaurl = $(xmldoc).find('mediaurl').text();
+				var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue; 
 				return {'url':mediaurl};
 			} else {
 				var errAttributes;
@@ -235,7 +235,7 @@ SpazImageUploader.prototype.services = {
 			status = rspAttr.getNamedItem("stat").nodeValue;
 			
 			if (status == 'ok') {
-				var mediaurl = $(xmldoc).find('mediaurl').text();
+				var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue; 
 				return {'url':mediaurl};
 			} else {
 				var errMsg;
@@ -268,7 +268,7 @@ SpazImageUploader.prototype.services = {
 			status = rspAttr.getNamedItem("stat").nodeValue;
 			
 			if (status == 'ok') {
-				var mediaurl = $(xmldoc).find('mediaurl').text();
+				var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue;
 				return {'url':mediaurl};
 			} else {
 				var errMsg;
