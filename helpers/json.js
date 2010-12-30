@@ -14,23 +14,25 @@ var sc;
  * @param {String} text 
  * @member sc.helpers
  */
-sc.helpers.deJSON = function(json)
- {
+sc.helpers.deJSON = function(json) {
 
 	// Fix twitter data bug
 	// var re = new RegExp("Couldn\\'t\\ find\\ Status\\ with\\ ID\\=[0-9]+\\,", "g");
 	// json = json.replace(re, "");
-
+	var obj;
 	var done = false;
+	
 	try {
-		var obj = JSON.parse(json);
+		obj = JSON.parse(json);
 		done = true;
+	} catch(e) {
+		sch.error(e.message);
+		sch.error(e);
 	} finally {
 		if (!done) {
-			sc.helpers.dump("Could not parse JSON text " + json);
+			sch.error("Could not parse JSON text: '" + json + "'");
 		}
 	}
-
 	return obj;
 };
 
@@ -40,7 +42,23 @@ sc.helpers.deJSON = function(json)
  * @member sc.helpers
  */
 sc.helpers.enJSON = function(jsobj) {
-	return JSON.stringify(jsobj);
+	// return JSON.stringify(jsobj);
+	
+	var json;
+	var done = false;
+	
+	try {
+		json = JSON.stringify(jsobj);
+		done = true;
+	} catch(e) {
+		sch.error(e.message);
+		sch.error(e);
+	} finally {
+		if (!done) {
+			sch.error("Could not stringify jsobj ("+typeof jsobj+")");
+		}
+	}
+	return json;
 };
 
 
