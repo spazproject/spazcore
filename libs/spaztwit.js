@@ -720,7 +720,7 @@ SpazTwit.prototype.getHomeTimeline = function(since_id, count, page, processing_
  * @private
  */
 SpazTwit.prototype._processHomeTimeline = function(ret_items, opts, processing_opts) {
-	sc.helpers.dump('Processing '+ret_items.length+' items returned from home method');
+	// sc.helpers.dump('Processing '+ret_items.length+' items returned from home method');
 	this._processTimeline(SPAZCORE_SECTION_HOME, ret_items, opts, processing_opts);
 };
 
@@ -777,7 +777,7 @@ SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page, processi
  * @private
  */
 SpazTwit.prototype._processFriendsTimeline = function(ret_items, opts, processing_opts) {
-	sc.helpers.dump('Processing '+ret_items.length+' items returned from friends method');
+	// sc.helpers.dump('Processing '+ret_items.length+' items returned from friends method');
 	this._processTimeline(SPAZCORE_SECTION_FRIENDS, ret_items, opts, processing_opts);
 };
 
@@ -836,7 +836,7 @@ SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts,
  * @private
  */
 SpazTwit.prototype._processRepliesTimeline = function(ret_items, opts, processing_opts) {
-	sc.helpers.dump('Processing '+ret_items.length+' items returned from replies method');
+	// sc.helpers.dump('Processing '+ret_items.length+' items returned from replies method');
 	this._processTimeline(SPAZCORE_SECTION_REPLIES, ret_items, opts, processing_opts);
 };
 
@@ -892,7 +892,7 @@ SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processin
  * @private
  */
 SpazTwit.prototype._processDMTimeline = function(ret_items, opts, processing_opts) {
-	sc.helpers.dump('Processing '+ret_items.length+' items returned from DM method');
+	// sc.helpers.dump('Processing '+ret_items.length+' items returned from DM method');
 	this._processTimeline(SPAZCORE_SECTION_DMS, ret_items, opts, processing_opts);
 };
 
@@ -1125,7 +1125,7 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, opts, proces
 	*/
 	var ret_items = search_result.results;
 
-	if (ret_items.length > 0){
+	if (ret_items && ret_items.length > 0){
 		/*
 			we process each item, adding some attributes and generally making it cool
 		*/
@@ -1278,7 +1278,7 @@ SpazTwit.prototype._processTrends = function(trends_result, opts, processing_opt
 	*/
 	var ret_items = trends_result.trends;
 
-	if (ret_items.length > 0) {
+	if (ret_items && ret_items.length > 0) {
 
 		for (var k=0; k<ret_items.length; k++) {
 			ret_items[k].searchterm = ret_items[k].name;
@@ -1322,17 +1322,20 @@ SpazTwit.prototype._getTimeline = function(opts) {
 	*/
 	var stwit = this;
 	
+	sch.error('_getTimeline opts:');
+	sch.error(opts);
+	
 	var xhr = jQuery.ajax({
 		'timeout' :opts.timeout,
         'complete':function(xhr, msg){
-            sc.helpers.dump(opts.url + ' complete:'+msg);
+            sch.error(opts.url + ' complete:'+msg);
 			if (msg === 'timeout') {
 				// jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
 				stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':xhr, 'msg':msg});				
 			}
         },
         'error':function(xhr, msg, exc) {
-			sc.helpers.dump(opts.url + ' error:"'+msg+'"');
+			sch.error(opts.url + ' error:"'+msg+'"');
 			if (msg.toLowerCase().indexOf('timeout') !== -1) {
 				stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':null, 'msg':msg});
 				/*
@@ -1398,7 +1401,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
         },
         'success':function(data) {
 			// sc.helpers.dump("Success! \n\n" + data);
-			sc.helpers.dump(opts.url + ' success!'+" data:"+data);
+			sch.error(opts.url + ' success!'+" data:"+data);
 			
 			try {
 				data = sc.helpers.deJSON(data);
@@ -1460,8 +1463,13 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 		
 	}
 	
+	
+	if (ret_items == undefined) {
+		sch.error('ret_items is undefined!');
+	}
+	
 
-	if (ret_items.length > 0){
+	if (ret_items && ret_items.length > 0){
 		
 		var proc_items = [];
 		
@@ -3637,7 +3645,7 @@ SpazTwit.prototype.openUserStream = function(onData, onFailure) {
 			var item;
 			data = sch.trim(data);
 			if (data) {
-				sch.error('new data:'+data);
+				sch.debug('new stream data:'+data);
 				item = sch.deJSON(data);
 				
 				if (item.source && item.user && item.text) { // is "normal" status
