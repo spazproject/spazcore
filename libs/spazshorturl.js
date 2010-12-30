@@ -417,15 +417,15 @@ SpazShortURL.prototype.findExpandableURLs = function(str) {
 		
 	};
 	
+	sch.debug("looking for "+regexes+ " in '"+str+"'");
 	for (i=0; i < regexes.length; i++) {
 		thisregex = regexes[i];
-		sch.dump("looking for "+thisregex+ " in '"+str+"'");
 		while( (re_matches = thisregex.exec(sch.trim(str))) != null) {
 			matches.push(re_matches[0]);
 		}		
 	};
 	
-	sch.dump(matches);
+	sch.debug('Matches: '+matches);
 	
 	if (matches.length > 0) {
 		return matches;
