@@ -64,7 +64,7 @@ var SpazTwitterStream = function(opts) {
 	 * @function 
 	 */
 	this.restartTimer = function() {
-		sch.error('Restarting timer');
+		sch.debug('Restarting streaming timer');
 		
 		if (this.timeout) {
 			clearTimeout(this.timeout);
@@ -72,7 +72,7 @@ var SpazTwitterStream = function(opts) {
 		
 		this.timeout = setTimeout(
 			function() {
-				sch.error('Reconnecting!');
+				sch.error('Reconnecting to stream!');
 				that.disconnect();
 				that.connect();
 			},
