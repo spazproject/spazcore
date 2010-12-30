@@ -180,8 +180,11 @@ sc.helpers.error = function(obj) {
  * @platformstub
  * @member sc.helpers
  */
-sc.helpers.dump = function(obj, level) {
+sc.helpers.dump = function(obj, level, cb) {
 	console.log(obj);
+	if (cb) {
+		cb(obj, level);
+	}
 };
 
 /**

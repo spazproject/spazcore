@@ -18,7 +18,7 @@ var sc, Mojo, use_palmhost_proxy;
 /**
  * dump an object's first level to console
  */
-sc.helpers.dump = function(obj, level) {
+sc.helpers.dump = function(obj, level, cb) {
 	var dumper;
 	
 	if (!level) { level = SPAZCORE_DUMPLEVEL_DEBUG; }
@@ -43,6 +43,10 @@ sc.helpers.dump = function(obj, level) {
 		dumper('NULL');
 	} else { // this is an object. we hope.
 		dumper(obj);
+	}
+	
+	if (cb) {
+		cb(obj, level);
 	}
 
 };
