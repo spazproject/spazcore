@@ -12,7 +12,7 @@ var sc, Titanium, air, jQuery, Mojo;
 /**
  * @constant 
  */
-var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
+var SPAZCORE_PREFS_TI_KEY = 'preferences.json';
 
 /**
  * @constant 
