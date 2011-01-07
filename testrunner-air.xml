@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <application 
-	xmlns="http://ns.adobe.com/air/application/2.0beta2"
+	xmlns="http://ns.adobe.com/air/application/2.5"
 	minimumPatchLevel="0">
 <!-- AIR Application Descriptor File. See http://www.adobe.com/go/learn_air_1.0_application_descriptor_en. -->
 	<id>com.funkatron.app.spazcore-testrunner-air</id>
 	<name>SpazCore Testrunner</name>
-	<version>0.1.0</version>
+	<versionNumber>0.1.0</version>
 	<filename>SpazCoreTestrunner</filename>
 	<description>
 		<text xml:lang="en">Testrunner app</text>
