@@ -2089,3 +2089,5 @@ sc.helpers.dump = function(obj, level) {
 sc.helpers.openInBrowser = function(url) {
 	return window.open(url,'SpazCore_new_window','toolbar=yes,location=yes,directories=yes,status=yes,menubar=yes,scrollbars=yes,copyhistory=yes,resizable=yes');	
 };
+
+
