@@ -27,6 +27,8 @@ sc.events.joindinEventDetailSuccess = 'joindinEventDetailSuccess';
 sc.events.joindinEventDetailFailure = 'joindinEventDetailFailure';
 sc.events.joindinGetEventTalksSuccess = 'joindinGetEventTalksSuccess';
 sc.events.joindinGetEventTalksFailure = 'joindinGetEventTalksFailure';
+sc.events.joindinAttendEventSuccess = 'joindinAttendEventSuccess';
+sc.events.joindinAttendEventFailure = 'joindinAttendEventFailure';
 sc.events.joindinGetEventCommentsSuccess = 'joindinGetEventCommentsSuccess';
 sc.events.joindinGetEventCommentsFailure = 'joindinGetEventCommentsFailure';
 sc.events.joindinAddEventTrackSuccess = 'joindinAddEventTrackSuccess';
@@ -37,6 +39,10 @@ sc.events.joindinGetTalkDetailFailure = 'joinedinGetTalkDetailFailure';
 sc.events.joindinGetTalkCommentsSuccess = 'joinedinGetTalkCommentsSuccess';
 sc.events.joindinGetTalkCommentsFailure = 'joinedinGetTalkCommentsFailure';
 //COMMENTS
+sc.events.joindinAddEventCommentSuccess = 'joinedinAddEventCommentSuccess';
+sc.events.joindinAddEventCommentFailure = 'joinedinAddEventCommentFailure';
+sc.events.joindinAddTalkCommentSuccess = 'joinedinAddTalkCommentSuccess';
+sc.events.joindinAddTalkCommentFailure = 'joinedinAddTalkCommentFailure';
 //USER
 sc.events.joindinGetUserDetailSuccess = 'joindinGetUserDetailSuccess';
 sc.events.joindinGetUserDetailFailure = 'joindinGetUserDetailFailure';
@@ -268,6 +274,37 @@ SpazJoindIn.prototype.getEventListing = function(opts) {
 
 
  /**
+  * Mark current user as attending event
+  * @param {Object} opts options for the method call
+  * @param {string} [opts.eid] Event ID
+  * @param {function} [opts.onSuccess]
+  * @param {function} [opts.onFailure]
+  */
+SpazJoindIn.prototype.attendEvent = function(opts) {
+     opts = sch.defaults({
+         eid: null,
+         onSuccess: null,
+         onFailure: null
+     }, opts);
+
+     this._callMethod({
+         namespace: 'event',
+         action: {
+             type: 'attend',
+             data: {
+                 eid: opts.eid
+             }
+         },
+         auth: true,
+         successEvent: sc.events.joindinAttendEventSuccess,
+         failureEvent: sc.events.joindinAttendEventFailure,
+         onSuccess: opts.onSuccess,
+         onFailure: opts.onFailure
+     });
+ };
+
+
+ /**
   * Get all comments associated with an event
   * @param {Object} opts options for the method call
   * @param {string} [opts.event_id]
@@ -365,6 +402,82 @@ SpazJoindIn.prototype.getTalkComments = function(opts) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // COMMENTS //////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ /**
+  * Add a comment to the event
+  * @param {Object} opts options for the method call
+  * @param {integer} [opts.event_id] id of the event to add the comment to
+  * @param {string} [opts.comment] comments to submit
+  * @param {function} [opts.onSuccess]
+  * @param {function} [opts.onFailure]
+  */
+SpazJoindIn.prototype.addEventComment = function(opts) {
+    opts = sch.defaults({
+        event_id: null,
+        comment: null,
+        onSuccess: null,
+        onFailure: null
+    }, opts);
+
+    this._callMethod({
+        namespace: 'event',
+        action: {
+            type: 'addcomment',
+            data: {
+                event_id: opts.event_id,
+                comment: opts.comment,
+            }
+        },
+        auth: false,
+        successEvent: sc.events.joindinAddEventCommentSuccess,
+        failureEvent: sc.events.joindinAddEventCommentFailure,
+        onSuccess: opts.onSuccess,
+        onFailure: opts.onFailure
+    });
+};
+
+
+ /**
+  * Add a comment to a given talk
+  * @param {Object} opts options for the method call
+  * @param {integer} [opts.talk_id] id of the talk to add the comment to
+  * @param {string} [opts.comment] comments to submit
+  * @param {integer} [opts.rating] rating to give the talk (range of 1-5)
+  * @param {function} [opts.onSuccess]
+  * @param {function} [opts.onFailure]
+  */
+SpazJoindIn.prototype.addTalkComment = function(opts) {
+    opts = sch.defaults({
+        talk_id: null,
+        comment: null,
+        onSuccess: null,
+        onFailure: null
+    }, opts);
+    
+    var data = {
+        event_id: opts.talk_id,
+        comment: opts.comment
+    };
+    
+    if( opts.rating )
+        data.rating = opts.rating;
+    
+    if( opts.private )
+        data.private = opts.private;
+    
+    this._callMethod({
+        namespace: 'event',
+        action: {
+            type: 'addcomment',
+            data: data
+        },
+        auth: true,
+        successEvent: sc.events.joindinAddEventCommentSuccess,
+        failureEvent: sc.events.joindinAddEventCommentFailure,
+        onSuccess: opts.onSuccess,
+        onFailure: opts.onFailure
+    });
+};
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // USERS /////////////////////////////////////////////////////////////////////////////////////////////////////////////
