@@ -13,7 +13,8 @@ var sc;
 /**
  * Stub 
  * @platformstub
- */
+ * @member sc.helpers
+ */
 sc.helpers.getCurrentLocation = function() {
 	
 };

@@ -21,4 +21,4 @@ sc.helpers.activateWindow = function(opts) {};
 sc.helpers.getCurrentWindow = function(opts) {};
 
 
-sch.helpers.getOpenWindows = function(opts) {};
+sc.helpers.getOpenWindows = function(opts) {};

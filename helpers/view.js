@@ -24,6 +24,7 @@ var sc, jQuery;
  * @param {integer} max_items the max # of item we should have
  * @param {boolean} remove_from_top whether or not to remove extra items from the top. default is FALSE
  * @requires jQuery
+ * @member sc.helpers 
  */
 sc.helpers.removeExtraElements = function(item_selector, max_items, remove_from_top) {
 
@@ -66,6 +67,7 @@ sc.helpers.removeExtraElements = function(item_selector, max_items, remove_from_
  * @param {string} item_selector a jquery-compatible selector to get items
  * @param {boolean} remove_from_top whether or not to remove extra items from the top. default is FALSE
  * @TODO
+ * @member sc.helpers 
  */
 sc.helpers.removeDuplicateElements = function(item_selector, remove_from_top) {
 	sc.helpers.dump('removeDuplicateElements TODO');
@@ -81,6 +83,7 @@ sc.helpers.removeDuplicateElements = function(item_selector, remove_from_top) {
  * @param {string} item_selector the jQuery selector for the elements which will contain the relative times
  * @param {string} time_attribute the attribute of the element that contains the created_at value
  * @requires jQuery
+ * @member sc.helpers 
  */
 sc.helpers.updateRelativeTimes = function(item_selector, time_attribute) {
 	jQuery(item_selector).each(function(i) {
@@ -97,6 +100,7 @@ sc.helpers.updateRelativeTimes = function(item_selector, time_attribute) {
  * 
  * @param {string} item_selector
  * @requires jQuery
+ * @member sc.helpers 
  */
 sc.helpers.markAllAsRead = function(item_selector) {
 	jQuery(item_selector).removeClass('new');

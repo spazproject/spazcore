@@ -18,7 +18,7 @@ var sc;
 /**
  * dump an object's first level to console
  */
-sc.helpers.dump = function(obj, level) {
+sc.helpers.dump = function(obj, level, cb) {
 	if (!level) { level = SPAZCORE_DUMPLEVEL_DEBUG; }
 	
 	if (sc.dumplevel < level ) {
@@ -35,6 +35,10 @@ sc.helpers.dump = function(obj, level) {
 		console.log('NULL');
 	} else { // this is an object. we hope.
 		console.log(obj);
+	}
+	
+	if (cb) {
+		cb(obj, level);
 	}
 
 };

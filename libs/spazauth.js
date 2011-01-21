@@ -2,10 +2,18 @@
  * A library for performing authentication.
  * Currently supports both Basic and oAuth.
  */
-
+/**
+ * @constant 
+ */
 var SPAZCORE_AUTHTYPE_BASIC  = 'basic';
+/**
+ * @constant 
+ */
 var SPAZCORE_AUTHTYPE_OAUTH  = 'oauth';
 
+/**
+ * @constant 
+ */
 var SPAZAUTH_SERVICES = {};
 
 SPAZAUTH_SERVICES[SPAZCORE_ACCOUNT_STATUSNET] = {
@@ -32,6 +40,7 @@ SPAZAUTH_SERVICES['default'] = {
  *
  * @param {string} service name of the service to authenticate (ex: twitter, identica)
  * @class SpazAuth
+ * @constructor
  */
 function SpazAuth(service) {
     var serviceInfo = SPAZAUTH_SERVICES[service];
@@ -63,6 +72,7 @@ SpazAuth.addService = function(label, opts) {
  * Construct a new basic authentication object.
  *
  * @class SpazBasicAuth
+ * @constructor
  */
 function SpazBasicAuth() {
 };
@@ -73,7 +83,6 @@ function SpazBasicAuth() {
  * @param {string} username
  * @param {string} password
  * @param {function} [onComplete] a callback to fire when complete. Currently just passed TRUE all the time; for compatibility with oAuth need for callbacks
- * @class SpazBasicAuth
  * @return {Boolean} true. ALWAYS returns true!
  */
 SpazBasicAuth.prototype.authorize = function(username, password, onComplete) {
@@ -91,7 +100,6 @@ SpazBasicAuth.prototype.authorize = function(username, password, onComplete) {
 /**
  * Returns the authentication header
  * @returns {string} Authentication header value
- * @class SpazBasicAuth
  */
 SpazBasicAuth.prototype.signRequest = function() {
     return this.authHeader;
@@ -102,7 +110,6 @@ SpazBasicAuth.prototype.signRequest = function() {
   *
   * @param {string} pickle the serialized data string returned by save()
   * @returns {boolean} true if successfully loaded
-  * @class SpazBasicAuth
   */
 SpazBasicAuth.prototype.load = function(pickle) {
     var credentials = pickle.split(':', 2);
@@ -119,7 +126,6 @@ SpazBasicAuth.prototype.load = function(pickle) {
   * Save basic auth credentials into a serialized string
   *
   * @returns {string} serialized string
-  * @class SpazBasicAuth
   */
 SpazBasicAuth.prototype.save = function() {
     return this.username + ":" + this.password;
@@ -141,6 +147,7 @@ SpazBasicAuth.prototype.getPassword = function() {
  * @param {string} realm
  * @param {object} options
  * @class SpazOAuth
+ * @constructor
  */
 function SpazOAuth(realm, options) {
     this.realm = realm;
@@ -154,7 +161,6 @@ function SpazOAuth(realm, options) {
  * @param {string} password
  * @param {function} [onComplete] a callback to fire on complete. If this is set, the request is asynchronous
  * @returns {boolean} true if authorization successful, otherwise false
- * @class SpazOAuth
  */
 SpazOAuth.prototype.authorize = function(username, password, onComplete) {
 	
@@ -295,7 +301,6 @@ SpazOAuth.prototype.authorize = function(username, password, onComplete) {
   *
   * @param {string} key
   * @param {string} secret
-  * @class SpazOAuth
   */
 SpazOAuth.prototype.setAccessToken = function(key, secret) {
     this.accessToken = {key: key, secret: secret};
@@ -314,7 +319,6 @@ SpazOAuth.prototype.setAccessToken = function(key, secret) {
  * @param {string} url the URL of the request
  * @param {object} parameters map of all parameters in the request
  * @returns {string} Authorization header value
- * @class SpazOAuth
  */
 SpazOAuth.prototype.signRequest = function(method, url, parameters) {
     // We need to copy parameters because OAuth.js modifies it.
@@ -334,7 +338,6 @@ SpazOAuth.prototype.signRequest = function(method, url, parameters) {
   *
   * @param {string} pickle the serialized string returned by save()
   * @returns {boolean} true if successfully loaded
-  * @class SpazOAuth
   */
 SpazOAuth.prototype.load = function(pickle) {
     var credentials = pickle.split(':', 3);
@@ -352,7 +355,6 @@ SpazOAuth.prototype.load = function(pickle) {
   * Save OAuth credentials to a serialized string
   *
   * @returns {string} serialized string
-  * @class SpazOAuth
   */
 SpazOAuth.prototype.save = function() {
     return this.username + ":" + this.accessToken.key + ":" + this.accessToken.secret;

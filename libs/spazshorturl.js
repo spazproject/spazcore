@@ -16,11 +16,26 @@ var sc, jQuery;
 /**
  * Constants to refer to services 
  */
+/**
+ * @constant 
+ */
 var SPAZCORE_SHORTURL_SERVICE_SHORTIE = 'short.ie';
+/**
+ * @constant 
+ */
 var SPAZCORE_SHORTURL_SERVICE_ISGD	  = 'is.gd';
+/**
+ * @constant 
+ */
 var SPAZCORE_SHORTURL_SERVICE_BITLY	  = 'bit.ly';
+/**
+ * @constant 
+ */
 var SPAZCORE_SHORTURL_SERVICE_JMP     = 'j.mp';
 
+/**
+ * @constant 
+ */
 var SPAZCORE_EXPANDABLE_DOMAINS = [
 	"bit.ly",
 	"cli.gs",
@@ -118,6 +133,8 @@ sc.events.newExpandURLFailure   = 'recoverLongURLFailure';
 /**
  * Constructor
  * @param {string} service	the name of a service. Preferrably one of the SPAZCORE_SHORTURL_SERVICE_* constants
+ * @class SpazShortURL
+ * @constructor
  */
 function SpazShortURL(service) {
 	
@@ -400,15 +417,15 @@ SpazShortURL.prototype.findExpandableURLs = function(str) {
 		
 	};
 	
+	sch.debug("looking for "+regexes+ " in '"+str+"'");
 	for (i=0; i < regexes.length; i++) {
 		thisregex = regexes[i];
-		sch.dump("looking for "+thisregex+ " in '"+str+"'");
 		while( (re_matches = thisregex.exec(sch.trim(str))) != null) {
 			matches.push(re_matches[0]);
 		}		
 	};
 	
-	sch.dump(matches);
+	sch.debug('Matches: '+matches);
 	
 	if (matches.length > 0) {
 		return matches;

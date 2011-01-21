@@ -351,6 +351,18 @@
         var input = "@techjunky79, @germboy @badkittyapp hah! Those guys do fine work–we have @foo different aims @foooddd. @foop Glad you like how we @_flazo___ do things.";
         var output = ["techjunky79","germboy","badkittyapp", "foo", "foooddd", "foop", "_flazo___"];
         same(sc.helpers.extractScreenNames(input), output);
+
+        var input = "@techjunky79, @germboy @badkittyapp @techjunky79 hah! ";
+        var output = ["techjunky79","germboy","badkittyapp"];
+        same(sc.helpers.extractScreenNames(input), output);
+
+        var input = "without @techjunky79, @germboy @badkittyapp @techjunky79 hah! ";
+        var output = ["badkittyapp"];
+        same(sc.helpers.extractScreenNames(input, ['germboy', 'techjunky79']), output);
+
+        var input = "See the light RT @ChrisLevel No one knew who Justin Blackmon was, he had a new QB in Weeden and they lost Russell Okung. #Holgorsencancoach";
+        var output = ["ChrisLevel"];
+        same(sc.helpers.extractScreenNames(input, ['smartfootball','funkatron']), output);
     });
 	
 	test("striptags", function() {
@@ -579,6 +591,14 @@
 	test("rtrim", function() {
 		var result = sc.helpers.rtrim('   foobar 	');
 		var expect = '   foobar';
+		equals(result, expect);
+	});
+	test("truncate", function() {
+		var result = sc.helpers.truncate("Thursday; December 30, 2010", 5);
+		var expect = "Thurs";
+		equals(result, expect);
+		var result = sc.helpers.truncate("Thursday; December 30, 2010", 7, '…');
+		var expect = "Thursda…";
 		equals(result, expect);
 	});
 	

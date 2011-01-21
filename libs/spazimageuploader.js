@@ -18,6 +18,7 @@ var sc, DOMParser, jQuery;
  * @param {string} [opts.password] a password, in case we're doing that kind of thing
  * @param {string} [opts.auth_method] the method of authentication: 'echo' or 'basic'. Default is 'echo'
  * @param {object} [opts.extra] Extra params to pass in the upload request
+ * @constructor
  */
 var SpazImageUploader = function(opts) {
     if (opts) {
@@ -78,7 +79,7 @@ SpazImageUploader.prototype.services = {
 			status = rspAttr.getNamedItem("stat").nodeValue;
 			
 			if (status == 'ok') {
-				var mediaurl = $(xmldoc).find('mediaurl').text();
+				var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue; 
 				return {'url':mediaurl};
 			} else {
 				var errMsg;
@@ -114,7 +115,7 @@ SpazImageUploader.prototype.services = {
 			}
 			
 			if (status == 'ok') {
-				var mediaurl = $(xmldoc).find('mediaurl').text();
+				var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue;
 				return {'url':mediaurl};
 			} else {
 				var errAttributes;
@@ -150,7 +151,7 @@ SpazImageUploader.prototype.services = {
     //         status = rspAttr.getNamedItem("stat").nodeValue;
     //         
     //         if (status == 'ok') {
-    //             var mediaurl = $(xmldoc).find('mediaurl').text();
+    //             var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue; 
     //             return {'url':mediaurl};
     //         } else {
     //             var errAttributes;
@@ -204,7 +205,7 @@ SpazImageUploader.prototype.services = {
 			status = rspAttr.getNamedItem("status").nodeValue;
 
 			if (status == 'ok') {
-				var mediaurl = $(xmldoc).find('mediaurl').text();
+				var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue; 
 				return {'url':mediaurl};
 			} else {
 				var errAttributes;
@@ -234,7 +235,7 @@ SpazImageUploader.prototype.services = {
 			status = rspAttr.getNamedItem("stat").nodeValue;
 			
 			if (status == 'ok') {
-				var mediaurl = $(xmldoc).find('mediaurl').text();
+				var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue; 
 				return {'url':mediaurl};
 			} else {
 				var errMsg;
@@ -267,7 +268,7 @@ SpazImageUploader.prototype.services = {
 			status = rspAttr.getNamedItem("stat").nodeValue;
 			
 			if (status == 'ok') {
-				var mediaurl = $(xmldoc).find('mediaurl').text();
+				var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue;
 				return {'url':mediaurl};
 			} else {
 				var errMsg;
@@ -338,6 +339,7 @@ SpazImageUploader.prototype.upload = function() {
 	
 	var onSuccess, rs;
 	if (srvc.parseResponse) {
+		/** @ignore */
 		onSuccess = function(data) {
 			if (sch.isString(data)) {
 				rs = srvc.parseResponse.call(srvc, data);

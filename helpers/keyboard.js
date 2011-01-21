@@ -19,7 +19,8 @@ var sc, DOMParser, shortcut;
  * @param {Object} [opts.target] The dom node that should be watched for the keyboard event. Default is the document element
  * @param {Boolean} [opts.propagate] If the key event should propagate. Default is FALSE
  * @param {Number} [opts.keycode] Watch for the given keycode
- */
+ * @member sc.helpers
+ */
 sc.helpers.key_add = function(keystroke, func, opts) {
 	opts = sch.defaults({
 		'type':'keydown',
@@ -32,14 +33,16 @@ sc.helpers.key_add = function(keystroke, func, opts) {
 
 /**
  * this is really a wrapper for shortcut.remove in shortcut.js 
- */
+ * @member sc.helpers
+ */
 sc.helpers.key_remove = function(keystroke) {
 	shortcut.remove(keystroke);
 };
 
 /**
  * @todo 
- */
+ * @member sc.helpers
+ */
 sc.helpers.getModKey = function() {
 	// get the primary modkey based on the OS
 	// if OS X, use 'Meta'

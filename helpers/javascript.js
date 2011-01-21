@@ -16,6 +16,7 @@ var sc, jQuery;
 /*
 	Return a boolean value telling whether
 	the first argument is a string.
+	* @member sc.helpers
 */
 sc.helpers.isString = function(thing) {
 	if (typeof thing === 'string') {return true;}
@@ -26,7 +27,9 @@ sc.helpers.isString = function(thing) {
     return false;
 };
 
-
+/**
+ * @member sc.helpers 
+ */
 sc.helpers.isNumber = function(chk) {
 	return typeof chk === 'number';
 };
@@ -35,6 +38,7 @@ sc.helpers.isNumber = function(chk) {
 
 /*
 	http://www.breakingpar.com/bkp/home.nsf/0/87256B280015193F87256C720080D723
+	* @member sc.helpers
 */
 sc.helpers.isArray = function(obj) {
 	if (!obj || !obj.constructor) { // short-circuit this if it's falsey
@@ -50,6 +54,7 @@ sc.helpers.isArray = function(obj) {
 
 /*
 	Returns a copy of the object using the _.extend() method
+	* @member sc.helpers
 */
 sc.helpers.clone = function(oldObj) {
 	return _.extend({}/* clone */, oldObj);
@@ -57,6 +62,7 @@ sc.helpers.clone = function(oldObj) {
 
 /**
  * @todo 
+ * @member sc.helpers
  */
 sc.helpers.each = function(arr, f) {
 	
@@ -70,6 +76,7 @@ sc.helpers.each = function(arr, f) {
  * 
  * @param {object} child the child type
  * @param {object} supertype the parent we inherit from 
+ * @member sc.helpers
  */
 sc.helpers.extend = function(child, supertype)
 {
@@ -84,6 +91,7 @@ sc.helpers.extend = function(child, supertype)
  * @param {object} defaults the default key/val pairs
  * @param {object} passed   the values provided to the calling method
  * @returns {object} a set of key/vals that have defaults filled-in
+ * @member sc.helpers
  */
 sc.helpers.defaults = function(defaults, passed) {
 	

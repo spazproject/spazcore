@@ -31,15 +31,18 @@ var sc;
 *
 *  Base64 encode / decode
 *  http://www.webtoolkit.info/
-*
+* @namespace
 **/
-
 sc.helpers.Base64 = {
 
 	// private property
 	_keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
 
-	// public method for encoding
+	/**
+	* public method for encoding
+	* @function
+	* @name sc.helpers.Base64.encode
+	*/
 	encode : function (input) {
 		var output = "";
 		var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
@@ -73,7 +76,11 @@ sc.helpers.Base64 = {
 		return output;
 	},
 
-	// public method for decoding
+	/**
+	* public method for decoding
+	* @function
+	* @name sc.helpers.Base64.decode
+	*/
 	decode : function (input) {
 		var output = "";
 		var chr1, chr2, chr3;
@@ -176,9 +183,8 @@ sc.helpers.Base64 = {
 *
 *  Javascript crc32
 *  http://www.webtoolkit.info/
-*
+* @function
 **/
- 
 sc.helpers.crc32 = function (str) {
  
 	function Utf8Encode(string) {
@@ -231,9 +237,8 @@ sc.helpers.crc32 = function (str) {
 *
 *  MD5 (Message-Digest Algorithm)
 *  http://www.webtoolkit.info/
-*
+* @function
 **/
- 
 sc.helpers.MD5 = function (string) {
  
 	function RotateLeft(lValue, iShiftBits) {
@@ -439,9 +444,8 @@ sc.helpers.MD5 = function (string) {
 *
 *  Secure Hash Algorithm (SHA1)
 *  http://www.webtoolkit.info/
-*
+* @function
 **/
- 
 sc.helpers.SHA1 = function (msg) {
  
 	function rotate_left(n,s) {
@@ -618,9 +622,8 @@ sc.helpers.SHA1 = function (msg) {
 *  http://www.webtoolkit.info/
 *
 *  Original code by Angel Marin, Paul Johnston.
-*
+* @function
 **/
- 
 sc.helpers.SHA256 = function (s){
  
 	var chrsz   = 8;
@@ -768,7 +771,7 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/*
+/**
  * Generate a random uuid.
  *
  * USAGE: Math.uuid(length, radix)
@@ -791,7 +794,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  *   "47473046"
  *   >>> Math.uuid(8, 16) // 8 character ID (base=16)
  *   "098F4D35"
- */
+ * @member sc.helpers
+ * @function
+ */
 sc.helpers.UUID = (function() {
   // Private array of chars to use
   var CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split(''); 
@@ -827,7 +832,8 @@ sc.helpers.UUID = (function() {
 
 /**
  * Checks if the given value is an RFC 4122 UUID 
- */
+ * @member sc.helpers
+ */
 sc.helpers.isUUID = function(val) {
 	return val.match(/^[0-9A-Z]{8}-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{12}$/);
 };

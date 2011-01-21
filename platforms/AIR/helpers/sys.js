@@ -17,7 +17,7 @@ var sc, air, DOMParser;
 /*
 	dump an object's first level to console
 */
-sc.helpers.dump = function(obj, level) {
+sc.helpers.dump = function(obj, level, cb) {
 	var dumper;
 	
 	if (!level) { level = SPAZCORE_DUMPLEVEL_DEBUG; }
@@ -30,9 +30,7 @@ sc.helpers.dump = function(obj, level) {
 		dumper = air.trace;
 	} else {
 		dumper = function() {
-			for(var x in obj) {
-				air.trace("'"+x+"':"+obj[x]);
-			}
+			typeof(obj) + ' - ' + sch.enJSON(obj);
 		};
 	}
 	
@@ -47,6 +45,11 @@ sc.helpers.dump = function(obj, level) {
 	} else { // this should be a "normal" object
 		dumper(obj);
 	}
+	
+	if (cb) {
+		cb(obj, level);
+	}
+	
 };
 
 

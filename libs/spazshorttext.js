@@ -11,9 +11,8 @@ var sc;
 
 /**
  * A library to shorten text 
+ * @constructor
  */
-
-
 function SpazShortText() {
 
 	this.map = {};

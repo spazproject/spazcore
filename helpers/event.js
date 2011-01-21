@@ -19,7 +19,7 @@ var sc;
  * @param {Object} [scope] the scope to execute the handler within (what "this" refers to)
  * @param {boolean} [use_capture]  defaults to false
  * @returns {function} the handler that was passed -- or created, if we passed a scope. You can use this to remove the listener later on
- * @function
+ * @member sc.helpers 
  */
 sc.helpers.addListener = function(target, event_type, handler, scope, use_capture) {
 	
@@ -48,7 +48,7 @@ sc.helpers.addListener = function(target, event_type, handler, scope, use_captur
  * @param {function} handler  a method that will take the event as a param, and "this" refers to target
  * @param {Object} scope the scope to execute the handler
  * @param {boolean} use_capture  defaults to false
- * @function
+ * @member sc.helpers 
  */
 sc.helpers.removeListener = function(target, event_type, handler, use_capture) {
 
@@ -104,20 +104,19 @@ sc.helpers.removeDelegatedListener = function(base_target, selector, event_type,
  * @param {DOMElement}  target   the target for the event (element, window, etc)
  * @param {object}  data     data to pass with event. it is always passed as the second parameter to the handler (after the event object)
  * @param {boolean} bubble   whether the event should bubble or not. defaults to true
- * @function
+ * @member sc.helpers 
  */
 sc.helpers.triggerCustomEvent = function(event_type, target, data, bubble) {
 	
-	sch.error('triggering '+event_type);
-	sch.error('on target nodeName:'+target.nodeName);
-	sch.error('event data:');
-	// sch.error(sch.enJSON(data));
+	sch.debug('EVENT triggering '+event_type);
+	sch.debug('EVENT on target nodeName:'+target.nodeName);
 	
 	if (bubble) {
 		sch.warn('bubble is no longer supported!');
 	}
 	
 	if (data) {
+		sch.debug('EVENT data passed');
 		data = [data];
 	}
 	
@@ -137,31 +136,36 @@ sc.helpers.getEventData = function(event_obj) {
 
 /**
  * Alias for sc.helpers.addListener 
+ * @member sc.helpers 
  * @function
  */
 sc.helpers.listen = sc.helpers.addListener;
 
 /**
  * Alias for sc.helpers.removeListener
+ * @member sc.helpers 
  * @function
  */
 sc.helpers.unlisten = sc.helpers.removeListener;
 
 /**
  * Alias for sc.helpers.addDelegatedListener
- * @function 
+ * @member sc.helpers  
+ * @function
  */
 sc.helpers.delegate = sc.helpers.addDelegatedListener;
 
 /**
  * Alias for sc.helpers.removeDelegatedListener
- * @function 
+ * @member sc.helpers  
+ * @function
  */
 sc.helpers.undelegate = sc.helpers.removeDelegatedListener;
 
 
 /**
  * Alias for sc.helpers.triggerCustomEvent 
+ * @member sc.helpers 
  * @function
  */
 sc.helpers.trigger  = sc.helpers.triggerCustomEvent;

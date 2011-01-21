@@ -63,18 +63,17 @@ onevar: false
  */
  
 /**
- * 
- * @namespace root namespace for SpazCore
+ * @namespace 
  */
 var sc = {};
 
 /**
- * @namespace namespace for app-specific stuff
+ * @namespace
  */
 sc.app = {};
 
 /**
- * @namespace namespace for helper methods
+ * @namespace
  */
 sc.helpers = {};
 

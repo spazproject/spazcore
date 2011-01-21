@@ -14,6 +14,7 @@ var sc;
  * SpazTemplate 
  * designed for fast templating functions
  * @class SpazTemplate
+ * @constructor
  */
 function SpazTemplate() {
 	
