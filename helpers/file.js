@@ -146,3 +146,10 @@ sc.helpers.getAppStoreDir = sc.helpers.getAppStorageDir;
  * @member sc.helpers
  */
 sc.helpers.getAppDir = function()  {};
+
+/**
+ * build a file path from an array of strings 
+ * @platformstub
+ * @member sc.helpers
+ */
+sch.helpers.joinPaths = function(path_arr) {};

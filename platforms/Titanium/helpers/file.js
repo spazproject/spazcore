@@ -167,3 +167,16 @@ sc.helpers.getAppStoreDir = sc.helpers.getAppStorageDir;
 sc.helpers.getAppDir = function() {
 	return Titanium.Filesystem.getApplicationDirectory().toString();
 };
+
+/**
+ * build a filesystem path from an array of strings 
+ */
+sc.helpers.joinPaths = function(path_arr) {
+	var path = '';
+	var sep  = Titanium.Filesystem.getSeparator();
+	for (var i=0; i < path_arr.length; i++) {
+		if (i != 0) { path += sep; }
+		path += path_arr[i];
+	}
+	return path;
+};
