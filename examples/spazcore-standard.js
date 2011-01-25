@@ -1,4 +1,4 @@
-/*********** Built 2010-10-12 21:09:12 EDT ***********/
+/*********** Built 2011-01-13 15:00:11 EST ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -2779,62 +2779,80 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
         };
     }
 })();
-// Underscore.js
-// (c) 2009 Jeremy Ashkenas, DocumentCloud Inc.
-// Underscore is freely distributable under the terms of the MIT license.
-// Portions of Underscore are inspired by or borrowed from Prototype.js,
-// Oliver Steele's Functional, and John Resig's Micro-Templating.
-// For all details and documentation:
-// http://documentcloud.github.com/underscore/
+//     (c) 2010 Jeremy Ashkenas, DocumentCloud Inc.
+//     Underscore is freely distributable under the MIT license.
+//     Portions of Underscore are inspired or borrowed from Prototype,
+//     Oliver Steele's Functional, and John Resig's Micro-Templating.
+//     For all details and documentation:
+//     http://documentcloud.github.com/underscore
 
 (function() {
 
-  /*------------------------- Baseline setup ---------------------------------*/
+  // Baseline setup
+  // --------------
 
-  // Establish the root object, "window" in the browser, or "global" on the server.
+  // Establish the root object, `window` in the browser, or `global` on the server.
   var root = this;
 
-  // Save the previous value of the "_" variable.
+  // Save the previous value of the `_` variable.
   var previousUnderscore = root._;
-
-  // If Underscore is called as a function, it returns a wrapped object that
-  // can be used OO-style. This wrapper holds altered versions of all the
-  // underscore functions. Wrapped objects may be chained.
-  var wrapper = function(obj) { this._wrapped = obj; };
 
   // Establish the object that gets thrown to break out of a loop iteration.
   var breaker = typeof StopIteration !== 'undefined' ? StopIteration : '__break__';
 
-  // Create a safe reference to the Underscore object for reference below.
-  var _ = root._ = function(obj) { return new wrapper(obj); };
-
-  // Export the Underscore object for CommonJS.
-  if (typeof exports !== 'undefined') exports._ = _;
+  // Save bytes in the minified (but not gzipped) version:
+  var ArrayProto = Array.prototype, ObjProto = Object.prototype;
 
   // Create quick reference variables for speed access to core prototypes.
-  var slice                 = Array.prototype.slice,
-      unshift               = Array.prototype.unshift,
-      toString              = Object.prototype.toString,
-      hasOwnProperty        = Object.prototype.hasOwnProperty,
-      propertyIsEnumerable  = Object.prototype.propertyIsEnumerable;
+  var slice                 = ArrayProto.slice,
+      unshift               = ArrayProto.unshift,
+      toString              = ObjProto.toString,
+      hasOwnProperty        = ObjProto.hasOwnProperty,
+      propertyIsEnumerable  = ObjProto.propertyIsEnumerable;
+
+  // All **ECMAScript 5** native function implementations that we hope to use
+  // are declared here.
+  var
+    nativeForEach      = ArrayProto.forEach,
+    nativeMap          = ArrayProto.map,
+    nativeReduce       = ArrayProto.reduce,
+    nativeReduceRight  = ArrayProto.reduceRight,
+    nativeFilter       = ArrayProto.filter,
+    nativeEvery        = ArrayProto.every,
+    nativeSome         = ArrayProto.some,
+    nativeIndexOf      = ArrayProto.indexOf,
+    nativeLastIndexOf  = ArrayProto.lastIndexOf,
+    nativeIsArray      = Array.isArray,
+    nativeKeys         = Object.keys;
+
+  // Create a safe reference to the Underscore object for use below.
+  var _ = function(obj) { return new wrapper(obj); };
+
+  // Export the Underscore object for **CommonJS**.
+  if (typeof exports !== 'undefined') exports._ = _;
+
+  // Export Underscore to the global scope.
+  root._ = _;
 
   // Current version.
-  _.VERSION = '0.5.1';
+  _.VERSION = '1.1.2';
 
-  /*------------------------ Collection Functions: ---------------------------*/
+  // Collection Functions
+  // --------------------
 
-  // The cornerstone, an each implementation.
-  // Handles objects implementing forEach, arrays, and raw objects.
-  _.each = function(obj, iterator, context) {
-    var index = 0;
+  // The cornerstone, an `each` implementation, aka `forEach`.
+  // Handles objects implementing `forEach`, arrays, and raw objects.
+  // Delegates to **ECMAScript 5**'s native `forEach` if available.
+  var each = _.each = _.forEach = function(obj, iterator, context) {
     try {
-      if (obj.forEach) {
+      if (nativeForEach && obj.forEach === nativeForEach) {
         obj.forEach(iterator, context);
-      } else if (_.isArray(obj) || _.isArguments(obj)) {
-        for (var i=0, l=obj.length; i<l; i++) iterator.call(context, obj[i], i, obj);
+      } else if (_.isNumber(obj.length)) {
+        for (var i = 0, l = obj.length; i < l; i++) iterator.call(context, obj[i], i, obj);
       } else {
-        var keys = _.keys(obj), l = keys.length;
-        for (var i=0; i<l; i++) iterator.call(context, obj[keys[i]], keys[i], obj);
+        for (var key in obj) {
+          if (hasOwnProperty.call(obj, key)) iterator.call(context, obj[key], key, obj);
+        }
       }
     } catch(e) {
       if (e != breaker) throw e;
@@ -2842,42 +2860,45 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
     return obj;
   };
 
-  // Return the results of applying the iterator to each element. Use JavaScript
-  // 1.6's version of map, if possible.
+  // Return the results of applying the iterator to each element.
+  // Delegates to **ECMAScript 5**'s native `map` if available.
   _.map = function(obj, iterator, context) {
-    if (obj && _.isFunction(obj.map)) return obj.map(iterator, context);
+    if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
     var results = [];
-    _.each(obj, function(value, index, list) {
-      results.push(iterator.call(context, value, index, list));
+    each(obj, function(value, index, list) {
+      results[results.length] = iterator.call(context, value, index, list);
     });
     return results;
   };
 
-  // Reduce builds up a single result from a list of values. Also known as
-  // inject, or foldl. Uses JavaScript 1.8's version of reduce, if possible.
-  _.reduce = function(obj, memo, iterator, context) {
-    if (obj && _.isFunction(obj.reduce)) return obj.reduce(_.bind(iterator, context), memo);
-    _.each(obj, function(value, index, list) {
+  // **Reduce** builds up a single result from a list of values, aka `inject`,
+  // or `foldl`. Delegates to **ECMAScript 5**'s native `reduce` if available.
+  _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
+    if (nativeReduce && obj.reduce === nativeReduce) {
+      if (context) iterator = _.bind(iterator, context);
+      return obj.reduce(iterator, memo);
+    }
+    each(obj, function(value, index, list) {
       memo = iterator.call(context, memo, value, index, list);
     });
     return memo;
   };
 
-  // The right-associative version of reduce, also known as foldr. Uses
-  // JavaScript 1.8's version of reduceRight, if available.
-  _.reduceRight = function(obj, memo, iterator, context) {
-    if (obj && _.isFunction(obj.reduceRight)) return obj.reduceRight(_.bind(iterator, context), memo);
-    var reversed = _.clone(_.toArray(obj)).reverse();
-    _.each(reversed, function(value, index) {
-      memo = iterator.call(context, memo, value, index, obj);
-    });
-    return memo;
+  // The right-associative version of reduce, also known as `foldr`.
+  // Delegates to **ECMAScript 5**'s native `reduceRight` if available.
+  _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
+    if (nativeReduceRight && obj.reduceRight === nativeReduceRight) {
+      if (context) iterator = _.bind(iterator, context);
+      return obj.reduceRight(iterator, memo);
+    }
+    var reversed = (_.isArray(obj) ? obj.slice() : _.toArray(obj)).reverse();
+    return _.reduce(reversed, iterator, memo, context);
   };
 
-  // Return the first value which passes a truth test.
-  _.detect = function(obj, iterator, context) {
+  // Return the first value which passes a truth test. Aliased as `detect`.
+  _.find = _.detect = function(obj, iterator, context) {
     var result;
-    _.each(obj, function(value, index, list) {
+    each(obj, function(value, index, list) {
       if (iterator.call(context, value, index, list)) {
         result = value;
         _.breakLoop();
@@ -2886,13 +2907,14 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
     return result;
   };
 
-  // Return all the elements that pass a truth test. Use JavaScript 1.6's
-  // filter(), if it exists.
-  _.select = function(obj, iterator, context) {
-    if (obj && _.isFunction(obj.filter)) return obj.filter(iterator, context);
+  // Return all the elements that pass a truth test.
+  // Delegates to **ECMAScript 5**'s native `filter` if available.
+  // Aliased as `select`.
+  _.filter = _.select = function(obj, iterator, context) {
+    if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
     var results = [];
-    _.each(obj, function(value, index, list) {
-      iterator.call(context, value, index, list) && results.push(value);
+    each(obj, function(value, index, list) {
+      if (iterator.call(context, value, index, list)) results[results.length] = value;
     });
     return results;
   };
@@ -2900,65 +2922,67 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
   // Return all the elements for which a truth test fails.
   _.reject = function(obj, iterator, context) {
     var results = [];
-    _.each(obj, function(value, index, list) {
-      !iterator.call(context, value, index, list) && results.push(value);
+    each(obj, function(value, index, list) {
+      if (!iterator.call(context, value, index, list)) results[results.length] = value;
     });
     return results;
   };
 
-  // Determine whether all of the elements match a truth test. Delegate to
-  // JavaScript 1.6's every(), if it is present.
-  _.all = function(obj, iterator, context) {
+  // Determine whether all of the elements match a truth test.
+  // Delegates to **ECMAScript 5**'s native `every` if available.
+  // Aliased as `all`.
+  _.every = _.all = function(obj, iterator, context) {
     iterator = iterator || _.identity;
-    if (obj && _.isFunction(obj.every)) return obj.every(iterator, context);
+    if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
     var result = true;
-    _.each(obj, function(value, index, list) {
+    each(obj, function(value, index, list) {
       if (!(result = result && iterator.call(context, value, index, list))) _.breakLoop();
     });
     return result;
   };
 
-  // Determine if at least one element in the object matches a truth test. Use
-  // JavaScript 1.6's some(), if it exists.
-  _.any = function(obj, iterator, context) {
+  // Determine if at least one element in the object matches a truth test.
+  // Delegates to **ECMAScript 5**'s native `some` if available.
+  // Aliased as `any`.
+  _.some = _.any = function(obj, iterator, context) {
     iterator = iterator || _.identity;
-    if (obj && _.isFunction(obj.some)) return obj.some(iterator, context);
+    if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
     var result = false;
-    _.each(obj, function(value, index, list) {
+    each(obj, function(value, index, list) {
       if (result = iterator.call(context, value, index, list)) _.breakLoop();
     });
     return result;
   };
 
-  // Determine if a given value is included in the array or object,
-  // based on '==='.
-  _.include = function(obj, target) {
-    if (_.isArray(obj)) return _.indexOf(obj, target) != -1;
+  // Determine if a given value is included in the array or object using `===`.
+  // Aliased as `contains`.
+  _.include = _.contains = function(obj, target) {
+    if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
     var found = false;
-    _.each(obj, function(value) {
+    each(obj, function(value) {
       if (found = value === target) _.breakLoop();
     });
     return found;
   };
 
-  // Invoke a method with arguments on every item in a collection.
+  // Invoke a method (with arguments) on every item in a collection.
   _.invoke = function(obj, method) {
-    var args = _.rest(arguments, 2);
+    var args = slice.call(arguments, 2);
     return _.map(obj, function(value) {
       return (method ? value[method] : value).apply(value, args);
     });
   };
 
-  // Convenience version of a common use case of map: fetching a property.
+  // Convenience version of a common use case of `map`: fetching a property.
   _.pluck = function(obj, key) {
     return _.map(obj, function(value){ return value[key]; });
   };
 
-  // Return the maximum item or (item-based computation).
+  // Return the maximum element or (element-based computation).
   _.max = function(obj, iterator, context) {
     if (!iterator && _.isArray(obj)) return Math.max.apply(Math, obj);
     var result = {computed : -Infinity};
-    _.each(obj, function(value, index, list) {
+    each(obj, function(value, index, list) {
       var computed = iterator ? iterator.call(context, value, index, list) : value;
       computed >= result.computed && (result = {value : value, computed : computed});
     });
@@ -2969,14 +2993,14 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
   _.min = function(obj, iterator, context) {
     if (!iterator && _.isArray(obj)) return Math.min.apply(Math, obj);
     var result = {computed : Infinity};
-    _.each(obj, function(value, index, list) {
+    each(obj, function(value, index, list) {
       var computed = iterator ? iterator.call(context, value, index, list) : value;
       computed < result.computed && (result = {value : value, computed : computed});
     });
     return result.value;
   };
 
-  // Sort the object's values by a criteria produced by an iterator.
+  // Sort the object's values by a criterion produced by an iterator.
   _.sortBy = function(obj, iterator, context) {
     return _.pluck(_.map(obj, function(value, index, list) {
       return {
@@ -3001,13 +3025,13 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
     return low;
   };
 
-  // Convert anything iterable into a real, live array.
+  // Safely convert anything iterable into a real, live array.
   _.toArray = function(iterable) {
     if (!iterable)                return [];
     if (iterable.toArray)         return iterable.toArray();
     if (_.isArray(iterable))      return iterable;
     if (_.isArguments(iterable))  return slice.call(iterable);
-    return _.map(iterable, function(val){ return val; });
+    return _.values(iterable);
   };
 
   // Return the number of elements in an object.
@@ -3015,20 +3039,21 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
     return _.toArray(obj).length;
   };
 
-  /*-------------------------- Array Functions: ------------------------------*/
+  // Array Functions
+  // ---------------
 
-  // Get the first element of an array. Passing "n" will return the first N
-  // values in the array. Aliased as "head". The "guard" check allows it to work
-  // with _.map.
-  _.first = function(array, n, guard) {
+  // Get the first element of an array. Passing **n** will return the first N
+  // values in the array. Aliased as `head`. The **guard** check allows it to work
+  // with `_.map`.
+  _.first = _.head = function(array, n, guard) {
     return n && !guard ? slice.call(array, 0, n) : array[0];
   };
 
-  // Returns everything but the first entry of the array. Aliased as "tail".
-  // Especially useful on the arguments object. Passing an "index" will return
-  // the rest of the values in the array from that index onward. The "guard"
-   //check allows it to work with _.map.
-  _.rest = function(array, index, guard) {
+  // Returns everything but the first entry of the array. Aliased as `tail`.
+  // Especially useful on the arguments object. Passing an **index** will return
+  // the rest of the values in the array from that index onward. The **guard**
+  // check allows it to work with `_.map`.
+  _.rest = _.tail = function(array, index, guard) {
     return slice.call(array, _.isUndefined(index) || guard ? 1 : index);
   };
 
@@ -3039,39 +3064,40 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
 
   // Trim out all falsy values from an array.
   _.compact = function(array) {
-    return _.select(array, function(value){ return !!value; });
+    return _.filter(array, function(value){ return !!value; });
   };
 
   // Return a completely flattened version of an array.
   _.flatten = function(array) {
-    return _.reduce(array, [], function(memo, value) {
+    return _.reduce(array, function(memo, value) {
       if (_.isArray(value)) return memo.concat(_.flatten(value));
-      memo.push(value);
+      memo[memo.length] = value;
       return memo;
-    });
+    }, []);
   };
 
   // Return a version of the array that does not contain the specified value(s).
   _.without = function(array) {
-    var values = _.rest(arguments);
-    return _.select(array, function(value){ return !_.include(values, value); });
+    var values = slice.call(arguments, 1);
+    return _.filter(array, function(value){ return !_.include(values, value); });
   };
 
   // Produce a duplicate-free version of the array. If the array has already
   // been sorted, you have the option of using a faster algorithm.
-  _.uniq = function(array, isSorted) {
-    return _.reduce(array, [], function(memo, el, i) {
-      if (0 == i || (isSorted === true ? _.last(memo) != el : !_.include(memo, el))) memo.push(el);
+  // Aliased as `unique`.
+  _.uniq = _.unique = function(array, isSorted) {
+    return _.reduce(array, function(memo, el, i) {
+      if (0 == i || (isSorted === true ? _.last(memo) != el : !_.include(memo, el))) memo[memo.length] = el;
       return memo;
-    });
+    }, []);
   };
 
   // Produce an array that contains every item shared between all the
   // passed-in arrays.
   _.intersect = function(array) {
-    var rest = _.rest(arguments);
-    return _.select(_.uniq(array), function(item) {
-      return _.all(rest, function(other) {
+    var rest = slice.call(arguments, 1);
+    return _.filter(_.uniq(array), function(item) {
+      return _.every(rest, function(other) {
         return _.indexOf(other, item) >= 0;
       });
     });
@@ -3080,78 +3106,93 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
   // Zip together multiple lists into a single array -- elements that share
   // an index go together.
   _.zip = function() {
-    var args = _.toArray(arguments);
+    var args = slice.call(arguments);
     var length = _.max(_.pluck(args, 'length'));
     var results = new Array(length);
-    for (var i=0; i<length; i++) results[i] = _.pluck(args, String(i));
+    for (var i = 0; i < length; i++) results[i] = _.pluck(args, "" + i);
     return results;
   };
 
-  // If the browser doesn't supply us with indexOf (I'm looking at you, MSIE),
+  // If the browser doesn't supply us with indexOf (I'm looking at you, **MSIE**),
   // we need this function. Return the position of the first occurence of an
   // item in an array, or -1 if the item is not included in the array.
+  // Delegates to **ECMAScript 5**'s native `indexOf` if available.
   _.indexOf = function(array, item) {
-    if (array.indexOf) return array.indexOf(item);
-    for (var i=0, l=array.length; i<l; i++) if (array[i] === item) return i;
+    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
+    for (var i = 0, l = array.length; i < l; i++) if (array[i] === item) return i;
     return -1;
   };
 
-  // Provide JavaScript 1.6's lastIndexOf, delegating to the native function,
-  // if possible.
+
+  // Delegates to **ECMAScript 5**'s native `lastIndexOf` if available.
   _.lastIndexOf = function(array, item) {
-    if (array.lastIndexOf) return array.lastIndexOf(item);
+    if (nativeLastIndexOf && array.lastIndexOf === nativeLastIndexOf) return array.lastIndexOf(item);
     var i = array.length;
     while (i--) if (array[i] === item) return i;
     return -1;
   };
 
   // Generate an integer Array containing an arithmetic progression. A port of
-  // the native Python range() function. See:
-  // http://docs.python.org/library/functions.html#range
+  // the native Python `range()` function. See
+  // [the Python documentation](http://docs.python.org/library/functions.html#range).
   _.range = function(start, stop, step) {
-    var a     = _.toArray(arguments);
-    var solo  = a.length <= 1;
-    var start = solo ? 0 : a[0], stop = solo ? a[0] : a[1], step = a[2] || 1;
-    var len   = Math.ceil((stop - start) / step);
-    if (len <= 0) return [];
-    var range = new Array(len);
-    for (var i = start, idx = 0; true; i += step) {
-      if ((step > 0 ? i - stop : stop - i) >= 0) return range;
-      range[idx++] = i;
+    var args  = slice.call(arguments),
+        solo  = args.length <= 1,
+        start = solo ? 0 : args[0],
+        stop  = solo ? args[0] : args[1],
+        step  = args[2] || 1,
+        len   = Math.max(Math.ceil((stop - start) / step), 0),
+        idx   = 0,
+        range = new Array(len);
+    while (idx < len) {
+      range[idx++] = start;
+      start += step;
     }
+    return range;
   };
 
-  /* ----------------------- Function Functions: -----------------------------*/
+  // Function (ahem) Functions
+  // ------------------
 
-  // Create a function bound to a given object (assigning 'this', and arguments,
-  // optionally). Binding with arguments is also known as 'curry'.
+  // Create a function bound to a given object (assigning `this`, and arguments,
+  // optionally). Binding with arguments is also known as `curry`.
   _.bind = function(func, obj) {
-    var args = _.rest(arguments, 2);
+    var args = slice.call(arguments, 2);
     return function() {
-      return func.apply(obj || root, args.concat(_.toArray(arguments)));
+      return func.apply(obj || {}, args.concat(slice.call(arguments)));
     };
   };
 
   // Bind all of an object's methods to that object. Useful for ensuring that
   // all callbacks defined on an object belong to it.
   _.bindAll = function(obj) {
-    var funcs = _.rest(arguments);
+    var funcs = slice.call(arguments, 1);
     if (funcs.length == 0) funcs = _.functions(obj);
-    _.each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
+    each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
     return obj;
+  };
+
+  // Memoize an expensive function by storing its results.
+  _.memoize = function(func, hasher) {
+    var memo = {};
+    hasher = hasher || _.identity;
+    return function() {
+      var key = hasher.apply(this, arguments);
+      return key in memo ? memo[key] : (memo[key] = func.apply(this, arguments));
+    };
   };
 
   // Delays a function for the given number of milliseconds, and then calls
   // it with the arguments supplied.
   _.delay = function(func, wait) {
-    var args = _.rest(arguments, 2);
+    var args = slice.call(arguments, 2);
     return setTimeout(function(){ return func.apply(func, args); }, wait);
   };
 
   // Defers a function, scheduling it to run after the current call stack has
   // cleared.
   _.defer = function(func) {
-    return _.delay.apply(_, [func, 1].concat(_.rest(arguments)));
+    return _.delay.apply(_, [func, 1].concat(slice.call(arguments, 1)));
   };
 
   // Returns the first function passed as an argument to the second,
@@ -3159,7 +3200,7 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
   // conditionally execute the original function.
   _.wrap = function(func, wrapper) {
     return function() {
-      var args = [func].concat(_.toArray(arguments));
+      var args = [func].concat(slice.call(arguments));
       return wrapper.apply(wrapper, args);
     };
   };
@@ -3167,9 +3208,9 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
   // Returns a function that is the composition of a list of functions, each
   // consuming the return value of the function that follows.
   _.compose = function() {
-    var funcs = _.toArray(arguments);
+    var funcs = slice.call(arguments);
     return function() {
-      var args = _.toArray(arguments);
+      var args = slice.call(arguments);
       for (var i=funcs.length-1; i >= 0; i--) {
         args = [funcs[i].apply(this, args)];
       }
@@ -3177,13 +3218,15 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
     };
   };
 
-  /* ------------------------- Object Functions: ---------------------------- */
+  // Object Functions
+  // ----------------
 
   // Retrieve the names of an object's properties.
-  _.keys = function(obj) {
-    if(_.isArray(obj)) return _.range(0, obj.length);
+  // Delegates to **ECMAScript 5**'s native `Object.keys`
+  _.keys = nativeKeys || function(obj) {
+    if (_.isArray(obj)) return _.range(0, obj.length);
     var keys = [];
-    for (var key in obj) if (hasOwnProperty.call(obj, key)) keys.push(key);
+    for (var key in obj) if (hasOwnProperty.call(obj, key)) keys[keys.length] = key;
     return keys;
   };
 
@@ -3192,21 +3235,31 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
     return _.map(obj, _.identity);
   };
 
-  // Return a sorted list of the function names available in Underscore.
-  _.functions = function(obj) {
-    return _.select(_.keys(obj), function(key){ return _.isFunction(obj[key]); }).sort();
+  // Return a sorted list of the function names available on the object.
+  // Aliased as `methods`
+  _.functions = _.methods = function(obj) {
+    return _.filter(_.keys(obj), function(key){ return _.isFunction(obj[key]); }).sort();
   };
 
-  // Extend a given object with all of the properties in a source object.
-  _.extend = function(destination, source) {
-    for (var property in source) destination[property] = source[property];
-    return destination;
+  // Extend a given object with all the properties in passed-in object(s).
+  _.extend = function(obj) {
+    each(slice.call(arguments, 1), function(source) {
+      for (var prop in source) obj[prop] = source[prop];
+    });
+    return obj;
   };
 
   // Create a (shallow-cloned) duplicate of an object.
   _.clone = function(obj) {
-    if (_.isArray(obj)) return obj.slice(0);
-    return _.extend({}, obj);
+    return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
+  };
+
+  // Invokes interceptor with the obj, and then returns obj.
+  // The primary purpose of this method is to "tap into" a method chain, in
+  // order to perform operations on intermediate results within the chain.
+  _.tap = function(obj, interceptor) {
+    interceptor(obj);
+    return obj;
   };
 
   // Perform a deep comparison to check if two objects are equal.
@@ -3225,7 +3278,7 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
     // Check dates' integer values.
     if (_.isDate(a) && _.isDate(b)) return a.getTime() === b.getTime();
     // Both are NaN?
-    if (_.isNaN(a) && _.isNaN(b)) return true;
+    if (_.isNaN(a) && _.isNaN(b)) return false;
     // Compare regular expressions.
     if (_.isRegExp(a) && _.isRegExp(b))
       return a.source     === b.source &&
@@ -3241,13 +3294,15 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
     // Different object sizes?
     if (aKeys.length != bKeys.length) return false;
     // Recursive comparison of contents.
-    for (var key in a) if (!_.isEqual(a[key], b[key])) return false;
+    for (var key in a) if (!(key in b) || !_.isEqual(a[key], b[key])) return false;
     return true;
   };
 
   // Is a given array or object empty?
   _.isEmpty = function(obj) {
-    return _.keys(obj).length == 0;
+    if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
+    for (var key in obj) if (hasOwnProperty.call(obj, key)) return false;
+    return true;
   };
 
   // Is a given value a DOM element?
@@ -3255,9 +3310,45 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
     return !!(obj && obj.nodeType == 1);
   };
 
+  // Is a given value an array?
+  // Delegates to ECMA5's native Array.isArray
+  _.isArray = nativeIsArray || function(obj) {
+    return !!(obj && obj.concat && obj.unshift && !obj.callee);
+  };
+
   // Is a given variable an arguments object?
   _.isArguments = function(obj) {
-    return obj && _.isNumber(obj.length) && !_.isArray(obj) && !propertyIsEnumerable.call(obj, 'length');
+    return !!(obj && obj.callee);
+  };
+
+  // Is a given value a function?
+  _.isFunction = function(obj) {
+    return !!(obj && obj.constructor && obj.call && obj.apply);
+  };
+
+  // Is a given value a string?
+  _.isString = function(obj) {
+    return !!(obj === '' || (obj && obj.charCodeAt && obj.substr));
+  };
+
+  // Is a given value a number?
+  _.isNumber = function(obj) {
+    return (obj === +obj) || (toString.call(obj) === '[object Number]');
+  };
+
+  // Is a given value a boolean?
+  _.isBoolean = function(obj) {
+    return obj === true || obj === false;
+  };
+
+  // Is a given value a date?
+  _.isDate = function(obj) {
+    return !!(obj && obj.getTimezoneOffset && obj.setUTCFullYear);
+  };
+
+  // Is the given value a regular expression?
+  _.isRegExp = function(obj) {
+    return !!(obj && obj.test && obj.exec && (obj.ignoreCase || obj.ignoreCase === false));
   };
 
   // Is the given value NaN -- this one is interesting. NaN != NaN, and
@@ -3276,19 +3367,10 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
     return typeof obj == 'undefined';
   };
 
-  // Define the isArray, isDate, isFunction, isNumber, isRegExp, and isString
-  // functions based on their toString identifiers.
-  var types = ['Array', 'Date', 'Function', 'Number', 'RegExp', 'String'];
-  for (var i=0, l=types.length; i<l; i++) {
-    (function() {
-      var identifier = '[object ' + types[i] + ']';
-      _['is' + types[i]] = function(obj) { return toString.call(obj) == identifier; };
-    })();
-  }
+  // Utility Functions
+  // -----------------
 
-  /* -------------------------- Utility Functions: -------------------------- */
-
-  // Run Underscore.js in noConflict mode, returning the '_' variable to its
+  // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
   // previous owner. Returns a reference to the Underscore object.
   _.noConflict = function() {
     root._ = previousUnderscore;
@@ -3300,9 +3382,22 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
     return value;
   };
 
+  // Run a function **n** times.
+  _.times = function (n, iterator, context) {
+    for (var i = 0; i < n; i++) iterator.call(context, i);
+  };
+
   // Break out of the middle of an iteration.
   _.breakLoop = function() {
     throw breaker;
+  };
+
+  // Add your own custom functions to the Underscore object, ensuring that
+  // they're correctly added to the OOP wrapper as well.
+  _.mixin = function(obj) {
+    each(_.functions(obj), function(name){
+      addToWrapper(name, _[name] = obj[name]);
+    });
   };
 
   // Generate a unique integer id (unique within the entire client session).
@@ -3313,55 +3408,67 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
     return prefix ? prefix + id : id;
   };
 
-  // JavaScript templating a-la ERB, pilfered from John Resig's
-  // "Secrets of the JavaScript Ninja", page 83.
-  _.template = function(str, data) {
-    var fn = new Function('obj',
-      'var p=[],print=function(){p.push.apply(p,arguments);};' +
-      'with(obj){p.push(\'' +
-      str
-        .replace(/[\r\t\n]/g, " ")
-        .split("<%").join("\t")
-        .replace(/((^|%>)[^\t]*)'/g, "$1\r")
-        .replace(/\t=(.*?)%>/g, "',$1,'")
-        .split("\t").join("');")
-        .split("%>").join("p.push('")
-        .split("\r").join("\\'")
-    + "');}return p.join('');");
-    return data ? fn(data) : fn;
+  // By default, Underscore uses ERB-style template delimiters, change the
+  // following template settings to use alternative delimiters.
+  _.templateSettings = {
+    evaluate    : /<%([\s\S]+?)%>/g,
+    interpolate : /<%=([\s\S]+?)%>/g
   };
 
-  /*------------------------------- Aliases ----------------------------------*/
+  // JavaScript micro-templating, similar to John Resig's implementation.
+  // Underscore templating handles arbitrary delimiters, preserves whitespace,
+  // and correctly escapes quotes within interpolated code.
+  _.template = function(str, data) {
+    var c  = _.templateSettings;
+    var tmpl = 'var __p=[],print=function(){__p.push.apply(__p,arguments);};' +
+      'with(obj||{}){__p.push(\'' +
+      str.replace(/'/g, "\\'")
+         .replace(c.interpolate, function(match, code) {
+           return "'," + code.replace(/\\'/g, "'") + ",'";
+         })
+         .replace(c.evaluate || null, function(match, code) {
+           return "');" + code.replace(/\\'/g, "'")
+                              .replace(/[\r\n\t]/g, ' ') + "__p.push('";
+         })
+         .replace(/\r/g, '\\r')
+         .replace(/\n/g, '\\n')
+         .replace(/\t/g, '\\t')
+         + "');}return __p.join('');";
+    var func = new Function('obj', tmpl);
+    return data ? func(data) : func;
+  };
 
-  _.forEach  = _.each;
-  _.foldl    = _.inject       = _.reduce;
-  _.foldr    = _.reduceRight;
-  _.filter   = _.select;
-  _.every    = _.all;
-  _.some     = _.any;
-  _.head     = _.first;
-  _.tail     = _.rest;
-  _.methods  = _.functions;
+  // The OOP Wrapper
+  // ---------------
 
-  /*------------------------ Setup the OOP Wrapper: --------------------------*/
+  // If Underscore is called as a function, it returns a wrapped object that
+  // can be used OO-style. This wrapper holds altered versions of all the
+  // underscore functions. Wrapped objects may be chained.
+  var wrapper = function(obj) { this._wrapped = obj; };
+
+  // Expose `wrapper.prototype` as `_.prototype`
+  _.prototype = wrapper.prototype;
 
   // Helper function to continue chaining intermediate results.
   var result = function(obj, chain) {
     return chain ? _(obj).chain() : obj;
   };
 
-  // Add all of the Underscore functions to the wrapper object.
-  _.each(_.functions(_), function(name) {
-    var method = _[name];
+  // A method to easily add functions to the OOP wrapper.
+  var addToWrapper = function(name, func) {
     wrapper.prototype[name] = function() {
-      unshift.call(arguments, this._wrapped);
-      return result(method.apply(_, arguments), this._chain);
+      var args = slice.call(arguments);
+      unshift.call(args, this._wrapped);
+      return result(func.apply(_, args), this._chain);
     };
-  });
+  };
+
+  // Add all of the Underscore functions to the wrapper object.
+  _.mixin(_);
 
   // Add all mutator Array functions to the wrapper.
-  _.each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
-    var method = Array.prototype[name];
+  each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
+    var method = ArrayProto[name];
     wrapper.prototype[name] = function() {
       method.apply(this._wrapped, arguments);
       return result(this._wrapped, this._chain);
@@ -3369,8 +3476,8 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
   });
 
   // Add all accessor Array functions to the wrapper.
-  _.each(['concat', 'join', 'slice'], function(name) {
-    var method = Array.prototype[name];
+  each(['concat', 'join', 'slice'], function(name) {
+    var method = ArrayProto[name];
     wrapper.prototype[name] = function() {
       return result(method.apply(this._wrapped, arguments), this._chain);
     };
@@ -5152,16 +5259,15 @@ sc.helpers.removeDelegatedListener = function(base_target, selector, event_type,
  */
 sc.helpers.triggerCustomEvent = function(event_type, target, data, bubble) {
 	
-	sch.error('triggering '+event_type);
-	sch.error('on target nodeName:'+target.nodeName);
-	sch.error('event data:');
-	// sch.error(sch.enJSON(data));
+	sch.debug('EVENT triggering '+event_type);
+	sch.debug('EVENT on target nodeName:'+target.nodeName);
 	
 	if (bubble) {
 		sch.warn('bubble is no longer supported!');
 	}
 	
 	if (data) {
+		sch.debug('EVENT data passed');
 		data = [data];
 	}
 	
@@ -6176,23 +6282,25 @@ var sc;
  * @param {String} text 
  * @member sc.helpers
  */
-sc.helpers.deJSON = function(json)
- {
+sc.helpers.deJSON = function(json) {
 
 	// Fix twitter data bug
 	// var re = new RegExp("Couldn\\'t\\ find\\ Status\\ with\\ ID\\=[0-9]+\\,", "g");
 	// json = json.replace(re, "");
-
+	var obj;
 	var done = false;
+	
 	try {
-		var obj = JSON.parse(json);
+		obj = JSON.parse(json);
 		done = true;
+	} catch(e) {
+		sch.error(e.message);
+		sch.error(e);
 	} finally {
 		if (!done) {
-			sc.helpers.dump("Could not parse JSON text " + json);
+			sch.error("Could not parse JSON text: '" + json + "'");
 		}
 	}
-
 	return obj;
 };
 
@@ -6202,7 +6310,23 @@ sc.helpers.deJSON = function(json)
  * @member sc.helpers
  */
 sc.helpers.enJSON = function(jsobj) {
-	return JSON.stringify(jsobj);
+	// return JSON.stringify(jsobj);
+	
+	var json;
+	var done = false;
+	
+	try {
+		json = JSON.stringify(jsobj);
+		done = true;
+	} catch(e) {
+		sch.error(e.message);
+		sch.error(e);
+	} finally {
+		if (!done) {
+			sch.error("Could not stringify jsobj ("+typeof jsobj+")");
+		}
+	}
+	return json;
 };
 
 
@@ -6486,11 +6610,16 @@ sc.helpers.containsScreenName = function(str, sn) {
 	
 };
 
-sc.helpers.extractScreenNames = function(str, tpl) {
+/**
+ * @param {string} str string to search for usernames
+ * @@param {array} without array of usernames to skip 
+ */
+sc.helpers.extractScreenNames = function(str, without) {
     // var re_uname = /(^|\s|\(\[|,|\.|\()@([a-zA-Z0-9_]+)([^a-zA-Z0-9_]|$)/gi;
 	var re_uname = /(?:^|\s|\(\[|,|\.|\()@([a-zA-Z0-9_]+)/gi;
 	var usernames = [];
 	var ms = [];
+	var wo_args = [];
 	while (ms = re_uname.exec(str))
 	{
 		/*
@@ -6507,7 +6636,23 @@ sc.helpers.extractScreenNames = function(str, tpl) {
 			usernames.push(ms[1]);
 		}
 	}
-	return usernames;
+	
+	if (usernames.length > 0) {
+		usernames = _.uniq(usernames); // make unique
+		if (sch.isString(usernames)) { // at least in webOS 1.4.5, if you only had one item it qould return as a string, not an array
+			usernames = [usernames];
+		}
+
+		if (without) { // remove any usernames we want to skip
+			wo_args = [usernames];
+			for (var i=0; i < without.length; i++) {
+				wo_args.push(without[i]);
+			}
+			usernames = _.without.apply(this, wo_args);
+		}
+	}
+	
+	return usernames||[];
 };
 
 /**
@@ -6850,235 +6995,235 @@ sc.helpers.escape_html = function(string) {
 
 
 sc.helpers.htmlspecialchars = function(string, quote_style) {
-    // http://kevin.vanzonneveld.net
-    // +   original by: Mirek Slugen
-    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-    // +   bugfixed by: Nathan
-    // +   bugfixed by: Arno
-    // +    revised by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-    // -    depends on: get_html_translation_table
-    // *     example 1: htmlspecialchars("<a href='test'>Test</a>", 'ENT_QUOTES');
-    // *     returns 1: '&lt;a href=&#039;test&#039;&gt;Test&lt;/a&gt;'
+	// http://kevin.vanzonneveld.net
+	// +   original by: Mirek Slugen
+	// +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	// +   bugfixed by: Nathan
+	// +   bugfixed by: Arno
+	// +	revised by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	// -	depends on: get_html_translation_table
+	// *	 example 1: htmlspecialchars("<a href='test'>Test</a>", 'ENT_QUOTES');
+	// *	 returns 1: '&lt;a href=&#039;test&#039;&gt;Test&lt;/a&gt;'
 
-    var histogram = {}, symbol = '', tmp_str = '', i = 0;
-    tmp_str = string.toString();
+	var histogram = {}, symbol = '', tmp_str = '', i = 0;
+	tmp_str = string.toString();
 
-    if (false === (histogram = sc.helpers._get_html_translation_table('HTML_SPECIALCHARS', quote_style))) {
-        return false;
-    }
+	if (false === (histogram = sc.helpers._get_html_translation_table('HTML_SPECIALCHARS', quote_style))) {
+		return false;
+	}
 
 	// first, do &amp;
 	tmp_str = tmp_str.split('&').join(histogram['&']);
 	
 	// then do the rest
-    for (symbol in histogram) {
+	for (symbol in histogram) {
 		if (symbol != '&') {
 			entity = histogram[symbol];
-	        tmp_str = tmp_str.split(symbol).join(entity);
+			tmp_str = tmp_str.split(symbol).join(entity);
 		}
-    }
+	}
 
-    return tmp_str;
+	return tmp_str;
 };
 
 
 
 sc.helpers.htmlentities = function(string, quote_style) {
-    // http://kevin.vanzonneveld.net
-    // +   original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-    // +    revised by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-    // +   improved by: nobbler
-    // +    tweaked by: Jack
-    // +   bugfixed by: Onno Marsman
-    // +    revised by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-    // -    depends on: get_html_translation_table
-    // *     example 1: htmlentities('Kevin & van Zonneveld');
-    // *     returns 1: 'Kevin &amp; van Zonneveld'
-    // *     example 2: htmlentities("foo'bar","ENT_QUOTES");
-    // *     returns 2: 'foo&#039;bar'
+	// http://kevin.vanzonneveld.net
+	// +   original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	// +	revised by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	// +   improved by: nobbler
+	// +	tweaked by: Jack
+	// +   bugfixed by: Onno Marsman
+	// +	revised by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	// -	depends on: get_html_translation_table
+	// *	 example 1: htmlentities('Kevin & van Zonneveld');
+	// *	 returns 1: 'Kevin &amp; van Zonneveld'
+	// *	 example 2: htmlentities("foo'bar","ENT_QUOTES");
+	// *	 returns 2: 'foo&#039;bar'
  
-    var histogram = {}, symbol = '', tmp_str = '', entity = '';
-    tmp_str = string.toString();
-    
-    if (false === (histogram = sc.helpers._get_html_translation_table('HTML_ENTITIES', quote_style))) {
-        return false;
-    }
-    
-    for (symbol in histogram) {
-        entity = histogram[symbol];
-        tmp_str = tmp_str.split(symbol).join(entity);
-    }
-    
-    return tmp_str;
+	var histogram = {}, symbol = '', tmp_str = '', entity = '';
+	tmp_str = string.toString();
+	
+	if (false === (histogram = sc.helpers._get_html_translation_table('HTML_ENTITIES', quote_style))) {
+		return false;
+	}
+	
+	for (symbol in histogram) {
+		entity = histogram[symbol];
+		tmp_str = tmp_str.split(symbol).join(entity);
+	}
+	
+	return tmp_str;
 };
 
 sc.helpers._get_html_translation_table = function(table, quote_style) {
-    // http://kevin.vanzonneveld.net
-    // +   original by: Philip Peterson
-    // +    revised by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-    // +   bugfixed by: noname
-    // +   bugfixed by: Alex
-    // +   bugfixed by: Marco
-    // +   bugfixed by: madipta
-    // %          note: It has been decided that we're not going to add global
-    // %          note: dependencies to php.js. Meaning the constants are not
-    // %          note: real constants, but strings instead. integers are also supported if someone
-    // %          note: chooses to create the constants themselves.
-    // %          note: Table from http://www.the-art-of-web.com/html/character-codes/
-    // *     example 1: get_html_translation_table('HTML_SPECIALCHARS');
-    // *     returns 1: {'"': '&quot;', '&': '&amp;', '<': '&lt;', '>': '&gt;'}
-    
-    var entities = {}, histogram = {}, decimal = 0, symbol = '';
-    var constMappingTable = {}, constMappingQuoteStyle = {};
-    var useTable = {}, useQuoteStyle = {};
-    
-    useTable      = (table ? table.toUpperCase() : 'HTML_SPECIALCHARS');
-    useQuoteStyle = (quote_style ? quote_style.toUpperCase() : 'ENT_COMPAT');
-    
-    // Translate arguments
-    constMappingTable[0]      = 'HTML_SPECIALCHARS';
-    constMappingTable[1]      = 'HTML_ENTITIES';
-    constMappingQuoteStyle[0] = 'ENT_NOQUOTES';
-    constMappingQuoteStyle[2] = 'ENT_COMPAT';
-    constMappingQuoteStyle[3] = 'ENT_QUOTES';
-    
-    // Map numbers to strings for compatibilty with PHP constants
-    if (!isNaN(useTable)) {
-        useTable = constMappingTable[useTable];
-    }
-    if (!isNaN(useQuoteStyle)) {
-        useQuoteStyle = constMappingQuoteStyle[useQuoteStyle];
-    }
+	// http://kevin.vanzonneveld.net
+	// +   original by: Philip Peterson
+	// +	revised by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	// +   bugfixed by: noname
+	// +   bugfixed by: Alex
+	// +   bugfixed by: Marco
+	// +   bugfixed by: madipta
+	// %		  note: It has been decided that we're not going to add global
+	// %		  note: dependencies to php.js. Meaning the constants are not
+	// %		  note: real constants, but strings instead. integers are also supported if someone
+	// %		  note: chooses to create the constants themselves.
+	// %		  note: Table from http://www.the-art-of-web.com/html/character-codes/
+	// *	 example 1: get_html_translation_table('HTML_SPECIALCHARS');
+	// *	 returns 1: {'"': '&quot;', '&': '&amp;', '<': '&lt;', '>': '&gt;'}
+	
+	var entities = [], histogram = {}, decimal = 0, symbol = '';
+	var constMappingTable = {}, constMappingQuoteStyle = {};
+	var useTable = {}, useQuoteStyle = {};
+	
+	useTable	  = (table ? table.toUpperCase() : 'HTML_SPECIALCHARS');
+	useQuoteStyle = (quote_style ? quote_style.toUpperCase() : 'ENT_COMPAT');
+	
+	// Translate arguments
+	constMappingTable[0]	  = 'HTML_SPECIALCHARS';
+	constMappingTable[1]	  = 'HTML_ENTITIES';
+	constMappingQuoteStyle[0] = 'ENT_NOQUOTES';
+	constMappingQuoteStyle[2] = 'ENT_COMPAT';
+	constMappingQuoteStyle[3] = 'ENT_QUOTES';
+	
+	// Map numbers to strings for compatibilty with PHP constants
+	if (!isNaN(useTable)) {
+		useTable = constMappingTable[useTable];
+	}
+	if (!isNaN(useQuoteStyle)) {
+		useQuoteStyle = constMappingQuoteStyle[useQuoteStyle];
+	}
  
-    if (useTable === 'HTML_SPECIALCHARS') {
-        // ascii decimals for better compatibility
-        entities['38'] = '&amp;';
-        if (useQuoteStyle !== 'ENT_NOQUOTES') {
-            entities['34'] = '&quot;';
-        }
-        if (useQuoteStyle === 'ENT_QUOTES') {
-            entities['39'] = '&#039;';
-        }
-        entities['60'] = '&lt;';
-        entities['62'] = '&gt;';
-    } else if (useTable === 'HTML_ENTITIES') {
-        // ascii decimals for better compatibility
-      entities['38']  = '&amp;';
-        if (useQuoteStyle !== 'ENT_NOQUOTES') {
-            entities['34'] = '&quot;';
-        }
-        if (useQuoteStyle === 'ENT_QUOTES') {
-            entities['39'] = '&#039;';
-        }
-      entities['60']  = '&lt;';
-      entities['62']  = '&gt;';
-      entities['160'] = '&nbsp;';
-      entities['161'] = '&iexcl;';
-      entities['162'] = '&cent;';
-      entities['163'] = '&pound;';
-      entities['164'] = '&curren;';
-      entities['165'] = '&yen;';
-      entities['166'] = '&brvbar;';
-      entities['167'] = '&sect;';
-      entities['168'] = '&uml;';
-      entities['169'] = '&copy;';
-      entities['170'] = '&ordf;';
-      entities['171'] = '&laquo;';
-      entities['172'] = '&not;';
-      entities['173'] = '&shy;';
-      entities['174'] = '&reg;';
-      entities['175'] = '&macr;';
-      entities['176'] = '&deg;';
-      entities['177'] = '&plusmn;';
-      entities['178'] = '&sup2;';
-      entities['179'] = '&sup3;';
-      entities['180'] = '&acute;';
-      entities['181'] = '&micro;';
-      entities['182'] = '&para;';
-      entities['183'] = '&middot;';
-      entities['184'] = '&cedil;';
-      entities['185'] = '&sup1;';
-      entities['186'] = '&ordm;';
-      entities['187'] = '&raquo;';
-      entities['188'] = '&frac14;';
-      entities['189'] = '&frac12;';
-      entities['190'] = '&frac34;';
-      entities['191'] = '&iquest;';
-      entities['192'] = '&Agrave;';
-      entities['193'] = '&Aacute;';
-      entities['194'] = '&Acirc;';
-      entities['195'] = '&Atilde;';
-      entities['196'] = '&Auml;';
-      entities['197'] = '&Aring;';
-      entities['198'] = '&AElig;';
-      entities['199'] = '&Ccedil;';
-      entities['200'] = '&Egrave;';
-      entities['201'] = '&Eacute;';
-      entities['202'] = '&Ecirc;';
-      entities['203'] = '&Euml;';
-      entities['204'] = '&Igrave;';
-      entities['205'] = '&Iacute;';
-      entities['206'] = '&Icirc;';
-      entities['207'] = '&Iuml;';
-      entities['208'] = '&ETH;';
-      entities['209'] = '&Ntilde;';
-      entities['210'] = '&Ograve;';
-      entities['211'] = '&Oacute;';
-      entities['212'] = '&Ocirc;';
-      entities['213'] = '&Otilde;';
-      entities['214'] = '&Ouml;';
-      entities['215'] = '&times;';
-      entities['216'] = '&Oslash;';
-      entities['217'] = '&Ugrave;';
-      entities['218'] = '&Uacute;';
-      entities['219'] = '&Ucirc;';
-      entities['220'] = '&Uuml;';
-      entities['221'] = '&Yacute;';
-      entities['222'] = '&THORN;';
-      entities['223'] = '&szlig;';
-      entities['224'] = '&agrave;';
-      entities['225'] = '&aacute;';
-      entities['226'] = '&acirc;';
-      entities['227'] = '&atilde;';
-      entities['228'] = '&auml;';
-      entities['229'] = '&aring;';
-      entities['230'] = '&aelig;';
-      entities['231'] = '&ccedil;';
-      entities['232'] = '&egrave;';
-      entities['233'] = '&eacute;';
-      entities['234'] = '&ecirc;';
-      entities['235'] = '&euml;';
-      entities['236'] = '&igrave;';
-      entities['237'] = '&iacute;';
-      entities['238'] = '&icirc;';
-      entities['239'] = '&iuml;';
-      entities['240'] = '&eth;';
-      entities['241'] = '&ntilde;';
-      entities['242'] = '&ograve;';
-      entities['243'] = '&oacute;';
-      entities['244'] = '&ocirc;';
-      entities['245'] = '&otilde;';
-      entities['246'] = '&ouml;';
-      entities['247'] = '&divide;';
-      entities['248'] = '&oslash;';
-      entities['249'] = '&ugrave;';
-      entities['250'] = '&uacute;';
-      entities['251'] = '&ucirc;';
-      entities['252'] = '&uuml;';
-      entities['253'] = '&yacute;';
-      entities['254'] = '&thorn;';
-      entities['255'] = '&yuml;';
-    } else {
-        throw Error("Table: "+useTable+' not supported');
-    }
-    
-    // ascii decimals to real symbols
-    for (decimal in entities) {
-        symbol = String.fromCharCode(decimal);
-        histogram[symbol] = entities[decimal];
-    }
-    
-    return histogram;
+	if (useTable === 'HTML_SPECIALCHARS') {
+		// ascii decimals for better compatibility
+		entities.push({'code':38, 'entity':'&amp;'});
+		if (useQuoteStyle !== 'ENT_NOQUOTES') {
+			entities.push({'code':34, 'entity':'&quot;'});
+		}
+		if (useQuoteStyle === 'ENT_QUOTES') {
+			entities.push({'code':39, 'entity':'&#039;'});
+		}
+		entities.push({'code':60, 'entity':'&lt;'});
+		entities.push({'code':62, 'entity':'&gt;'});
+	} else if (useTable === 'HTML_ENTITIES') {
+		// ascii decimals for better compatibility
+	  entities.push({'code':38, 'entity':'&amp;'});
+		if (useQuoteStyle !== 'ENT_NOQUOTES') {
+			entities.push({'code':34, 'entity':'&quot;'});
+		}
+		if (useQuoteStyle === 'ENT_QUOTES') {
+			entities.push({'code':39, 'entity':'&#039;'});
+		}
+	  entities.push({'code':60, 'entity':'&lt;'});
+	  entities.push({'code':62, 'entity':'&gt;'});
+	  entities.push({'code':160, 'entity':'&nbsp;'});
+	  entities.push({'code':161, 'entity':'&iexcl;'});
+	  entities.push({'code':162, 'entity':'&cent;'});
+	  entities.push({'code':163, 'entity':'&pound;'});
+	  entities.push({'code':164, 'entity':'&curren;'});
+	  entities.push({'code':165, 'entity':'&yen;'});
+	  entities.push({'code':166, 'entity':'&brvbar;'});
+	  entities.push({'code':167, 'entity':'&sect;'});
+	  entities.push({'code':168, 'entity':'&uml;'});
+	  entities.push({'code':169, 'entity':'&copy;'});
+	  entities.push({'code':170, 'entity':'&ordf;'});
+	  entities.push({'code':171, 'entity':'&laquo;'});
+	  entities.push({'code':172, 'entity':'&not;'});
+	  entities.push({'code':173, 'entity':'&shy;'});
+	  entities.push({'code':174, 'entity':'&reg;'});
+	  entities.push({'code':175, 'entity':'&macr;'});
+	  entities.push({'code':176, 'entity':'&deg;'});
+	  entities.push({'code':177, 'entity':'&plusmn;'});
+	  entities.push({'code':178, 'entity':'&sup2;'});
+	  entities.push({'code':179, 'entity':'&sup3;'});
+	  entities.push({'code':180, 'entity':'&acute;'});
+	  entities.push({'code':181, 'entity':'&micro;'});
+	  entities.push({'code':182, 'entity':'&para;'});
+	  entities.push({'code':183, 'entity':'&middot;'});
+	  entities.push({'code':184, 'entity':'&cedil;'});
+	  entities.push({'code':185, 'entity':'&sup1;'});
+	  entities.push({'code':186, 'entity':'&ordm;'});
+	  entities.push({'code':187, 'entity':'&raquo;'});
+	  entities.push({'code':188, 'entity':'&frac14;'});
+	  entities.push({'code':189, 'entity':'&frac12;'});
+	  entities.push({'code':190, 'entity':'&frac34;'});
+	  entities.push({'code':191, 'entity':'&iquest;'});
+	  entities.push({'code':192, 'entity':'&Agrave;'});
+	  entities.push({'code':193, 'entity':'&Aacute;'});
+	  entities.push({'code':194, 'entity':'&Acirc;'});
+	  entities.push({'code':195, 'entity':'&Atilde;'});
+	  entities.push({'code':196, 'entity':'&Auml;'});
+	  entities.push({'code':197, 'entity':'&Aring;'});
+	  entities.push({'code':198, 'entity':'&AElig;'});
+	  entities.push({'code':199, 'entity':'&Ccedil;'});
+	  entities.push({'code':200, 'entity':'&Egrave;'});
+	  entities.push({'code':201, 'entity':'&Eacute;'});
+	  entities.push({'code':202, 'entity':'&Ecirc;'});
+	  entities.push({'code':203, 'entity':'&Euml;'});
+	  entities.push({'code':204, 'entity':'&Igrave;'});
+	  entities.push({'code':205, 'entity':'&Iacute;'});
+	  entities.push({'code':206, 'entity':'&Icirc;'});
+	  entities.push({'code':207, 'entity':'&Iuml;'});
+	  entities.push({'code':208, 'entity':'&ETH;'});
+	  entities.push({'code':209, 'entity':'&Ntilde;'});
+	  entities.push({'code':210, 'entity':'&Ograve;'});
+	  entities.push({'code':211, 'entity':'&Oacute;'});
+	  entities.push({'code':212, 'entity':'&Ocirc;'});
+	  entities.push({'code':213, 'entity':'&Otilde;'});
+	  entities.push({'code':214, 'entity':'&Ouml;'});
+	  entities.push({'code':215, 'entity':'&times;'});
+	  entities.push({'code':216, 'entity':'&Oslash;'});
+	  entities.push({'code':217, 'entity':'&Ugrave;'});
+	  entities.push({'code':218, 'entity':'&Uacute;'});
+	  entities.push({'code':219, 'entity':'&Ucirc;'});
+	  entities.push({'code':220, 'entity':'&Uuml;'});
+	  entities.push({'code':221, 'entity':'&Yacute;'});
+	  entities.push({'code':222, 'entity':'&THORN;'});
+	  entities.push({'code':223, 'entity':'&szlig;'});
+	  entities.push({'code':224, 'entity':'&agrave;'});
+	  entities.push({'code':225, 'entity':'&aacute;'});
+	  entities.push({'code':226, 'entity':'&acirc;'});
+	  entities.push({'code':227, 'entity':'&atilde;'});
+	  entities.push({'code':228, 'entity':'&auml;'});
+	  entities.push({'code':229, 'entity':'&aring;'});
+	  entities.push({'code':230, 'entity':'&aelig;'});
+	  entities.push({'code':231, 'entity':'&ccedil;'});
+	  entities.push({'code':232, 'entity':'&egrave;'});
+	  entities.push({'code':233, 'entity':'&eacute;'});
+	  entities.push({'code':234, 'entity':'&ecirc;'});
+	  entities.push({'code':235, 'entity':'&euml;'});
+	  entities.push({'code':236, 'entity':'&igrave;'});
+	  entities.push({'code':237, 'entity':'&iacute;'});
+	  entities.push({'code':238, 'entity':'&icirc;'});
+	  entities.push({'code':239, 'entity':'&iuml;'});
+	  entities.push({'code':240, 'entity':'&eth;'});
+	  entities.push({'code':241, 'entity':'&ntilde;'});
+	  entities.push({'code':242, 'entity':'&ograve;'});
+	  entities.push({'code':243, 'entity':'&oacute;'});
+	  entities.push({'code':244, 'entity':'&ocirc;'});
+	  entities.push({'code':245, 'entity':'&otilde;'});
+	  entities.push({'code':246, 'entity':'&ouml;'});
+	  entities.push({'code':247, 'entity':'&divide;'});
+	  entities.push({'code':248, 'entity':'&oslash;'});
+	  entities.push({'code':249, 'entity':'&ugrave;'});
+	  entities.push({'code':250, 'entity':'&uacute;'});
+	  entities.push({'code':251, 'entity':'&ucirc;'});
+	  entities.push({'code':252, 'entity':'&uuml;'});
+	  entities.push({'code':253, 'entity':'&yacute;'});
+	  entities.push({'code':254, 'entity':'&thorn;'});
+	  entities.push({'code':255, 'entity':'&yuml;'});
+	} else {
+		throw Error("Table: "+useTable+' not supported');
+	}
+	
+	// ascii decimals to real symbols
+	for (var i=0; i < entities.length; i++) {
+		symbol = String.fromCharCode(entities[i].code);
+		histogram[symbol] = entities[i].entity;
+	}
+	
+	return histogram;
 };
 
 
@@ -7224,6 +7369,27 @@ sc.helpers.pad = function (input, pad_length, pad_string, pad_type) {
     return input;
 };
 
+/**
+ * truncate a string to a certain length, if it exceeds that length 
+ * 
+ * @param {string} str
+ * @param {Number} limit the max length of the string
+ * @param {string} [suffix] a suffix to append to the string if it is over limit. Does not count against the limit
+ * @returns {string} the possibly modified string
+ */
+sc.helpers.truncate = function(str, limit, suffix) {
+
+	if (str.length > limit) {
+		str = str.slice(0, limit);
+		if (suffix) {
+			str = str+suffix;
+		}
+	}
+
+	return str;	
+};
+
+
 
 /**
  * @param {string} str the string in which we're converting linebreaks
@@ -7315,7 +7481,10 @@ var SPAZCORE_DUMPLEVEL_ERROR   = 1;
  */
 var SPAZCORE_DUMPLEVEL_NONE    = 0; // this means "never ever dump anything!"
 
-
+/**
+ * @constant 
+ */
+var SPAZCORE_DUMP_MAXLEN = 512;
 
 
 
@@ -7419,8 +7588,14 @@ sc.helpers.error = function(obj) {
  * @platformstub
  * @member sc.helpers
  */
-sc.helpers.dump = function(obj, level) {
+sc.helpers.dump = function(obj, level, cb) {
+	if (sc.helpers.isString(obj)) {
+		obj = sch.truncate(obj, SPAZCORE_DUMP_MAXLEN, '…[TRUNC]');
+	}
 	console.log(obj);
+	if (cb) {
+		cb(obj, level);
+	}
 };
 
 /**
@@ -9080,7 +9255,7 @@ var sc, Titanium, air, jQuery, Mojo;
 /**
  * @constant 
  */
-var SPAZCORE_PREFS_TI_KEY = 'preferences_json';
+var SPAZCORE_PREFS_TI_KEY = 'preferences.json';
 
 /**
  * @constant 
@@ -10066,10 +10241,6 @@ var sc, jQuery;
 /**
  * @constant 
  */
-var SPAZCORE_SHORTURL_SERVICE_SHORTIE = 'short.ie';
-/**
- * @constant 
- */
 var SPAZCORE_SHORTURL_SERVICE_ISGD	  = 'is.gd';
 /**
  * @constant 
@@ -10079,6 +10250,10 @@ var SPAZCORE_SHORTURL_SERVICE_BITLY	  = 'bit.ly';
  * @constant 
  */
 var SPAZCORE_SHORTURL_SERVICE_JMP     = 'j.mp';
+/**
+ * @constant 
+ */
+var SPAZCORE_SHORTURL_SERVICE_GOOGLE  = 'goo.gl';
 
 /**
  * @constant 
@@ -10198,7 +10373,7 @@ SpazShortURL.prototype.getAPIObj = function(service) {
 	
 	apis[SPAZCORE_SHORTURL_SERVICE_BITLY] = {
 		'url'	  : 'http://bit.ly/api',
-		'getData' : function(longurl, opts){
+		'getData' : function(longurl, opts) {
 			
 			/*
 				use the api if we're doing multiple URLs
@@ -10244,45 +10419,28 @@ SpazShortURL.prototype.getAPIObj = function(service) {
 				apis[SPAZCORE_SHORTURL_SERVICE_JMP].processing_multiple = false;
 				return { 'url':longurl };				
 			}
-		},
-		'processResult' : function(data) {
-			if (apis[SPAZCORE_SHORTURL_SERVICE_JMP].processing_multiple === true) {
-				var result = sc.helpers.deJSON(data);
-				var rs = {};
-				for (var i in result.results) {
-					rs[i] = result.results[i].shortUrl;
-				}
-				return rs;
-			} else {
-				return data;
-			}
-		}
-		
-	};
-		
-	apis[SPAZCORE_SHORTURL_SERVICE_SHORTIE] = {
-		'url'	  : 'http://short.ie/api?',
-		'getData' : function(longurl, opts){
-			
-			if (longurl.match(/ /gi)) {
-				longurl = longurl.replace(/ /gi, '%20');
-			}
-			
-			var shortie = {
-				orig: longurl,
-				url:  longurl,
-				email:	 '',
-				'private': 'false',
-				format:	 'rest'
-			};
-			return shortie;
 		}
 	};
 		
 	apis[SPAZCORE_SHORTURL_SERVICE_ISGD] = {
-		'url'	  : 'http://is.gd/api.php',
+		'url'	  : 'http://is.gd/create.php',
 		'getData' : function(longurl, opts) {
-			return { 'longurl':longurl };
+			return { 'url':longurl, 'format':'simple' };
+		}
+	};
+	
+	apis[SPAZCORE_SHORTURL_SERVICE_GOOGLE] = {
+		// 'url'	  : 'https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyBMFTY7VjWGoXeFwbiY7vXoqAssjTr0od0',
+		'url'	  : 'https://www.googleapis.com/urlshortener/v1/url',
+		'contentType':'application/json',
+		'getData' : function(longurl, opts) {
+			return JSON.stringify({ 'longUrl':longurl  });
+		},
+		'processResult' : function(data) {
+			var result = sc.helpers.deJSON(data);
+			result.longurl = result.longUrl;
+			result.shorturl = result.id;
+			return result;
 		}
 	};
 	
@@ -10306,55 +10464,74 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 	*/
 	opts.event_target = opts.event_target || document;
 	opts.apiopts	  = opts.apiopts	  || null;
-	
-	/*
-		we call getData now in case it needs to override anything
-	*/
-	var apidata = this.api.getData(longurl, opts.apiopts);
 
-	if (sc.helpers.getMojoURL) {
-		this.api.url = sc.helpers.getMojoURL(this.api.url);
+
+
+	if (sch.isString(longurl)) {
+		longurl = [longurl];
 	}
+	
+	
+	for (var i=0; i < longurl.length; i++) {
+
+		longurl[i];
+
+	
+		/*
+			we call getData now in case it needs to override anything
+		*/
+		var apidata = this.api.getData(longurl[i], opts.apiopts);
+
+		if (sc.helpers.getMojoURL) {
+			this.api.url = sc.helpers.getMojoURL(this.api.url);
+		}
 		
+		getShortURL(longurl[i], shortener, apidata, opts, this);
+		
+	}
+	
+	function getShortURL(longurl, shortener, apidata, opts, self) {
+		jQuery.ajax({
+			'traditional':true, // so we don't use square brackets on arrays in data. Bit.ly doesn't like it
+			'dataType':'text',
+			complete:function(xhr, rstr) {
+			},
+			'error':function(xhr, msg, exc) {
+				sc.helpers.dump(shortener.api.url + ' error:'+msg);
 
-	var xhr = jQuery.ajax({
-		'traditional':true, // so we don't use square brackets on arrays in data. Bit.ly doesn't like it
-		'dataType':'text',
-		complete:function(xhr, rstr) {
-		},
-		'error':function(xhr, msg, exc) {
-			sc.helpers.dump(shortener.api.url + ' error:'+msg);
-			
-			var errobj = {'url':shortener.api.url, 'xhr':null, 'msg':null};
-			
-			if (xhr) {
-				errobj.xhr = xhr;
-				sc.helpers.error("Error:"+xhr.status+" from "+ shortener.api.url);
-			} else {
-				sc.helpers.error("Error:Unknown from "+ shortener.api.url);
-				errobj.msg = 'Unknown Error';
-			}
-			shortener._onShortenResponseFailure(errobj, opts.event_target);
-		},
-		success:function(data) {
-			// var shorturl = trim(data);
-			var return_data = {};
-			if (shortener.api.processResult) {
-				return_data = shortener.api.processResult(data);
-			} else {
-				return_data = {
-					'shorturl':data,
-					'longurl' :longurl
-				};
-			}
-			sch.error(return_data);
-			shortener._onShortenResponseSuccess(return_data, opts.event_target);
-		},
-		'type':"POST",
-		'url' :this.api.url,
-		'data':apidata
-	});
+				var errobj = {'url':shortener.api.url, 'xhr':null, 'msg':null};
 
+				if (xhr) {
+					errobj.xhr = xhr;
+					sc.helpers.error("Error:"+xhr.status+" from "+ shortener.api.url);
+				} else {
+					sc.helpers.error("Error:Unknown from "+ shortener.api.url);
+					errobj.msg = 'Unknown Error';
+				}
+				shortener._onShortenResponseFailure(errobj, opts.event_target);
+			},
+			success:function(data) {
+				// var shorturl = trim(data);
+				var return_data = {};
+				if (shortener.api.processResult) {
+					return_data = shortener.api.processResult(data);
+				} else {
+					return_data = {
+						'shorturl':data,
+						'longurl' :longurl
+					};
+				}
+				sch.error(return_data);
+				shortener._onShortenResponseSuccess(return_data, opts.event_target);
+			},
+
+			'type':self.api.method || "POST",
+			'contentType':self.api.contentType || "application/x-www-form-urlencoded",
+			'url' :self.api.url,
+			'data':apidata
+		});			
+	}
+	
 };
 
 SpazShortURL.prototype._onShortenResponseSuccess = function(data, target) {
@@ -10464,15 +10641,15 @@ SpazShortURL.prototype.findExpandableURLs = function(str) {
 		
 	};
 	
+	sch.debug("looking for "+regexes+ " in '"+str+"'");
 	for (i=0; i < regexes.length; i++) {
 		thisregex = regexes[i];
-		sch.dump("looking for "+thisregex+ " in '"+str+"'");
 		while( (re_matches = thisregex.exec(sch.trim(str))) != null) {
 			matches.push(re_matches[0]);
 		}		
 	};
 	
-	sch.dump(matches);
+	sch.debug('Matches: '+matches);
 	
 	if (matches.length > 0) {
 		return matches;
@@ -11744,7 +11921,8 @@ SpazTwit.prototype.getLastId   = function(section) {
  * @param {integer} id  the new last id retrieved for this section
  */
 SpazTwit.prototype.setLastId   = function(section, id) {
-	this.data[section].lastid = parseInt(id, 10);
+	// this.data[section].lastid = parseInt(id, 10);
+	this.data[section].lastid = id;
 };
 
 
@@ -11992,7 +12170,7 @@ SpazTwit.prototype.getAPIURL = function(key, urldata) {
 	urls.dm_sent            = "direct_messages/sent.json";
 	urls.friendslist        = "statuses/friends.json";
 	urls.followerslist      = "statuses/followers.json";
-	urls.show_user			= "users/show/{{ID}}.json";
+	urls.show_user			= "users/show.json";
 	urls.featuredlist       = "statuses/featured.json";
 
 	// Action URLs
@@ -12216,7 +12394,7 @@ SpazTwit.prototype.getHomeTimeline = function(since_id, count, page, processing_
  * @private
  */
 SpazTwit.prototype._processHomeTimeline = function(ret_items, opts, processing_opts) {
-	sc.helpers.dump('Processing '+ret_items.length+' items returned from home method');
+	// sc.helpers.dump('Processing '+ret_items.length+' items returned from home method');
 	this._processTimeline(SPAZCORE_SECTION_HOME, ret_items, opts, processing_opts);
 };
 
@@ -12273,7 +12451,7 @@ SpazTwit.prototype.getFriendsTimeline = function(since_id, count, page, processi
  * @private
  */
 SpazTwit.prototype._processFriendsTimeline = function(ret_items, opts, processing_opts) {
-	sc.helpers.dump('Processing '+ret_items.length+' items returned from friends method');
+	// sc.helpers.dump('Processing '+ret_items.length+' items returned from friends method');
 	this._processTimeline(SPAZCORE_SECTION_FRIENDS, ret_items, opts, processing_opts);
 };
 
@@ -12332,7 +12510,7 @@ SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts,
  * @private
  */
 SpazTwit.prototype._processRepliesTimeline = function(ret_items, opts, processing_opts) {
-	sc.helpers.dump('Processing '+ret_items.length+' items returned from replies method');
+	// sc.helpers.dump('Processing '+ret_items.length+' items returned from replies method');
 	this._processTimeline(SPAZCORE_SECTION_REPLIES, ret_items, opts, processing_opts);
 };
 
@@ -12388,7 +12566,7 @@ SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processin
  * @private
  */
 SpazTwit.prototype._processDMTimeline = function(ret_items, opts, processing_opts) {
-	sc.helpers.dump('Processing '+ret_items.length+' items returned from DM method');
+	// sc.helpers.dump('Processing '+ret_items.length+' items returned from DM method');
 	this._processTimeline(SPAZCORE_SECTION_DMS, ret_items, opts, processing_opts);
 };
 
@@ -12568,7 +12746,7 @@ SpazTwit.prototype.search = function(query, since_id, results_per_page, page, la
 	// 	}
 	// }
 	if (!results_per_page) {
-		results_per_page = 50;
+		results_per_page = 100;
 	}
 	
 	
@@ -12621,7 +12799,7 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, opts, proces
 	*/
 	var ret_items = search_result.results;
 
-	if (ret_items.length > 0){
+	if (ret_items && ret_items.length > 0){
 		/*
 			we process each item, adding some attributes and generally making it cool
 		*/
@@ -12687,6 +12865,10 @@ SpazTwit.prototype._processSearchTimeline = function(search_result, opts, proces
 
 
 SpazTwit.prototype._processSearchItem = function(item, section_name) {
+	
+	// remove snowflakeyness
+	item = this.deSnowFlake(item);
+	
 	
 	item.SC_timeline_from = section_name;
 	if (this.username) {
@@ -12770,7 +12952,7 @@ SpazTwit.prototype._processTrends = function(trends_result, opts, processing_opt
 	*/
 	var ret_items = trends_result.trends;
 
-	if (ret_items.length > 0) {
+	if (ret_items && ret_items.length > 0) {
 
 		for (var k=0; k<ret_items.length; k++) {
 			ret_items[k].searchterm = ret_items[k].name;
@@ -12814,17 +12996,20 @@ SpazTwit.prototype._getTimeline = function(opts) {
 	*/
 	var stwit = this;
 	
+	sch.error('_getTimeline opts:');
+	sch.error(opts);
+	
 	var xhr = jQuery.ajax({
 		'timeout' :opts.timeout,
         'complete':function(xhr, msg){
-            sc.helpers.dump(opts.url + ' complete:'+msg);
+            sch.error(opts.url + ' complete:'+msg);
 			if (msg === 'timeout') {
 				// jQuery().trigger(opts.failure_event_type, [{'url':opts.url, 'xhr':xhr, 'msg':msg}]);
 				stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':xhr, 'msg':msg});				
 			}
         },
         'error':function(xhr, msg, exc) {
-			sc.helpers.dump(opts.url + ' error:"'+msg+'"');
+			sch.error(opts.url + ' error:"'+msg+'"');
 			if (msg.toLowerCase().indexOf('timeout') !== -1) {
 				stwit.triggerEvent(opts.failure_event_type, {'url':opts.url, 'xhr':null, 'msg':msg});
 				/*
@@ -12890,7 +13075,7 @@ SpazTwit.prototype._getTimeline = function(opts) {
         },
         'success':function(data) {
 			// sc.helpers.dump("Success! \n\n" + data);
-			sc.helpers.dump(opts.url + ' success!'+" data:"+data);
+			sch.error(opts.url + ' success!'+" data:"+data);
 			
 			try {
 				data = sc.helpers.deJSON(data);
@@ -12952,8 +13137,13 @@ SpazTwit.prototype._processTimeline = function(section_name, ret_items, opts, pr
 		
 	}
 	
+	
+	if (ret_items == undefined) {
+		sch.error('ret_items is undefined!');
+	}
+	
 
-	if (ret_items.length > 0){
+	if (ret_items && ret_items.length > 0){
 		
 		var proc_items = [];
 		
@@ -13129,6 +13319,9 @@ SpazTwit.prototype._cleanupItemArray = function(arr, max, sortfunc) {
  */
 SpazTwit.prototype._processItem = function(item, section_name) {
 	
+	// remove snowflakeyness
+	item = this.deSnowFlake(item);
+	
 	item.SC_timeline_from = section_name;
 	if (this.username) {
 		item.SC_user_received_by = this.username;
@@ -13215,6 +13408,10 @@ SpazTwit.prototype._processItem = function(item, section_name) {
  */
 SpazTwit.prototype._processUser = function(item, section_name) {
 	
+	// remove snowflakeyness
+	item = this.deSnowFlake(item);
+	
+	
 	item.SC_timeline_from = section_name;
 	if (this.username) {
 		item.SC_user_received_by = this.username;
@@ -13232,14 +13429,14 @@ SpazTwit.prototype._processUser = function(item, section_name) {
 		add unix timestamp .SC_created_at_unixtime for easier date comparison
 	*/
 	if (!item.SC_created_at_unixtime) {
-		item.SC_created_at_unixtime = sc.helpers.httpTimeToInt(item.created_at);
+		item.SC_created_at_unixtime = sc.helpers.httpTimeToInt(item.created_at)/1000;
 	}
 	
 	/*
 		add .SC_retrieved_unixtime
 	*/
 	if (!item.SC_retrieved_unixtime) {
-		item.SC_retrieved_unixtime = sc.helpers.getTimeAsInt();
+		item.SC_retrieved_unixtime = sc.helpers.getTimeAsInt()/1000;
 	}
 	
 	return item;
@@ -13390,13 +13587,18 @@ SpazTwit.prototype._callMethod = function(opts) {
 
 SpazTwit.prototype.getUser = function(user_id, onSuccess, onFailure) {
 	var data = {};
-	data['id'] = user_id;
+
+	if (sch.isString(user_id) && user_id.indexOf('@') === 0) {
+		data.screen_name = user_id.substr(1);
+	} else {
+		data.user_id = user_id;
+	}
 	
-	var url = this.getAPIURL('show_user', data);
+	var url = this.getAPIURL('show_user');
 	
 	var opts = {
 		'url':url,
-		// 'process_callback': this._processUserData,
+		'data':data,
 		'success_event_type':'get_user_succeeded',
 		'failure_event_type':'get_user_failed',
 		'success_callback':onSuccess,
@@ -13412,12 +13614,29 @@ SpazTwit.prototype.getUser = function(user_id, onSuccess, onFailure) {
 
 
 
-SpazTwit.prototype.getFriendsList = function() {
-	
+SpazTwit.prototype.getFriendsList = function(user_id, cursor, onSuccess, onFailure) {
+
 	var url = this.getAPIURL('friendslist');
-	
+
+	var data = {};
+
+    if (sch.isString(user_id) && user_id.indexOf('@') === 0) {
+		data.screen_name = user_id.substr(1);
+    } else {
+        data.user_id = user_id;
+    }
+
+    if (cursor) {
+        data.cursor = cursor;
+    } else {
+        data.cursor = -1;
+    }
+
 	var opts = {
 		'url':url,
+		'data':data,
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'process_callback': this._processFriendsList,
 		'success_event_type':'get_friendslist_succeeded',
 		'failure_event_type':'get_friendslist_failed',
@@ -13430,7 +13649,7 @@ SpazTwit.prototype.getFriendsList = function() {
  * @private
  */
 SpazTwit.prototype._processFriendsList = function(ret_items, opts, processing_opts) {
-	this._processUserList(SPAZCORE_SECTION_FRIENDLIST, ret_items, opts.success_event_type, processing_opts);
+	this._processUserList(SPAZCORE_SECTION_FRIENDLIST, ret_items, opts, processing_opts);
 };
 
 
@@ -13438,11 +13657,28 @@ SpazTwit.prototype._processFriendsList = function(ret_items, opts, processing_op
 
 
 
-SpazTwit.prototype.getFollowersList = function() {
+SpazTwit.prototype.getFollowersList = function(user_id, cursor, onSuccess, onFailure) {
 	var url = this.getAPIURL('followerslist');
 	
+	var data = {};
+
+	if (sch.isString(user_id) && user_id.indexOf('@') === 0) {
+		data.screen_name = user_id.substr(1);
+	} else {
+	    data.user_id = user_id;
+	}
+	
+    if (cursor) {
+        data.cursor = cursor;
+    } else {
+        data.cursor = -1;
+    }
+
 	var opts = {
 		'url':url,
+		'data':data,
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
 		'process_callback': this._processFollowersList,
 		'success_event_type':'get_followerslist_succeeded',
 		'failure_event_type':'get_followerslist_failed',
@@ -13455,52 +13691,57 @@ SpazTwit.prototype.getFollowersList = function() {
  * @private
  */
 SpazTwit.prototype._processFollowersList = function(ret_items, opts, processing_opts) {
-	this._processUserList(SPAZCORE_SECTION_FOLLOWERSLIST, ret_items, opts.success_event_type, processing_opts);
+	this._processUserList(SPAZCORE_SECTION_FOLLOWERSLIST, ret_items, opts, processing_opts);
 };
 
 
 
 /**
- * general processor for timeline data 
+ * general processor for timeline data. results are not sorted
  * @private
  */
 SpazTwit.prototype._processUserList = function(section_name, ret_items, opts, processing_opts) {
 	
+	var users = [], next = -1, prev = -1;
+	
 	if (!processing_opts) { processing_opts = {}; }
 
-	if (ret_items.length > 0){
+    if (ret_items.users) {
+        users = ret_items.users;
+        next  = ret_items.next_cursor_str;
+        prev  = ret_items.previous_cursor_str;
+    } else {
+        users = ret_items;
+    }
+
+	if (users.length > 0){
 		/*
 			we process each item, adding some attributes and generally making it cool
 		*/
-		for (var k=0; k<ret_items.length; k++) {
-			ret_items[k] = this._processUser(ret_items[k], section_name);
-			sch.dump(ret_items[k]);
+		for (var k=0; k<users.length; k++) {
+			users[k] = this._processUser(users[k], section_name);
+			sch.dump(users[k]);
 		}
-
-		/*
-			sort items
-		*/
-		ret_items.sort(this._sortItemsAscending);
 		
 			
 		// set lastid
-		var lastid = ret_items[ret_items.length-1].id;
+		var lastid = users[users.length-1].id;
 		this.data[section_name].lastid = lastid;
 		sc.helpers.dump('this.data['+section_name+'].lastid:'+this.data[section_name].lastid);
 
 		// add new items to data.newitems array
-		this.data[section_name].newitems = ret_items;
+		this.data[section_name].newitems = users;
 
 		this._addToSectionItems(section_name, this.data[section_name].newitems);
 
 		if (opts.success_callback) {
-			opts.success_callback(this.data[section_name].newitems);
+			opts.success_callback(this.data[section_name].newitems, { 'next':next, 'prev':prev });
 		}
-		this.triggerEvent(opts.success_event_type,this.data[section_name].newitems );
+		this.triggerEvent(opts.success_event_type, this.data[section_name].newitems );
 
 	} else { // no new items, but we should fire off success anyway
 		if (opts.success_callback) {
-			opts.success_callback();
+			opts.success_callback(users, { 'next':next, 'prev':prev });
 		}
 		this.triggerEvent(opts.success_event_type);
 	}
@@ -13833,6 +14074,39 @@ SpazTwit.prototype._processUpdateReturn = function(data, opts) {
 	opts.is_update_item = true;
 	this._processTimeline(SPAZCORE_SECTION_HOME, [data], opts);
 };
+
+/**
+ * @param {string|number} user_id a string or number. if a screen name, prefix with '@'; else assumed to be a numeric user_id 
+ * @param {string} text the message to send to the user_id
+ */
+SpazTwit.prototype.sendDirectMessage = function(user_id, text, onSuccess, onFailure) {
+    var url = this.getAPIURL('dm_new');
+	
+	var data = {};
+	
+	if (sch.isString(user_id) && user_id.indexOf('@') === 0) {
+	    data.screen_name = user_id.substr(1);
+	} else {
+	    data.user_id = user_id;
+	}
+	
+	data.text = text;
+	
+	var opts = {
+		'url':url,
+		'data':data,
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
+		'success_event_type':'sent_dm_succeeded',
+		'failure_event_type':'sent_dm_failed'
+	};
+
+	/*
+		Perform a request and get true or false back
+	*/
+	var xhr = this._callMethod(opts);
+}
+
 
 /**
  * destroy/delete a status
@@ -14256,7 +14530,15 @@ SpazTwit.prototype._postProcessURL = function(url) {
  * @private
  */
 SpazTwit.prototype._sortItemsAscending = function(a,b) {
-	return (a.id - b.id);
+	if (a.id < b.id) {
+		return -1;
+	}
+
+	if (a.id > b.id) {
+		return 1;
+	}
+
+	return 0;
 };
 
 /**
@@ -14269,7 +14551,16 @@ SpazTwit.prototype._sortItemsAscending = function(a,b) {
  * @private
  */
 SpazTwit.prototype._sortItemsDescending = function(a,b) {
-	return (b.id - a.id);
+	if (a.id < b.id) {
+		return 1;
+	}
+
+	if (a.id > b.id) {
+		return -1;
+	}
+
+	return 0;
+
 };
 
 
@@ -15028,7 +15319,7 @@ SpazTwit.prototype.openUserStream = function(onData, onFailure) {
 			var item;
 			data = sch.trim(data);
 			if (data) {
-				sch.error('new data:'+data);
+				sch.debug('new stream data:'+data);
 				item = sch.deJSON(data);
 				
 				if (item.source && item.user && item.text) { // is "normal" status
@@ -15069,6 +15360,52 @@ SpazTwit.prototype.userStreamExists = function() {
 	return false;
 };
 
+
+/**
+ * scans an object for _str values and assigns them back to the non-string id properties 
+ */
+SpazTwit.prototype.deSnowFlake = function(obj) {
+	
+	if (obj.id_str) {
+		obj.id = obj.id_str;
+	}
+	
+	if (obj.in_reply_to_user_id_str) {
+		obj.in_reply_to_user_id = obj.in_reply_to_user_id_str;
+	}
+	
+	if (obj.in_reply_to_status_id_str) {
+		obj.in_reply_to_status_id = obj.in_reply_to_status_id_str;
+	}
+	
+	// search item stuff	
+	if (obj.to_user_id_str) {
+		obj.to_user_id = obj.to_user_id_str;
+	}
+
+	if (obj.from_user_id_str) {
+		obj.from_user_id = obj.from_user_id_str;
+	}
+	
+	// descend into the underworld
+	if (obj.user) {
+		obj.user = this.deSnowFlake(obj.user);
+	}
+	
+	if (obj.recipient) {
+		obj.recipient = this.deSnowFlake(obj.recipient);
+	}
+	
+	if (obj.sender) {
+		obj.sender = this.deSnowFlake(obj.sender);
+	}
+	
+	if (obj.retweeted_status) {
+		obj.retweeted_status = this.deSnowFlake(obj.retweeted_status);
+	}
+	
+	return obj;
+}
 
 
 /**

@@ -35,8 +35,10 @@
 		// 	$('#shortened-URLs').html(sc.helpers.getEventData(e));	
 		// });
 		
+		console.dir(data);
+		
 		var html = jQuery('#multiple_url').val();
-		html = sc.helpers.replaceMultiple(html, data);
+		html = html.replace(data.longurl, data.shorturl);
 		jQuery('#multiple_url').val(html);
 		
 	}
@@ -60,12 +62,14 @@
 		
 		sc.helpers.listen($('#shorten-multiple').get(0), sc.events.newShortURLSuccess, showMultipleShortURLs);
 
-		/*
-			Make a shortURL object instance
-		*/
-		var shurl = new SpazShortURL( $('#service').val() );
 
 		$('#shorten').click(function() {
+
+			/*
+				Make a shortURL object instance
+			*/
+			var shurl = new SpazShortURL( $('#service').val() );
+
 
 			$('#results').fadeOut(200);
 			
@@ -83,6 +87,12 @@
 
 
 		$('#expand').click(function() {
+
+			/*
+				Make a shortURL object instance
+			*/
+			var shurl = new SpazShortURL( $('#service').val() );
+
 			
 			$('#expand-results').fadeOut(200);
 			
@@ -99,9 +109,9 @@
 		$('#shorten-multiple').click(function() {
 			
 			/*
-				we use bitly because it supports multiple urls per request
+				Make a shortURL object instance
 			*/
-			var bitly = new SpazShortURL( SPAZCORE_SHORTURL_SERVICE_BITLY );
+			var shurl = new SpazShortURL( $('#service').val() );
 			
 			$('#multiple-results').fadeOut(200);
 			
@@ -116,7 +126,7 @@
 				shorten the long URL and set the event target
 				to the #shorten element ('this' in this scope)
 			*/
-			bitly.shorten(urls, {
+			shurl.shorten(urls, {
 				'event_target':this,
 				'apiopts': {
 					'version':'2.0.1',
@@ -139,9 +149,10 @@
 		<input type="text" name="long_url" size="60" value="http://www.cherny.com/webdev/60/javascript-function-arguments-default-values-passing-objects-and-overloading" id="long_url" /><br>
 
 		<select name="service" id="service">
-			<option value="short.ie">short.ie</option>
-			<option value="bit.ly">bit.ly</option>
 			<option value="is.gd">is.gd</option>
+			<option value="goo.gl">goo.gl</option>
+			<option value="bit.ly">bit.ly</option>
+			<option value="j.mp">j.mp</option>
 		</select>
 		<input type="button" name="shorten" value="Shorten!" id="shorten">
 	</form>
