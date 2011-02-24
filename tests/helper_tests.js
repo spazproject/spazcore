@@ -490,8 +490,8 @@
 		output  = ['http://www.ypass.net/blog/2010/04/solaris-licensing-changes-the-real-story/'];
 		equals(sc.helpers.extractURLs(input)[0], output[0]);
 
-		input   = 'http://✪df.ws/fez, http://www.ypass.net/blog/2010/04/solaris-licensing-changes-the-real-story/';
-		output  = ['http://✪df.ws/fez','http://www.ypass.net/blog/2010/04/solaris-licensing-changes-the-real-story/'];
+		input   = 'http://✪df.ws/fez, http://ow.ly/i/8kuq, http://www.ypass.net/blog/2010/04/solaris-licensing-changes-the-real-story/';
+		output  = ['http://✪df.ws/fez', 'http://ow.ly/i/8kuq', 'http://www.ypass.net/blog/2010/04/solaris-licensing-changes-the-real-story/'];
 		same(sc.helpers.extractURLs(input), output);
 	});
 	
@@ -502,6 +502,10 @@
 	
 		input   = '(I did one for my site; see the logo:http://bit.ly/1LkKk1)';
 		output  = '(I did one for my site; see the logo:<a href="http://bit.ly/1LkKk1">bit.ly/1LkKk1</a>)';
+		equals(sc.helpers.autolink(input), output);
+	
+		input   = '(I did one for my site; see the logo:http://ow.ly/i/8kuq)';
+		output  = '(I did one for my site; see the logo:<a href="http://ow.ly/i/8kuq">ow.ly/i/8kuq</a>)';
 		equals(sc.helpers.autolink(input), output);
 	
 		input   = '(Testing for length limits; see the logo:http://bit.ly/1LkKk1)';
