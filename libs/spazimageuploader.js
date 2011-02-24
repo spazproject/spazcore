@@ -73,16 +73,23 @@ SpazImageUploader.prototype.services = {
 			
 			var parser=new DOMParser();
 			xmldoc = parser.parseFromString(data,"text/xml");
-
+			
 			var status;
-			var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
-			status = rspAttr.getNamedItem("stat").nodeValue;
+			var rspAttr;
+			var errMsg;
+			
+			try {
+				rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
+				status = rspAttr.getNamedItem("stat").nodeValue;
+			} catch(e) {
+				errMsg = 'Unknown error uploading image';
+				return {'error':errMsg};
+			}
 			
 			if (status == 'ok') {
 				var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue; 
 				return {'url':mediaurl};
 			} else {
-				var errMsg;
 				if (xmldoc.getElementsByTagName("err")[0]) {
 					errMsg = xmldoc.getElementsByTagName("err")[0].childNodes[0].nodeValue;
 				} else {
