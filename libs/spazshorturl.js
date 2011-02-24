@@ -370,12 +370,16 @@ SpazShortURL.prototype._onExpandResponseFailure = function(errobj, target) {
 
 
 SpazShortURL.prototype.findExpandableURLs = function(str) {
-	var x, i, matches = [], re_matches, key, thisdomain, thisregex, regexes = [];
+	var x, i, j, matches = [], key, thisdomain, thisregex, regexes = [];
+	
+	var all_urls = sch.extractURLs(str);
 	
 	for (i=0; i < SPAZCORE_EXPANDABLE_DOMAINS.length; i++) {
 		thisdomain = SPAZCORE_EXPANDABLE_DOMAINS[i];
 		if (thisdomain == 'ff.im') {
 			regexes.push(new RegExp("http://"+thisdomain+"/(-?[a-zA-Z0-9]+)", "gi"));
+		} else if (thisdomain == 'ow.ly') { // we have to skip ow.ly/i/XXX links
+			regexes.push(new RegExp("http://"+thisdomain+"/(-?[a-zA-Z0-9]{2,})", "gi"));
 		} else {
 			regexes.push(new RegExp("http://"+thisdomain+"/([a-zA-Z0-9]+)", "gi"));
 		}
@@ -385,9 +389,12 @@ SpazShortURL.prototype.findExpandableURLs = function(str) {
 	sch.debug("looking for "+regexes+ " in '"+str+"'");
 	for (i=0; i < regexes.length; i++) {
 		thisregex = regexes[i];
-		while( (re_matches = thisregex.exec(sch.trim(str))) != null) {
-			matches.push(re_matches[0]);
-		}		
+		
+		for (j=0; j < all_urls.length; j++) {
+			if (all_urls[j].match(thisregex)) {
+				matches.push(all_urls[j]);
+			}
+		}
 	};
 	
 	sch.debug('Matches: '+matches);
