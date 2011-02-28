@@ -150,16 +150,48 @@ SpazShortURL.prototype.getAPIObj = function(service) {
 	var apis = {};
 	
 	apis[SPAZCORE_SHORTURL_SERVICE_BITLY] = {
-		'url'	  : 'http://bit.ly/api',
+		'url'	  : 'http://api.bit.ly/v3/shorten',
 		'getData' : function(longurl, opts) {
-			return { 'url':longurl };				
+		    var data = {
+		        'longurl':longurl,
+		        'login':opts.login,
+		        'apiKey':opts.apiKey,
+		        'format':'json'
+		    };
+			return data;
+		},
+		'method':'GET',
+		'processResult' : function(data) {
+			var result = sc.helpers.deJSON(data);
+			
+			if (result.data && result.data.long_url) {
+			    result.longurl = result.data.long_url;
+    			result.shorturl = result.data.url;
+			}
+			return result;
 		}
 	};
 		
 	apis[SPAZCORE_SHORTURL_SERVICE_JMP] = {
-		'url'	  : 'http://j.mp/api',
+		'url'	  : 'http://api.j.mp/v3/shorten',
 		'getData' : function(longurl, opts){
-			return { 'url':longurl };				
+		    var data = {
+		        'longurl':longurl,
+		        'login':opts.login,
+		        'apiKey':opts.apiKey,
+		        'format':'json'
+		    };
+			return data;
+		},
+		'method':'GET',
+		'processResult' : function(data) {
+			var result = sc.helpers.deJSON(data);
+			
+			if (result.data && result.data.long_url) {
+			    result.longurl = result.data.long_url;
+    			result.shorturl = result.data.url;
+			}
+			return result;
 		}
 	};
 		
@@ -232,6 +264,7 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 	}
 	
 	function getShortURL(longurl, shortener, apidata, opts, self) {
+	    
 		jQuery.ajax({
 			'traditional':true, // so we don't use square brackets on arrays in data. Bit.ly doesn't like it
 			'dataType':'text',

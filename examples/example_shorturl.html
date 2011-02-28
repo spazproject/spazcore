@@ -31,10 +31,6 @@
 
 	function showMultipleShortURLs(e, data) {
 		
-		// $('#multiple-results').fadeIn(200, function() {
-		// 	$('#shortened-URLs').html(sc.helpers.getEventData(e));	
-		// });
-		
 		console.dir(data);
 		
 		var html = jQuery('#multiple_url').val();
@@ -64,11 +60,16 @@
 
 
 		$('#shorten').click(function() {
-
+			var shurl;
+			var apiopts;
+			var service_val = $('#service').val();
+			
+			
+			
 			/*
 				Make a shortURL object instance
 			*/
-			var shurl = new SpazShortURL( $('#service').val() );
+			shurl = new SpazShortURL(service_val);
 
 
 			$('#results').fadeOut(200);
@@ -76,11 +77,29 @@
 			var longurl = $('#long_url').val();
 			
 			/*
+				set apiopts
+			*/
+			switch (service_val) {
+				case 'j.mp':
+				case 'bit.ly':
+					apiopts = {
+						'login':'spazcore',
+						'apiKey':'R_f3b86681a63a6bbefc7d8949fd915f1d'
+					};
+					
+					break;
+				default:
+					apiopts = null;
+			}
+			
+			
+			/*
 				shorten the long URL and set the event target
 				to the #shorten element ('this' in this scope)
 			*/
 			shurl.shorten(longurl, {
-				'event_target':this
+				'event_target':this,
+				'apiopts':apiopts
 			});
 			
 		});
@@ -129,8 +148,6 @@
 			shurl.shorten(urls, {
 				'event_target':this,
 				'apiopts': {
-					'version':'2.0.1',
-					'format':'json',
 					'login':'spazcore',
 					'apiKey':'R_f3b86681a63a6bbefc7d8949fd915f1d'
 				}

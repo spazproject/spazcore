@@ -1,4 +1,4 @@
-/*********** Built 2011-01-13 15:00:11 EST ***********/
+/*********** Built 2011-02-27 18:59:45 EST ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -10372,54 +10372,31 @@ SpazShortURL.prototype.getAPIObj = function(service) {
 	var apis = {};
 	
 	apis[SPAZCORE_SHORTURL_SERVICE_BITLY] = {
-		'url'	  : 'http://bit.ly/api',
+		'url'	  : 'http://api.bit.ly/v3/shorten',
 		'getData' : function(longurl, opts) {
-			
-			/*
-				use the api if we're doing multiple URLs
-			*/
-			if (sc.helpers.isArray(longurl)) {
-				apis[SPAZCORE_SHORTURL_SERVICE_BITLY].processing_multiple = true;
-				apis[SPAZCORE_SHORTURL_SERVICE_BITLY].url = 'http://api.bit.ly/shorten';
-				opts.longUrl = longurl;
-				return opts;
-			} else {
-				apis[SPAZCORE_SHORTURL_SERVICE_BITLY].processing_multiple = false;
-				return { 'url':longurl };				
-			}
+		    var data = {
+		        'longurl':longurl,
+		        'login':opts.login,
+		        'apiKey':opts.apiKey,
+		        'format':opts.format||'txt'
+		    }
+			return data;
 		},
-		'processResult' : function(data) {
-			if (apis[SPAZCORE_SHORTURL_SERVICE_BITLY].processing_multiple === true) {
-				var result = sc.helpers.deJSON(data);
-				var rs = {};
-				for (var i in result.results) {
-					rs[i] = result.results[i].shortUrl;
-				}
-				return rs;
-			} else {
-				return data;
-			}
-		}
-		
+		'method':'GET'
 	};
 		
 	apis[SPAZCORE_SHORTURL_SERVICE_JMP] = {
-		'url'	  : 'http://j.mp/api',
+		'url'	  : 'http://api.j.mp/v3/shorten',
 		'getData' : function(longurl, opts){
-			
-			/*
-				use the api if we're doing multiple URLs
-			*/
-			if (sc.helpers.isArray(longurl)) {
-				apis[SPAZCORE_SHORTURL_SERVICE_JMP].processing_multiple = true;
-				apis[SPAZCORE_SHORTURL_SERVICE_JMP].url = 'http://api.j.mp/shorten';
-				opts.longUrl = longurl;
-				return opts;
-			} else {
-				apis[SPAZCORE_SHORTURL_SERVICE_JMP].processing_multiple = false;
-				return { 'url':longurl };				
-			}
-		}
+		    var data = {
+		        'longurl':longurl,
+		        'login':opts.login,
+		        'apiKey':opts.apiKey,
+		        'format':opts.format||'txt'
+		    }
+			return data;
+		},
+		'method':'GET'
 	};
 		
 	apis[SPAZCORE_SHORTURL_SERVICE_ISGD] = {
@@ -10430,8 +10407,8 @@ SpazShortURL.prototype.getAPIObj = function(service) {
 	};
 	
 	apis[SPAZCORE_SHORTURL_SERVICE_GOOGLE] = {
-		// 'url'	  : 'https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyBMFTY7VjWGoXeFwbiY7vXoqAssjTr0od0',
-		'url'	  : 'https://www.googleapis.com/urlshortener/v1/url',
+		'url'	  : 'https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyBMFTY7VjWGoXeFwbiY7vXoqAssjTr0od0',
+		// 'url'	  : 'https://www.googleapis.com/urlshortener/v1/url',
 		'contentType':'application/json',
 		'getData' : function(longurl, opts) {
 			return JSON.stringify({ 'longUrl':longurl  });
@@ -10491,6 +10468,7 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 	}
 	
 	function getShortURL(longurl, shortener, apidata, opts, self) {
+	    
 		jQuery.ajax({
 			'traditional':true, // so we don't use square brackets on arrays in data. Bit.ly doesn't like it
 			'dataType':'text',
@@ -10629,14 +10607,18 @@ SpazShortURL.prototype._onExpandResponseFailure = function(errobj, target) {
 
 
 SpazShortURL.prototype.findExpandableURLs = function(str) {
-	var x, i, matches = [], re_matches, key, thisdomain, thisregex, regexes = [];
+	var x, i, j, matches = [], key, thisdomain, thisregex, regexes = [];
+	
+	var all_urls = sch.extractURLs(str);
 	
 	for (i=0; i < SPAZCORE_EXPANDABLE_DOMAINS.length; i++) {
 		thisdomain = SPAZCORE_EXPANDABLE_DOMAINS[i];
 		if (thisdomain == 'ff.im') {
 			regexes.push(new RegExp("http://"+thisdomain+"/(-?[a-zA-Z0-9]+)", "gi"));
+		} else if (thisdomain == 'ow.ly') { // we have to skip ow.ly/i/XXX links
+			regexes.push(new RegExp("http://"+thisdomain+"/(-?[a-zA-Z0-9]{2,})", "gi"));
 		} else {
-			regexes.push(new RegExp("http://"+thisdomain+"/([a-zA-Z0-9]+)", "gi"));
+			regexes.push(new RegExp("http://"+thisdomain+"/([a-zA-Z0-9-_]+)", "gi"));
 		}
 		
 	};
