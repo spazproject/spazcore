@@ -283,6 +283,25 @@ SpazAccounts.prototype.get = function(id) {
 };
 
 
+SpazAccounts.prototype.getLabel = function(id) {
+	
+	var index = this._findUserIndex(id);
+	var label = '';
+	
+	if (index !== false) {
+		label = this._accounts[i].username+'@'+this._accounts[i].type;
+		if (this._accounts[i].type === SPAZCORE_ACCOUNT_STATUSNET
+			|| this._accounts[i].type === SPAZCORE_ACCOUNT_CUSTOM) {
+			
+		}
+		return label;
+	}
+
+	return false;
+	
+};
+
+
 /**
  * a private function to find the user's array index by their UUID
  * @param {string} id the user's UUID
