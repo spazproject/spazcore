@@ -1,11 +1,11 @@
 #!/bin/bash
 # run this from the base dir of SpazCore
 
-YUICOMPRESSOR_JAR="/Users/coj/Library/Application Support/TextMate/Bundles/javascript-tools.tmbundle/Support/bin/yuicompressor.jar"
-
 BUILD_FILE='builds/spazcore-titanium.js'
 MIN_FILE='builds/spazcore-titanium.min.js'
 BUILD_DATE=`date "+%Y-%m-%d %H:%M:%S %Z"`
+
+COMPRESS_CMD="uglifyjs -o ${MIN_FILE} ${BUILD_FILE}"
 
 echo "/*********** Built ${BUILD_DATE} ***********/" > $BUILD_FILE
 
@@ -38,15 +38,10 @@ cat libs/spazcore.js \
 	libs/spaztmdb.js \
 	libs/spaztwit.js \
 	platforms/Titanium/helpers/file.js \
+	platforms/Titanium/helpers/network.js \
 	platforms/Titanium/helpers/sys.js \
 	platforms/Titanium/libs/spazprefs.js \
 	>> $BUILD_FILE
 
-# test if file exists before running min
-`test -f "${YUICOMPRESSOR_JAR}"`
-if [ "$?" = "0" ]
-then 
-	java -jar "${YUICOMPRESSOR_JAR}" --charset utf8 --preserve-semi $BUILD_FILE -o $MIN_FILE
-else
-	echo "YUICOMPRESSOR not found at ${YUICOMPRESSOR_JAR}; skipping minimization"
-fi
+echo $COMPRESS_CMD
+$COMPRESS_CMD

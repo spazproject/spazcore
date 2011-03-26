@@ -1,7 +1,6 @@
 #!/bin/bash
 # run this from the base dir of SpazCore
 
-#YUICOMPRESSOR_JAR="/Users/coj/Library/Application Support/TextMate/Bundles/javascript-tools.tmbundle/Support/bin/yuicompressor.jar"
 
 BUILD_FILE='builds/spazcore-webos.js'
 MIN_FILE='builds/spazcore-webos.min.js'
