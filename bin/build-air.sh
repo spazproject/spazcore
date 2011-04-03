@@ -24,6 +24,7 @@ cat libs/spazcore.js \
 	helpers/string.js \
 	helpers/sys.js \
 	helpers/view.js \
+	helpers/url.js \
 	helpers/xml.js \
 	libs/spazaccounts.js \
 	libs/spazauth.js \
