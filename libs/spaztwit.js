@@ -1968,7 +1968,7 @@ SpazTwit.prototype.getUser = function(user_id, onSuccess, onFailure) {
 		'success_callback': function(data) {
 			sch.error('BEFORE PROCESSING');
 			sch.error(data);
-			data = this._processUser(data, SPAZCORE_SECTION_HOME);
+			data = that._processUser(data, SPAZCORE_SECTION_HOME);
 			sch.error('AFTER PROCESSING');
 			sch.error(data);
 			onSuccess(data);
