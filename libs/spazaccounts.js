@@ -13,6 +13,10 @@ var SPAZCORE_ACCOUNT_IDENTICA	= 'identi.ca';
 /**
  * @constant 
  */
+var SPAZCORE_ACCOUNT_FREELISHUS	= 'freelish.us';
+/**
+ * @constant 
+ */
 var SPAZCORE_ACCOUNT_STATUSNET	= 'StatusNet';
 /**
  * @constant 

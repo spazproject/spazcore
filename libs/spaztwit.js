@@ -70,26 +70,6 @@ var SPAZCORE_SECTION_USERLISTS = 'userlists';
 /**
  * @constant 
  */
-var SPAZCORE_SERVICE_TWITTER = 'twitter';
-/**
- * @constant 
- */
-var SPAZCORE_SERVICE_IDENTICA = 'identi.ca';
-/**
- * @constant 
- */
-var SPAZCORE_SERVICE_WORDPRESS_TWITTER = 'wordpress-twitter';
-/**
- * @constant 
- */
-var SPAZCORE_SERVICE_TUMBLR_TWITTER = 'tumblr-twitter';
-/**
- * @constant 
- */
-var SPAZCORE_SERVICE_CUSTOM = 'custom';
-/**
- * @constant 
- */
 var SPAZCORE_SERVICEURL_TWITTER = 'https://api.twitter.com/1/';
 /**
  * @constant 
@@ -98,11 +78,16 @@ var SPAZCORE_SERVICEURL_IDENTICA = 'https://identi.ca/api/';
 /**
  * @constant 
  */
+var SPAZCORE_SERVICEURL_FREELISHUS = 'http://freelish.us/api/';
+/**
+ * @constant 
+ */
 var SPAZCORE_SERVICEURL_WORDPRESS_TWITTER = 'https://twitter-api.wordpress.com/';
 /**
  * @constant 
  */
 var SPAZCORE_SERVICEURL_TUMBLR_TWITTER = 'http://www.tumblr.com/';
+
 
 
 /**
@@ -433,6 +418,9 @@ SpazTwit.prototype.setBaseURLByService= function(service) {
 		case SPAZCORE_SERVICE_IDENTICA:
 			baseurl = SPAZCORE_SERVICEURL_IDENTICA;
 			break;
+		case SPAZCORE_SERVICE_FREELISHUS:
+			baseurl = SPAZCORE_SERVICEURL_FREELISHUS;
+			break;
 		case SPAZCORE_SERVICE_WORDPRESS_TWITTER:
 			baseurl = SPAZCORE_SERVICEURL_WORDPRESS_TWITTER;
 			break;
@@ -459,6 +447,9 @@ SpazTwit.prototype.getServiceFromBaseURL = function(baseurl) {
 			break;
 		case SPAZCORE_SERVICEURL_IDENTICA:
 			service = SPAZCORE_SERVICE_IDENTICA;
+			break;
+		case SPAZCORE_SERVICEURL_FREELISHUS:
+			service = SPAZCORE_SERVICE_FREELISHUS;
 			break;
 		case SPAZCORE_SERVICEURL_WORDPRESS_TWITTER:
 			service = SPAZCORE_SERVICE_WORDPRESS_TWITTER;
@@ -1951,6 +1942,7 @@ SpazTwit.prototype._callMethod = function(opts) {
 
 SpazTwit.prototype.getUser = function(user_id, onSuccess, onFailure) {
 	var data = {};
+	var that = this;
 
 	if (sch.isString(user_id) && user_id.indexOf('@') === 0) {
 		data.screen_name = user_id.substr(1);

@@ -101,6 +101,48 @@ sc.events = {};
 
 
 
+/**
+ * various constant definitions that aren't specific to a single library
+ */
+
+/**
+ * @constant 
+ */
+var SPAZCORE_SERVICE_TWITTER = 'twitter';
+/**
+ * @constant 
+ */
+var SPAZCORE_SERVICE_IDENTICA = 'identi.ca';
+/**
+ * @constant 
+ */
+var SPAZCORE_SERVICE_FREELISHUS = 'freelish.us';
+/**
+ * @constant 
+ */
+var SPAZCORE_SERVICE_WORDPRESS_TWITTER = 'wordpress-twitter';
+/**
+ * @constant 
+ */
+var SPAZCORE_SERVICE_TUMBLR_TWITTER = 'tumblr-twitter';
+/**
+ * @constant 
+ */
+var SPAZCORE_SERVICE_CUSTOM = 'custom';
+
+/**
+ * @constant 
+ */
+var SPAZCORE_BASEURL_TWITTER = 'https://twitter.com/';
+/**
+ * @constant 
+ */
+var SPAZCORE_BASEURL_IDENTICA = 'https://identi.ca/';
+/**
+ * @constant 
+ */
+var SPAZCORE_BASEURL_FREELISHUS = 'http://freelish.us/';
+
 
 
 /**
