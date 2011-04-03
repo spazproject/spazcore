@@ -231,7 +231,7 @@ SpazImageUploader.prototype.services = {
 		}
 	},
 	'identi.ca' : {
-		'url'  : 'http://identi.ca/api/statusnet/media/upload',
+		'url'  : 'https://identi.ca/api/statusnet/media/upload',
 		'parseResponse': function(data) {
 			
 			var parser=new DOMParser();
@@ -257,11 +257,11 @@ SpazImageUploader.prototype.services = {
 			}
 		}
 	},
-	'statusnet' : {
+	'StatusNet' : {
 		'url'  : '/statusnet/media/upload',
 		'prepForUpload':function() {
 			if (this.opts.statusnet_api_base) {
-				this.services.statusnet.url = this.opts.statusnet_api_base + this.services.statusnet.url;
+				this.services.StatusNet.url = this.opts.statusnet_api_base + this.services.StatusNet.url;
 			} else {
 				sch.error('opts.statusnet_api_base must be set to use statusnet uploader service');
 			}
@@ -378,18 +378,19 @@ SpazImageUploader.prototype.upload = function() {
 		auth_header = this.getAuthHeader();
 	}
 	
-	sch.error(auth_header);
 	if (auth_header.indexOf('Basic ') === 0) {
 		
 		opts.username = this.opts.auth_obj.getUsername();
 		opts.password = this.opts.auth_obj.getPassword();
+		
+		if (!opts.headers) { opts.headers = {}; }
+		opts.headers['Authorization'] = auth_header;
 
 	} else {
-		opts.headers = {
-			'X-Auth-Service-Provider': verify_url,
-			'X-Verify-Credentials-Authorization':auth_header
-		};
-		
+	
+		if (!opts.headers) { opts.headers = {}; }
+		opts.headers['X-Auth-Service-Provider'] = verify_url;
+		opts.headers['X-Verify-Credentials-Authorization'] = auth_header;
 	}
 	
 	sc.helpers.HTTPUploadFile(opts, onSuccess, opts.onFailure);
