@@ -1,4 +1,4 @@
-/*********** Built 2011-04-03 13:55:15 EDT ***********/
+/*********** Built 2011-04-03 13:55:16 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -3537,678 +3537,7 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
   };
 
 })();
-/**
- * http://www.openjs.com/scripts/events/keyboard_shortcuts/
- * Version : 2.01.B
- * By Binny V A
- * License : BSD
- */
-shortcut = {
-	'all_shortcuts':{},//All the shortcuts are stored in this array
-	'add': function(shortcut_combination,callback,opt) {
-		//Provide a set of default options
-		var default_options = {
-			'type':'keydown',
-			'propagate':false,
-			'disable_in_input':false,
-			'target':document,
-			'keycode':false
-		}
-		if(!opt) opt = default_options;
-		else {
-			for(var dfo in default_options) {
-				if(typeof opt[dfo] == 'undefined') opt[dfo] = default_options[dfo];
-			}
-		}
-
-		var ele = opt.target;
-		if(typeof opt.target == 'string') ele = document.getElementById(opt.target);
-		var ths = this;
-		shortcut_combination = shortcut_combination.toLowerCase();
-
-		//The function to be called at keypress
-		var func = function(e) {
-			e = e || window.event;
-			
-			if(opt['disable_in_input']) { //Don't enable shortcut keys in Input, Textarea fields
-				var element;
-				if(e.target) element=e.target;
-				else if(e.srcElement) element=e.srcElement;
-				if(element.nodeType==3) element=element.parentNode;
-
-				if(element.tagName == 'INPUT' || element.tagName == 'TEXTAREA') return;
-			}
-	
-			//Find Which key is pressed
-			if (e.keyCode) code = e.keyCode;
-			else if (e.which) code = e.which;
-			var character = String.fromCharCode(code).toLowerCase();
-			
-			if(code == 188) character=","; //If the user presses , when the type is onkeydown
-			if(code == 190) character="."; //If the user presses , when the type is onkeydown
-
-			var keys = shortcut_combination.split("+");
-			//Key Pressed - counts the number of valid keypresses - if it is same as the number of keys, the shortcut function is invoked
-			var kp = 0;
-			
-			//Work around for stupid Shift key bug created by using lowercase - as a result the shift+num combination was broken
-			var shift_nums = {
-				"`":"~",
-				"1":"!",
-				"2":"@",
-				"3":"#",
-				"4":"$",
-				"5":"%",
-				"6":"^",
-				"7":"&",
-				"8":"*",
-				"9":"(",
-				"0":")",
-				"-":"_",
-				"=":"+",
-				";":":",
-				"'":"\"",
-				",":"<",
-				".":">",
-				"/":"?",
-				"\\":"|"
-			}
-			//Special Keys - and their codes
-			var special_keys = {
-				'esc':27,
-				'escape':27,
-				'tab':9,
-				'space':32,
-				'return':13,
-				'enter':13,
-				'backspace':8,
-	
-				'scrolllock':145,
-				'scroll_lock':145,
-				'scroll':145,
-				'capslock':20,
-				'caps_lock':20,
-				'caps':20,
-				'numlock':144,
-				'num_lock':144,
-				'num':144,
-				
-				'pause':19,
-				'break':19,
-				
-				'insert':45,
-				'home':36,
-				'delete':46,
-				'end':35,
-				
-				'pageup':33,
-				'page_up':33,
-				'pu':33,
-	
-				'pagedown':34,
-				'page_down':34,
-				'pd':34,
-	
-				'left':37,
-				'up':38,
-				'right':39,
-				'down':40,
-	
-				'f1':112,
-				'f2':113,
-				'f3':114,
-				'f4':115,
-				'f5':116,
-				'f6':117,
-				'f7':118,
-				'f8':119,
-				'f9':120,
-				'f10':121,
-				'f11':122,
-				'f12':123
-			}
-	
-			var modifiers = { 
-				shift: { wanted:false, pressed:false},
-				ctrl : { wanted:false, pressed:false},
-				alt  : { wanted:false, pressed:false},
-				meta : { wanted:false, pressed:false}	//Meta is Mac specific
-			};
-                        
-			if(e.ctrlKey)	modifiers.ctrl.pressed = true;
-			if(e.shiftKey)	modifiers.shift.pressed = true;
-			if(e.altKey)	modifiers.alt.pressed = true;
-			if(e.metaKey)   modifiers.meta.pressed = true;
-                        
-			for(var i=0; k=keys[i],i<keys.length; i++) {
-				//Modifiers
-				if(k == 'ctrl' || k == 'control') {
-					kp++;
-					modifiers.ctrl.wanted = true;
-
-				} else if(k == 'shift') {
-					kp++;
-					modifiers.shift.wanted = true;
-
-				} else if(k == 'alt') {
-					kp++;
-					modifiers.alt.wanted = true;
-				} else if(k == 'meta') {
-					kp++;
-					modifiers.meta.wanted = true;
-				} else if(k.length > 1) { //If it is a special key
-					if(special_keys[k] == code) kp++;
-					
-				} else if(opt['keycode']) {
-					if(opt['keycode'] == code) kp++;
-
-				} else { //The special keys did not match
-					if(character == k) kp++;
-					else {
-						if(shift_nums[character] && e.shiftKey) { //Stupid Shift key bug created by using lowercase
-							character = shift_nums[character]; 
-							if(character == k) kp++;
-						}
-					}
-				}
-			}
-			
-			if(kp == keys.length && 
-						modifiers.ctrl.pressed == modifiers.ctrl.wanted &&
-						modifiers.shift.pressed == modifiers.shift.wanted &&
-						modifiers.alt.pressed == modifiers.alt.wanted &&
-						modifiers.meta.pressed == modifiers.meta.wanted) {
-				callback(e);
-	
-				if(!opt['propagate']) { //Stop the event
-					//e.cancelBubble is supported by IE - this will kill the bubbling process.
-					e.cancelBubble = true;
-					e.returnValue = false;
-	
-					//e.stopPropagation works in Firefox.
-					if (e.stopPropagation) {
-						e.stopPropagation();
-						e.preventDefault();
-					}
-					return false;
-				}
-			}
-		}
-		this.all_shortcuts[shortcut_combination] = {
-			'callback':func, 
-			'target':ele, 
-			'event': opt['type']
-		};
-		//Attach the function with the event
-		if(ele.addEventListener) ele.addEventListener(opt['type'], func, false);
-		else if(ele.attachEvent) ele.attachEvent('on'+opt['type'], func);
-		else ele['on'+opt['type']] = func;
-	},
-
-	//Remove the shortcut - just specify the shortcut and I will remove the binding
-	'remove':function(shortcut_combination) {
-		shortcut_combination = shortcut_combination.toLowerCase();
-		var binding = this.all_shortcuts[shortcut_combination];
-		delete(this.all_shortcuts[shortcut_combination])
-		if(!binding) return;
-		var type = binding['event'];
-		var ele = binding['target'];
-		var callback = binding['callback'];
-
-		if(ele.detachEvent) ele.detachEvent('on'+type, callback);
-		else if(ele.removeEventListener) ele.removeEventListener(type, callback, false);
-		else ele['on'+type] = false;
-	}
-}/**
- * Copyright (c) 2005 - 2010, James Auldridge
- * All rights reserved.
- *
- * Licensed under the BSD, MIT, and GPL (your choice!) Licenses:
- *  http://code.google.com/p/cookies/wiki/License
- *
- */
-var jaaulde = window.jaaulde || {};
-jaaulde.utils = jaaulde.utils || {};
-jaaulde.utils.cookies = ( function()
-{
-	var resolveOptions, assembleOptionsString, parseCookies, constructor, defaultOptions = {
-		expiresAt: null,
-		path: '/',
-		domain:  null,
-		secure: false
-	};
-	/**
-	* resolveOptions - receive an options object and ensure all options are present and valid, replacing with defaults where necessary
-	*
-	* @access private
-	* @static
-	* @parameter Object options - optional options to start with
-	* @return Object complete and valid options object
-	*/
-	resolveOptions = function( options )
-	{
-		var returnValue, expireDate;
-
-		if( typeof options !== 'object' || options === null )
-		{
-			returnValue = defaultOptions;
-		}
-		else
-		{
-			returnValue = {
-				expiresAt: defaultOptions.expiresAt,
-				path: defaultOptions.path,
-				domain: defaultOptions.domain,
-				secure: defaultOptions.secure
-			};
-
-			if( typeof options.expiresAt === 'object' && options.expiresAt instanceof Date )
-			{
-				returnValue.expiresAt = options.expiresAt;
-			}
-			else if( typeof options.hoursToLive === 'number' && options.hoursToLive !== 0 )
-			{
-				expireDate = new Date();
-				expireDate.setTime( expireDate.getTime() + ( options.hoursToLive * 60 * 60 * 1000 ) );
-				returnValue.expiresAt = expireDate;
-			}
-
-			if( typeof options.path === 'string' && options.path !== '' )
-			{
-				returnValue.path = options.path;
-			}
-
-			if( typeof options.domain === 'string' && options.domain !== '' )
-			{
-				returnValue.domain = options.domain;
-			}
-
-			if( options.secure === true )
-			{
-				returnValue.secure = options.secure;
-			}
-		}
-
-		return returnValue;
-		};
-	/**
-	* assembleOptionsString - analyze options and assemble appropriate string for setting a cookie with those options
-	*
-	* @access private
-	* @static
-	* @parameter options OBJECT - optional options to start with
-	* @return STRING - complete and valid cookie setting options
-	*/
-	assembleOptionsString = function( options )
-	{
-		options = resolveOptions( options );
-
-		return (
-			( typeof options.expiresAt === 'object' && options.expiresAt instanceof Date ? '; expires=' + options.expiresAt.toGMTString() : '' ) +
-			'; path=' + options.path +
-			( typeof options.domain === 'string' ? '; domain=' + options.domain : '' ) +
-			( options.secure === true ? '; secure' : '' )
-		);
-	};
-	/**
-	* parseCookies - retrieve document.cookie string and break it into a hash with values decoded and unserialized
-	*
-	* @access private
-	* @static
-	* @return OBJECT - hash of cookies from document.cookie
-	*/
-	parseCookies = function()
-	{
-		var cookies = {}, i, pair, name, value, separated = document.cookie.split( ';' ), unparsedValue;
-		for( i = 0; i < separated.length; i = i + 1 )
-		{
-			pair = separated[i].split( '=' );
-			name = pair[0].replace( /^\s*/, '' ).replace( /\s*$/, '' );
-
-			try
-			{
-				value = decodeURIComponent( pair[1] );
-			}
-			catch( e1 )
-			{
-				value = pair[1];
-			}
-
-			if( typeof JSON === 'object' && JSON !== null && typeof JSON.parse === 'function' )
-			{
-				try
-				{
-					unparsedValue = value;
-					value = JSON.parse( value );
-				}
-				catch( e2 )
-				{
-					value = unparsedValue;
-				}
-			}
-
-			cookies[name] = value;
-		}
-		return cookies;
-	};
-
-	constructor = function(){};
-
-	/**
-	 * get - get one, several, or all cookies
-	 *
-	 * @access public
-	 * @paramater Mixed cookieName - String:name of single cookie; Array:list of multiple cookie names; Void (no param):if you want all cookies
-	 * @return Mixed - Value of cookie as set; Null:if only one cookie is requested and is not found; Object:hash of multiple or all cookies (if multiple or all requested);
-	 */
-	constructor.prototype.get = function( cookieName )
-	{
-		var returnValue, item, cookies = parseCookies();
-
-		if( typeof cookieName === 'string' )
-		{
-			returnValue = ( typeof cookies[cookieName] !== 'undefined' ) ? cookies[cookieName] : null;
-		}
-		else if( typeof cookieName === 'object' && cookieName !== null )
-		{
-			returnValue = {};
-			for( item in cookieName )
-			{
-				if( typeof cookies[cookieName[item]] !== 'undefined' )
-				{
-					returnValue[cookieName[item]] = cookies[cookieName[item]];
-				}
-				else
-				{
-					returnValue[cookieName[item]] = null;
-				}
-			}
-		}
-		else
-		{
-			returnValue = cookies;
-		}
-
-		return returnValue;
-	};
-	/**
-	 * filter - get array of cookies whose names match the provided RegExp
-	 *
-	 * @access public
-	 * @paramater Object RegExp - The regular expression to match against cookie names
-	 * @return Mixed - Object:hash of cookies whose names match the RegExp
-	 */
-	constructor.prototype.filter = function( cookieNameRegExp )
-	{
-		var cookieName, returnValue = {}, cookies = parseCookies();
-
-		if( typeof cookieNameRegExp === 'string' )
-		{
-			cookieNameRegExp = new RegExp( cookieNameRegExp );
-		}
-
-		for( cookieName in cookies )
-		{
-			if( cookieName.match( cookieNameRegExp ) )
-			{
-				returnValue[cookieName] = cookies[cookieName];
-			}
-		}
-
-		return returnValue;
-	};
-	/**
-	 * set - set or delete a cookie with desired options
-	 *
-	 * @access public
-	 * @paramater String cookieName - name of cookie to set
-	 * @paramater Mixed value - Any JS value. If not a string, will be JSON encoded; NULL to delete
-	 * @paramater Object options - optional list of cookie options to specify
-	 * @return void
-	 */
-	constructor.prototype.set = function( cookieName, value, options )
-	{
-		if( typeof options !== 'object' || options === null )
-		{
-			options = {};
-		}
-
-		if( typeof value === 'undefined' || value === null )
-		{
-			value = '';
-			options.hoursToLive = -8760;
-		}
-
-		else if( typeof value !== 'string' )
-		{
-			if( typeof JSON === 'object' && JSON !== null && typeof JSON.stringify === 'function' )
-			{
-				value = JSON.stringify( value );
-			}
-			else
-			{
-				throw new Error( 'cookies.set() received non-string value and could not serialize.' );
-			}
-		}
-
-
-		var optionsString = assembleOptionsString( options );
-
-		document.cookie = cookieName + '=' + encodeURIComponent( value ) + optionsString;
-	};
-	/**
-	 * del - delete a cookie (domain and path options must match those with which the cookie was set; this is really an alias for set() with parameters simplified for this use)
-	 *
-	 * @access public
-	 * @paramater MIxed cookieName - String name of cookie to delete, or Bool true to delete all
-	 * @paramater Object options - optional list of cookie options to specify ( path, domain )
-	 * @return void
-	 */
-	constructor.prototype.del = function( cookieName, options )
-	{
-		var allCookies = {}, name;
-
-		if( typeof options !== 'object' || options === null )
-		{
-			options = {};
-		}
-
-		if( typeof cookieName === 'boolean' && cookieName === true )
-		{
-			allCookies = this.get();
-		}
-		else if( typeof cookieName === 'string' )
-		{
-			allCookies[cookieName] = true;
-		}
-
-		for( name in allCookies )
-		{
-			if( typeof name === 'string' && name !== '' )
-			{
-				this.set( name, null, options );
-			}
-		}
-	};
-	/**
-	 * test - test whether the browser is accepting cookies
-	 *
-	 * @access public
-	 * @return Boolean
-	 */
-	constructor.prototype.test = function()
-	{
-		var returnValue = false, testName = 'cT', testValue = 'data';
-
-		this.set( testName, testValue );
-
-		if( this.get( testName ) === testValue )
-		{
-			this.del( testName );
-			returnValue = true;
-		}
-
-		return returnValue;
-	};
-	/**
-	 * setOptions - set default options for calls to cookie methods
-	 *
-	 * @access public
-	 * @param Object options - list of cookie options to specify
-	 * @return void
-	 */
-	constructor.prototype.setOptions = function( options )
-	{
-		if( typeof options !== 'object' )
-		{
-			options = null;
-		}
-
-		defaultOptions = resolveOptions( options );
-	};
-
-	return new constructor();
-} )();
-
-( function()
-{
-	if( window.jQuery )
-	{
-		( function( $ )
-		{
-			$.cookies = jaaulde.utils.cookies;
-
-			var extensions = {
-				/**
-				* $( 'selector' ).cookify - set the value of an input field, or the innerHTML of an element, to a cookie by the name or id of the field or element
-				*                           (field or element MUST have name or id attribute)
-				*
-				* @access public
-				* @param options OBJECT - list of cookie options to specify
-				* @return jQuery
-				*/
-				cookify: function( options )
-				{
-					return this.each( function()
-					{
-						var i, nameAttrs = ['name', 'id'], name, $this = $( this ), value;
-
-						for( i in nameAttrs )
-						{
-							if( ! isNaN( i ) )
-							{
-								name = $this.attr( nameAttrs[ i ] );
-								if( typeof name === 'string' && name !== '' )
-								{
-									if( $this.is( ':checkbox, :radio' ) )
-									{
-										if( $this.attr( 'checked' ) )
-										{
-											value = $this.val();
-										}
-									}
-									else if( $this.is( ':input' ) )
-									{
-										value = $this.val();
-									}
-									else
-									{
-										value = $this.html();
-									}
-
-									if( typeof value !== 'string' || value === '' )
-									{
-										value = null;
-									}
-
-									$.cookies.set( name, value, options );
-
-									break;
-								}
-							}
-						}
-					} );
-				},
-				/**
-				* $( 'selector' ).cookieFill - set the value of an input field or the innerHTML of an element from a cookie by the name or id of the field or element
-				*
-				* @access public
-				* @return jQuery
-				*/
-				cookieFill: function()
-				{
-					return this.each( function()
-					{
-						var n, getN, nameAttrs = ['name', 'id'], name, $this = $( this ), value;
-
-						getN = function()
-						{
-							n = nameAttrs.pop();
-							return !! n;
-						};
-
-						while( getN() )
-						{
-							name = $this.attr( n );
-							if( typeof name === 'string' && name !== '' )
-							{
-								value = $.cookies.get( name );
-								if( value !== null )
-								{
-									if( $this.is( ':checkbox, :radio' ) )
-									{
-										if( $this.val() === value )
-										{
-											$this.attr( 'checked', 'checked' );
-										}
-										else
-										{
-											$this.removeAttr( 'checked' );
-										}
-									}
-									else if( $this.is( ':input' ) )
-									{
-										$this.val( value );
-									}
-									else
-									{
-										$this.html( value );
-									}
-								}
-								
-								break;
-							}
-						}
-					} );
-				},
-				/**
-				* $( 'selector' ).cookieBind - call cookie fill on matching elements, and bind their change events to cookify()
-				*
-				* @access public
-				* @param options OBJECT - list of cookie options to specify
-				* @return jQuery
-				*/
-				cookieBind: function( options )
-				{
-					return this.each( function()
-					{
-						var $this = $( this );
-						$this.cookieFill().change( function()
-						{
-							$this.cookify( options );
-						} );
-					} );
-				}
-			};
-
-			$.each( extensions, function( i )
-			{
-				$.fn[i] = this;
-			} );
-
-		} )( window.jQuery );
-	}
-} )();/*
+/*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
  * in FIPS 180-1
  * Version 2.2 Copyright Paul Johnston 2000 - 2009.
@@ -6553,55 +5882,6 @@ sc.helpers.xml2json = function(xml, extended) {
 
 
 /*jslint 
-browser: true,
-nomen: false,
-debug: true,
-forin: true,
-undef: true,
-white: false,
-onevar: false 
- */
-var sc, DOMParser, shortcut;
-
-/**
- * this is really a wrapper for shortcut.add in shortcut.js 
- * @param {string} shortcut The shortcut key combination should be specified in this format: Modifier[+Modifier..]+Key
- * @param {Object} func	The function to be called when key is pressed
- * @param {Object} opts A hash of options
- * @param {string} [opts.type] The event type - can be 'keydown','keyup','keypress'. Default: 'keydown' 
- * @param {Boolean} [opts.disable_in_input] If this is set to true, keyboard capture will be disabled in input and textarea fields. Default is TRUE
- * @param {Object} [opts.target] The dom node that should be watched for the keyboard event. Default is the document element
- * @param {Boolean} [opts.propagate] If the key event should propagate. Default is FALSE
- * @param {Number} [opts.keycode] Watch for the given keycode
- * @member sc.helpers
- */
-sc.helpers.key_add = function(keystroke, func, opts) {
-	opts = sch.defaults({
-		'type':'keydown',
-		'disable_in_input':'true'
-
-	}, opts);
-	
-	shortcut.add(keystroke, func, opts);
-};
-
-/**
- * this is really a wrapper for shortcut.remove in shortcut.js 
- * @member sc.helpers
- */
-sc.helpers.key_remove = function(keystroke) {
-	shortcut.remove(keystroke);
-};
-
-/**
- * @todo 
- * @member sc.helpers
- */
-sc.helpers.getModKey = function() {
-	// get the primary modkey based on the OS
-	// if OS X, use 'Meta'
-	// if Win or Linux, use 'Ctrl'
-};/*jslint 
 browser: true,
 nomen: false,
 debug: true,
@@ -9217,173 +8497,398 @@ browser: true,
 nomen: false,
 debug: true,
 forin: true,
-sub: true,
-plusplus: true,
 undef: true,
 white: false,
 onevar: false 
  */
-var sc, jQuery;
+var sc, DOMParser, jQuery;
+
 
 /**
- * @constructor 
+ * An image uploader library for SpazCore. Probably this will supercede spazfileuploader.js
+ * @param {object} [opts] options hash
+ * @param {object} [opts.auth_obj] A SpazAuth object that's filled with proper authentication info
+ * @param {string} [opts.username] a username, in case we're doing that kind of thing
+ * @param {string} [opts.password] a password, in case we're doing that kind of thing
+ * @param {string} [opts.auth_method] the method of authentication: 'echo' or 'basic'. Default is 'echo'
+ * @param {object} [opts.extra] Extra params to pass in the upload request
+ * @constructor
  */
-function SpazPhotoMailer(opts) {
+var SpazImageUploader = function(opts) {
+    if (opts) {
+        this.setOpts(opts);
+    }
+};
 
-	this.apis = this.getAPIs();
-	
-}
 
-SpazPhotoMailer.prototype.getAPILabels = function() {
+/**
+ * this lets us set options after instantiation 
+ * @param {object} opts options hash
+ * @param {object} [opts.auth_obj] A SpazAuth object that's filled with proper authentication info
+ * @param {string} [opts.username] a username, in case we're doing that kind of thing
+ * @param {string} [opts.password] a password, in case we're doing that kind of thing
+ * @param {string} [opts.auth_method] the method of authentication: 'echo' or 'basic'. Default is 'echo'
+ * @param {string} [opts.statusnet_api_base] the api base URL for statusnet, if that service is used
+ * @param {object} [opts.extra] Extra params to pass in the upload request
+ */
+SpazImageUploader.prototype.setOpts = function(opts) {
+    this.opts = sch.defaults({
+        'extra':{},
+        'auth_obj':null,
+        'username':null,
+        'password':null,
+        'auth_method':'echo', // 'echo' or 'basic'
+		'statusnet_api_base':null // only used by statusnet
+    }, opts);
+};
+
+/**
+ * returns an array of labels for the services 
+ * @return array
+ */
+SpazImageUploader.prototype.getServiceLabels = function() {
 	var labels = [];
-	for ( var key in this.getAPIs() ) {
+	for(var key in this.services) {
 		labels.push(key);
 	}
 	return labels;
 };
 
-SpazPhotoMailer.prototype.getAPIs = function() {
-	
-	var thisSPM = this;
-	
-	var apis = {
-		"yfrog": {
-			"email_tpl"  :"{{username}}.??????@yfrog.com",
-			"message_in" :"subject",
-			"email_info_url":"http://yfrog.com/froggy.php",
-			'help_text'  :"Log-in to yfrog.com with your Twitter username and password, and click 'my yfrog.' Your customized posting email will be listed on the right.",
-			'getToAddress': function(opts) {
-				var username = opts.username;
-				return thisSPM.apis['yfrog'].email_tpl.replace('{{username}}', username);
+/**
+ * a hash of service objects. Each object has a URL endpoint, a parseResponse callback, and an optional "extra" set of params to pass on upload
+ *	parseResponse should return one of these key/val pairs:
+ *	- {'url':'http://foo.bar/XXXX'}
+ *	- {'error':'Error message'}
+ */
+SpazImageUploader.prototype.services = {
+	'drippic' : {
+		'url' : 'http://drippic.com/drippic2/upload',
+		'parseResponse': function(data) {
+			
+			var parser=new DOMParser();
+			xmldoc = parser.parseFromString(data,"text/xml");
+			
+			var status;
+			var rspAttr;
+			var errMsg;
+			
+			try {
+				rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
+				status = rspAttr.getNamedItem("stat").nodeValue;
+			} catch(e) {
+				errMsg = 'Unknown error uploading image';
+				return {'error':errMsg};
 			}
-		},
-
-		"posterous": {
-			"email_tpl"  :"post@posterous.com",
-			"message_in" :"subject",
-			"email_info_url":"http://posterous.com/autopost",
-			'help_text'  :"Post instantly to your Posterous blog. Setup autopost to post back to Twitter! Login for more information and controls.",
-			'getToAddress': function(opts) {
-				return thisSPM.apis['posterous'].email_tpl;
-			}
-		},
-		
-		"pikchur": {
-			"email_tpl"  :"{{username}}.???@pikchur.com",
-			"message_in" :"subject",
-			"email_info_url":"http://pikchur.com/dashboard/profile",
-			'help_text'  :"Log-in to pikchur with your Twitter username and password, and click 'Profile.' Your customized posting email will be listed",
-			'getToAddress': function(opts) {
-				var username = opts.username;
-				return thisSPM.apis['pikchur'].email_tpl.replace('{{username}}', username);
-			}
-		},
-
-
-		"twitgoo": {
-			"email_tpl"  :"m@twitgoo.com",
-			"message_in" :"subject",
-			"email_info_url":"http://twitgoo.com/-settings/mobile",
-			'help_text'  :"Log-in to twitgoo.com and click 'Settings.' Add the email address from which you'll be sending messages.",
-			'getToAddress': function(opts) {
-				return thisSPM.apis['twitgoo'].email_tpl;
-			}
-		},
-
-		"twitpic": {
-			"email_tpl"  :"{{username}}.####@twitpic.com",
-			"message_in" :"subject",
-			"email_info_url":"http://twitpic.com/settings.do",
-			'help_text'  :"Log-in to twitpic.com, and click 'Settings.' Your custom email address will be listed.",
-			'getToAddress': function(opts) {
-				var username = opts.username;
-				return thisSPM.apis['twitpic'].email_tpl.replace('{{username}}', username);
-			}
-		},
-
-		"tweetphoto": {
-			"email_tpl"  :"{{username}}.####@tweetphoto.com",
-			"message_in" :"subject",
-			"email_info_url":"http://www.tweetphoto.com/mysettings.php",
-			'help_text'  :"Log-in to tweetphoto.com and click 'My Settings.' Your custom email address will be listed.",
-			'getToAddress': function(opts) {
-				var username = opts.username;
-				return thisSPM.apis['tweetphoto'].email_tpl.replace('{{username}}', username);
-			},
-			'retrievePostingAddress': function(username, password, success, failure) {
-				
-				function getTweetPhotoProfile(username, password) {
-					
-					var url = "http://tweetphotoapi.com/api/tpapi.svc/json/users/"+username;
-					var TPAPI_header = 'TPAPI: '+username+","+password;
-					
-					jQuery.ajax({
-                	    'dataType':'text',
-						
-						'success':function(data, textStatus) {
-							var profile = sc.helpers.deJSON(data);
-							
-						},
-						
-						'error':function(xhr, testStatus, errorThrown) {
-							failure(xhr, testStatus, errorThrown);
-						},
-						
-						'beforeSend':function(xhr){
-							xhr.setRequestHeader("TPAPI", username+","+password);
-				        },
-				        
-						'url':url
-						
-						
-					});
-					
+			
+			if (status == 'ok') {
+				var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue; 
+				return {'url':mediaurl};
+			} else {
+				if (xmldoc.getElementsByTagName("err")[0]) {
+					errMsg = xmldoc.getElementsByTagName("err")[0].childNodes[0].nodeValue;
+				} else {
+					errMsg = xmldoc.getElementsByTagName("error")[0].childNodes[0].nodeValue;
 				}
 				
-				function getTweetPhoto(username, password, settings_url) {
-
-					var TPAPI_header = 'TPAPI: '+username+","+password;
-					
-					jQuery.ajax({
-                	    'dataType':'text',
-						
-						'success':function(data, textStatus) {
-							var settings = sc.helpers.deJSON(data);
-							success(settings.Email);
-						},
-						
-						'error':function(xhr, testStatus, errorThrown) {
-							failure(xhr, testStatus, errorThrown);
-						},
-						
-						'beforeSend':function(xhr){
-							xhr.setRequestHeader("TPAPI", username+","+password);
-				        },
-				        
-						'url':settings_url
-						
-					});
-					
-				}
-				
-				
-				
+				sch.error(errMsg);
+				return {'error':errMsg};
 			}
 		}
-	};
+	},
+	'pikchur' : {
+		'url'  : 'http://api.pikchur.com/simple/upload',
+		'extra': {
+			'api_key':'MzTrvEd/uPNjGDabr539FA',
+			'source':'NjMw'
+		},
+		'parseResponse': function(data) {
+			var parser=new DOMParser();
+			xmldoc = parser.parseFromString(data,"text/xml");
 	
-	return apis;
+			var status;
+			var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
+			if (rspAttr.getNamedItem("status")) {
+				status = rspAttr.getNamedItem("status").nodeValue;
+			} else if(rspAttr.getNamedItem("stat")) {
+				status = rspAttr.getNamedItem("stat").nodeValue;
+			} else {
+				status = 'fuck I wish they would use the same goddamn nodenames';
+			}
+			
+			if (status == 'ok') {
+				var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue;
+				return {'url':mediaurl};
+			} else {
+				var errAttributes;
+				if (xmldoc.getElementsByTagName("err")[0]) {
+					errAttributes = xmldoc.getElementsByTagName("err")[0].attributes;
+				} else {
+					errAttributes = xmldoc.getElementsByTagName("error")[0].attributes;
+				}
+				
+				sch.error(errAttributes);
+				errMsg = errAttributes.getNamedItem("msg").nodeValue;
+				sch.error(errMsg);
+				return {'error':errMsg};
+			}
+		}
+	},
+	/*
+		Removed yfrog for now because their oAuth Echo stuff never seems to work.
+		Not sure if it's my code or theirs
+	*/
+    // 'yfrog' : {
+    //     'url' : 'http://yfrog.com/api/xauth_upload',
+    //     'extra': {
+    //         'key':'579HINUYe8d826dd61808f2580cbda7f13433310'
+    //     },
+    //     'parseResponse': function(data) {
+    //         
+    //         var parser=new DOMParser();
+    //         xmldoc = parser.parseFromString(data,"text/xml");
+    // 
+    //         var status;
+    //         var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
+    //         status = rspAttr.getNamedItem("stat").nodeValue;
+    //         
+    //         if (status == 'ok') {
+    //             var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue; 
+    //             return {'url':mediaurl};
+    //         } else {
+    //             var errAttributes;
+    //             if (xmldoc.getElementsByTagName("err")[0]) {
+    //                 errAttributes = xmldoc.getElementsByTagName("err")[0].attributes;
+    //             } else {
+    //                 errAttributes = xmldoc.getElementsByTagName("error")[0].attributes;
+    //             }
+    //             
+    //             sch.error(errAttributes);
+    //             errMsg = errAttributes.getNamedItem("msg").nodeValue;
+    //             sch.error(errMsg);
+    //             return {'error':errMsg};
+    //         }
+    //         
+    //     }
+    // },
+	'twitpic' : {
+		'url' : 'http://api.twitpic.com/2/upload.json',
+		'extra': {
+			'key':'3d8f511397248dc913193a6195c4a018'
+		},
+		'parseResponse': function(data) {
+			
+			if (sch.isString(data)) {
+				data = sch.deJSON(data);
+			}
+			
+			if (data.url) {
+				return {'url':data.url};
+			} else {
+				return {'error':'unknown error'};
+			}
+			
+		}
+	},
+	'twitgoo' : {
+		'url'  : 'http://twitgoo.com/api/upload',
+		'extra': {
+			'format':'xml',
+			'source':'Spaz',
+			'source_url':'http://getspaz.com'
+		},
+		'parseResponse': function(data) {
+			
+			var parser=new DOMParser();
+			xmldoc = parser.parseFromString(data,"text/xml");
 
+			var status;
+			var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
+			status = rspAttr.getNamedItem("status").nodeValue;
+
+			if (status == 'ok') {
+				var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue; 
+				return {'url':mediaurl};
+			} else {
+				var errAttributes;
+				if (xmldoc.getElementsByTagName("err")[0]) {
+					errAttributes = xmldoc.getElementsByTagName("err")[0].attributes;
+				} else {
+					errAttributes = xmldoc.getElementsByTagName("error")[0].attributes;
+				}
+
+				sch.error(errAttributes);
+				errMsg = errAttributes.getNamedItem("msg").nodeValue;
+				sch.error(errMsg);
+				return {'error':errMsg};
+			}
+			
+		}
+	},
+	'identi.ca' : {
+		'url'  : 'http://identi.ca/api/statusnet/media/upload',
+		'parseResponse': function(data) {
+			
+			var parser=new DOMParser();
+			xmldoc = parser.parseFromString(data,"text/xml");
+
+			var status;
+			var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
+			status = rspAttr.getNamedItem("stat").nodeValue;
+			
+			if (status == 'ok') {
+				var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue; 
+				return {'url':mediaurl};
+			} else {
+				var errMsg;
+				if (xmldoc.getElementsByTagName("err")[0]) {
+					errMsg = xmldoc.getElementsByTagName("err")[0].childNodes[0].nodeValue;
+				} else {
+					errMsg = xmldoc.getElementsByTagName("error")[0].childNodes[0].nodeValue;
+				}
+				
+				sch.error(errMsg);
+				return {'error':errMsg};
+			}
+		}
+	},
+	'statusnet' : {
+		'url'  : '/statusnet/media/upload',
+		'prepForUpload':function() {
+			if (this.opts.statusnet_api_base) {
+				this.services.statusnet.url = this.opts.statusnet_api_base + this.services.statusnet.url;
+			} else {
+				sch.error('opts.statusnet_api_base must be set to use statusnet uploader service');
+			}
+		},
+		'parseResponse':function(data) {
+			var parser=new DOMParser();
+			xmldoc = parser.parseFromString(data,"text/xml");
+
+			var status;
+			var rspAttr = xmldoc.getElementsByTagName("rsp")[0].attributes;
+			status = rspAttr.getNamedItem("stat").nodeValue;
+			
+			if (status == 'ok') {
+				var mediaurl = xmldoc.getElementsByTagName("mediaurl")[0].childNodes[0].nodeValue;
+				return {'url':mediaurl};
+			} else {
+				var errMsg;
+				if (xmldoc.getElementsByTagName("err")[0]) {
+					errMsg = xmldoc.getElementsByTagName("err")[0].childNodes[0].nodeValue;
+				} else {
+					errMsg = xmldoc.getElementsByTagName("error")[0].childNodes[0].nodeValue;
+				}
+				
+				sch.error(errMsg);
+				return {'error':errMsg};
+			}
+			
+		}
+	}
 };
 
-SpazPhotoMailer.prototype.setAPI = function(apilabel) {
-	this.api = this.apis[apilabel];
-};
-
-SpazPhotoMailer.prototype.send = function(api, photo_url, message) {
+/**
+ * Retrieves the auth_header 
+ */
+SpazImageUploader.prototype.getAuthHeader = function() {
 	
+	var opts = sch.defaults({
+		'getEchoHeaderOpts':{}
+	}, this.opts);
+	
+	var auth_header;
+	var user = opts.username;
+	var pass = opts.password;
+	
+	if (opts.auth_method === 'echo') { // this is Twitter. hopefully
+
+		var twit	= new SpazTwit({'auth':opts.auth_obj});
+		auth_header = twit.getEchoHeader(opts.getEchoHeaderOpts);
+
+	} else {
+		auth_header = opts.auth_obj.signRequest(); // returns basic auth header
+	}
+	
+	sch.error(auth_header);
+	return auth_header;
+
 };
-/*jslint 
+
+
+/**
+ * this actually does the upload. Well, really it preps the data and uses sc.helpers.HTTPFileUpload 
+ */
+SpazImageUploader.prototype.upload = function() {
+
+	var opts = sch.defaults({
+		extra:{}
+	}, this.opts);
+	
+	var srvc = this.services[opts.service];
+
+	if (srvc.prepForUpload) {
+		srvc.prepForUpload.call(this);
+	}
+
+	/*
+		file url
+	*/
+	opts.url      = srvc.url;
+	if (srvc.extra) {
+		opts.extra = jQuery.extend(opts.extra, srvc.extra);
+	}
+	
+	var onSuccess, rs;
+	if (srvc.parseResponse) {
+		/** @ignore */
+		onSuccess = function(data) {
+			if (sch.isString(data)) {
+				rs = srvc.parseResponse.call(srvc, data);
+				return opts.onSuccess(rs);
+			} else if (data && data.responseString) { // webOS will return an object, not just the response string
+				rs = srvc.parseResponse.call(srvc, data.responseString);
+				return opts.onSuccess(rs);
+			} else { // I dunno what it is; just pass it to the callback
+				return opts.onSuccess(data);
+			}
+		};
+	} else {
+		onSuccess = opts.onSuccess;
+	}
+	
+	/*
+		get auth stuff
+	*/
+	var auth_header;
+    if (opts.service === 'yfrog') {
+		verify_url  = 'https://api.twitter.com/1/account/verify_credentials.xml';
+		auth_header = this.getAuthHeader({
+			'getEchoHeaderOpts': {
+				'verify_url':verify_url
+			}
+		});
+	} else {
+		verify_url  = 'https://api.twitter.com/1/account/verify_credentials.json';
+		auth_header = this.getAuthHeader();
+	}
+	
+	sch.error(auth_header);
+	if (auth_header.indexOf('Basic ') === 0) {
+		
+		opts.username = this.opts.auth_obj.getUsername();
+		opts.password = this.opts.auth_obj.getPassword();
+
+	} else {
+		opts.headers = {
+			'X-Auth-Service-Provider': verify_url,
+			'X-Verify-Credentials-Authorization':auth_header
+		};
+		
+	}
+	
+	sc.helpers.HTTPUploadFile(opts, onSuccess, opts.onFailure);
+	
+};/*jslint 
 browser: true,
 nomen: false,
 debug: true,
@@ -11215,323 +10720,6 @@ SpazTimeline.prototype.append = function(htmlitem) {
 
 SpazTimeline.prototype.getEntrySelector = function() {
 	return this.timeline_container_selector + ' ' + this.timeline_item_selector;
-};
-/**
- * This is a library to handle custom filtering of Twitter timelines based on
- * usernames and message content
- * @constructor
- * @param {Object} opts
- * @param {string} opts.name name of filter
- * @param {string} opts.type whitelist or blacklist (default)
- * @deprecated
- */
-SpazTimelineFilter = function(opts) {
-	
-	if (!opts) { opts = {}; };
-	
-	if (opts.type !== 'whitelist') { opts.type = 'blacklist'; };
-	
-	this.settings = {
-		name : opts.name || 'unnamed',
-		type : opts.type,
-		usernames_show : opts.usernames_show   || [],
-		usernames_hide : opts.usernames_hide   || [],
-		content_show   : opts.content_show     || [],
-		content_hide   : opts.content_hide     || [],
-		filter_class_prefix: opts.filter_class_prefix || 'customfilter-',
-		timeline_selector: opts.timeline_selector || 'div.timeline',
-		entry_selector : opts.entry_selector   || 'div.timeline-entry',
-		username_attr  : opts.username_attr    || 'data-user-screen_name',
-		content_selector:opts.content_selector || 'div.timeline-entry status-text',
-		style_selector : opts.style_selector   || 'style[title="custom-timeline-filters"]'
-	};
-	// this.settings = {
-	// 	name : 'php-people',
-	// 	type : 'whitelist', // whitelist | blacklist
-	// 	usernames_show : [],
-	// 	usernames_hide : [],
-	// 	content_show : [],
-	// 	content_hide : [],
-	// 	filter_class_prefix: 'customfilter-',
-	// 	timeline_selector: 'div.timeline',
-	// 	entry_selector : 'div.timeline-entry',
-	// 	username_attr  : 'data-user-screen_name',
-	// 	content_selector:'div.timeline-entry status-text',
-	// 	style_selector : 'style[title="custom-timeline-filters"]'
-	// }
-	
-};
-
-
-
-/**
- * this generates the base selector for timeline entries based on 
- * the opts given to the constructor 
- * @return {string}
- */
-SpazTimelineFilter.prototype.getBaseSelector = function() {
-	var base_sel = this.settings.timeline_selector+
-		    "."+this.getTimelineClass()+
-		    " "+this.settings.entry_selector;
-	return base_sel;
-};
-
-/**
- * this returns the timeline class we'll apply to the timeline container 
- */
-SpazTimelineFilter.prototype.getTimelineClass = function() {
-	return this.settings.filter_class_prefix+this.settings.name;
-};
-
-/**
- * This generates the user-filtering CSS rules
- * @return {array} 
- */
-SpazTimelineFilter.prototype.getUserCSS = function() {
-	var base_sel = '', rule = '', rules = [], thisuser;
-	
-	base_sel = this.getBaseSelector();
-	
-	/*
-		start with white or black
-	*/
-	if (this.settings.type === 'whitelist') {
-		rule = base_sel+" { display:none; }";
-		rules.push(rule);
-	}
-	else if (this.settings.type === 'blacklist') {
-		rule = base_sel+" { display:block; }";
-		rules.push(rule);
-	} else {
-		return null;
-	}
-	
-	/*
-		add usernames to show
-	*/
-	for (var i=0; i < this.settings.usernames_show.length; i++) {
-		thisuser = this.settings.usernames_show[i];
-		rule = base_sel+"["+this.settings.username_attr+"='"+thisuser+"'] { display:block; }";
-		rules.push(rule);
-	};
-
-	/*
-		add usernames to hide
-	*/
-	for (var i=0; i < this.settings.usernames_hide.length; i++) {
-		thisuser = this.settings.usernames_show[i];
-		rule = base_sel+"["+this.settings.username_attr+"='"+thisuser+"'] { display:none; }";
-		rules.push(rule);
-	};
-
-	return rules.join("\n");
-};
-
-
-/**
- * This takes a string of comma-delimited usernames and "hide" OR "show" and 
- * parses it into the arrays used in this.settings
- * @param {string} str  string of usernames, separated by commas
- * @param {string} hide_or_show  'hide' or 'show'. defaults to 'show' 
- */
-SpazTimelineFilter.prototype.parseUsersFromString = function(str, hide_or_show) {
-	
-	if (hide_or_show !== 'hide') { hide_or_show = 'show'; }
-	var users = str.split(',');
-	for (var i=0; i < users.length; i++) {
-		users[i] = sch.trim(users[i]);
-	};
-	
-	this.parseUsersFromArray(users, hide_or_show);
-};
-
-/**
- * This takes an array of usernames and "hide" OR "show" and 
- * parses it into the arrays used in this.settings
- * @param {array} user_arr  array of usernames
- * @param {string} hide_or_show  'hide' or 'show'. defaults to 'show' 
- */
-SpazTimelineFilter.prototype.parseUsersFromArray = function(user_arr, hide_or_show) {
-
-	if (hide_or_show !== 'hide') { hide_or_show = 'show'; }
-
-	if (hide_or_show === 'hide') {
-		this.usernames_hide = user_arr;
-	} else {
-		this.usernames_show = user_arr;
-	}
-};
-
-
-/**
- * This takes a username and "hide" or "show" and adds it to the appropriate
- * array in this.settings
- * @param {string} str  the username
- * @param {string} hide_or_show  'hide' or 'show'. defaults to 'show' 
- */
-SpazTimelineFilter.prototype.addUser = function(str, hide_or_show) {
-	
-	if (hide_or_show !== 'hide') { hide_or_show = 'show'; }
-	
-	var username = sch.trim(str);
-	
-	if (hide_or_show === 'hide') {
-		this.usernames_hide.push(username);
-	} else {
-		this.usernames_show.push(username);
-	}
-	
-};
-
-/**
- * This takes a string of comma-delimited strings and "hide" OR "show" and 
- * parses it into the content string filter arrays used in this.settings
- * @param {string} str  string of strings, separated by commas
- * @param {string} hide_or_show  'hide' or 'show'. defaults to 'show' 
- */
-SpazTimelineFilter.prototype.parseContentStringsFromString = function(str, hide_or_show) {
-	if (hide_or_show !== 'hide') { hide_or_show = 'show'; }
-	var contentstrings = str.split(',');
-	for (var i=0; i < contentstrings.length; i++) {
-		contentstrings[i] = sch.trim(contentstrings[i]);
-	};
-	
-	this.parseContentStringsFromArray(contentstrings, hide_or_show);
-};
-
-/**
- * This takes an array of comma-delimited strings and "hide" OR "show" and 
- * parses it into the content string filter arrays used in this.settings
- * @param {array} str_arr  array of strings
- * @param {string} hide_or_show  'hide' or 'show'. defaults to 'show' 
- */
-SpazTimelineFilter.prototype.parseContentStringsFromArray = function(str_arr, hide_or_show) {
-	
-	if (hide_or_show !== 'hide') { hide_or_show = 'show'; }
-
-	if (hide_or_show === 'hide') {
-		this.content_hide = str_arr;
-	} else {
-		this.content_show = str_arr;
-	}
-	
-};
-
-/**
- * This takes a string and "hide" or "show" and adds it to the appropriate
- * content string filter array in this.settings
- * @param {string} str  the string
- * @param {string} hide_or_show  'hide' or 'show'. defaults to 'show' 
- */
-SpazTimelineFilter.prototype.addContentString = function(str, hide_or_show) {
-	if (hide_or_show !== 'hide') { hide_or_show = 'show'; }
-	
-	var contentstring = sch.trim(str);
-	
-	if (hide_or_show === 'hide') {
-		this.content_hide.push(contentstring);
-	} else {
-		this.content_show.push(contentstring);
-	}
-};
-
-/**
- * returns the current this.settings object as JSON. Mainly this is for
- * saving the settings to some permanent data store
- */
-SpazTimelineFilter.prototype.settingsToJSON = function() {
-	
-	return sch.enJSON(this.settings);
-	
-};
-
-/**
- * takes JSON, decodes it, and assigns it to this.settings. Mainly this is 
- * for loading the settings from a file or DB
- * @param {string} json 
- */
-SpazTimelineFilter.prototype.settingsFromJSON = function(json) {
-	
-	this.settings = sch.deJSON(json);
-	
-};
-
-/**
- * This applies the user filtering CSS by inserting it into the <style>
- * tag designated by this.settings.style_selector 
- */
-SpazTimelineFilter.prototype.applyUserCSS = function() {
-	jQuery(this.settings.style_selector).text( this.getUserCSS() );
-};
-
-/**
- * this clears the CSS code inside the <style> tag 
- */
-SpazTimelineFilter.prototype.disableUserCSS = function() {
-	jQuery(this.settings.style_selector).text('');
-};
-
-/**
- * This applies the content filters by hiding and showing elements via jQuery
- */
-SpazTimelineFilter.prototype.applyContentFilters = function() {
-	var thiscontent;
-	
-	var contentfilters = this.buildContentFilterSelectors();
-	var jq_entries = jQuery(this.getBaseSelector());
-	
-	for (var i=0; i < contentfilters.hide.length; i++) {
-		jq_entries.filter(contentfilters.hide[i]).hide();
-	}
-	for (var i=0; i < contentfilters.show.length; i++) {
-		jq_entries.filter(contentfilters.show[i]).show();
-	}
-};
-
-/**
- * This disables the content filters by showing *everything* 
- */
-SpazTimelineFilter.prototype.disableContentFilters = function() {
-	var jq_entries = jQuery(this.getBaseSelector());
-	jq_entries.filter().show();
-};
-
-/**
- * this builds the content filtering selectors used by jQuery to hide and 
- * show elements based on content 
- */
-SpazTimelineFilter.prototype.buildContentFilterSelectors = function() {
-	
-	var contentfilters = {
-		'hide':[],
-		'show':[]
-	};
-	
-	for (var i=0; i < this.settings.content_hide.length; i++) {
-		thiscontent = this.settings.content_hide[i];
-		contentfilters.hide.push(':contains("'+thiscontent+'")');
-	}
-	for (var i=0; i < this.settings.content_show.length; i++) {
-		thiscontent = this.settings.content_show[i];
-		contentfilters.show.push(':contains("'+thiscontent+'")');
-	}
-	return contentfilters;
-};
-
-/**
- * Apply user and content filtering 
- */
-SpazTimelineFilter.prototype.apply = function() {
-	this.applyUserCSS();
-	this.applyContentFilters();
-};
-
-/**
- * Disable user and content filtering 
- */
-SpazTimelineFilter.prototype.disable = function() {
-	this.disableUserCSS();
-	this.disableContentFilters();
 };
 /*jslint 
 browser: true,
@@ -15622,77 +14810,484 @@ undef: true,
 white: false,
 onevar: false 
  */
-var sc;
+var sc, DOMParser, Titanium;
+ 
+/**
+ * the Titanium Desktop version of this platform-specific helper file 
+ */
 
 /**
- * standard
+ * Gets the contents of a file
+ */
+sc.helpers.getFileContents = function(url) {
+	var f = Titanium.Filesystem.getFile(url);
+	if (f.exists) {
+		return f.read();
+	} else {
+		return false;
+	}
+};
+
+
+
+/**
+ * sets the file contents 
+ */
+sc.helpers.setFileContents = function(url, content, serialize) {
+	
+	if (serialize) {
+		content = JSON.stringify(content);
+	}
+	
+	sc.helpers.debug('setFileContents for '+url+ ' to "' +content+ '"');
+	
+	try { 
+		var f = Titanium.Filesystem.getFile(url);
+		f.write(content);
+	} catch (e) {
+		sch.error('There was an error setting file contents:'+e.message);
+	}
+};
+
+
+
+
+
+/**
+ * does fileurl exist
+ */
+sc.helpers.fileExists = function (url) {
+	var f = Titanium.Filesystem.getFile(url);
+	return f.exists();
+};
+
+/**
+ * is given fileurl a file 
+ */
+sc.helpers.isFile = function (url) {
+	var f = Titanium.Filesystem.getFile(url);
+	return f.isFile();
+};
+
+/**
+ * is given fileurl a directory 
+ */
+sc.helpers.isDirectory = function (url) {
+	var f = Titanium.Filesystem.getFile(url);
+	return f.isDirectory();
+};
+
+
+/**
+ * resolve a path against the given url 
+ */
+sc.helpers.resolvePath = function(url, rel_path) {
+	var f = Titanium.Filesystem.getFile(url);
+	return f.resolve(rel_path).toString();
+};
+
+/**
+ * Returns the native file object 
+ */
+sc.helpers.getFileObject = function(url) {
+	return Titanium.Filesystem.getFile(url);
+};
+
+/**
+ * copy a file 
+ */
+sc.helpers.copyFile = function(url, dest_url) {
+	var f = Titanium.Filesystem.getFile(url);
+	var fnew = Titanium.Filesystem.getFile(dest_url);
+	f.copy(fnew);
+};
+
+/**
+ * move a file 
+ */
+sc.helpers.moveFile = function(url, dest_url) {
+	var f = Titanium.Filesystem.getFile(url);
+	var fnew = Titanium.Filesystem.getFile(dest_url);
+	f.move(fnew);
+};
+
+/**
+ * delete a file 
+ */
+sc.helpers.deleteFile = function (url) {
+	var f = Titanium.Filesystem.getFile(url);
+	f.deleteFile();
+};
+
+/**
+ * delete a directory 
+ */
+sc.helpers.deleteDirectory = function (url) {
+	var f = Titanium.Filesystem.getFile(url);
+	f.deleteDirectory();
+};
+
+
+/**
+ * make a new directory 
+ */
+sc.helpers.createDirectory = function (url) {
+	var f = Titanium.Filesystem.getFile(url);
+	f.createDirectory();
+};
+
+
+/**
+ * initializes a file at the given location. set overwrite to true
+ * to clear out an existing file.
+ * returns true or false
+ */
+sc.helpers.initFile = function (url) {
+	var file = Titanium.Filesystem.getFile(url);
+	if ( !file.exists || (file.exists && overwrite) ) {
+		file.setFileContents('');
+		return true;
+	} else {
+		return false;
+	}
+};
+sc.helpers.init_file = sc.helpers.initFile;
+
+
+
+/**
+ * returns the file URL for the app storage directory
+ */
+sc.helpers.getAppStorageDir = function() {
+	return Titanium.Filesystem.getApplicationDataDirectory().toString();
+};
+sc.helpers.getAppStoreDir = sc.helpers.getAppStorageDir;
+
+
+/**
+ * get the application's directory 
+ */
+sc.helpers.getAppDir = function() {
+	return Titanium.Filesystem.getApplicationDirectory().toString();
+};
+
+/**
+ * build a filesystem path from an array of strings 
+ */
+sc.helpers.joinPaths = function(path_arr) {
+	var path = '';
+	var sep  = Titanium.Filesystem.getSeparator();
+	for (var i=0; i < path_arr.length; i++) {
+		if (i != 0) { path += sep; }
+		path += path_arr[i];
+	}
+	return path;
+};/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, air;
+
+ 
+/**
+ * This really only supports image uploads right now (jpg, gif, png) 
+ * 
+ * opts = {
+ *	content_type:'', // optional
+ *	field_name:'', //optional, default to 'media;
+ *	file_url:'',
+ *	url:'',
+ *	extra:{...}
+ *	headers:{...}
+ * 
+ * 
+ * }
+ */
+sc.helpers.HTTPUploadFile = function(opts, onSuccess, onFailure) {
+
+	function callback_for_upload_progress(event) { 
+		var pct;
+		console.log(events);
+		if (event.bytesLoaded && event.bytesTotal) {
+			pct = Math.ceil( ( event.bytesLoaded / event.bytesTotal ) * 100 ); 
+			sch.error('Uploaded ' + pct.toString() + '%');
+		}
+		
+		sch.debug('onsendstream', e.progress);
+		sch.debug(http.dataSent());
+		if (opts.onProgress) { opts.onProgress(e, pct); }
+		
+		// 
+		// if (opts.onProgress) {
+		//	opts.onProgress({
+		//		'bytesLoaded':event.bytesLoaded,
+		//		'bytesLoaded':event.bytesTotal,
+		//		'percentage':pct
+		//	});
+		// }
+	}
+
+	function callback_for_upload_finish(event) {
+		console.log('File upload complete');
+		sch.error('http.responseText:');
+		sch.error(http.responseText);
+		if (onSuccess) {
+			onSuccess(http.responseText, http);
+		}
+	}
+	
+	function callback_for_error(event) {
+		sch.error('IOError!', event);
+		console.log(http.responseText);
+		if (onFailure) {
+			onFailure(http.responseText, http);
+		}
+	}
+
+	opts = sch.defaults({
+		'method':'POST',
+		'content_type':'multipart/form-data',
+		'field_name':'media',
+		'file_url':null,
+		'url':null,
+		'extra':null,
+		'headers':null,
+		'username':null,
+		'password':null
+	}, opts);
+
+	
+	
+	
+	var http = Titanium.Network.createHTTPClient();
+	var uploading_fs = Titanium.Filesystem.getFileStream(opts.file_url);
+	uploading_fs.open(Titanium.Filesystem.MODE_READ);
+	var file_data = uploading_fs.read();
+	uploading_fs.close();
+	
+	
+	http.onsendstream = function(e) {
+		console.log('onsendstream', e.progress);
+		console.log(http.dataReceived);
+	};
+	http.onerror = callback_for_error;
+	http.onload = callback_for_upload_finish;
+
+	http.open(opts.method, opts.url, true);
+
+	
+	// build data hash
+	var data = {};
+
+	if (opts.username) {
+		data.username = opts.username;
+	}
+
+	if (opts.password) {
+		data.password = opts.password;
+	}
+
+	var key;	
+	if (opts.extra) {
+		for(key in opts.extra) {
+			data[key] = opts.extra[key];
+		}
+	}
+	
+	// set uploading file data
+	data[opts.field_name] = file_data;
+	
+	// set headers
+	http.setRequestHeader("content-type", opts.content_type);
+	if (opts.headers) {
+		for(key in opts.headers) {
+			http.setRequestHeader( key, opts.headers[key] );
+		}
+	}
+
+	http.send(data);	
+
+};
+
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, Titanium;
+ 
+/**
+ * This should contain definitions for all methods from helpers/sys.js tagged @platformsub 
+ */
+
+/**
+ * dump an object's first level to console
+ */
+sc.helpers.dump = function(obj, level, cb) {
+	var dumper, tilogger;
+	
+	if (!level) { level = SPAZCORE_DUMPLEVEL_DEBUG; }
+	
+	if (sc.dumplevel < level ) {
+		return;
+	}
+	
+	switch(level) {
+		case SPAZCORE_DUMPLEVEL_DEBUG:
+			tilogger = Titanium.API.debug;
+			break;
+		case SPAZCORE_DUMPLEVEL_NOTICE:
+			tilogger = Titanium.API.notice;
+			break;
+		case SPAZCORE_DUMPLEVEL_WARNING:
+			tilogger = Titanium.API.warn;
+			break;
+		case SPAZCORE_DUMPLEVEL_ERROR:
+			tilogger = Titanium.API.error;
+			break;
+		case SPAZCORE_DUMPLEVEL_NONE:
+			return;
+		default:
+			tilogger = Titanium.API.debug;
+	}
+	
+	if (sc.helpers.isString(obj)) {
+		obj = sch.truncate(obj, SPAZCORE_DUMP_MAXLEN, '…[TRUNC]');
+	}
+	
+	
+	if (sc.helpers.isString(obj) || sc.helpers.isNumber(obj) || !obj) {
+		dumper = function(str) {
+			tilogger(str);
+		};
+	} else {
+		dumper = function() {
+			tilogger(typeof(obj) + ' - ' + sch.enJSON(obj));
+		};
+	}
+	
+	if (sc.helpers.isString(obj)) {
+		dumper(obj);
+	} else if(sc.helpers.isNumber(obj)) {
+		dumper(obj.toString());
+	} else if (obj === undefined) {
+		dumper('UNDEFINED');
+	} else if (obj === null) {
+		dumper('NULL');
+	} else { // this should be a "normal" object
+		dumper(obj);
+	}
+	
+	if (cb) {
+		cb(obj, level);
+	}
+	
+};
+
+
+/*
+	Open a URL in the default system web browser
+*/
+sc.helpers.openInBrowser = function(url) {
+	// This works on Titanium Desktop only
+	Titanium.Desktop.openURL(url);
+};
+
+
+/*jslint 
+browser: true,
+nomen: false,
+debug: true,
+forin: true,
+undef: true,
+white: false,
+onevar: false 
+ */
+var sc, Titanium;
+ 
+/**
+ * TITANIUM
  * platform-specific definitions for prefs lib 
  */
 
-
-if (!window.localStorage) { // if localStorage is not available, we fall back to cookies. Ick
-	/**
-	 * this requires the cookies library <http://code.google.com/p/cookies/> 
-	 */
-	SpazPrefs.prototype.load = function() {
-		var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
-		var prefsval = jaaulde.utils.cookies.get(cookie_key);
-		
-		if (prefsval) {
-			sch.debug('prefsval exists');
-			for (var key in prefsval) {
-				sc.helpers.dump('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
-				this._prefs[key] = prefsval[key];
-			}
-		} else { // init the file
-			sch.debug('prefsval does not exist; saving with defaults');
-			this.save();
-		}
-	};
-
-	/**
-	 * this requires the cookies library <http://code.google.com/p/cookies/> 
-	 */
-	SpazPrefs.prototype.save = function() {
-		var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
-		jaaulde.utils.cookies.set(cookie_key, this._prefs);
-		sch.debug('stored prefs in cookie');
-	};
+SpazPrefs.prototype.load = function() {
 	
-} else {
+	var thisPrefs = this;
+	var prefs_file = sch.getFileObject(sch.joinPaths([sch.getAppStorageDir(), SPAZCORE_PREFS_TI_KEY]));
 
-	SpazPrefs.prototype.load = function() {
-		var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
-		var prefsjson = window.localStorage.getItem(cookie_key);
-		
-		if (prefsjson) {
-			var prefsval = sch.deJSON(prefsjson);
-			sch.debug('prefsval exists');
-			for (var key in prefsval) {
-				sc.helpers.dump('Copying loaded pref "' + key + '":"' + prefsval[key] + '" (' + typeof(prefsval[key]) + ')');
-				this._prefs[key] = prefsval[key];
-			}
-		} else { // init the file
-			sch.debug('prefsval does not exist; saving with defaults');
-			this.save();
-		}
-	};
-
-	/**
-	 * this requires the cookies library <http://code.google.com/p/cookies/> 
-	 */
-	SpazPrefs.prototype.save = function() {
-		var cookie_key = this.id || SPAZCORE_PREFS_STANDARD_COOKIENAME;
+	if (prefs_file.exists() && (prefs_file.size() > 0)) {
+		var fs = prefs_file.open(Titanium.Filesystem.MODE_READ);
+		var prefs_json = fs.read();
+		fs.close();
 		try {
-			window.localStorage.setItem(cookie_key, sch.enJSON(this._prefs));
-			sch.debug('stored prefs in localStorage');
+			var loaded_prefs = sc.helpers.deJSON(prefs_json);
 		} catch (e) {
-			if (e == QUOTA_EXCEEDED_ERR) {
-				sch.error('LocalStorage quota exceeded!');
-			}
+			sch.error('Could not load prefs JSON… using defaults');
+			this.save();
+			return;
 		}
 
-	};
-	
+		for (var key in loaded_prefs) {
+			sc.helpers.dump('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
+			this._prefs[key] = loaded_prefs[key];
+		}
+	} else {
+		// save the defaults if this is the first time
+		this.save();
+	}
+};
 
-}
+SpazPrefs.prototype.save = function() {
+	// save the file to a default place
+	var prefs_json = sc.helpers.enJSON(this._prefs);
+	var prefs_file = sch.getFileObject(sch.joinPaths([sch.getAppStorageDir(), SPAZCORE_PREFS_TI_KEY]));
+	
+	Titanium.App.Properties.setString(SPAZCORE_PREFS_TI_KEY, prefs_json);
+	
+	if (!prefs_file.exists()) {
+		prefs_file.touch();
+	}
+	var fs = prefs_file.open(Titanium.Filesystem.MODE_WRITE);
+	fs.write(prefs_json);
+	fs.close();
+};
+
+
+/**
+ * @todo 
+ */
+SpazPrefs.prototype.getEncrypted = function(key) {
+	
+};
+
+/**
+ * @todo 
+ */
+SpazPrefs.prototype.setEncrypted = function(key, val) {
+
+};
+
+
+/**
+ * @todo 
+ */
+SpazPrefs.prototype.saveWindowState = function() {
+
+};
+
+
+/**
+ * @todo 
+ */
+SpazPrefs.prototype.loadWindowState = function() {
+
+};

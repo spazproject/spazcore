@@ -1,0 +1,20 @@
+#appname:identica_uploader
+#appid:com.funkatron.app.identica_uploader
+#publisher:coj
+#image:default_app_logo.png
+#url:http://funkatron.com
+#guid:29facb49-dcde-4fec-a004-a0787fa66560
+#desc:No description provided
+#type:desktop
+runtime:1.1.0
+tiapp:1.1.0
+tifilesystem:1.1.0
+tiplatform:1.1.0
+tiui:1.1.0
+ticodec:1.1.0
+tidatabase:1.1.0
+timedia:1.1.0
+timonkey:1.1.0
+tinetwork:1.1.0
+tiprocess:1.1.0
+tiworker:1.1.0

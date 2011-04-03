@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Page Title</title>
+	
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+	<script src="http://ajax.cdnjs.com/ajax/libs/less.js/1.0.41/less-1.0.41.min.js"></script>
+	
+	<script src="spazcore-titanium.js"></script>
+	<script src="spazimageuploader.js"></script>
+	<script src="network.js"></script>
+	
+	
+	<style type="text/css" media="screen">
+		
+	</style>
+	
+	
+	<script>
+    	var auth   = new SpazAuth(SPAZCORE_ACCOUNT_IDENTICA);
+    	var image_uploader = new SpazImageUploader();
+	
+	
+    	$(document).ready(function() {
+    		// build list of services
+            for (var key in image_uploader.services) {
+                var val = image_uploader.services[key];
+                jQuery('#upload_service').append('<option value="'+key+'">'+key+'</option>');
+                jQuery('#upload_service').val('identi.ca');
+            }
+        
+        
+            jQuery('#login').click(function() {
+			
+    			console.log('clicked!');
+			
+    			var result = auth.authorize(jQuery('#username').val(), jQuery('#password').val());
+    			
+    			alert(result);
+
+    			console.log(auth.authHeader);
+
+    			if (result) {
+    		        jQuery('#result').html("<div>Access header: " + auth.authHeader + "</div>");
+    				jQuery('#file_upload').show();
+    		    } else {
+    		        jQuery('#result').html("<h3>Failed!</h3>");
+    		    }
+			
+    		});
+    		
+    		
+    		jQuery('#choose_a_file').click(function() {
+
+				var opts = {multiple:false,directories:false,files:true,types:['gif','png','jpg']};
+				
+				Titanium.UI.openFileChooserDialog(function(f) {
+				    
+    			    if (f.length) {
+    			        var file_url = f[0];
+    				    var service = jQuery('#upload_service').val();
+
+    				    image_uploader.setOpts({
+    				        'auth_obj': auth,
+    				        'service' : service,
+    				        'file_url': file_url,
+    				        'extra': {
+    							'message':jQuery('#message').val()
+    						},
+    						'onSuccess':function(event_data) { // onSuccess
+    							alert("Success!\n"+event_data);
+    						},
+    						'onFailure':function(event) { // onFailure
+    							alert("Error!\n"+event.text);
+    						}
+    				    })
+
+    				    image_uploader.upload();
+                    }
+			    
+    			}, opts);
+
+		    });
+        
+    	});
+	</script>
+</head>
+<body>
+	<fieldset id="authenticate" class="">
+		<legend>Login to identi.ca for credentials</legend>
+		<div><label for="username">Username</label><input type="text" name="username" value="" id="username"></div>
+		<div><label for="password">Password</label><input type="password" name="password" value="" id="password"></div>
+		<input type="button" name="login" value="Login" id="login">
+		
+		<div id="result">
+			
+		</div>
+		
+	</fieldset>
+	
+	
+	
+	<fieldset id="file_upload" class="" style="display:none">
+		<legend>File Upload</legend>
+		
+		<div><label for="upload_service">Upload Service</label><select name="upload_service" id="upload_service"></select></div>
+		
+		
+		<div><label for="message">Message</label><input type="text" name="message" value="Testing!!!" id="message"></div>
+		
+		<div><label for="choose_a_file">Choose JPG</label><input type="button" name="choose_a_file" value="..." id="choose_a_file"></div>
+		
+	</fieldset>
+	
+	
+</body>
+</html>
