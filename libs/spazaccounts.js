@@ -343,7 +343,7 @@ SpazAccounts.prototype.generateID = function() {
  * @returns {String|Object|Array|Boolean|Number} returns the set value, or null if user ID or meta entry is not found
  */
 SpazAccounts.prototype.getMeta = function(id, key) {
-	
+	var user;
 	if ( (user = this.get(id)) ) {
 		if (user.meta && user.meta[key] !== null ) {
 			return user.meta[key];
