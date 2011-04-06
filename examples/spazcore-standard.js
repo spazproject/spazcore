@@ -1,4 +1,4 @@
-/*********** Built 2011-04-03 13:55:15 EDT ***********/
+/*********** Built 2011-04-06 11:03:54 EDT ***********/
 /*jslint 
 browser: true,
 nomen: false,
@@ -10396,6 +10396,10 @@ var SPAZCORE_SHORTURL_SERVICE_JMP     = 'j.mp';
  * @constant 
  */
 var SPAZCORE_SHORTURL_SERVICE_GOOGLE  = 'goo.gl';
+/**
+ * @constant 
+ */
+var SPAZCORE_SHORTURL_SERVICE_GOLOOKAT  = 'go.ly';
 
 /**
  * @constant 
@@ -10509,79 +10513,119 @@ function SpazShortURL(service) {
 	
 }
 
+
+SpazShortURL.prototype.services = {};
+	
+SpazShortURL.prototype.services[SPAZCORE_SHORTURL_SERVICE_BITLY] = {
+		'url'	  : 'http://api.bit.ly/v3/shorten',
+	'getData' : function(longurl, opts) {
+	    var data = {
+	        'longurl':longurl,
+	        'login':opts.login,
+	        'apiKey':opts.apiKey,
+	        'format':'json'
+	    };
+		return data;
+	},
+	'method':'GET',
+	'processResult' : function(data) {
+		var result = sc.helpers.deJSON(data);
+
+		if (result.data && result.data.long_url) {
+		    result.longurl = result.data.long_url;
+			result.shorturl = result.data.url;
+		}
+		return result;
+	}
+};
+
+SpazShortURL.prototype.services[SPAZCORE_SHORTURL_SERVICE_JMP] = {
+	'url'	  : 'http://api.j.mp/v3/shorten',
+	'getData' : function(longurl, opts){
+	    var data = {
+	        'longurl':longurl,
+	        'login':opts.login,
+	        'apiKey':opts.apiKey,
+	        'format':'json'
+	    };
+		return data;
+	},
+	'method':'GET',
+	'processResult' : function(data) {
+		var result = sc.helpers.deJSON(data);
+
+		if (result.data && result.data.long_url) {
+		    result.longurl = result.data.long_url;
+			result.shorturl = result.data.url;
+		}
+		return result;
+	}
+};
+
+SpazShortURL.prototype.services[SPAZCORE_SHORTURL_SERVICE_ISGD] = {
+	'url'	  : 'http://is.gd/create.php',
+	'getData' : function(longurl, opts) {
+		return { 'url':longurl, 'format':'simple' };
+	}
+};
+
+SpazShortURL.prototype.services[SPAZCORE_SHORTURL_SERVICE_GOLOOKAT] = {
+	'url'	  : 'http://api.golook.at/',
+	'getData' : function(longurl, opts) {
+		return { 'url':longurl, 'output_format':'json', 'anybase':1 };
+	},
+	'method':'GET',
+	'processResult' : function(data) {
+		var result = sc.helpers.deJSON(data);
+
+		if (result.orig_url && result.short_url) {
+		    result.longurl = result.orig_url;
+			result.shorturl = result.short_url;
+		}
+		return result;
+	}
+};
+
+SpazShortURL.prototype.services[SPAZCORE_SHORTURL_SERVICE_GOOGLE] = {
+	'url'	  : 'https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyBMFTY7VjWGoXeFwbiY7vXoqAssjTr0od0',
+	// 'url'	  : 'https://www.googleapis.com/urlshortener/v1/url',
+	'contentType':'application/json',
+	'getData' : function(longurl, opts) {
+		return JSON.stringify({ 'longUrl':longurl  });
+	},
+	'processResult' : function(data) {
+		var result = sc.helpers.deJSON(data);
+		result.longurl = result.longUrl;
+		result.shorturl = result.id;
+		return result;
+	}
+};
+
+
+
+
+
+/**
+ * returns an array of labels for the services 
+ * @return array
+ */
+SpazShortURL.prototype.getServiceLabels = function() {
+	var labels = [];
+	for(var key in this.services) {
+		labels.push(key);
+	}
+	return labels;
+};
+
+
+
+
+
 SpazShortURL.prototype.getAPIObj = function(service) {
 	
-	var apis = {};
+
 	
-	apis[SPAZCORE_SHORTURL_SERVICE_BITLY] = {
-		'url'	  : 'http://api.bit.ly/v3/shorten',
-		'getData' : function(longurl, opts) {
-		    var data = {
-		        'longurl':longurl,
-		        'login':opts.login,
-		        'apiKey':opts.apiKey,
-		        'format':'json'
-		    };
-			return data;
-		},
-		'method':'GET',
-		'processResult' : function(data) {
-			var result = sc.helpers.deJSON(data);
-			
-			if (result.data && result.data.long_url) {
-			    result.longurl = result.data.long_url;
-    			result.shorturl = result.data.url;
-			}
-			return result;
-		}
-	};
-		
-	apis[SPAZCORE_SHORTURL_SERVICE_JMP] = {
-		'url'	  : 'http://api.j.mp/v3/shorten',
-		'getData' : function(longurl, opts){
-		    var data = {
-		        'longurl':longurl,
-		        'login':opts.login,
-		        'apiKey':opts.apiKey,
-		        'format':'json'
-		    };
-			return data;
-		},
-		'method':'GET',
-		'processResult' : function(data) {
-			var result = sc.helpers.deJSON(data);
-			
-			if (result.data && result.data.long_url) {
-			    result.longurl = result.data.long_url;
-    			result.shorturl = result.data.url;
-			}
-			return result;
-		}
-	};
-		
-	apis[SPAZCORE_SHORTURL_SERVICE_ISGD] = {
-		'url'	  : 'http://is.gd/create.php',
-		'getData' : function(longurl, opts) {
-			return { 'url':longurl, 'format':'simple' };
-		}
-	};
-	
-	apis[SPAZCORE_SHORTURL_SERVICE_GOOGLE] = {
-		'url'	  : 'https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyBMFTY7VjWGoXeFwbiY7vXoqAssjTr0od0',
-		// 'url'	  : 'https://www.googleapis.com/urlshortener/v1/url',
-		'contentType':'application/json',
-		'getData' : function(longurl, opts) {
-			return JSON.stringify({ 'longUrl':longurl  });
-		},
-		'processResult' : function(data) {
-			var result = sc.helpers.deJSON(data);
-			result.longurl = result.longUrl;
-			result.shorturl = result.id;
-			return result;
-		}
-	};
-	
-	return apis[service];
+	return this.services[service];
 };
 
 
