@@ -164,7 +164,7 @@ SpazShortURL.prototype.services[SPAZCORE_SHORTURL_SERVICE_BITLY] = {
 		return data;
 	},
 	'method':'GET',
-	'processResult' : function(data) {
+	'processResult' : function(data, longurl) {
 		var result = sc.helpers.deJSON(data);
 
 		if (result.data && result.data.long_url) {
@@ -187,7 +187,7 @@ SpazShortURL.prototype.services[SPAZCORE_SHORTURL_SERVICE_JMP] = {
 		return data;
 	},
 	'method':'GET',
-	'processResult' : function(data) {
+	'processResult' : function(data, longurl) {
 		var result = sc.helpers.deJSON(data);
 
 		if (result.data && result.data.long_url) {
@@ -211,7 +211,7 @@ SpazShortURL.prototype.services[SPAZCORE_SHORTURL_SERVICE_GOLOOKAT] = {
 		return { 'url':longurl, 'output_format':'json', 'anybase':1 };
 	},
 	'method':'GET',
-	'processResult' : function(data) {
+	'processResult' : function(data, longurl) {
 		var result = sc.helpers.deJSON(data);
 
 		if (result.orig_url && result.short_url) {
@@ -229,10 +229,13 @@ SpazShortURL.prototype.services[SPAZCORE_SHORTURL_SERVICE_GOOGLE] = {
 	'getData' : function(longurl, opts) {
 		return JSON.stringify({ 'longUrl':longurl  });
 	},
-	'processResult' : function(data) {
+	'processResult' : function(data, longurl) {
 		var result = sc.helpers.deJSON(data);
-		result.longurl = result.longUrl;
-		result.shorturl = result.id;
+		
+		if (result.longUrl && result.id) {
+			result.longurl = longurl; // google re-encodes characters so we need to use the original we passed
+			result.shorturl = result.id;
+		}
 		return result;
 	}
 };
@@ -332,7 +335,7 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 				// var shorturl = trim(data);
 				var return_data = {};
 				if (shortener.api.processResult) {
-					return_data = shortener.api.processResult(data);
+					return_data = shortener.api.processResult(data, longurl);
 				} else {
 					return_data = {
 						'shorturl':data,
