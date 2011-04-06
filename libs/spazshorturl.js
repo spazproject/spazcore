@@ -271,7 +271,11 @@ SpazShortURL.prototype.getAPIObj = function(service) {
 /**
  * shortens a URL by making an ajax call
  * @param {string} longurl
- * @param {object} opts   right now opts.event_target (a DOMelement) and opts.apiopts (passed to api's getData() call) are supported
+ * @param {object} [opts]   right now opts.event_target (a DOMelement) and opts.apiopts (passed to api's getData() call) are supported
+ * @param {DOMElement} [opts.event_target]
+ * @param {Object} [opts.apiopts]
+ * @param {Function} [opts.onSuccess]
+ * @param {Function} [opts.onError]
  */
 SpazShortURL.prototype.shorten = function(longurl, opts) {
 	
@@ -330,6 +334,10 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 					errobj.msg = 'Unknown Error';
 				}
 				shortener._onShortenResponseFailure(errobj, opts.event_target);
+				if (opts.onError) {
+					opts.onError(errobj);
+				}
+				
 			},
 			success:function(data) {
 				// var shorturl = trim(data);
@@ -344,6 +352,9 @@ SpazShortURL.prototype.shorten = function(longurl, opts) {
 				}
 				sch.error(return_data);
 				shortener._onShortenResponseSuccess(return_data, opts.event_target);
+				if (opts.onSuccess) {
+					opts.onSuccess(return_data);
+				}
 			},
 
 			'type':self.api.method || "POST",
