@@ -58,6 +58,14 @@
 		
 		sc.helpers.listen($('#shorten-multiple').get(0), sc.events.newShortURLSuccess, showMultipleShortURLs);
 
+		var shurl = new SpazShortURL();
+		var labels = shurl.getServiceLabels();
+		for (var i=0; i < labels.length; i++) {
+			var label = labels[i];
+			$('#service').append('<option value="'+label+'">'+label+'</option>');
+		}
+		
+
 
 		$('#shorten').click(function() {
 			var shurl;
@@ -166,10 +174,6 @@
 		<input type="text" name="long_url" size="60" value="http://www.cherny.com/webdev/60/javascript-function-arguments-default-values-passing-objects-and-overloading" id="long_url" /><br>
 
 		<select name="service" id="service">
-			<option value="is.gd">is.gd</option>
-			<option value="goo.gl">goo.gl</option>
-			<option value="bit.ly">bit.ly</option>
-			<option value="j.mp">j.mp</option>
 		</select>
 		<input type="button" name="shorten" value="Shorten!" id="shorten">
 	</form>
