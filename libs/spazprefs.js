@@ -223,24 +223,22 @@ SpazPrefs.prototype.setEncrypted = function(key, val) {
  * loads the prefs file and parses the prefs into this._prefs,
  * or initializes the file and loads the defaults
  * @stub
+ * @param {function} callback to fire when preferences are loaded
  */
-SpazPrefs.prototype.load = function(name) {
+SpazPrefs.prototype.load = function(callback) {
+    if( typeof callback == 'function' )
+        callback(this);
 };
-
-
-
-
-
 
 
 /**
  * saves the current preferences
- * @todo
+ * @strub
+ * @param {function} callback to fire when preferences are saved
  */
-SpazPrefs.prototype.save = function() {
-
-
-	
+SpazPrefs.prototype.save = function(callback) {
+    if( typeof callback == 'function' )
+        callback(this);
 };
 
 

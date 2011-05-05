@@ -14,7 +14,7 @@ var sc, air;
  * platform-specific definitions for prefs lib 
  */
 
-SpazPrefs.prototype.load = function() {
+SpazPrefs.prototype.load = function(callback) {
 	var filename = this.id || SPAZCORE_PREFS_AIR_FILENAME;
 	
 	var prefsFile = air.File.applicationStorageDirectory;
@@ -45,9 +45,12 @@ SpazPrefs.prototype.load = function() {
 		this.save();
 	}
 	fs.close();
+	
+	if( typeof callback == 'function' )
+        callback(this);
 };
 
-SpazPrefs.prototype.save = function() {
+SpazPrefs.prototype.save = function(callback) {
 	var jsonPrefs = sch.enJSON(this._prefs);
 	sch.debug(jsonPrefs);
 
@@ -61,6 +64,9 @@ SpazPrefs.prototype.save = function() {
 	fs.open(prefsFile, air.FileMode.WRITE);
 	fs.writeUTFBytes(sc.helpers.enJSON(this._prefs));
 	fs.close();
+	
+	if( typeof callback == 'function' )
+        callback(this);
 };
 
 
