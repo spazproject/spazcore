@@ -14,7 +14,7 @@ var sc, Titanium;
  * platform-specific definitions for prefs lib 
  */
 
-SpazPrefs.prototype.load = function() {
+SpazPrefs.prototype.load = function(callback) {
 	
 	var thisPrefs = this;
 	var prefs_file = sch.getFileObject(sch.joinPaths([sch.getAppStorageDir(), SPAZCORE_PREFS_TI_KEY]));
@@ -28,6 +28,10 @@ SpazPrefs.prototype.load = function() {
 		} catch (e) {
 			sch.error('Could not load prefs JSON… using defaults');
 			this.save();
+			
+			if( typeof callback == 'function' )
+				callback(this);
+				
 			return;
 		}
 
@@ -39,6 +43,9 @@ SpazPrefs.prototype.load = function() {
 		// save the defaults if this is the first time
 		this.save();
 	}
+	
+	if( typeof callback == 'function' )
+		callback(this);
 };
 
 SpazPrefs.prototype.save = function() {
