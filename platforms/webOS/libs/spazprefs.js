@@ -15,19 +15,15 @@ var sc, Mojo;
  * platform-specific definitions for prefs lib 
  */
 
-SpazPrefs.prototype.load = function() {
-	
+SpazPrefs.prototype.load = function(callback) {
 	var thisPrefs = this;
-	
 	
 	sc.helpers.dump('this is webOS');
 	if (!this.mojoCookie) {
 		sc.helpers.dump('making cookie');
 		this.mojoCookie = new Mojo.Model.Cookie(SPAZCORE_PREFS_MOJO_COOKIENAME);
-		
-		
-		
 	}
+	
 	var loaded_prefs = this.mojoCookie.get();
 	if (loaded_prefs) {
 		sc.helpers.dump('Prefs loaded');
@@ -42,12 +38,11 @@ SpazPrefs.prototype.load = function() {
 		// thisPrefs.resetPrefs();
 	}
 	
-
-	
-
+    if( typeof callback == 'function' )
+        callback(this);
 };
 
-SpazPrefs.prototype.save = function() {
+SpazPrefs.prototype.save = function(callback) {
 	if (sc.helpers.iswebOS()) {
 		if (!this.mojoCookie) {
 			this.mojoCookie = new Mojo.Model.Cookie(SPAZCORE_PREFS_MOJO_COOKIENAME);
@@ -55,7 +50,9 @@ SpazPrefs.prototype.save = function() {
 		
 		this.mojoCookie.put(this._prefs);
 	}
-
+	
+    if( typeof callback == 'function' )
+        callback(this);
 };
 
 /**
