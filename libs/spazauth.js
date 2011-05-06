@@ -242,6 +242,7 @@ SpazOAuth.prototype.authorize = function(username, password, onComplete) {
 		},
 		beforeSend: function(xhr) {
 			xhr.setRequestHeader('Accept-Encoding', 'none');
+			xhr.setRequestHeader('Cookie', '');
 
 		}
 
