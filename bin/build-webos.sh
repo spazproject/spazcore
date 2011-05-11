@@ -15,6 +15,7 @@ cat libs/spazcore.js \
 	vendors/date.js \
 	vendors/json2.js \
 	vendors/underscore.js \
+	vendors/underscore.string.js \
 	vendors/sha1.js \
 	vendors/oauth.js \
 	helpers/datetime.js \
