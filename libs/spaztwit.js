@@ -671,7 +671,7 @@ SpazTwit.prototype.getPublicTimeline = function(onSuccess, onFailure) {
 /**
  * Initiates retrieval of the home timeline (all the people you are following)
  * 
- * @param {integer} since_id default is 1
+ * @param {integer} since_id default is 1. If a negative number is passed, Math.abs(since_id) is used as the max_id
  * @param {integer} count default is 200 
  * @param {integer} page default is null (ignored if null)
  */
