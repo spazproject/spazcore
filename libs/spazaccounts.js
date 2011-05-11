@@ -287,6 +287,13 @@ SpazAccounts.prototype.get = function(id) {
 };
 
 
+
+/**
+ * Alias for .update
+ */
+SpazAccounts.prototype.set = SpazAccounts.prototype.update;
+
+
 SpazAccounts.prototype.getLabel = function(id) {
 	
 	var index = this._findUserIndex(id);
@@ -377,4 +384,48 @@ SpazAccounts.prototype.setMeta = function(id, key, value) {
 	}
 	return null;
 	
+};
+
+
+/**
+ * Get account type 
+ */
+SpazAccounts.prototype.getType = function(acc_id) {
+	var user;
+	if ( (user = this.get(acc_id)) ) {
+		return user.type;
+	}
+
+	return null;
+
+};
+
+
+/**
+ * Returns the current account's auth key 
+ */
+SpazAccounts.prototype.getAuthKey = function(acc_id) {
+
+	if (acc_id) {
+		var accobj = this.get(acc_id);
+		return !!accobj ? accobj.auth : null;
+	} else {
+		return null;
+	}
+
+};
+
+/**
+ * @requires SpazAuth 
+ */
+SpazAccounts.prototype.getAuthObject = function(acc_id) {
+	var authkey = this.getAuthKey(acc_id);
+	
+	if (authkey) {
+		var auth = new SpazAuth(this.getType(acc_id));
+		auth.load(authkey);
+		return auth;
+	} else {
+		return null;
+	}
 };
