@@ -14,6 +14,7 @@ cat libs/spazcore.js \
 	vendors/date.js \
 	vendors/json2.js \
 	vendors/underscore.js \
+	vendors/underscore.string.js \
 	vendors/shortcut.js \
 	vendors/jquery.cookies.2.2.0.js \
 	vendors/sha1.js \
