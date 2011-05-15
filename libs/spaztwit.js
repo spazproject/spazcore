@@ -37,6 +37,10 @@ var SPAZCORE_SECTION_DMS = 'dms';
 /**
  * @constant 
  */
+var SPAZCORE_SECTION_DMSENT = 'dmsent';
+/**
+ * @constant 
+ */
 var SPAZCORE_SECTION_FAVORITES = 'favorites';
 /**
  * @constant 
@@ -263,6 +267,13 @@ SpazTwit.prototype.initializeData = function() {
 		'max':50,
 		'min_age':5*60
 	};
+	this.data[SPAZCORE_SECTION_DMSENT] = {
+		'lastid':   1,
+		'items':   [],
+		'newitems':[],
+		'max':50,
+		'min_age':5*60
+	};
 	this.data[SPAZCORE_SECTION_FAVORITES] = {
 		'lastid':   1,
 		'items':   [],
@@ -315,6 +326,7 @@ SpazTwit.prototype.initializeCombinedTracker = function() {
 	this.combined_finished[SPAZCORE_SECTION_HOME] = false;
 	this.combined_finished[SPAZCORE_SECTION_REPLIES] = false;
 	this.combined_finished[SPAZCORE_SECTION_DMS] = false;
+	this.combined_finished[SPAZCORE_SECTION_DMSENT] = false;
 	
 	this.combined_errors = [];
 };
@@ -935,8 +947,62 @@ SpazTwit.prototype._processFavoritesTimeline = function(ret_items, opts, process
 
 
 
-SpazTwit.prototype.getSent = function(since_id, count, page, onSuccess, onFailure) {}; // auth user's sent statuses
-SpazTwit.prototype.getSentDirectMessages = function(since_id, page, onSuccess, onFailure) {};
+SpazTwit.prototype.getSent = function(since_id, count, page, onSuccess, onFailure) {};
+
+
+SpazTwit.prototype.getSentDirectMessages = function(since_id, count, page, processing_opts, onSuccess, onFailure) {
+
+	if (!page) { page = null;}
+	if (!count) { count = null;}
+	if (!since_id) {
+		if (this.data[SPAZCORE_SECTION_DMSENT].lastid && this.data[SPAZCORE_SECTION_DMSENT].lastid > 1) {
+			since_id = this.data[SPAZCORE_SECTION_DMSENT].lastid;
+		} else {
+			since_id = 1;
+		}
+	}
+	
+	if (!processing_opts) {
+		processing_opts = {};
+	}
+	
+	if (processing_opts.combined) {
+		processing_opts.section = SPAZCORE_SECTION_DMSENT;
+	}
+	
+	var data = {};
+	if (since_id < -1) {
+		data['max_id'] = Math.abs(since_id);
+	} else {
+		data['since_id'] = since_id;
+	}
+	if (page) {
+		data['page'] = page;
+	}
+	if (count) {
+		data['count'] = count;
+	}
+	
+	var url = this.getAPIURL('dm_sent', data);
+	this._getTimeline({
+		'url':url,
+		'process_callback'	: this._processDMSentTimeline,
+		'success_callback':onSuccess,
+		'failure_callback':onFailure,
+		'success_event_type': 'new_dms_sent_timeline_data',
+		'failure_event_type': 'error_dms_sent_timeline_data',
+		'processing_opts':processing_opts		
+	});
+
+};
+
+/**
+ * @private
+ */
+SpazTwit.prototype._processDMSentTimeline = function(ret_items, opts, processing_opts) {
+	// sc.helpers.dump('Processing '+ret_items.length+' items returned from DM method');
+	this._processTimeline(SPAZCORE_SECTION_DMSENT, ret_items, opts, processing_opts);
+};
 
 SpazTwit.prototype.getUserTimeline = function(id, count, page, onSuccess, onFailure) {
 
@@ -997,9 +1063,9 @@ SpazTwit.prototype._processUserTimeline = function(ret_items, opts, processing_o
  * 
  */
 SpazTwit.prototype.getCombinedTimeline = function(com_opts, onSuccess, onFailure) {
-	var home_count, friends_count, replies_count, dm_count, 
-		home_since, friends_since, dm_since, replies_since,
-		home_page, friends_page, dm_page, replies_page;
+	var home_count, friends_count, replies_count, dm_count, dmsent_count, 
+		home_since, friends_since, dm_since, dmsent_since, replies_since,
+		home_page, friends_page, dm_page, dmsent_page, replies_page;
 
 	var opts = {
 		'combined':true
@@ -1019,6 +1085,9 @@ SpazTwit.prototype.getCombinedTimeline = function(com_opts, onSuccess, onFailure
 		if (com_opts.dm_count) {
 			dm_count = com_opts.dm_count; // this is not used yet
 		}
+		if (com_opts.dmsent_count) {
+			dmsent_count = com_opts.dmsent_count; // this is not used yet
+		}
 		
 		if (com_opts.home_since) {
 			home_since = com_opts.home_since;
@@ -1032,6 +1101,9 @@ SpazTwit.prototype.getCombinedTimeline = function(com_opts, onSuccess, onFailure
 		if (com_opts.dm_since) {
 			dm_since = com_opts.dm_since;
 		}
+		if (com_opts.dmsent_since) {
+			dmsent_since = com_opts.dmsent_since;
+		}
 		
 		if (com_opts.home_page) {
 			home_page = com_opts.home_page;
@@ -1044,6 +1116,9 @@ SpazTwit.prototype.getCombinedTimeline = function(com_opts, onSuccess, onFailure
 		}
 		if (com_opts.dm_page) {
 			dm_page = com_opts.dm_page;
+		}
+		if (com_opts.dmsent_page) {
+			dmsent_page = com_opts.dmsent_page;
 		}
 		
 		/*
@@ -1061,6 +1136,7 @@ SpazTwit.prototype.getCombinedTimeline = function(com_opts, onSuccess, onFailure
 	this.getHomeTimeline(home_since, home_count, home_page, opts, onSuccess, onFailure);
 	this.getReplies(replies_since, replies_count, replies_page, opts, onSuccess, onFailure);
 	this.getDirectMessages(dm_since, dm_count, dm_page, opts, onSuccess, onFailure);
+	this.getSentDirectMessages(dmsent_since, dmsent_count, dmsent_page, opts, onSuccess, onFailure);
 };
 
 
