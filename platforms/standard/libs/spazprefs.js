@@ -26,7 +26,7 @@ if (!window.localStorage) { // if localStorage is not available, we fall back to
 		if (prefsval) {
 			sch.debug('prefsval exists');
 			for (var key in prefsval) {
-				sc.helpers.dump('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
+				sch.debug('Copying loaded pref "' + key + '":"' + this._prefs[key] + '" (' + typeof(this._prefs[key]) + ')');
 				this._prefs[key] = prefsval[key];
 			}
 		} else { // init the file
@@ -59,7 +59,7 @@ if (!window.localStorage) { // if localStorage is not available, we fall back to
 			var prefsval = sch.deJSON(prefsjson);
 			sch.debug('prefsval exists');
 			for (var key in prefsval) {
-				sc.helpers.dump('Copying loaded pref "' + key + '":"' + prefsval[key] + '" (' + typeof(prefsval[key]) + ')');
+				sch.debug('Copying loaded pref "' + key + '":"' + prefsval[key] + '" (' + typeof(prefsval[key]) + ')');
 				this._prefs[key] = prefsval[key];
 			}
 		} else { // init the file
