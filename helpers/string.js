@@ -396,15 +396,10 @@ sc.helpers.stripTags = function(str) {
  */
 sc.helpers.fromHTMLSpecialChars = function(str) {
 	str = str.replace(/&lt;/gi, '<');
-	sc.helpers.dump(str);
 	str = str.replace(/&gt;/gi, '>');
-	sc.helpers.dump(str);
 	str = str.replace(/&quot;/gi, '"');
-	sc.helpers.dump(str);
 	str = str.replace(/&apos;/gi, '\'');
-	sc.helpers.dump(str);
 	str = str.replace(/&amp;/gi, '&');
-	sc.helpers.dump(str);
 	return str;
 };
 
