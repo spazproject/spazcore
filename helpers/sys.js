@@ -184,10 +184,19 @@ sc.helpers.error = function(obj) {
  * @member sc.helpers
  */
 sc.helpers.dump = function(obj, level, cb) {
+
+	if (!level) { level = SPAZCORE_DUMPLEVEL_DEBUG; }
+	
+	if (sc.dumplevel < level ) {
+		return;
+	}
+	
 	if (sc.helpers.isString(obj)) {
 		obj = sch.truncate(obj, SPAZCORE_DUMP_MAXLEN, '…[TRUNC]');
 	}
+	
 	console.log(obj);
+	
 	if (cb) {
 		cb(obj, level);
 	}
