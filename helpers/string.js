@@ -35,6 +35,9 @@ sc.helpers.containsScreenName = function(str, sn) {
  * @@param {array} without array of usernames to skip 
  */
 sc.helpers.extractScreenNames = function(str, without) {
+
+	str = str.toLowerCase(); // normalize to lowercase
+	
     // var re_uname = /(^|\s|\(\[|,|\.|\()@([a-zA-Z0-9_]+)([^a-zA-Z0-9_]|$)/gi;
 	var re_uname = /(?:^|\s|\(\[|,|\.|\()@([a-zA-Z0-9_]+)/gi;
 	var usernames = [];
@@ -66,7 +69,7 @@ sc.helpers.extractScreenNames = function(str, without) {
 		if (without) { // remove any usernames we want to skip
 			wo_args = [usernames];
 			for (var i=0; i < without.length; i++) {
-				wo_args.push(without[i]);
+				wo_args.push(without[i].toLowerCase());
 			}
 			usernames = _.without.apply(this, wo_args);
 		}
