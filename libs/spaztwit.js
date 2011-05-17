@@ -697,7 +697,7 @@ SpazTwit.prototype.getHomeTimeline = function(since_id, count, page, processing_
 	
 	var data = {};
 	if (since_id[0] == '-') {
-		data['max_id'] = since_id.replace('-');
+		data['max_id'] = since_id.replace('-', '');
 	} else {
 		data['since_id'] = since_id;
 	}
@@ -810,7 +810,7 @@ SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts,
 	
 	var data = {};
 	if (since_id[0] == '-') {
-		data['max_id'] = since_id.replace('-');
+		data['max_id'] = since_id.replace('-', '');
 	} else {
 		data['since_id'] = since_id;
 	}
@@ -867,7 +867,7 @@ SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processin
 	
 	var data = {};
 	if (since_id[0] == '-') {
-		data['max_id'] = since_id.replace('-');
+		data['max_id'] = since_id.replace('-', '');
 	} else {
 		data['since_id'] = since_id;
 	}
@@ -958,7 +958,7 @@ SpazTwit.prototype.getUserTimeline = function(id, count, page, onSuccess, onFail
 	data['count'] = opts.count;
 	if (opts.since_id) {
 		if (since_id[0] == '-') {
-			data['max_id'] = since_id.replace('-');
+			data['max_id'] = since_id.replace('-', '');
 		} else {
 			data['since_id'] = opts.since_id;
 		}
@@ -1084,7 +1084,7 @@ SpazTwit.prototype.search = function(query, since_id, results_per_page, page, la
 	data['rpp']      = results_per_page;
 	if (since_id) {
 		if (since_id[0] == '-') {
-			data['max_id'] = since_id.replace('-');
+			data['max_id'] = since_id.replace('-', '');
 		} else {
 			data['since_id'] = since_id;
 		}
