@@ -84,9 +84,10 @@ $().ready(function() {
 		same(JSON.stringify(result), JSON.stringify(expect));
 	
 	
-		foo = "http://twitpic.com/gr2p5 - \"I'm giving the catapault 18 AC.\" RT @coffeemaverick: This kid we call \"Monkey Boy\" in Hawaii.His story tomorrow at Coffeemaverick.com #fb http://yfrog.com/12obqj. 5 rows from the wil wheaton panel http://twitgoo.com/36cg2  http://pikchur.com/Gp0 - waaah! my face is too big. lol http://tweetphoto.com/1de714 Me & Jenn at the Del Mar track Friday. Had a blast I just voted for http://pic.gd/b4b8eb Check it out! #TweetPhoto";
+		foo = "http://twitpic.com/gr2p5 http://twitpic.com/51if4t - \"I'm giving the catapault 18 AC.\" RT @coffeemaverick: This kid we call \"Monkey Boy\" in Hawaii.His story tomorrow at Coffeemaverick.com #fb http://yfrog.com/12obqj. 5 rows from the wil wheaton panel http://twitgoo.com/36cg2  http://pikchur.com/Gp0 - waaah! my face is too big. lol http://tweetphoto.com/1de714 Me & Jenn at the Del Mar track Friday. Had a blast I just voted for http://pic.gd/b4b8eb Check it out! #TweetPhoto";
 		expect = {
 						"http://twitpic.com/gr2p5"     : "http://twitpic.com/show/thumb/gr2p5",
+						"http://twitpic.com/51if4t"    : "http://twitpic.com/show/thumb/51if4t",
 						"http://yfrog.com/12obqj"      : "http://yfrog.com/12obqj.th.jpg",
 						"http://twitgoo.com/36cg2"     : "http://twitgoo.com/show/thumb/36cg2",
 						"http://pikchur.com/Gp0"       : "http://img.pikchur.com/pic_Gp0_s.jpg",
@@ -104,7 +105,15 @@ $().ready(function() {
 		};
 		result = siu.getThumbsForUrls(foo);
 		same(JSON.stringify(result), JSON.stringify(expect));
-	
+		
+		
+		foo = "Alice says my beautiful plant's still going strong, love from Australia! http://twitpic.com/51ieyo http://twitpic.com/51if4t";
+		expect = {
+						"http://twitpic.com/51ieyo"     : "http://twitpic.com/show/large/51ieyo",
+						"http://twitpic.com/51if4t"    : "http://twitpic.com/show/large/51if4t"
+		};
+		result = siu.getImagesForUrls(foo);
+		same(JSON.stringify(result), JSON.stringify(expect));
 	});
 	
 	
