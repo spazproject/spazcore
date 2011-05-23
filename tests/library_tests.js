@@ -81,7 +81,7 @@ $().ready(function() {
 			"http://yfrog.com/0tr0gj"     : "http://yfrog.com/0tr0gj.th.jpg"
 		};
 		result = siu.getThumbsForUrls(foo);
-		same(result, expect);
+		same(JSON.stringify(result), JSON.stringify(expect));
 	
 	
 		foo = "http://twitpic.com/gr2p5 - \"I'm giving the catapault 18 AC.\" RT @coffeemaverick: This kid we call \"Monkey Boy\" in Hawaii.His story tomorrow at Coffeemaverick.com #fb http://yfrog.com/12obqj. 5 rows from the wil wheaton panel http://twitgoo.com/36cg2  http://pikchur.com/Gp0 - waaah! my face is too big. lol http://tweetphoto.com/1de714 Me & Jenn at the Del Mar track Friday. Had a blast I just voted for http://pic.gd/b4b8eb Check it out! #TweetPhoto";
@@ -94,7 +94,7 @@ $().ready(function() {
 						"http://pic.gd/b4b8eb"         : "http://TweetPhotoAPI.com/api/TPAPI.svc/imagefromurl?size=thumbnail&url=http://pic.gd/b4b8eb"
 		};
 		result = siu.getThumbsForUrls(foo);
-		same(result, expect);
+		same(JSON.stringify(result), JSON.stringify(expect));
 		
 		
 		
@@ -103,7 +103,7 @@ $().ready(function() {
 			"http://yfrog.com/0tr0gj"     : "http://yfrog.com/0tr0gj.th.jpg"
 		};
 		result = siu.getThumbsForUrls(foo);
-		same(result, expect);
+		same(JSON.stringify(result), JSON.stringify(expect));
 	
 	});
 	
