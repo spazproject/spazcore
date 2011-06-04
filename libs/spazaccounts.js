@@ -415,6 +415,23 @@ SpazAccounts.prototype.getAuthKey = function(acc_id) {
 
 };
 
+
+/**
+ * Set account's auth key 
+ */
+SpazAccounts.prototype.setAuthKey = function(acc_id, auth_key) {
+
+	if (acc_id) {
+		var accobj = this.get(acc_id);
+		accobj.auth = auth_key;
+		this.set(acc_id, accobj);
+	} else {
+		return null;
+	}
+
+};
+
+
 /**
  * @requires SpazAuth 
  */
