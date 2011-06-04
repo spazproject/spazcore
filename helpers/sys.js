@@ -95,7 +95,7 @@ sc.helpers.getPlatform = function() {
 	if (window.runtime) {
 		return SPAZCORE_PLATFORM_AIR;
 	}
-	if (window.Mojo) {
+	if (window && window.PalmSystem) {
 		return SPAZCORE_PLATFORM_WEBOS;
 	}
 	if (window.Titanium) {
