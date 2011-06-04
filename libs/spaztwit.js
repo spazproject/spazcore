@@ -683,7 +683,7 @@ SpazTwit.prototype.getPublicTimeline = function(onSuccess, onFailure) {
 /**
  * Initiates retrieval of the home timeline (all the people you are following)
  * 
- * @param {integer} since_id default is 1. If a negative number is passed, Math.abs(since_id) is used as the max_id
+ * @param {string} since_id default is 1. If a negative number value is passed, the '-' prefix is removed and the string is used as the max_id
  * @param {integer} count default is 200 
  * @param {integer} page default is null (ignored if null)
  */
@@ -708,8 +708,8 @@ SpazTwit.prototype.getHomeTimeline = function(since_id, count, page, processing_
 	}
 	
 	var data = {};
-	if (since_id < -1) {
-		data['max_id'] = Math.abs(since_id);
+	if (since_id[0] == '-') {
+		data['max_id'] = since_id.replace('-', '');
 	} else {
 		data['since_id'] = since_id;
 	}
@@ -744,7 +744,7 @@ SpazTwit.prototype._processHomeTimeline = function(ret_items, opts, processing_o
 /**
  * Initiates retrieval of the friends timeline (all the people you are following)
  * 
- * @param {integer} since_id default is 1
+ * @param {string} since_id default is 1
  * @param {integer} count default is 200 
  * @param {integer} page default is null (ignored if null)
  */
@@ -821,8 +821,8 @@ SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts,
 	
 	
 	var data = {};
-	if (since_id < -1) {
-		data['max_id'] = Math.abs(since_id);
+	if (since_id[0] == '-') {
+		data['max_id'] = since_id.replace('-', '');
 	} else {
 		data['since_id'] = since_id;
 	}
@@ -878,8 +878,8 @@ SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processin
 	}
 	
 	var data = {};
-	if (since_id < -1) {
-		data['max_id'] = Math.abs(since_id);
+	if (since_id[0] == '-') {
+		data['max_id'] = since_id.replace('-', '');
 	} else {
 		data['since_id'] = since_id;
 	}
@@ -914,13 +914,21 @@ SpazTwit.prototype._processDMTimeline = function(ret_items, opts, processing_opt
 /**
  *  
  */
-SpazTwit.prototype.getFavorites = function(page, processing_opts, onSuccess, onFailure) {	
+SpazTwit.prototype.getFavorites = function(since_id, page, processing_opts, onSuccess, onFailure) {	
 	if (!page) { page = null;}
+	if (!since_id) {
+		since_id = 1;
+	}
 	if (!processing_opts) {
 		processing_opts = {};
 	}
 	
 	var data = {};
+	if (since_id[0] == '-') {
+		data['max_id'] = since_id.replace('-', '');
+	} else {
+		data['since_id'] = since_id;
+	}
 	if (page) {
 		data['page'] = page;
 	}
@@ -1023,8 +1031,8 @@ SpazTwit.prototype.getUserTimeline = function(id, count, page, onSuccess, onFail
 	data['id']    = opts.id;
 	data['count'] = opts.count;
 	if (opts.since_id) {
-		if (opts.since_id < -1) {
-			data['max_id'] = Math.abs(opts.since_id);
+		if (since_id[0] == '-') {
+			data['max_id'] = since_id.replace('-', '');
 		} else {
 			data['since_id'] = opts.since_id;
 		}
@@ -1158,7 +1166,13 @@ SpazTwit.prototype.search = function(query, since_id, results_per_page, page, la
 	var data = {};
 	data['q']        = query;
 	data['rpp']      = results_per_page;
-	// data['since_id'] = since_id;
+	if (since_id) {
+		if (since_id[0] == '-') {
+			data['max_id'] = since_id.replace('-', '');
+		} else {
+			data['since_id'] = since_id;
+		}
+	}
 	data['page']     = page;
 	if (lang) {
 		data['lang'] = lang;

@@ -361,7 +361,7 @@
         same(sc.helpers.extractScreenNames(input, ['germboy', 'techjunky79']), output);
 
         var input = "See the light RT @ChrisLevel No one knew who Justin Blackmon was, he had a new QB in Weeden and they lost Russell Okung. #Holgorsencancoach";
-        var output = ["ChrisLevel"];
+        var output = ["chrislevel"];
         same(sc.helpers.extractScreenNames(input, ['smartfootball','funkatron']), output);
     });
 	
