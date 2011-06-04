@@ -902,13 +902,21 @@ SpazTwit.prototype._processDMTimeline = function(ret_items, opts, processing_opt
 /**
  *  
  */
-SpazTwit.prototype.getFavorites = function(page, processing_opts, onSuccess, onFailure) {	
+SpazTwit.prototype.getFavorites = function(since_id, page, processing_opts, onSuccess, onFailure) {	
 	if (!page) { page = null;}
+	if (!since_id) {
+		since_id = 1;
+	}
 	if (!processing_opts) {
 		processing_opts = {};
 	}
 	
 	var data = {};
+	if (since_id[0] == '-') {
+		data['max_id'] = since_id.replace('-', '');
+	} else {
+		data['since_id'] = since_id;
+	}
 	if (page) {
 		data['page'] = page;
 	}
