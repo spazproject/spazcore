@@ -347,15 +347,18 @@ SpazImageUploader.prototype.upload = function() {
 	var onSuccess, rs;
 	if (srvc.parseResponse) {
 		/** @ignore */
-		onSuccess = function(data) {
+		onSuccess = function(data) {	
 			if (sch.isString(data)) {
 				rs = srvc.parseResponse.call(srvc, data);
 				return opts.onSuccess(rs);
-			} else if (data && data.responseString) { // webOS will return an object, not just the response string
+			} else if (data && data.responseString) { // Mojo webOS will return an object, not just the response string
 				rs = srvc.parseResponse.call(srvc, data.responseString);
 				return opts.onSuccess(rs);
+			} else if (arguments[1] && arguments[1].responseString) { // Enyo webOS will return more args than Mojo
+				rs = srvc.parseResponse.call(srvc, arguments[1].responseString);
+				return opts.onSuccess(rs);
 			} else { // I dunno what it is; just pass it to the callback
-				return opts.onSuccess(data);
+				return opts.onSuccess.apply(this, arguments);
 			}
 		};
 	} else {
