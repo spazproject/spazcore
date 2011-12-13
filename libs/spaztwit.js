@@ -717,6 +717,7 @@ SpazTwit.prototype.getHomeTimeline = function(since_id, count, page, processing_
 	if (page) {
 		data['page'] = page;
 	}
+	data['include_entities'] = true;
 	
 	
 	var url = this.getAPIURL('home_timeline', data);
@@ -832,6 +833,7 @@ SpazTwit.prototype.getReplies = function(since_id, count, page, processing_opts,
 	if (count) {
 		data['count'] = count;
 	}
+	data['include_entities'] = true;
 	
 	var url = this.getAPIURL('replies_timeline', data);
 	this._getTimeline({
@@ -889,6 +891,7 @@ SpazTwit.prototype.getDirectMessages = function(since_id, count, page, processin
 	if (count) {
 		data['count'] = count;
 	}
+	data['include_entities'] = true;
 	
 	var url = this.getAPIURL('dm_timeline', data);
 	this._getTimeline({
@@ -932,6 +935,7 @@ SpazTwit.prototype.getFavorites = function(since_id, page, processing_opts, onSu
 	if (page) {
 		data['page'] = page;
 	}
+	data['include_entities'] = true;
 	
 	var url = this.getAPIURL('favorites', data);
 
@@ -990,6 +994,7 @@ SpazTwit.prototype.getSentDirectMessages = function(since_id, count, page, proce
 	if (count) {
 		data['count'] = count;
 	}
+	data['include_entities'] = true;
 	
 	var url = this.getAPIURL('dm_sent', data);
 	this._getTimeline({
@@ -1040,6 +1045,7 @@ SpazTwit.prototype.getUserTimeline = function(id, count, page, onSuccess, onFail
 	if (opts.page) {
 		data['page'] = opts.page;
 	}
+	data['include_entities'] = true;
 	
 	
 	var url = this.getAPIURL('user_timeline', data);
@@ -1180,6 +1186,7 @@ SpazTwit.prototype.search = function(query, since_id, results_per_page, page, la
 	if (geocode) {
 		data['geocode'] = geocode;
 	}
+	data['include_entities'] = true;
 	
 	var url = this.getAPIURL('search', data);
 	this._getTimeline({
@@ -2615,6 +2622,7 @@ SpazTwit.prototype.destroyDirectMessage = function(id, onSuccess, onFailure) {
 SpazTwit.prototype.getOne = function(id, onSuccess, onFailure) {
 	var data = {};
 	data['id'] = id;
+	data['include_entities'] = true;
 	
 	var url = this.getAPIURL('show', data);
 	
@@ -2693,6 +2701,7 @@ SpazTwit.prototype.getRelated = function(id, onSuccess, onFailure) {
 SpazTwit.prototype.retweet = function(id, onSuccess, onFailure) {
 	var data = {};
 	data['id'] = id;
+	data['include_entities'] = true;
 	
 	var url = this.getAPIURL('retweet', data);
 	
@@ -2758,6 +2767,7 @@ SpazTwit.prototype.retweetedByMe = function(since, max, count, page){
 		page = 1;
 	}
 	params['page'] = page;
+	params['include_entities'] = true;
 	var url = this.getAPIURL('retweeted_by_me', params);
 	
 	var opts = {
@@ -2796,6 +2806,7 @@ SpazTwit.prototype.retweetedToMe = function(since, max, count, page){
 		page = 1;
 	}
 	params['page'] = page;
+	params['include_entities'] = true;
 	var url = this.getAPIURL('retweeted_to_me', params);
 	
 	var opts = {
@@ -2834,6 +2845,7 @@ SpazTwit.prototype.retweetsOfMe = function(since, max, count, page){
 		page = 1;
 	}
 	params['page'] = page;
+	params['include_entities'] = true;
 	var url = this.getAPIURL('retweets_of_me', params);
 	
 	var opts = {
