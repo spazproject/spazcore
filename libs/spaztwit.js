@@ -3343,7 +3343,7 @@ SpazTwit.prototype.getListTimeline = function(list, user, onSuccess, onFailure) 
 
 	var url = this.getAPIURL('lists_timeline', {
 	    'user':user,
-		'slug':list
+		'slug':list.replace(/\W/g,'-')
 	});
 	
 	var opts = {
