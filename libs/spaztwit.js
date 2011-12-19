@@ -1046,6 +1046,7 @@ SpazTwit.prototype.getUserTimeline = function(id, count, page, onSuccess, onFail
 		data['page'] = opts.page;
 	}
 	data['include_entities'] = true;
+	data['include_rts'] = true;
 	
 	
 	var url = this.getAPIURL('user_timeline', data);
