@@ -27,7 +27,7 @@ SpazImageURL.prototype.initAPIs = function() {
 	});
   
 	this.addAPI('twitpic', {
-		'url_regex'       : new RegExp("http://twitpic.com/([a-zA-Z0-9]+)", "gi"),
+		'url_regex'       : new RegExp("http://(?:www\.)?twitpic.com/([a-zA-Z0-9]+)", "gi"),
 		'getThumbnailUrl' : function(id) {
 			var url = 'http://twitpic.com/show/thumb/'+id;
 			return url;
