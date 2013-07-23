@@ -27,7 +27,7 @@ SpazImageURL.prototype.initAPIs = function() {
 	});
   
 	this.addAPI('twitpic', {
-		'url_regex'       : new RegExp("http://(?:www\.)?twitpic.com/([a-zA-Z0-9]+)", "gi"),
+		'url_regex'       : new RegExp("http://twitpic.com/([a-zA-Z0-9]+)", "gi"),
 		'getThumbnailUrl' : function(id) {
 			var url = 'http://twitpic.com/show/thumb/'+id;
 			return url;
@@ -81,14 +81,16 @@ SpazImageURL.prototype.initAPIs = function() {
 	});
 	
 	
-	this.addAPI('lockerz', {
-		'url_regex'       : /http:\/\/lockerz.com\/s\/([a-zA-Z0-9]+)/gi,
+	this.addAPI('tweetphoto', {
+		'url_regex'       : /http:\/\/tweetphoto.com\/([a-zA-Z0-9]+)/gi,
 		'getThumbnailUrl' : function(id) {
-			var url = 'http://api.plixi.com/api/tpapi.svc/imagefromurl?url=http://plixi.com/p/'+id+'&size=small';
+			// http://TweetPhotoAPI.com/api/TPAPI.svc/json/imagefromurl?size=thumbnail&url=http://tweetphoto.com/iyb9azy4
+			var url = 'http://TweetPhotoAPI.com/api/TPAPI.svc/imagefromurl?size=thumbnail&url=http://tweetphoto.com/'+id;
 			return url;
 		},
 		'getImageUrl'     : function(id) {
-			var url = 'http://api.plixi.com/api/tpapi.svc/imagefromurl?url=http://plixi.com/p/'+id+'&size=big';
+			// http://TweetPhotoAPI.com/api/TPAPI.svc/imagefromurl?size=big&url=http://tweetphoto.com/iyb9azy4
+			var url = 'http://TweetPhotoAPI.com/api/TPAPI.svc/imagefromurl?size=big&url=http://tweetphoto.com/'+id;
 			return url;
 		}
 	});

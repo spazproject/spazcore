@@ -351,14 +351,11 @@ SpazImageUploader.prototype.upload = function() {
 			if (sch.isString(data)) {
 				rs = srvc.parseResponse.call(srvc, data);
 				return opts.onSuccess(rs);
-			} else if (data && data.responseString) { // Mojo webOS will return an object, not just the response string
+			} else if (data && data.responseString) { // webOS will return an object, not just the response string
 				rs = srvc.parseResponse.call(srvc, data.responseString);
 				return opts.onSuccess(rs);
-			} else if (arguments[1] && arguments[1].responseString) { // Enyo webOS will return more args than Mojo
-				rs = srvc.parseResponse.call(srvc, arguments[1].responseString);
-				return opts.onSuccess(rs);
 			} else { // I dunno what it is; just pass it to the callback
-				return opts.onSuccess.apply(this, arguments);
+				return opts.onSuccess(data);
 			}
 		};
 	} else {
@@ -370,14 +367,14 @@ SpazImageUploader.prototype.upload = function() {
 	*/
 	var auth_header;
     if (opts.service === 'yfrog') {
-		verify_url  = 'https://api.twitter.com/1/account/verify_credentials.xml';
+		verify_url  = 'https://api.twitter.com/' + SPAZCORE_APIVERSION_TWITTER + '/account/verify_credentials.xml';
 		auth_header = this.getAuthHeader({
 			'getEchoHeaderOpts': {
 				'verify_url':verify_url
 			}
 		});
 	} else {
-		verify_url  = 'https://api.twitter.com/1/account/verify_credentials.json';
+		verify_url  = 'https://api.twitter.com/' + SPAZCORE_APIVERSION_TWITTER + '/account/verify_credentials.json';
 		auth_header = this.getAuthHeader();
 	}
 	

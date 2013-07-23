@@ -142,7 +142,10 @@ var SPAZCORE_BASEURL_IDENTICA = 'https://identi.ca/';
  * @constant 
  */
 var SPAZCORE_BASEURL_FREELISHUS = 'http://freelish.us/';
-
+/**
+ * @constant
+ */
+var SPAZCORE_APIVERSION_TWITTER = '1.1';
 
 
 /**
